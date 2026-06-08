@@ -1,0 +1,21 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/chests/chest.tscn" id="2_chest"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/pickable_bomb/bomb.tres" id="3_bomb"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/coin/coin.tres" id="4_coin"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/hearts/half_heart.tres" id="5_heart"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black_fly"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="7_red_fly"]
+
+[node name="Room" instance=ExtResource("1_room")]
+
+[node name="GuardBlackFly" parent="Enemies" index="0" instance=ExtResource("6_black_fly")]
+position = Vector2(418, 260)
+
+[node name="GuardRedFly" parent="Enemies" index="1" instance=ExtResource("7_red_fly")]
+position = Vector2(606, 352)
+
+[node name="BombRewardChest" parent="." index="7" instance=ExtResource("2_chest")]
+position = Vector2(512, 318)
+items = [ExtResource("3_bomb"), ExtResource("4_coin"), ExtResource("5_heart")]
