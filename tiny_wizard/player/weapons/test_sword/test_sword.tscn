@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/test_sword/test_sword.gd" id="1_test_sword"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_test_sword"]
+size = Vector2(68, 36)
+
+[node name="TestSword" type="Node2D"]
+script = ExtResource("1_test_sword")
+damage = 2
+cooldown = 0.32
+active_time = 0.12
+swing_start_angle = -0.5
+swing_end_angle = 0.42
+swing_recover_time = 0.09
+swing_scale_peak = Vector2(1.1, 1.04)
+
+[node name="Handle" type="Polygon2D" parent="."]
+z_index = 7
+color = Color(0.14, 0.12, 0.1, 1)
+polygon = PackedVector2Array(-10, -4, 8, -4, 10, 4, -10, 4)
+
+[node name="Guard" type="Polygon2D" parent="."]
+z_index = 8
+color = Color(0.64, 0.5, 0.22, 1)
+polygon = PackedVector2Array(6, -12, 12, -12, 15, 0, 12, 12, 6, 12, 9, 0)
+
+[node name="Blade" type="Polygon2D" parent="."]
+z_index = 9
+color = Color(0.78, 0.85, 0.88, 1)
+polygon = PackedVector2Array(12, -5, 54, -3, 70, 0, 54, 3, 12, 5)
+
+[node name="BladeEdge" type="Line2D" parent="."]
+z_index = 10
+points = PackedVector2Array(18, -3, 65, 0, 18, 3)
+width = 1.5
+default_color = Color(1, 1, 1, 0.72)
+
+[node name="SlashVisual" type="Polygon2D" parent="."]
+visible = false
+z_index = 11
+color = Color(0.95, 0.95, 0.85, 0.28)
+polygon = PackedVector2Array(14, -22, 72, -10, 78, 10, 14, 22, 31, 0)
+
+[node name="HitFlash" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(66, 0)
+z_index = 12
+color = Color(1, 0.95, 0.7, 0.95)
+polygon = PackedVector2Array(-7, 0, -2, -2, 0, -9, 2, -2, 8, 0, 2, 2, 0, 9, -2, 2)
+
+[node name="HitArea" type="Area2D" parent="."]
+position = Vector2(42, 0)
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea"]
+shape = SubResource("RectangleShape2D_test_sword")
+disabled = true

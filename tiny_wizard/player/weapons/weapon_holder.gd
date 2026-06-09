@@ -61,6 +61,23 @@ func equip_weapon_by_index(index: int) -> void:
 	equip_weapon(weapon_scenes[index])
 
 
+func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> int:
+	if weapon_scene == null:
+		return -1
+
+	var existing_index := _find_weapon_scene_index(weapon_scene)
+	if existing_index >= 0:
+		if equip_immediately:
+			equip_weapon_by_index(existing_index)
+		return existing_index
+
+	weapon_scenes.append(weapon_scene)
+	var new_index := weapon_scenes.size() - 1
+	if equip_immediately:
+		equip_weapon_by_index(new_index)
+	return new_index
+
+
 func set_aim_direction(direction: Vector2) -> void:
 	if direction.length() == 0:
 		return
@@ -81,8 +98,18 @@ func secondary_fire() -> void:
 
 
 func _handle_weapon_switch() -> void:
-	var slot_actions := ["weapon_slot_1", "weapon_slot_2", "weapon_slot_3"]
-	for index in range(slot_actions.size()):
-		var action_name: String = slot_actions[index]
+	for index in range(weapon_scenes.size()):
+		var action_name: String = "weapon_slot_%d" % (index + 1)
 		if InputMap.has_action(action_name) and Input.is_action_just_pressed(action_name):
 			equip_weapon_by_index(index)
+
+
+func _find_weapon_scene_index(weapon_scene: PackedScene) -> int:
+	var incoming_path := weapon_scene.resource_path
+	for index in range(weapon_scenes.size()):
+		var existing_scene := weapon_scenes[index]
+		if existing_scene == weapon_scene:
+			return index
+		if existing_scene != null and incoming_path != "" and existing_scene.resource_path == incoming_path:
+			return index
+	return -1

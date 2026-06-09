@@ -2,7 +2,7 @@ class_name LabDungeonGenerator
 extends RefCounted
 
 
-const START_ROOM_SCENE := preload("res://tiny_wizard/room/room.tscn")
+const START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_start_room.tscn")
 const COMBAT_ROOM_A_SCENE := preload("res://tiny_wizard/room/room_types/room_1.tscn")
 const COMBAT_ROOM_B_SCENE := preload("res://tiny_wizard/room/room_types/room_2.tscn")
 const REWARD_ROOM_A_SCENE := preload("res://tiny_wizard/room/room_types/lab_reward_bomb_room.tscn")

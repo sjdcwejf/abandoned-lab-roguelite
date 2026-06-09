@@ -1,0 +1,226 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/gui/character_select/character_select.gd" id="1_select"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/select_your_character_title.png" id="2_title"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/test_subject_07_portrait.png" id="3_experimenter"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/containment_technician_13_portrait.png" id="4_technician"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.035, 0.041, 0.047, 0.58)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.36, 0.39, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_normal"]
+bg_color = Color(0.065, 0.075, 0.085, 0.72)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.24, 0.34, 0.36, 0.88)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_hover"]
+bg_color = Color(0.075, 0.09, 0.1, 0.84)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.25, 0.82, 0.88, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_pressed"]
+bg_color = Color(0.05, 0.075, 0.08, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.95, 0.57, 0.18, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="CharacterSelectScreen" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_select")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Background" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.01, 0.012, 0.014, 0.26)
+
+[node name="CenterContainer" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 0.75
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Root/CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(512, 300)
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="Root/CenterContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 40)
+size_flags_horizontal = 4
+texture = ExtResource("2_title")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Choices" type="HBoxContainer" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ExperimenterCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
+layout_mode = 2
+custom_minimum_size = Vector2(235, 220)
+size_flags_horizontal = 0
+clip_contents = true
+focus_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_card_hover")
+
+[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_experimenter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -38.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.015, 0.018, 0.021, 0.82)
+
+[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "Test Subject 07"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TechnicianCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
+layout_mode = 2
+custom_minimum_size = Vector2(235, 220)
+size_flags_horizontal = 0
+clip_contents = true
+focus_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_card_hover")
+
+[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_technician")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -38.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.015, 0.018, 0.021, 0.82)
+
+[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "Technician 13"
+horizontal_alignment = 1
+vertical_alignment = 1

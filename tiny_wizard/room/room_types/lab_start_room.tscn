@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/weapon_stand/weapon_stand.tscn" id="2_weapon_stand"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/sleep_pod/sleep_pod.tscn" id="3_sleep_pod"]
+
+[node name="Room" instance=ExtResource("1_base_room")]
+lab_room_type = "start"
+lab_room_label = "Start Room"
+
+[node name="ExperimenterSleepPod" parent="." index="8" instance=ExtResource("3_sleep_pod")]
+position = Vector2(646, 194)
+character_id = "experimenter"
+pod_label = "实验员"
+accent_color = Color(0.35, 0.85, 0.95, 1)
+
+[node name="TechnicianSleepPod" parent="." index="9" instance=ExtResource("3_sleep_pod")]
+position = Vector2(806, 194)
+character_id = "containment_technician"
+pod_label = "收容技师"
+accent_color = Color(0.95, 0.58, 0.22, 1)
+
+[node name="StarterWeaponStand" parent="." index="10" instance=ExtResource("2_weapon_stand")]
+position = Vector2(344, 232)
