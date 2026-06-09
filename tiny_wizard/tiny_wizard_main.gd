@@ -2,6 +2,7 @@ extends Node2D
 
 
 @export var use_generated_lab_dungeon := true
+@export var dungeon_seed := 0
 @export var start_room_coord := Vector2i.ZERO
 @export var experimenter_character_scene: PackedScene
 @export var technician_character_scene: PackedScene
@@ -17,7 +18,7 @@ var rooms := {}
 func _ready():
 	_current_room = start_room_coord
 	if use_generated_lab_dungeon:
-		rooms = LabDungeonGenerator.generate($Rooms)
+		rooms = LabDungeonGenerator.generate($Rooms, dungeon_seed)
 	else:
 		rooms = _collect_existing_rooms()
 
@@ -194,7 +195,10 @@ func _respawn_character_at_start() -> void:
 
 
 func _print_dungeon_summary() -> void:
-	print("Generated 7-room abandoned lab dungeon:")
+	var seed_text := ""
+	if use_generated_lab_dungeon:
+		seed_text = " (seed %d)" % LabDungeonGenerator.last_seed
+	print("Generated %d-room abandoned lab dungeon%s:" % [rooms.size(), seed_text])
 	for room_pos in rooms:
 		var room = rooms[room_pos]
 		print(" - ", room.lab_room_label, " [", room.lab_room_type, "] at ", room_pos)

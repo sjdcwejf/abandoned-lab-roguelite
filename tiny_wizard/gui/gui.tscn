@@ -46,12 +46,14 @@ offset_right = 1024.0
 offset_bottom = 183.0
 
 [node name="VSeparator2" type="VSeparator" parent="TopUI/TextureRect/MarginContainer/HBoxContainer"]
+visible = false
 offset_right = 50.0
 offset_bottom = 183.0
 theme_override_constants/separation = 50
 theme_override_styles/separator = SubResource("StyleBoxFlat_fe4ma")
 
 [node name="Icon" type="TextureRect" parent="TopUI/TextureRect/MarginContainer/HBoxContainer"]
+visible = false
 offset_left = 54.0
 offset_right = 354.0
 offset_bottom = 183.0
