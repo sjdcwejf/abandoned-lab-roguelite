@@ -21,16 +21,19 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 - Primary fire: left mouse button
 - Legacy directional fire: arrow keys
 - Bomb/use inherited prototype item: E
-- Reserved secondary fire: right mouse button
+- Secondary fire: right mouse button
+- Switch MVP weapons: 1 / 2 / 3
 - Reserved dash: Space
 - Reserved interact: F
 
 ## Current Weapon Prototype
 
-The player now equips a new MVP weapon slot at startup. Its first weapon is `Laser Pointer`:
+The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
 
-- Hold the left mouse button to fire a continuous beam toward the mouse cursor.
-- The beam uses a raycast, stops on collision, and applies repeated damage to targets that expose the inherited `hit()` method.
+- `1` Laser Pointer: hold left mouse button to fire a continuous beam toward the mouse cursor.
+- `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
+- `3` Power Gauntlets: left mouse button lunges into a short punch, right mouse button fires a ranged energy bolt from the lower muzzle.
+- Beam, melee, and projectile weapons all route damage through targets that expose the inherited `hit()` method.
 - The old Tiny Wizard arrow shooter is kept in the player scene for compatibility, but hidden and disconnected from primary fire.
 
 ## Current Dungeon Prototype

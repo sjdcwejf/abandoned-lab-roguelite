@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/energy_saber/energy_saber.gd" id="1_saber"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_saber"]
+size = Vector2(74, 42)
+
+[node name="EnergySaber" type="Node2D"]
+script = ExtResource("1_saber")
+damage = 2
+cooldown = 0.36
+active_time = 0.14
+swing_start_angle = -0.65
+swing_end_angle = 0.55
+swing_recover_time = 0.1
+swing_scale_peak = Vector2(1.12, 1.05)
+
+[node name="Handle" type="Polygon2D" parent="."]
+z_index = 7
+color = Color(0.13, 0.13, 0.16, 1)
+polygon = PackedVector2Array(-6, -5, 14, -5, 18, 0, 14, 5, -6, 5)
+
+[node name="Blade" type="Line2D" parent="."]
+z_index = 8
+points = PackedVector2Array(12, 0, 60, 0)
+width = 7.0
+default_color = Color(0.35, 1, 0.95, 0.92)
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SlashVisual" type="Polygon2D" parent="."]
+visible = false
+z_index = 9
+color = Color(0.35, 1, 0.95, 0.32)
+polygon = PackedVector2Array(14, -26, 78, -12, 84, 12, 14, 26, 32, 0)
+
+[node name="HitFlash" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(70, 0)
+z_index = 10
+color = Color(0.85, 1, 0.95, 0.95)
+polygon = PackedVector2Array(-7, 0, -2, -2, 0, -9, 2, -2, 8, 0, 2, 2, 0, 9, -2, 2)
+
+[node name="HitArea" type="Area2D" parent="."]
+position = Vector2(44, 0)
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea"]
+shape = SubResource("RectangleShape2D_saber")
+disabled = true
