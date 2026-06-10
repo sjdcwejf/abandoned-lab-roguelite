@@ -35,6 +35,9 @@ func _process(_delta: float) -> void:
 
 
 func equip_weapon(weapon_scene: PackedScene) -> void:
+	if weapon_scene == null:
+		return
+
 	if current_weapon != null:
 		current_weapon.unequip()
 		current_weapon.queue_free()
@@ -55,6 +58,8 @@ func equip_weapon(weapon_scene: PackedScene) -> void:
 
 func equip_weapon_by_index(index: int) -> void:
 	if index < 0 or index >= weapon_scenes.size():
+		return
+	if weapon_scenes[index] == null:
 		return
 	if current_weapon_index == index:
 		return
@@ -78,6 +83,42 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 	return new_index
 
 
+func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_immediately := false) -> int:
+	if weapon_scene == null or slot_index < 0:
+		return -1
+
+	var existing_index := _find_weapon_scene_index(weapon_scene)
+	if existing_index >= 0:
+		if equip_immediately:
+			equip_weapon_by_index(existing_index)
+		return existing_index
+
+	while weapon_scenes.size() <= slot_index:
+		weapon_scenes.append(null)
+
+	weapon_scenes[slot_index] = weapon_scene
+	if equip_immediately:
+		equip_weapon_by_index(slot_index)
+	return slot_index
+
+
+func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
+	if current_weapon != null:
+		current_weapon.unequip()
+		current_weapon.queue_free()
+		current_weapon = null
+
+	weapon_scenes.clear()
+	for weapon_scene in new_weapon_scenes:
+		if weapon_scene is PackedScene:
+			weapon_scenes.append(weapon_scene)
+
+	current_weapon_index = -1
+	starting_weapon_scene = weapon_scenes[0] if not weapon_scenes.is_empty() else null
+	if not weapon_scenes.is_empty():
+		equip_weapon_by_index(clampi(equip_index, 0, weapon_scenes.size() - 1))
+
+
 func set_aim_direction(direction: Vector2) -> void:
 	if direction.length() == 0:
 		return
@@ -99,6 +140,8 @@ func secondary_fire() -> void:
 
 func _handle_weapon_switch() -> void:
 	for index in range(weapon_scenes.size()):
+		if weapon_scenes[index] == null:
+			continue
 		var action_name: String = "weapon_slot_%d" % (index + 1)
 		if InputMap.has_action(action_name) and Input.is_action_just_pressed(action_name):
 			equip_weapon_by_index(index)

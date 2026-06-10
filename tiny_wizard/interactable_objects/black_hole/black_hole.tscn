@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/interactable_objects/black_hole/black_hole.gd" id="1_black_hole"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_black_hole"]
+radius = 46.0
+
+[node name="BlackHole" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+monitorable = false
+script = ExtResource("1_black_hole")
+
+[node name="OuterGlow" type="Polygon2D" parent="."]
+z_index = 15
+color = Color(0.18, 0.62, 0.95, 0.35)
+polygon = PackedVector2Array(0, -58, 22, -44, 45, -41, 55, -17, 59, 0, 50, 22, 39, 45, 13, 56, -9, 57, -33, 46, -53, 24, -58, 0, -50, -24, -35, -47, -10, -58)
+
+[node name="Core" type="Polygon2D" parent="."]
+z_index = 16
+color = Color(0.02, 0.015, 0.04, 0.92)
+polygon = PackedVector2Array(0, -38, 17, -31, 32, -20, 40, 0, 33, 18, 17, 33, 0, 40, -19, 32, -33, 18, -39, 0, -31, -21, -17, -34)
+
+[node name="Center" type="Polygon2D" parent="."]
+z_index = 17
+color = Color(0.55, 0.9, 1, 0.55)
+polygon = PackedVector2Array(0, -13, 9, -9, 13, 0, 8, 10, 0, 13, -9, 8, -13, 0, -8, -9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_black_hole")

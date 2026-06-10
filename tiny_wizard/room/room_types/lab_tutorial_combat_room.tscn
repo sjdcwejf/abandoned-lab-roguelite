@@ -1,0 +1,31 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/tutorial_combat_room.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/chests/chest.tscn" id="3_chest"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/pickable_bomb/bomb.tres" id="4_bomb"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/coin/coin.tres" id="5_coin"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/hearts/half_shield.tres" id="6_shield"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/hearts/half_heart.tres" id="7_heart"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="8_black_fly"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="9_red_fly"]
+
+[node name="Room" instance=ExtResource("1_base_room")]
+script = ExtResource("2_script")
+lab_room_type = "tutorial_combat"
+lab_room_label = "Tutorial Bomb Room"
+rock_chest_path = NodePath("RockWrappedChest")
+
+[node name="TrainingBlackFly" parent="Enemies" index="0" instance=ExtResource("8_black_fly")]
+position = Vector2(440, 240)
+
+[node name="TrainingRedFly" parent="Enemies" index="1" instance=ExtResource("9_red_fly")]
+position = Vector2(610, 245)
+
+[node name="BombChest" parent="." index="7" instance=ExtResource("3_chest")]
+position = Vector2(360, 380)
+items = [ExtResource("4_bomb")]
+
+[node name="RockWrappedChest" parent="." index="8" instance=ExtResource("3_chest")]
+position = Vector2(650, 382)
+items = [ExtResource("5_coin"), ExtResource("6_shield"), ExtResource("7_heart")]
