@@ -15,8 +15,8 @@ func _ready() -> void:
 func set_active(active: bool) -> void:
 	_active = active
 	visible = active
-	monitoring = active
-	monitorable = active
+	set_deferred("monitoring", active)
+	set_deferred("monitorable", active)
 
 
 func _on_body_entered(body: Node2D) -> void:

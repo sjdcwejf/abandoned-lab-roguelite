@@ -3,9 +3,7 @@ extends Node2D
 
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
-const ENERGY_SABER_SCENE := preload("res://tiny_wizard/player/weapons/energy_saber/energy_saber.tscn")
-const POWER_GAUNTLETS_SCENE := preload("res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn")
-const WEAPON_PICKUP_SCENE := preload("res://tiny_wizard/interactable_objects/weapon_pickup/weapon_pickup.tscn")
+const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 
 @export var use_generated_lab_dungeon := true
 @export var play_tutorial := true
@@ -56,13 +54,16 @@ func _register_rooms() -> void:
 		if room.has_signal("tutorial_boss_defeated") and not room.is_connected("tutorial_boss_defeated", boss_defeated_callable):
 			room.connect("tutorial_boss_defeated", boss_defeated_callable)
 
+		if room.has_method("set_weapon_holder"):
+			room.call("set_weapon_holder", _get_weapon_holder())
+
 		_connect_black_holes(room)
 
 
 func _connect_black_holes(root: Node) -> void:
 	if root is LabBlackHole:
 		var black_hole := root as LabBlackHole
-		var entered_callable := Callable(self, "_on_tutorial_black_hole_entered")
+		var entered_callable := Callable(self, "_on_black_hole_entered")
 		if not black_hole.entered.is_connected(entered_callable):
 			black_hole.entered.connect(entered_callable)
 
@@ -286,89 +287,14 @@ func _respawn_character_at_start() -> void:
 
 
 func _on_tutorial_boss_defeated() -> void:
-	_drop_tutorial_clear_weapons()
-	_show_tutorial_hint("Reward weapons dropped. Press F to pick up slot 2 Energy Saber and slot 3 Power Gauntlets.")
-
-
-func _drop_tutorial_clear_weapons() -> void:
 	if _tutorial_rewards_dropped:
 		return
 
-	var boss_room: Room = get_current_room()
-	if boss_room == null:
-		return
-
-	var drop_origin: Vector2 = _room_center(boss_room)
-	if boss_room.has_method("get_reward_drop_origin"):
-		drop_origin = boss_room.call("get_reward_drop_origin") as Vector2
-
-	var room_origin: Vector2 = boss_room.get_room_global_position()
 	_tutorial_rewards_dropped = true
-	_tutorial_reward_pickups_remaining = 2
-	_spawn_tutorial_reward_weapon(
-		ENERGY_SABER_SCENE,
-		"Energy Saber",
-		2,
-		drop_origin,
-		room_origin + Vector2(430, 392),
-		-0.35
-	)
-	_spawn_tutorial_reward_weapon(
-		POWER_GAUNTLETS_SCENE,
-		"Power Gauntlets",
-		3,
-		drop_origin,
-		room_origin + Vector2(594, 392),
-		0.05
-	)
-	print("Tutorial reward weapons dropped.")
-
-
-func _spawn_tutorial_reward_weapon(
-	weapon_scene: PackedScene,
-	weapon_label: String,
-	slot_number: int,
-	start_position: Vector2,
-	end_position: Vector2,
-	preview_rotation: float
-) -> void:
-	var boss_room: Room = get_current_room()
-	if boss_room == null:
-		return
-
-	var weapon_pickup := WEAPON_PICKUP_SCENE.instantiate() as Node2D
-	weapon_pickup.set("weapon_scene", weapon_scene)
-	weapon_pickup.set("weapon_label", weapon_label)
-	weapon_pickup.set("target_slot_number", slot_number)
-	weapon_pickup.set("equip_on_pickup", false)
-	weapon_pickup.set("preview_rotation", preview_rotation)
-	boss_room.add_child(weapon_pickup)
-
-	var picked_up_callable := Callable(self, "_on_tutorial_reward_weapon_picked_up")
-	if weapon_pickup.has_signal("weapon_picked_up") and not weapon_pickup.is_connected("weapon_picked_up", picked_up_callable):
-		weapon_pickup.connect("weapon_picked_up", picked_up_callable)
-
-	if weapon_pickup.has_method("play_drop_animation"):
-		weapon_pickup.call("play_drop_animation", start_position, end_position)
-	else:
-		weapon_pickup.global_position = end_position
-
-
-func _on_tutorial_reward_weapon_picked_up(_slot_index: int) -> void:
-	if _run_state != RUN_STATE_TUTORIAL:
-		return
-	if _tutorial_rewards_granted:
-		return
-
-	_tutorial_reward_pickups_remaining = max(0, _tutorial_reward_pickups_remaining - 1)
-	if _tutorial_reward_pickups_remaining > 0:
-		_show_tutorial_hint("Pick up both reward weapons before entering the black hole.")
-		return
-
 	_tutorial_rewards_granted = true
 	_activate_tutorial_exit_black_hole()
-	_show_tutorial_hint("Reward weapons acquired. Enter the black hole to start the real run.")
-	print("Tutorial rewards acquired: Energy Saber in slot 2, Power Gauntlets in slot 3.")
+	_show_tutorial_hint("Training complete. Enter the black hole to start the real run.")
+	print("Tutorial complete. Exit black hole activated.")
 
 
 func _activate_tutorial_exit_black_hole() -> void:
@@ -377,16 +303,27 @@ func _activate_tutorial_exit_black_hole() -> void:
 		boss_room.call("activate_exit_black_hole")
 
 
-func _on_tutorial_black_hole_entered(body: Node2D) -> void:
-	if _run_state != RUN_STATE_TUTORIAL:
-		return
+func _on_black_hole_entered(body: Node2D) -> void:
 	if body != _character:
 		return
-	if not _tutorial_rewards_granted:
+
+	match _run_state:
+		RUN_STATE_TUTORIAL:
+			if not _tutorial_rewards_granted:
+				return
+			print("Tutorial complete. Entering formal dungeon.")
+			call_deferred("_start_formal_run")
+		RUN_STATE_FORMAL:
+			call_deferred("_complete_formal_layer")
+
+
+func _complete_formal_layer() -> void:
+	if _run_state == RUN_STATE_LAYER_COMPLETE:
 		return
 
-	print("Tutorial complete. Entering formal dungeon.")
-	_start_formal_run()
+	_run_state = RUN_STATE_LAYER_COMPLETE
+	_show_tutorial_hint("Layer complete. Next layer will be added in a later version.")
+	print("Formal layer complete.")
 
 
 func _setup_tutorial_hint() -> void:
@@ -445,11 +382,11 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 			_show_tutorial_hint("Clear the enemies. Open the nearby chest for a bomb. Press E to place it, break the rocks, then loot the blocked chest.")
 		"tutorial_boss":
 			if _tutorial_rewards_granted:
-				_show_tutorial_hint("Reward weapons acquired. Enter the black hole to start the real run.")
+				_show_tutorial_hint("Training complete. Enter the black hole to start the real run.")
 			elif _tutorial_rewards_dropped:
-				_show_tutorial_hint("Reward weapons dropped. Press F to pick up slot 2 Energy Saber and slot 3 Power Gauntlets.")
+				_show_tutorial_hint("Enter the black hole to start the real run.")
 			else:
-				_show_tutorial_hint("Defeat the boss. Reward weapons will drop after the fight.")
+				_show_tutorial_hint("Defeat the boss, then enter the black hole to start the real run.")
 		_:
 			_hide_tutorial_hint()
 

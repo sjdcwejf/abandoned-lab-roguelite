@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/guarded_reward_room.gd" id="2_reward_script"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/chests/chest.tscn" id="2_chest"]
 [ext_resource type="Resource" path="res://tiny_wizard/items/coin/coin.tres" id="3_coin"]
 [ext_resource type="Resource" path="res://tiny_wizard/items/key/key.tres" id="4_key"]
@@ -8,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black_fly"]
 
 [node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_reward_script")
 
 [node name="GuardBlackFly" parent="Enemies" index="0" instance=ExtResource("6_black_fly")]
 position = Vector2(402, 310)

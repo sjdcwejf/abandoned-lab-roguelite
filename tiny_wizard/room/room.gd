@@ -47,8 +47,10 @@ const GUI_SCENE = preload("res://tiny_wizard/gui/gui.tscn")
 var room_pos := Vector2i.ZERO
 var lab_room_type := "combat"
 var lab_room_label := "Combat Room"
+var is_cleared := false
 
 signal door_entered(direction)
+signal room_cleared(room: Room)
 
 func _ready():
 	# This spawns the player if launching the scene from the editor
@@ -94,7 +96,7 @@ func get_spawning_point(direction):
 
 func enter_room():
 	var enemies = $Enemies.get_children()
-	if enemies.size() > 0:
+	if enemies.size() > 0 and not is_cleared:
 		# Wake up Enemies
 		for enemy in enemies:
 			enemy.set_deferred("process_mode", Node.PROCESS_MODE_INHERIT)
@@ -102,6 +104,8 @@ func enter_room():
 		# Close doors
 		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
 			close_door(d)
+	elif enemies.size() == 0:
+		_mark_room_cleared()
 
 func enter_door(_body, door_direction):
 	if _is_door_hidden(_direction_to_index(door_direction)):
@@ -132,6 +136,19 @@ func _on_enemies_child_exiting_tree(node):
 	if $Enemies.get_child_count() == 1:
 		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
 			open_door(d)
+		_mark_room_cleared()
+
+
+func _mark_room_cleared() -> void:
+	if is_cleared:
+		return
+	is_cleared = true
+	_on_room_cleared()
+	room_cleared.emit(self)
+
+
+func _on_room_cleared() -> void:
+	pass
 
 
 func _is_door_hidden(direction: Direction) -> bool:

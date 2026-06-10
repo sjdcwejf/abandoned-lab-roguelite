@@ -89,7 +89,7 @@ func _pick_up(character: Node2D) -> void:
 	_picked_up = true
 	prompt.visible = false
 	visible = false
-	pickup_area.monitoring = false
+	pickup_area.set_deferred("monitoring", false)
 	weapon_picked_up.emit(slot_index)
 	print("%s added to weapon slot %d." % [weapon_label, slot_index + 1])
 
@@ -101,7 +101,7 @@ func play_drop_animation(start_global_position: Vector2, end_global_position: Ve
 	global_position = start_global_position
 	scale = Vector2(0.42, 0.42)
 	modulate = Color(1, 1, 1, 0.0)
-	pickup_area.monitoring = false
+	pickup_area.set_deferred("monitoring", false)
 	prompt.visible = false
 
 	_drop_tween = create_tween()
@@ -116,7 +116,7 @@ func play_drop_animation(start_global_position: Vector2, end_global_position: Ve
 func _on_drop_animation_finished() -> void:
 	if _picked_up:
 		return
-	pickup_area.monitoring = true
+	pickup_area.set_deferred("monitoring", true)
 
 
 func _on_pickup_area_body_entered(body: Node2D) -> void:

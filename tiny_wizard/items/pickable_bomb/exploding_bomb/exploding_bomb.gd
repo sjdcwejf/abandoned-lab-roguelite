@@ -10,7 +10,7 @@ var active = true
 var stone_rids = []
 
 func _ready():
-	self.tree_exited.connect(_on_tree_exited)
+	tree_exiting.connect(_on_tree_exiting)
 
 func explode():
 	
@@ -62,12 +62,17 @@ func _destroy_tilemap_rock(tilemap: TileMap, coords: Vector2i) -> bool:
 func play_anim():
 	($RigidBody2D/AnimatedSprite2D as AnimatedSprite2D).play("explosion")
 
-func _on_tree_exited():
+func _on_tree_exiting():
+	var target_parent := get_parent()
 	var ground_trace = $RigidBody2D/GroundBombTrace
+	var trace_parent = ground_trace.get_parent()
+	if target_parent == null or trace_parent == null:
+		return
+
 	var pos = ground_trace.global_position
-	ground_trace.get_parent().remove_child(ground_trace)
-	add_sibling(ground_trace)
-	ground_trace.global_position = pos
+	trace_parent.remove_child(ground_trace)
+	target_parent.call_deferred("add_child", ground_trace)
+	ground_trace.set_deferred("global_position", pos)
 
 func _on_exploding_area_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
 	if body is TileMap:

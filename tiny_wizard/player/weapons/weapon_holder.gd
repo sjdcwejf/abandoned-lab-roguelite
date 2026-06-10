@@ -81,8 +81,12 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 			equip_weapon_by_index(existing_index)
 		return existing_index
 
-	weapon_scenes.append(weapon_scene)
-	var new_index := weapon_scenes.size() - 1
+	var new_index := _find_empty_weapon_slot()
+	if new_index >= 0:
+		weapon_scenes[new_index] = weapon_scene
+	else:
+		weapon_scenes.append(weapon_scene)
+		new_index = weapon_scenes.size() - 1
 	if equip_immediately:
 		equip_weapon_by_index(new_index)
 	else:
@@ -187,6 +191,13 @@ func _find_weapon_scene_index(weapon_scene: PackedScene) -> int:
 		if existing_scene == weapon_scene:
 			return index
 		if existing_scene != null and incoming_path != "" and existing_scene.resource_path == incoming_path:
+			return index
+	return -1
+
+
+func _find_empty_weapon_slot() -> int:
+	for index in range(weapon_scenes.size()):
+		if weapon_scenes[index] == null:
 			return index
 	return -1
 
