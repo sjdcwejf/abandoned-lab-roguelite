@@ -199,6 +199,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_character.name = "Character"
 	add_child(_character)
 	_character.set("gui_path", NodePath("../Camera2D/GUI"))
+	_bind_character_weapon_ui()
 	if _character.has_signal("respawn_requested"):
 		_character.connect("respawn_requested", Callable(self, "_respawn_character_at_start"))
 
@@ -254,6 +255,14 @@ func _get_weapon_holder() -> Node:
 	if _character == null:
 		return null
 	return _character.get_node_or_null("Visual/WeaponHolder")
+
+
+func _bind_character_weapon_ui() -> void:
+	var gui := $Camera2D/GUI
+	if gui == null or not gui.has_method("bind_weapon_holder"):
+		return
+
+	gui.bind_weapon_holder(_get_weapon_holder())
 
 
 func _respawn_character_at_start() -> void:

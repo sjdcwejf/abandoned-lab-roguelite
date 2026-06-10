@@ -2,8 +2,28 @@ class_name LabWeapon
 extends Node2D
 
 
+@export var display_name := ""
+@export var inventory_size := Vector2i(2, 1)
+@export var inventory_color := Color(0.26, 0.62, 0.9, 1.0)
+
 var owner_character: Node2D
 var aim_direction := Vector2.RIGHT
+
+
+func get_inventory_display_name() -> String:
+	if display_name != "":
+		return display_name
+	if name != "":
+		return name
+	return "Weapon"
+
+
+func get_inventory_size() -> Vector2i:
+	return Vector2i(maxi(1, inventory_size.x), maxi(1, inventory_size.y))
+
+
+func get_inventory_color() -> Color:
+	return inventory_color
 
 
 func equip(new_owner: Node2D) -> void:

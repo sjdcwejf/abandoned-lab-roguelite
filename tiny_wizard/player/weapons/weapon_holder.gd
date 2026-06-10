@@ -1,6 +1,9 @@
 extends Node2D
 
 
+signal weapon_loadout_changed
+signal weapon_equipped(slot_index: int)
+
 @export var starting_weapon_scene: PackedScene
 @export var weapon_scenes: Array[PackedScene] = []
 @export var owner_character_path: NodePath
@@ -51,6 +54,8 @@ func equip_weapon(weapon_scene: PackedScene) -> void:
 		current_weapon_index = weapon_scenes.find(weapon_scene)
 		current_weapon.equip(owner_character)
 		current_weapon.set_aim_direction(aim_direction)
+		weapon_equipped.emit(current_weapon_index)
+		weapon_loadout_changed.emit()
 	else:
 		push_error("%s is not a LabWeapon." % weapon_scene.resource_path)
 		weapon.queue_free()
@@ -80,6 +85,8 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 	var new_index := weapon_scenes.size() - 1
 	if equip_immediately:
 		equip_weapon_by_index(new_index)
+	else:
+		weapon_loadout_changed.emit()
 	return new_index
 
 
@@ -99,6 +106,8 @@ func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_
 	weapon_scenes[slot_index] = weapon_scene
 	if equip_immediately:
 		equip_weapon_by_index(slot_index)
+	else:
+		weapon_loadout_changed.emit()
 	return slot_index
 
 
@@ -117,6 +126,30 @@ func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
 	starting_weapon_scene = weapon_scenes[0] if not weapon_scenes.is_empty() else null
 	if not weapon_scenes.is_empty():
 		equip_weapon_by_index(clampi(equip_index, 0, weapon_scenes.size() - 1))
+	else:
+		weapon_loadout_changed.emit()
+
+
+func get_quick_weapon_slots(max_slots := 4) -> Array:
+	var slots := []
+	for index in range(max_slots):
+		var weapon_scene: PackedScene = null
+		if index < weapon_scenes.size():
+			weapon_scene = weapon_scenes[index]
+
+		var slot_info := {
+			"slot": index + 1,
+			"scene": weapon_scene,
+			"equipped": index == current_weapon_index,
+			"name": "Empty",
+			"size": Vector2i(1, 1),
+			"color": Color(0.18, 0.2, 0.23, 1.0),
+		}
+
+		if weapon_scene != null:
+			slot_info.merge(_get_weapon_scene_inventory_info(weapon_scene), true)
+		slots.append(slot_info)
+	return slots
 
 
 func set_aim_direction(direction: Vector2) -> void:
@@ -156,3 +189,27 @@ func _find_weapon_scene_index(weapon_scene: PackedScene) -> int:
 		if existing_scene != null and incoming_path != "" and existing_scene.resource_path == incoming_path:
 			return index
 	return -1
+
+
+func _get_weapon_scene_inventory_info(weapon_scene: PackedScene) -> Dictionary:
+	var info := {
+		"name": _fallback_weapon_name(weapon_scene),
+		"size": Vector2i(2, 1),
+		"color": Color(0.26, 0.62, 0.9, 1.0),
+	}
+
+	var weapon := weapon_scene.instantiate()
+	if weapon is LabWeapon:
+		info["name"] = weapon.get_inventory_display_name()
+		info["size"] = weapon.get_inventory_size()
+		info["color"] = weapon.get_inventory_color()
+	weapon.free()
+	return info
+
+
+func _fallback_weapon_name(weapon_scene: PackedScene) -> String:
+	if weapon_scene == null or weapon_scene.resource_path == "":
+		return "Weapon"
+
+	var base_name := weapon_scene.resource_path.get_file().get_basename()
+	return base_name.replace("_", " ").capitalize()
