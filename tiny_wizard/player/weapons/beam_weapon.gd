@@ -87,4 +87,4 @@ func _try_damage(target: Object, start: Vector2) -> void:
 		return
 
 	if apply_damage_to_target(target, damage, Vector2.ZERO, start):
-		_damage_timer = damage_interval
+		_damage_timer = damage_interval * get_fire_cooldown_multiplier()

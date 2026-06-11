@@ -31,3 +31,6 @@ modulate = Color(0.68, 0.42, 1, 1)
 [node name="WeaponHolder" parent="Visual" index="5"]
 starting_weapon_scene = ExtResource("4_saber")
 weapon_scenes = Array[PackedScene]([ExtResource("4_saber"), ExtResource("5_laser"), ExtResource("6_gauntlets")])
+
+[node name="AbilityController" parent="." index="3"]
+ability_id = "huisheng"

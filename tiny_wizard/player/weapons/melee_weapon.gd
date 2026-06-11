@@ -67,7 +67,7 @@ func unequip() -> void:
 
 
 func swing() -> void:
-	_cooldown_timer = cooldown
+	_cooldown_timer = cooldown * get_fire_cooldown_multiplier()
 	_active_timer = active_time
 	_targets_hit.clear()
 	_set_active(true)

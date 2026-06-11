@@ -22,9 +22,9 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 
 ## Current Playable Subjects
 
-- Panshi / Bulwark: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer.
-- Liuying / Reflex: a neural-reflex subject tuned for fast repositioning and room clears. Low HP, high movement speed, starts with the Containment Nailgun.
-- Huisheng / Echo: a resonance subject reserved for the future energy-skill branch. Medium HP, balanced movement, starts with the Energy Saber.
+- Panshi / Bulwark: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer, and can trigger Bulwark Protocol.
+- Liuying / Reflex: a neural-reflex subject tuned for fast repositioning and room clears. Low HP, high movement speed, starts with the Containment Nailgun, and can trigger Reflex Slip.
+- Huisheng / Echo: a resonance subject tuned for energy-control experiments. Medium HP, balanced movement, starts with the Energy Saber, and can trigger Echo Pulse.
 
 ## Current Prototype Controls
 
@@ -34,6 +34,7 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 - Primary fire: left mouse button
 - Legacy directional fire: arrow keys
 - Plant Breach Charge: E
+- Character skill: Q
 - Secondary fire: right mouse button
 - Switch MVP weapons: 1 / 2 / 3 / 4 after pickup
 - Reserved dash: Space
@@ -52,6 +53,14 @@ The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` t
 - `4` Test Sword: unlocked by picking up Raven's test blade from the starter weapon stand in the Cryo Wake Bay.
 - Beam, melee, and projectile weapons all route damage through targets that expose the inherited `hit()` method.
 - The old Tiny Wizard arrow shooter is kept in the player scene for compatibility, but hidden and disconnected from primary fire.
+
+## Current Skill Prototype
+
+Each subject now has one active skill on `Q`:
+
+- Panshi - Bulwark Protocol: gains temporary shield, reduces incoming damage, and emits a short defensive pulse.
+- Liuying - Reflex Slip: dashes in the movement direction, briefly avoids damage, and temporarily reduces weapon cooldowns.
+- Huisheng - Echo Pulse: emits a resonance wave that damages nearby enemies and slows affected specimens.
 
 ## Current Dungeon Prototype
 

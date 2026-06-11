@@ -58,6 +58,14 @@ func secondary_released() -> void:
 	pass
 
 
+func get_fire_cooldown_multiplier() -> float:
+	if owner_character != null:
+		var ability_controller := owner_character.get_node_or_null("AbilityController") as LabPlayerAbilityController
+		if ability_controller != null:
+			return ability_controller.get_fire_cooldown_multiplier()
+	return 1.0
+
+
 func get_fire_origin() -> Vector2:
 	var muzzle := get_node_or_null("Muzzle") as Node2D
 	if muzzle != null:

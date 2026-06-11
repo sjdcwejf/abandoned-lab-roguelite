@@ -70,7 +70,7 @@ func unequip() -> void:
 
 
 func _start_punch() -> void:
-	_punch_cooldown_timer = punch_cooldown
+	_punch_cooldown_timer = punch_cooldown * get_fire_cooldown_multiplier()
 	_punch_active_timer = punch_active_time
 	_punch_targets_hit.clear()
 	_set_punch_active(true)

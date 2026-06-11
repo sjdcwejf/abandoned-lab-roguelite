@@ -36,5 +36,5 @@ func fire_projectile() -> bool:
 	if projectile.has_method("launch"):
 		projectile.launch(aim_direction, owner_character, damage, projectile_speed, collision_mask)
 
-	_cooldown_timer = cooldown
+	_cooldown_timer = cooldown * get_fire_cooldown_multiplier()
 	return true

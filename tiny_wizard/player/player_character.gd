@@ -10,6 +10,12 @@ var arrow_types = {
 }
 
 func hit(damage:=1, from:=Vector2.ZERO):
+	var ability_controller := get_node_or_null("AbilityController") as LabPlayerAbilityController
+	if ability_controller != null:
+		if ability_controller.should_ignore_damage():
+			return
+		damage = ability_controller.modify_incoming_damage(int(damage))
+
 	super.hit(damage, from)
 	$Visual/AnimationPlayer.play("Blink")
 
