@@ -76,7 +76,7 @@ Combat rooms close their visible doors when entered and reopen them after all en
 
 Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments. For now, fragments are collected into the inventory and shown in the resource UI; later versions can spend them in Raven's shop, permanent upgrades, or story unlocks.
 
-Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory message panel. Real shop stock, supply purchases, and random temporary black markets are reserved for later versions.
+Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Research Data. Supply purchases and random temporary black markets are reserved for later versions.
 
 Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby destructible resin-rock tiles, including stones blocking reward pickups.
 

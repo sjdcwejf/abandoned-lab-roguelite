@@ -97,9 +97,9 @@ vertical_alignment = 1
 visible = false
 z_index = 30
 offset_left = -238.0
-offset_top = -206.0
+offset_top = -244.0
 offset_right = 238.0
-offset_bottom = -74.0
+offset_bottom = -58.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_dialog")
 
 [node name="MarginContainer" type="MarginContainer" parent="DialogPanel"]
@@ -123,11 +123,25 @@ theme_override_font_sizes/font_size = 12
 text = "Boss signal ahead. Patch your nerves and count your charges."
 autowrap_mode = 3
 
+[node name="Stock" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.78, 0.42, 1)
+theme_override_font_sizes/font_size = 12
+text = "Stock: Weapon"
+autowrap_mode = 3
+
+[node name="Status" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.86, 0.86, 1)
+theme_override_font_sizes/font_size = 11
+text = "You have 0 Research Data."
+autowrap_mode = 3
+
 [node name="Hint" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.58, 0.72, 0.72, 1)
 theme_override_font_sizes/font_size = 10
-text = "Press F again to close."
+text = "Press F to buy."
 horizontal_alignment = 1
 
 [node name="InteractArea" type="Area2D" parent="."]
