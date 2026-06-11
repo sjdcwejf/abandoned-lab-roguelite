@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/raven_merchant/raven_merchant.tscn" id="2_raven"]
+
+[node name="Room" instance=ExtResource("1_base_room")]
+lab_room_type = "merchant"
+lab_room_label = "Raven Safehouse"
+
+[node name="RavenMerchant" parent="." index="8" instance=ExtResource("2_raven")]
+position = Vector2(512, 304)

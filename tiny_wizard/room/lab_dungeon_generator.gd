@@ -11,10 +11,11 @@ const COMBAT_ROOM_B_SCENE := preload("res://tiny_wizard/room/room_types/room_2.t
 const REWARD_ROOM_A_SCENE := preload("res://tiny_wizard/room/room_types/lab_reward_bomb_room.tscn")
 const REWARD_ROOM_B_SCENE := preload("res://tiny_wizard/room/room_types/lab_reward_guarded_room.tscn")
 const WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/room_4.tscn")
+const RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn")
 const BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_boss_room.tscn")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
-const MAIN_PATH_ROOM_COUNT := 5
+const MAIN_PATH_ROOM_COUNT := 6
 const REWARD_ROOM_COUNT := 2
 const MAX_LAYOUT_ATTEMPTS := 80
 const LAYOUT_RADIUS := 3
@@ -68,24 +69,30 @@ const FALLBACK_ROOM_LAYOUT := [
 	},
 	{
 		"coord": Vector2i(3, 0),
+		"type": "weapon",
+		"label": "Raven Cache",
+		"scene": WEAPON_ROOM_SCENE,
+	},
+	{
+		"coord": Vector2i(3, 1),
+		"type": "merchant",
+		"label": "Raven Safehouse",
+		"scene": RAVEN_SAFEHOUSE_ROOM_SCENE,
+	},
+	{
+		"coord": Vector2i(3, 2),
 		"type": "boss",
 		"label": "Fusion Node",
 		"scene": BOSS_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, -1),
-		"type": "weapon",
-		"label": "Raven Cache",
-		"scene": WEAPON_ROOM_SCENE,
-	},
-	{
-		"coord": Vector2i(2, -1),
 		"type": "reward",
 		"label": "Data Vault 1",
 		"scene": REWARD_ROOM_A_SCENE,
 	},
 	{
-		"coord": Vector2i(2, 1),
+		"coord": Vector2i(2, -1),
 		"type": "reward",
 		"label": "Data Vault 2",
 		"scene": REWARD_ROOM_B_SCENE,
@@ -186,6 +193,8 @@ static func _generate_random_layout(rng: RandomNumberGenerator) -> Array:
 		var reward_coords := _build_reward_branches(main_path, rng)
 		if reward_coords.size() != REWARD_ROOM_COUNT:
 			continue
+		if not _has_isolated_pre_boss_room(main_path, reward_coords):
+			continue
 
 		return _build_room_specs(main_path, reward_coords, rng)
 
@@ -228,7 +237,7 @@ static func _build_reward_branches(main_path: Array, rng: RandomNumberGenerator)
 	var reward_coords := []
 	while reward_coords.size() < REWARD_ROOM_COUNT:
 		var candidates := []
-		for path_index in range(1, main_path.size() - 1):
+		for path_index in range(1, main_path.size() - 2):
 			var attach_coord := main_path[path_index] as Vector2i
 			for direction: Vector2i in DIRECTIONS:
 				var branch_coord := attach_coord + direction
@@ -254,6 +263,7 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	var scene_pools := _build_scene_pools()
 	var main_room_types := ["combat", "combat", "weapon"]
 	_shuffle_array(main_room_types, rng)
+	main_room_types.append("merchant")
 	main_room_types.append("boss")
 
 	room_specs.append(_make_spec(Vector2i.ZERO, "start", "Safehouse Airlock", START_ROOM_SCENE))
@@ -271,11 +281,40 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	return room_specs
 
 
+static func _has_isolated_pre_boss_room(main_path: Array, reward_coords: Array) -> bool:
+	if main_path.size() < 3:
+		return false
+
+	var boss_coord := main_path[main_path.size() - 1] as Vector2i
+	var merchant_coord := main_path[main_path.size() - 2] as Vector2i
+	var previous_coord := main_path[main_path.size() - 3] as Vector2i
+	if not _are_adjacent(merchant_coord, boss_coord):
+		return false
+	if not _are_adjacent(previous_coord, merchant_coord):
+		return false
+
+	var room_coords := []
+	room_coords.append_array(main_path)
+	room_coords.append_array(reward_coords)
+
+	for coord_value in room_coords:
+		var coord := coord_value as Vector2i
+		if coord == boss_coord or coord == merchant_coord:
+			continue
+		if _are_adjacent(coord, boss_coord):
+			return false
+		if coord != previous_coord and _are_adjacent(coord, merchant_coord):
+			return false
+
+	return true
+
+
 static func _build_scene_pools() -> Dictionary:
 	return {
 		"combat": COMBAT_ROOM_SCENES.duplicate(),
 		"reward": REWARD_ROOM_SCENES.duplicate(),
 		"weapon": WEAPON_ROOM_SCENES.duplicate(),
+		"merchant": [RAVEN_SAFEHOUSE_ROOM_SCENE],
 		"boss": BOSS_ROOM_SCENES.duplicate(),
 	}
 
@@ -298,6 +337,8 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return REWARD_ROOM_SCENES
 		"weapon":
 			return WEAPON_ROOM_SCENES
+		"merchant":
+			return [RAVEN_SAFEHOUSE_ROOM_SCENE]
 		"boss":
 			return BOSS_ROOM_SCENES
 	return COMBAT_ROOM_SCENES
@@ -323,6 +364,8 @@ static func _next_label(room_type: String, label_counts: Dictionary) -> String:
 			return "Data Vault %d" % count
 		"weapon":
 			return "Raven Cache"
+		"merchant":
+			return "Raven Safehouse"
 		"boss":
 			return "Fusion Node"
 	return "Room %d" % count
@@ -338,3 +381,7 @@ static func _shuffle_array(values: Array, rng: RandomNumberGenerator) -> void:
 
 static func _is_outside_layout_bounds(coord: Vector2i) -> bool:
 	return abs(coord.x) > LAYOUT_RADIUS or abs(coord.y) > LAYOUT_RADIUS
+
+
+static func _are_adjacent(a: Vector2i, b: Vector2i) -> bool:
+	return abs(a.x - b.x) + abs(a.y - b.y) == 1

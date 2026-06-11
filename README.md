@@ -55,7 +55,7 @@ The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` t
 
 ## Current Dungeon Prototype
 
-The current flow starts with a 3-room wake sequence, then enters a randomized 7-room Abyss Facility sector.
+The current flow starts with a 3-room wake sequence, then enters a randomized 8-room Abyss Facility sector.
 
 Wake sequence:
 
@@ -69,11 +69,14 @@ Formal sector room roles:
 - Specimen Cells: combat rooms that lock until enemies are cleared
 - Data Vaults: guarded reward rooms
 - Raven Cache: random weapon pickup room
+- Raven Safehouse: fixed pre-boss merchant room with Raven's armory terminal and story guidance
 - Fusion Node: sector boss room with an Entropy Rift exit
 
 Combat rooms close their visible doors when entered and reopen them after all enemies are defeated. Hidden doors remain locked, so the player cannot leave the generated layout through missing room exits.
 
 Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments. For now, fragments are collected into the inventory and shown in the resource UI; later versions can spend them in Raven's shop, permanent upgrades, or story unlocks.
+
+Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory message panel. Real shop stock, supply purchases, and random temporary black markets are reserved for later versions.
 
 Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby destructible resin-rock tiles, including stones blocking reward pickups.
 
