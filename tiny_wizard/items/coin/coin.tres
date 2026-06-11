@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource( "1_isq16" )
-name = "Coin"
-short_description = "A coin to get rich"
+name = "Research Data"
+short_description = "Recovered Abyss Facility data used by Raven and permanent systems."
 long_description = null
 stackable = true
 stack_size = null

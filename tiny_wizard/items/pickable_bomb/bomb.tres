@@ -10,8 +10,8 @@ scene_to_spawn = ExtResource("2_qfkbo")
 
 [resource]
 script = ExtResource("1_2ib5n")
-name = "Bomb"
-short_description = "A bomb that goes BOUMnull"
+name = "Breach Charge"
+short_description = "A compact charge for breaking resin-sealed debris."
 long_description = null
 stackable = true
 stack_size = null

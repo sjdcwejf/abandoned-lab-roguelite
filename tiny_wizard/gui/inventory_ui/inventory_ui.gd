@@ -4,9 +4,10 @@ extends MarginContainer
 
 
 @onready var counters = {
-	'Bomb': $VBoxContainer/Bombs/BombsCount,
-	'Key': $VBoxContainer/Keys/KeysCount,
-	'Coin': $VBoxContainer/Coins/CoinsCount,
+	'Breach Charge': $VBoxContainer/Bombs/BombsCount,
+	'Biometric Key': $VBoxContainer/Keys/KeysCount,
+	'Research Data': $VBoxContainer/Coins/CoinsCount,
+	'Protomatter Fragment': $VBoxContainer/Fragments/FragmentsCount,
 }
 
 func _ready():

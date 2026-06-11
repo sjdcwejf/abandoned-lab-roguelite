@@ -75,7 +75,7 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 	if weapon_scene == null:
 		return -1
 
-	var existing_index := _find_weapon_scene_index(weapon_scene)
+	var existing_index := find_weapon_scene_index(weapon_scene)
 	if existing_index >= 0:
 		if equip_immediately:
 			equip_weapon_by_index(existing_index)
@@ -98,7 +98,7 @@ func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_
 	if weapon_scene == null or slot_index < 0:
 		return -1
 
-	var existing_index := _find_weapon_scene_index(weapon_scene)
+	var existing_index := find_weapon_scene_index(weapon_scene)
 	if existing_index >= 0:
 		if equip_immediately:
 			equip_weapon_by_index(existing_index)
@@ -175,6 +175,37 @@ func secondary_fire() -> void:
 		current_weapon.secondary_pressed()
 
 
+func has_weapon_scene(weapon_scene: PackedScene) -> bool:
+	return find_weapon_scene_index(weapon_scene) >= 0
+
+
+func find_weapon_scene_index(weapon_scene: PackedScene) -> int:
+	var incoming_key := get_weapon_scene_key(weapon_scene)
+	for index in range(weapon_scenes.size()):
+		var existing_scene := weapon_scenes[index]
+		if existing_scene == weapon_scene:
+			return index
+		if existing_scene != null and incoming_key != "" and get_weapon_scene_key(existing_scene) == incoming_key:
+			return index
+	return -1
+
+
+func get_owned_weapon_scene_keys() -> Dictionary:
+	var owned := {}
+	for weapon_scene in weapon_scenes:
+		_add_owned_weapon_scene_key(owned, weapon_scene)
+	_add_owned_weapon_scene_key(owned, starting_weapon_scene)
+	return owned
+
+
+func get_weapon_scene_key(weapon_scene: PackedScene) -> String:
+	if weapon_scene == null:
+		return ""
+	if weapon_scene.resource_path != "":
+		return weapon_scene.resource_path
+	return str(weapon_scene.get_instance_id())
+
+
 func _handle_weapon_switch() -> void:
 	for index in range(weapon_scenes.size()):
 		if weapon_scenes[index] == null:
@@ -184,22 +215,21 @@ func _handle_weapon_switch() -> void:
 			equip_weapon_by_index(index)
 
 
-func _find_weapon_scene_index(weapon_scene: PackedScene) -> int:
-	var incoming_path := weapon_scene.resource_path
-	for index in range(weapon_scenes.size()):
-		var existing_scene := weapon_scenes[index]
-		if existing_scene == weapon_scene:
-			return index
-		if existing_scene != null and incoming_path != "" and existing_scene.resource_path == incoming_path:
-			return index
-	return -1
-
-
 func _find_empty_weapon_slot() -> int:
 	for index in range(weapon_scenes.size()):
 		if weapon_scenes[index] == null:
 			return index
 	return -1
+
+
+func _add_owned_weapon_scene_key(owned: Dictionary, weapon_scene) -> void:
+	if not weapon_scene is PackedScene:
+		return
+
+	var key := get_weapon_scene_key(weapon_scene as PackedScene)
+	if key == "":
+		return
+	owned[key] = true
 
 
 func _get_weapon_scene_inventory_info(weapon_scene: PackedScene) -> Dictionary:

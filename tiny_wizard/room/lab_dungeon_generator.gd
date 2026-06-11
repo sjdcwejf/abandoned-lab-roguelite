@@ -51,43 +51,43 @@ const FALLBACK_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "start",
-		"label": "Start Room",
+		"label": "Safehouse Airlock",
 		"scene": START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
 		"type": "combat",
-		"label": "Monster Room 1",
+		"label": "Specimen Cell 1",
 		"scene": COMBAT_ROOM_A_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "combat",
-		"label": "Monster Room 2",
+		"label": "Specimen Cell 2",
 		"scene": COMBAT_ROOM_B_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 0),
 		"type": "boss",
-		"label": "Boss Room",
+		"label": "Fusion Node",
 		"scene": BOSS_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, -1),
 		"type": "weapon",
-		"label": "Weapon Room",
+		"label": "Raven Cache",
 		"scene": WEAPON_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(2, -1),
 		"type": "reward",
-		"label": "Reward Room 1",
+		"label": "Data Vault 1",
 		"scene": REWARD_ROOM_A_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 1),
 		"type": "reward",
-		"label": "Reward Room 2",
+		"label": "Data Vault 2",
 		"scene": REWARD_ROOM_B_SCENE,
 	},
 ]
@@ -96,19 +96,19 @@ const TUTORIAL_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "tutorial_start",
-		"label": "Tutorial Start Room",
+		"label": "Cryo Wake Bay",
 		"scene": TUTORIAL_START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
 		"type": "tutorial_combat",
-		"label": "Tutorial Bomb Room",
+		"label": "Breach Training Lab",
 		"scene": TUTORIAL_COMBAT_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "tutorial_boss",
-		"label": "Tutorial Boss Room",
+		"label": "Low-Grade Fusion Chamber",
 		"scene": TUTORIAL_BOSS_ROOM_SCENE,
 	},
 ]
@@ -256,7 +256,7 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	_shuffle_array(main_room_types, rng)
 	main_room_types.append("boss")
 
-	room_specs.append(_make_spec(Vector2i.ZERO, "start", "Start Room", START_ROOM_SCENE))
+	room_specs.append(_make_spec(Vector2i.ZERO, "start", "Safehouse Airlock", START_ROOM_SCENE))
 
 	for path_index in range(1, main_path.size()):
 		var room_type := main_room_types[path_index - 1] as String
@@ -318,13 +318,13 @@ static func _next_label(room_type: String, label_counts: Dictionary) -> String:
 
 	match room_type:
 		"combat":
-			return "Monster Room %d" % count
+			return "Specimen Cell %d" % count
 		"reward":
-			return "Reward Room %d" % count
+			return "Data Vault %d" % count
 		"weapon":
-			return "Weapon Room"
+			return "Raven Cache"
 		"boss":
-			return "Boss Room"
+			return "Fusion Node"
 	return "Room %d" % count
 
 

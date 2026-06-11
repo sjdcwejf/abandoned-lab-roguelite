@@ -23,7 +23,7 @@ impulse_force = 250.0
 [node name="Room" instance=ExtResource("1_base_room")]
 script = ExtResource("2_script")
 lab_room_type = "tutorial_boss"
-lab_room_label = "Tutorial Boss Room"
+lab_room_label = "Low-Grade Fusion Chamber"
 
 [node name="PrototypeBoss" parent="Enemies" index="0" instance=ExtResource("3_boss")]
 modulate = Color(1, 0.28, 0.36, 1)
@@ -31,6 +31,9 @@ position = Vector2(512, 310)
 scale = Vector2(1.35, 1.35)
 character_stats = SubResource("Resource_tutorial_boss_stats")
 physics_stats = SubResource("Resource_tutorial_boss_physics")
+protomatter_drop_chance = 1.0
+protomatter_min_drop = 3
+protomatter_max_drop = 5
 
 [node name="Visual" parent="Enemies/PrototypeBoss" index="0"]
 modulate = Color(0.85, 0.35, 1, 1)

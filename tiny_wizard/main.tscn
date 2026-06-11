@@ -7,7 +7,7 @@
 [ext_resource type="Resource" uid="uid://bpvgw7v25bbsx" path="res://tiny_wizard/player/inventory/inventory.tres" id="14_ui8tp"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/gui/character_select/character_select.tscn" id="15_select"]
 
-[node name="AbandonedLabPrototype" type="Node2D"]
+[node name="BioProtocolEntropyZonePrototype" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_5rjdy")
 experimenter_character_scene = ExtResource("2_5wjcq")

@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource( "1_3uhtu" )
-name = "Key"
-short_description = "A key to open things"
+name = "Biometric Key"
+short_description = "A copied Abyss Facility access signature."
 long_description = null
 stackable = true
 stack_size = null

@@ -2,6 +2,29 @@
 
 这个文件记录项目的主要功能变化，方便团队成员快速了解每次版本推进的内容。
 
+## v0.1.8 - 命名与文本包装
+
+日期：2026-06-11
+
+### 新增
+
+- 项目包装方向统一为《生化协议：熵区》/ Bio Protocol: Entropy Zone。
+- 游戏内角色选择界面新增 Abyss Facility 唤醒流程文案。
+- 正式关卡与教学关卡房间命名改为极渊设施语境，包括 Cryo Wake Bay、Safehouse Airlock、Specimen Cell、Data Vault、Raven Cache 和 Fusion Node。
+- 新增 Protomatter Fragment 原质碎片资源，击杀普通敌人有概率掉落，击败 Fusion 类 Boss 会必定掉落多个。
+- 顶部资源栏和本层结算界面现在会显示 Protomatter Fragment 数量。
+
+### 调整
+
+- Coin、Key、Bomb 的显示命名分别调整为 Research Data、Biometric Key、Breach Charge。
+- 黑洞出口的描述包装为 Entropy Rift。
+- 本层结算界面文案调整为 Abyss sector sealed / Fusion node neutralized。
+- README 改为以《生化协议：熵区》为当前项目说明基准。
+
+### 修复
+
+- 修复 Raven Cache 武器房仍可能掉落玩家初始武器或已拥有武器的问题。
+
 ## v0.1.7 - 本层结算界面
 
 日期：2026-06-10
@@ -9,7 +32,7 @@
 ### 新增
 
 - 正式关卡 Boss 黑洞进入后会弹出本层完成结算界面。
-- 结算界面会显示当前武器构筑和 Coin、Key、Bomb 数量。
+- 结算界面会显示当前武器构筑和 Research Data、Biometric Key、Breach Charge 数量。
 - 结算界面新增 Restart Run 按钮，可用当前角色重开流程。
 - 结算界面新增 Next Layer Coming Soon 占位按钮，为后续多层推进预留入口。
 

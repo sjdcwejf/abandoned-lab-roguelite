@@ -52,26 +52,35 @@ func _spawn_random_weapon() -> void:
 
 func _pick_unowned_weapon_scene(rng: RandomNumberGenerator) -> PackedScene:
 	var candidates := []
-	var owned_weapon_paths := _get_owned_weapon_paths()
+	var owned_weapon_keys := _get_owned_weapon_keys()
+	var weapon_holder := _get_active_weapon_holder()
 	for weapon_scene in WEAPON_POOL:
 		var packed_scene := weapon_scene as PackedScene
 		if packed_scene == null:
 			continue
-		if owned_weapon_paths.has(_weapon_scene_key(packed_scene)):
+		if owned_weapon_keys.has(_weapon_scene_key(packed_scene)):
+			continue
+		if weapon_holder != null and weapon_holder.has_method("has_weapon_scene") and bool(weapon_holder.call("has_weapon_scene", packed_scene)):
 			continue
 		candidates.append(packed_scene)
 
 	if candidates.is_empty():
 		return null
-	return candidates[rng.randi_range(0, candidates.size() - 1)] as PackedScene
+	var selected_scene := candidates[rng.randi_range(0, candidates.size() - 1)] as PackedScene
+	print("Raven Cache dropped %s from %d unowned candidates." % [_get_weapon_label(selected_scene), candidates.size()])
+	return selected_scene
 
 
-func _get_owned_weapon_paths() -> Dictionary:
+func _get_owned_weapon_keys() -> Dictionary:
 	var owned := {}
-	if _weapon_holder == null or not is_instance_valid(_weapon_holder):
+	var weapon_holder := _get_active_weapon_holder()
+	if weapon_holder == null:
 		return owned
 
-	var weapon_scenes := _weapon_holder.get("weapon_scenes") as Array
+	if weapon_holder.has_method("get_owned_weapon_scene_keys"):
+		return weapon_holder.call("get_owned_weapon_scene_keys") as Dictionary
+
+	var weapon_scenes := weapon_holder.get("weapon_scenes") as Array
 	if weapon_scenes == null:
 		return owned
 
@@ -79,6 +88,29 @@ func _get_owned_weapon_paths() -> Dictionary:
 		if weapon_scene is PackedScene:
 			owned[_weapon_scene_key(weapon_scene as PackedScene)] = true
 	return owned
+
+
+func _get_active_weapon_holder() -> Node:
+	if _weapon_holder != null and is_instance_valid(_weapon_holder):
+		return _weapon_holder
+
+	var tree := get_tree()
+	if tree == null or tree.current_scene == null:
+		return null
+
+	_weapon_holder = _find_weapon_holder(tree.current_scene)
+	return _weapon_holder
+
+
+func _find_weapon_holder(root: Node) -> Node:
+	if root.name == "WeaponHolder" and root.has_method("add_weapon_scene"):
+		return root
+
+	for child in root.get_children():
+		var found := _find_weapon_holder(child)
+		if found != null:
+			return found
+	return null
 
 
 func _weapon_scene_key(weapon_scene: PackedScene) -> String:

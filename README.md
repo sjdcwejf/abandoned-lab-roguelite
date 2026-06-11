@@ -1,10 +1,12 @@
-# Abandoned Lab Roguelite
+# Bio Protocol: Entropy Zone
 
-A Steam-focused 2D pixel-art, top-down room-based action roguelite prototype.
+中文暂定名：《生化协议：熵区》。
+
+A Steam-focused 2D pixel-art, top-down room-based action roguelite prototype set inside the Abyss Facility, a corporate bioengineering complex swallowed by the entropy zone.
 
 Current design direction:
 
-- Theme: abandoned laboratory
+- Theme: bio-horror, corporate conspiracy, alien protomatter, adaptive test subjects
 - Core loop: enter room, clear enemies, pick up weapons, build a run, die, restart
 - Engine: Godot 4
 - MVP weapons:
@@ -12,16 +14,20 @@ Current design direction:
   - Energy Saber
   - Power Gauntlets
 
+Story and worldbuilding baseline:
+
+- `docs/剧情设定_生化协议_熵区.md`
+
 This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shooter Core. See `LICENSES/THIRD_PARTY_NOTICES.md` for source and license details.
 
 ## Current Prototype Controls
 
-- Start run: choose Experimenter or Containment Technician on the opening screen; the selected character wakes from their sleep pod in the start room
+- Start run: choose Subject 07 or Tech 13 on the opening screen; the selected subject wakes from a cryo pod in the Cryo Wake Bay
 - Move: WASD
 - Aim: mouse
 - Primary fire: left mouse button
 - Legacy directional fire: arrow keys
-- Bomb/use inherited prototype item: E
+- Plant Breach Charge: E
 - Secondary fire: right mouse button
 - Switch MVP weapons: 1 / 2 / 3 / 4 after pickup
 - Reserved dash: Space
@@ -31,32 +37,40 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 
 The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
 
-- Experimenter starts with the Laser Pointer.
-- Containment Technician starts with the Containment Nailgun.
+- Subject 07 starts with the Laser Pointer.
+- Tech 13 starts with the Containment Nailgun.
 - `1` Starting ranged weapon: hold or press the left mouse button to attack toward the mouse cursor.
 - `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
 - `3` Power Gauntlets: left mouse button lunges into a short punch, right mouse button fires a ranged energy bolt from the lower muzzle.
-- `4` Test Sword: unlocked by picking up the sword from the starter weapon stand in the start room.
+- `4` Test Sword: unlocked by picking up Raven's test blade from the starter weapon stand in the Cryo Wake Bay.
 - Beam, melee, and projectile weapons all route damage through targets that expose the inherited `hit()` method.
 - The old Tiny Wizard arrow shooter is kept in the player scene for compatibility, but hidden and disconnected from primary fire.
 
 ## Current Dungeon Prototype
 
-The main scene now generates a fixed 7-room abandoned lab layout at runtime:
+The current flow starts with a 3-room wake sequence, then enters a randomized 7-room Abyss Facility sector.
 
-- `(0, 0)`: Start Room
-- `(1, 0)`: Monster Room A
-- `(2, 0)`: Monster Room B
-- `(3, 0)`: Boss Room
-- `(1, -1)`: Weapon Room
-- `(2, -1)`: Reward Room A, guarded and with an unobstructed chest containing a bomb
-- `(2, 1)`: Reward Room B, guarded reward chest
+Wake sequence:
+
+- Cryo Wake Bay: subject selection, cryo pods, starter weapon stand
+- Breach Training Lab: guarded cache, Breach Charge, resin-sealed reward chest
+- Low-Grade Fusion Chamber: tutorial Fusion encounter and Entropy Rift exit
+
+Formal sector room roles:
+
+- Safehouse Airlock: formal run spawn room
+- Specimen Cells: combat rooms that lock until enemies are cleared
+- Data Vaults: guarded reward rooms
+- Raven Cache: random weapon pickup room
+- Fusion Node: sector boss room with an Entropy Rift exit
 
 Combat rooms close their visible doors when entered and reopen them after all enemies are defeated. Hidden doors remain locked, so the player cannot leave the generated layout through missing room exits.
 
-Bombs are used with `E` when the bomb inventory count is above zero. After a short fuse, bombs now destroy nearby destructible rock tiles, including the stones blocking the current weapon-room pickup.
+Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments. For now, fragments are collected into the inventory and shown in the resource UI; later versions can spend them in Raven's shop, permanent upgrades, or story unlocks.
 
-For now, player death immediately restores health and respawns the character in the start room instead of ending the run.
+Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby destructible resin-rock tiles, including stones blocking reward pickups.
+
+For now, player death immediately restores health and respawns the subject in the current run's start room instead of ending the run.
 
 ## Open In Godot
 

@@ -307,7 +307,7 @@ func _respawn_character_at_start() -> void:
 		character_stats.set_life_to_max()
 	start_room.enter_room()
 	_update_tutorial_hint_for_room(start_room)
-	print("Player respawned in Start Room.")
+	print("Subject respawned in Safehouse Airlock.")
 
 
 func _on_tutorial_boss_defeated() -> void:
@@ -317,8 +317,8 @@ func _on_tutorial_boss_defeated() -> void:
 	_tutorial_rewards_dropped = true
 	_tutorial_rewards_granted = true
 	_activate_tutorial_exit_black_hole()
-	_show_tutorial_hint("Training complete. Enter the black hole to start the real run.")
-	print("Tutorial complete. Exit black hole activated.")
+	_show_tutorial_hint("Wake sequence complete. Enter the Entropy Rift to reach the Abyss Facility.")
+	print("Wake sequence complete. Entropy Rift activated.")
 
 
 func _activate_tutorial_exit_black_hole() -> void:
@@ -335,7 +335,7 @@ func _on_black_hole_entered(body: Node2D) -> void:
 		RUN_STATE_TUTORIAL:
 			if not _tutorial_rewards_granted:
 				return
-			print("Tutorial complete. Entering formal dungeon.")
+			print("Wake sequence complete. Entering the Abyss Facility.")
 			call_deferred("_start_formal_run")
 		RUN_STATE_FORMAL:
 			call_deferred("_complete_formal_layer")
@@ -403,14 +403,14 @@ func _setup_layer_clear_screen() -> void:
 	margin.add_child(layout)
 
 	var title := Label.new()
-	title.text = "LAYER COMPLETE"
+	title.text = "ABYSS SECTOR SEALED"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 26)
 	title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
 	layout.add_child(title)
 
 	var summary := Label.new()
-	summary.text = "Boss defeated. Current build snapshot:"
+	summary.text = "Fusion node neutralized. Current build snapshot:"
 	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	summary.add_theme_font_size_override("font_size", 14)
 	summary.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
@@ -424,7 +424,7 @@ func _setup_layer_clear_screen() -> void:
 	_layer_clear_weapons_label.add_theme_color_override("font_color", Color(0.88, 0.92, 0.92, 1.0))
 	layout.add_child(_wrap_layer_clear_detail(_layer_clear_weapons_label))
 
-	layout.add_child(_make_layer_clear_section_title("Inventory"))
+	layout.add_child(_make_layer_clear_section_title("Recovered Assets"))
 
 	_layer_clear_inventory_label = Label.new()
 	_layer_clear_inventory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -444,7 +444,7 @@ func _setup_layer_clear_screen() -> void:
 	buttons.add_child(restart_button)
 
 	var next_layer_button := Button.new()
-	next_layer_button.text = "Next Layer Coming Soon"
+	next_layer_button.text = "Deeper Sector Coming Soon"
 	next_layer_button.disabled = true
 	next_layer_button.custom_minimum_size = Vector2(190, 42)
 	buttons.add_child(next_layer_button)
@@ -547,12 +547,13 @@ func _get_layer_clear_weapon_text() -> String:
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "Coins: 0    Keys: 0    Bombs: 0"
+		return "Research Data: 0    Protomatter: 0    Biometric Keys: 0    Breach Charges: 0"
 
-	return "Coins: %d    Keys: %d    Bombs: %d" % [
-		inventory.get_item_amount("Coin"),
-		inventory.get_item_amount("Key"),
-		inventory.get_item_amount("Bomb")
+	return "Research Data: %d    Protomatter: %d    Biometric Keys: %d    Breach Charges: %d" % [
+		inventory.get_item_amount("Research Data"),
+		inventory.get_item_amount("Protomatter Fragment"),
+		inventory.get_item_amount("Biometric Key"),
+		inventory.get_item_amount("Breach Charge")
 	]
 
 
@@ -625,16 +626,16 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 	match room.lab_room_type:
 		"tutorial_start":
-			_show_tutorial_hint("Press F to pick up the sword. Press 4 to equip it, then enter the room on the right.")
+			_show_tutorial_hint("Raven left a test blade nearby. Press F to pick it up. Press 4 to equip it, then move right.")
 		"tutorial_combat":
-			_show_tutorial_hint("Clear the enemies. Open the nearby chest for a bomb. Press E to place it, break the rocks, then loot the blocked chest.")
+			_show_tutorial_hint("Clear the specimens. Open the cache for a Breach Charge. Press E to plant it, crack the resin, then recover the data.")
 		"tutorial_boss":
 			if _tutorial_rewards_granted:
-				_show_tutorial_hint("Training complete. Enter the black hole to start the real run.")
+				_show_tutorial_hint("Wake sequence complete. Enter the Entropy Rift to reach the Abyss Facility.")
 			elif _tutorial_rewards_dropped:
-				_show_tutorial_hint("Enter the black hole to start the real run.")
+				_show_tutorial_hint("Enter the Entropy Rift to reach the Abyss Facility.")
 			else:
-				_show_tutorial_hint("Defeat the boss, then enter the black hole to start the real run.")
+				_show_tutorial_hint("Neutralize the low-grade Fusion, then enter the Entropy Rift.")
 		_:
 			_hide_tutorial_hint()
 
@@ -656,7 +657,7 @@ func _print_dungeon_summary() -> void:
 	var seed_text := ""
 	if _run_state == RUN_STATE_FORMAL and use_generated_lab_dungeon:
 		seed_text = " (seed %d)" % LabDungeonGenerator.last_seed
-	print("Generated %d-room %s abandoned lab dungeon%s:" % [rooms.size(), _run_state, seed_text])
+	print("Generated %d-room %s Abyss Facility sector%s:" % [rooms.size(), _run_state, seed_text])
 	for room_pos in rooms:
 		var room = rooms[room_pos]
 		print(" - ", room.lab_room_label, " [", room.lab_room_type, "] at ", room_pos)

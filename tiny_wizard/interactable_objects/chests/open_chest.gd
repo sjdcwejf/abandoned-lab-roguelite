@@ -16,8 +16,8 @@ func trigger(object: QuiverInteractableObject, character: QuiverCharacter):
 		if character.can_grab_items:
 			
 			if locked:
-				if (character.inventory as QuiverInventory).get_item_amount("Key") > 0:
-					character.inventory.remove_item("Key")
+				if (character.inventory as QuiverInventory).get_item_amount("Biometric Key") > 0:
+					character.inventory.remove_item("Biometric Key")
 				else:
 					# We cannot open it so we stop here
 					if next_action is QuiverInteractableObjectAction:

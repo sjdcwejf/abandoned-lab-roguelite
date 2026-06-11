@@ -29,6 +29,9 @@ position = Vector2(512, 310)
 scale = Vector2(1.35, 1.35)
 character_stats = SubResource("Resource_boss_stats")
 physics_stats = SubResource("Resource_boss_physics")
+protomatter_drop_chance = 1.0
+protomatter_min_drop = 3
+protomatter_max_drop = 5
 
 [node name="Visual" parent="Enemies/PrototypeBoss" index="0"]
 modulate = Color(0.85, 0.35, 1, 1)

@@ -1,7 +1,6 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/gui/character_select/character_select.gd" id="1_select"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/select_your_character_title.png" id="2_title"]
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/test_subject_07_portrait.png" id="3_experimenter"]
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/containment_technician_13_portrait.png" id="4_technician"]
 
@@ -100,13 +99,18 @@ layout_mode = 2
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 40)
-size_flags_horizontal = 4
-texture = ExtResource("2_title")
-expand_mode = 1
-stretch_mode = 5
+theme_override_font_sizes/font_size = 22
+text = "BIO PROTOCOL: ENTROPY ZONE"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66, 0.82, 0.86, 1)
+theme_override_font_sizes/font_size = 12
+text = "Abyss Facility wake sequence online. Choose one adaptive subject."
+horizontal_alignment = 1
 
 [node name="Choices" type="HBoxContainer" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -166,7 +170,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 14
-text = "Test Subject 07"
+text = "Subject 07 - Adaptive Strain"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -221,6 +225,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 14
-text = "Technician 13"
+text = "Tech 13 - Containment Unit"
 horizontal_alignment = 1
 vertical_alignment = 1
