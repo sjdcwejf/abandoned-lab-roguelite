@@ -23,6 +23,9 @@ var _tutorial_rewards_granted := false
 var _tutorial_reward_pickups_remaining := 0
 var _tutorial_hint_panel: PanelContainer
 var _tutorial_hint_label: Label
+var _layer_clear_root: Control
+var _layer_clear_weapons_label: Label
+var _layer_clear_inventory_label: Label
 
 var rooms := {}
 
@@ -31,6 +34,7 @@ func _ready():
 	_current_room = start_room_coord
 	$Camera2D.position = _room_camera_position(_current_room)
 	_setup_tutorial_hint()
+	_setup_layer_clear_screen()
 	_show_character_select()
 
 
@@ -193,6 +197,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 		return
 
 	_selected_character_id = character_id
+	_hide_layer_clear_screen()
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
 
@@ -200,6 +205,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_character.name = "Character"
 	add_child(_character)
 	_character.set("gui_path", NodePath("../Camera2D/GUI"))
+	_reset_character_inventory()
 	_bind_character_weapon_ui()
 	if _character.has_signal("respawn_requested"):
 		_character.connect("respawn_requested", Callable(self, "_respawn_character_at_start"))
@@ -258,12 +264,30 @@ func _get_weapon_holder() -> Node:
 	return _character.get_node_or_null("Visual/WeaponHolder")
 
 
-func _bind_character_weapon_ui() -> void:
-	var gui := $Camera2D/GUI
-	if gui == null or not gui.has_method("bind_weapon_holder"):
+func _get_character_inventory() -> QuiverInventory:
+	if _character == null:
+		return null
+	return _character.get("inventory") as QuiverInventory
+
+
+func _reset_character_inventory() -> void:
+	var inventory := _get_character_inventory()
+	if inventory == null:
 		return
 
-	gui.bind_weapon_holder(_get_weapon_holder())
+	inventory.inventory.clear()
+	inventory.item_counts.clear()
+
+
+func _bind_character_weapon_ui() -> void:
+	var gui := $Camera2D/GUI
+	if gui == null:
+		return
+
+	if gui.has_method("bind_inventory"):
+		gui.bind_inventory(_get_character_inventory())
+	if gui.has_method("bind_weapon_holder"):
+		gui.bind_weapon_holder(_get_weapon_holder())
 
 
 func _respawn_character_at_start() -> void:
@@ -322,8 +346,232 @@ func _complete_formal_layer() -> void:
 		return
 
 	_run_state = RUN_STATE_LAYER_COMPLETE
-	_show_tutorial_hint("Layer complete. Next layer will be added in a later version.")
+	_hide_tutorial_hint()
+	_set_character_control_enabled(false)
+	_show_layer_clear_screen()
 	print("Formal layer complete.")
+
+
+func _set_character_control_enabled(enabled: bool) -> void:
+	if _character == null or not is_instance_valid(_character):
+		return
+
+	_character.process_mode = Node.PROCESS_MODE_INHERIT if enabled else Node.PROCESS_MODE_DISABLED
+	_character.set("velocity", Vector2.ZERO)
+
+
+func _setup_layer_clear_screen() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "LayerClearLayer"
+	layer.layer = 40
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+
+	_layer_clear_root = Control.new()
+	_layer_clear_root.name = "LayerClearRoot"
+	_layer_clear_root.process_mode = Node.PROCESS_MODE_ALWAYS
+	_layer_clear_root.visible = false
+	_layer_clear_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_layer_clear_root)
+
+	var dimmer := ColorRect.new()
+	dimmer.name = "Dimmer"
+	dimmer.color = Color(0.0, 0.0, 0.0, 0.68)
+	dimmer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_layer_clear_root.add_child(dimmer)
+
+	var center := CenterContainer.new()
+	center.name = "Center"
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_layer_clear_root.add_child(center)
+
+	var panel := PanelContainer.new()
+	panel.name = "Panel"
+	panel.custom_minimum_size = Vector2(460, 360)
+	panel.add_theme_stylebox_override("panel", _make_layer_clear_panel_style())
+	center.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 24)
+	margin.add_theme_constant_override("margin_top", 22)
+	margin.add_theme_constant_override("margin_right", 24)
+	margin.add_theme_constant_override("margin_bottom", 22)
+	panel.add_child(margin)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 14)
+	margin.add_child(layout)
+
+	var title := Label.new()
+	title.text = "LAYER COMPLETE"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
+	layout.add_child(title)
+
+	var summary := Label.new()
+	summary.text = "Boss defeated. Current build snapshot:"
+	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary.add_theme_font_size_override("font_size", 14)
+	summary.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
+	layout.add_child(summary)
+
+	layout.add_child(_make_layer_clear_section_title("Weapons"))
+
+	_layer_clear_weapons_label = Label.new()
+	_layer_clear_weapons_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_layer_clear_weapons_label.add_theme_font_size_override("font_size", 14)
+	_layer_clear_weapons_label.add_theme_color_override("font_color", Color(0.88, 0.92, 0.92, 1.0))
+	layout.add_child(_wrap_layer_clear_detail(_layer_clear_weapons_label))
+
+	layout.add_child(_make_layer_clear_section_title("Inventory"))
+
+	_layer_clear_inventory_label = Label.new()
+	_layer_clear_inventory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_layer_clear_inventory_label.add_theme_font_size_override("font_size", 15)
+	_layer_clear_inventory_label.add_theme_color_override("font_color", Color(0.88, 0.92, 0.92, 1.0))
+	layout.add_child(_wrap_layer_clear_detail(_layer_clear_inventory_label))
+
+	var buttons := HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 10)
+	layout.add_child(buttons)
+
+	var restart_button := Button.new()
+	restart_button.text = "Restart Run"
+	restart_button.custom_minimum_size = Vector2(150, 42)
+	restart_button.pressed.connect(_restart_run_from_layer_clear)
+	buttons.add_child(restart_button)
+
+	var next_layer_button := Button.new()
+	next_layer_button.text = "Next Layer Coming Soon"
+	next_layer_button.disabled = true
+	next_layer_button.custom_minimum_size = Vector2(190, 42)
+	buttons.add_child(next_layer_button)
+
+
+func _make_layer_clear_panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.06, 0.075, 0.95)
+	style.border_color = Color(0.25, 0.78, 0.86, 0.85)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	return style
+
+
+func _make_layer_clear_detail_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.11, 0.13, 0.92)
+	style.border_color = Color(0.18, 0.28, 0.31, 1.0)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right = 6
+	style.content_margin_left = 12
+	style.content_margin_top = 8
+	style.content_margin_right = 12
+	style.content_margin_bottom = 8
+	return style
+
+
+func _make_layer_clear_section_title(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", Color(0.45, 0.92, 0.96, 1.0))
+	return label
+
+
+func _wrap_layer_clear_detail(content: Control) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _make_layer_clear_detail_style())
+	panel.add_child(content)
+	return panel
+
+
+func _show_layer_clear_screen() -> void:
+	if _layer_clear_root == null:
+		return
+	_refresh_layer_clear_screen()
+	_layer_clear_root.visible = true
+
+
+func _hide_layer_clear_screen() -> void:
+	if _layer_clear_root == null:
+		return
+	_layer_clear_root.visible = false
+
+
+func _refresh_layer_clear_screen() -> void:
+	if _layer_clear_weapons_label != null:
+		_layer_clear_weapons_label.text = _get_layer_clear_weapon_text()
+	if _layer_clear_inventory_label != null:
+		_layer_clear_inventory_label.text = _get_layer_clear_inventory_text()
+
+
+func _get_layer_clear_weapon_text() -> String:
+	var weapon_holder := _get_weapon_holder()
+	if weapon_holder == null or not weapon_holder.has_method("get_quick_weapon_slots"):
+		return "No weapons."
+
+	var lines := PackedStringArray()
+	var slots := weapon_holder.call("get_quick_weapon_slots", 4) as Array
+	for slot_info in slots:
+		var weapon_scene := slot_info.get("scene") as PackedScene
+		if weapon_scene == null:
+			continue
+
+		var line := "%d. %s" % [
+			int(slot_info.get("slot", 0)),
+			str(slot_info.get("name", "Weapon"))
+		]
+		if bool(slot_info.get("equipped", false)):
+			line += "  ACTIVE"
+		lines.append(line)
+
+	if lines.is_empty():
+		return "No weapons."
+	return "\n".join(lines)
+
+
+func _get_layer_clear_inventory_text() -> String:
+	var inventory := _get_character_inventory()
+	if inventory == null:
+		return "Coins: 0    Keys: 0    Bombs: 0"
+
+	return "Coins: %d    Keys: %d    Bombs: %d" % [
+		inventory.get_item_amount("Coin"),
+		inventory.get_item_amount("Key"),
+		inventory.get_item_amount("Bomb")
+	]
+
+
+func _restart_run_from_layer_clear() -> void:
+	var character_id := _selected_character_id
+	if character_id == "":
+		character_id = CharacterSelectScreen.EXPERIMENTER_ID
+
+	_hide_layer_clear_screen()
+	_set_character_control_enabled(true)
+	_start_run_with_character(_get_selected_character_scene(), character_id)
+
+
+func _get_selected_character_scene() -> PackedScene:
+	match _selected_character_id:
+		CharacterSelectScreen.TECHNICIAN_ID:
+			return technician_character_scene
+		_:
+			return experimenter_character_scene
 
 
 func _setup_tutorial_hint() -> void:

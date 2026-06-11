@@ -22,3 +22,12 @@ func bind_weapon_holder(weapon_holder: Node) -> void:
 	if _weapon_backpack_ui == null:
 		return
 	_weapon_backpack_ui.bind_weapon_holder(weapon_holder)
+
+
+func bind_inventory(new_inventory: QuiverInventory) -> void:
+	inventory = new_inventory
+	var inventory_ui := get_node_or_null("TopUI/TextureRect/MarginContainer/HBoxContainer/InventoryUI")
+	if inventory_ui == null:
+		return
+	if inventory_ui.has_method("bind_inventory"):
+		inventory_ui.call("bind_inventory", inventory)
