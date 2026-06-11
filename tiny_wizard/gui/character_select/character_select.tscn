@@ -89,7 +89,7 @@ grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Root/CenterContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(512, 300)
+custom_minimum_size = Vector2(792, 374)
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="MarginContainer" type="MarginContainer" parent="Root/CenterContainer/PanelContainer"]
@@ -116,12 +116,12 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="ExperimenterCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
 layout_mode = 2
-custom_minimum_size = Vector2(235, 220)
+custom_minimum_size = Vector2(240, 284)
 size_flags_horizontal = 0
 clip_contents = true
 focus_mode = 2
@@ -138,7 +138,7 @@ anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 10.0
 offset_right = -12.0
-offset_bottom = -44.0
+offset_bottom = -104.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -153,7 +153,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = -38.0
+offset_top = -96.0
 offset_right = -12.0
 offset_bottom = -10.0
 grow_horizontal = 2
@@ -169,14 +169,48 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 14
-text = "Subject 07 - Adaptive Strain"
+offset_bottom = -58.0
+theme_override_font_sizes/font_size = 13
+text = "Panshi - Bulwark"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.74, 0.88, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "Stable | HP 8 | Laser"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 56.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.62, 0.74, 0.78, 1)
+theme_override_font_sizes/font_size = 9
+text = "Stable strain built to hold the line."
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TechnicianCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
 layout_mode = 2
-custom_minimum_size = Vector2(235, 220)
+custom_minimum_size = Vector2(240, 284)
 size_flags_horizontal = 0
 clip_contents = true
 focus_mode = 2
@@ -193,7 +227,7 @@ anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 10.0
 offset_right = -12.0
-offset_bottom = -44.0
+offset_bottom = -104.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -208,7 +242,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = -38.0
+offset_top = -96.0
 offset_right = -12.0
 offset_bottom = -10.0
 grow_horizontal = 2
@@ -224,7 +258,131 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 14
-text = "Tech 13 - Containment Unit"
+offset_bottom = -58.0
+theme_override_font_sizes/font_size = 13
+text = "Liuying - Reflex"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.78, 0.48, 1)
+theme_override_font_sizes/font_size = 10
+text = "Fast | HP 5 | Nailgun"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 56.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.65, 0.42, 1)
+theme_override_font_sizes/font_size = 9
+text = "Reflex-tuned runner for fast clears."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EchoCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
+layout_mode = 2
+custom_minimum_size = Vector2(240, 284)
+size_flags_horizontal = 0
+clip_contents = true
+focus_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_card_hover")
+
+[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard"]
+modulate = Color(0.68, 0.76, 1, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -104.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_experimenter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -96.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.015, 0.018, 0.021, 0.82)
+
+[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -58.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 13
+text = "Huisheng - Echo"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Energy | HP 6 | Saber"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard/NameBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 56.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.7, 0.62, 0.86, 1)
+theme_override_font_sizes/font_size = 9
+text = "Resonance subject for future energy skills."
 horizontal_alignment = 1
 vertical_alignment = 1

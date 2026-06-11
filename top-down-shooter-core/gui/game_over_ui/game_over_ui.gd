@@ -3,11 +3,11 @@ extends Control
 # Emited if the player wants to restart the game
 signal restart
 
-@export var player_stats : QuiverPlayerStats
+@export var player_stats: QuiverCharacterStats
 
 func _ready():
 	if player_stats is QuiverCharacterStats:
-		player_stats.died.connect(self.show_game_over)
+		player_stats.died.connect(Callable(self, "show_game_over"))
 
 
 func show_game_over():

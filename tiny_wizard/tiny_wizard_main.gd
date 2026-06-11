@@ -11,6 +11,7 @@ const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 @export var start_room_coord := Vector2i.ZERO
 @export var experimenter_character_scene: PackedScene
 @export var technician_character_scene: PackedScene
+@export var huisheng_character_scene: PackedScene
 @export var character_select_scene: PackedScene
 
 var _current_room := Vector2i.ZERO
@@ -162,13 +163,13 @@ func _find_sleep_pod(root: Node, character_id: String) -> LabSleepPod:
 
 func _show_character_select() -> void:
 	if character_select_scene == null:
-		_start_run_with_character(experimenter_character_scene)
+		_start_run_with_character(experimenter_character_scene, CharacterSelectScreen.PANSHI_ID)
 		return
 
 	var screen := character_select_scene.instantiate() as CharacterSelectScreen
 	if screen == null:
 		push_error("Character select scene is not a CharacterSelectScreen.")
-		_start_run_with_character(experimenter_character_scene)
+		_start_run_with_character(experimenter_character_scene, CharacterSelectScreen.PANSHI_ID)
 		return
 
 	_character_select_screen = screen
@@ -177,21 +178,29 @@ func _show_character_select() -> void:
 
 
 func _on_character_selected(character_id: String) -> void:
+	var resolved_character_id := CharacterSelectScreen.PANSHI_ID
 	var character_scene := experimenter_character_scene
 	match character_id:
-		CharacterSelectScreen.TECHNICIAN_ID:
+		CharacterSelectScreen.LIUYING_ID, CharacterSelectScreen.LEGACY_TECHNICIAN_ID:
+			resolved_character_id = CharacterSelectScreen.LIUYING_ID
 			character_scene = technician_character_scene
-		CharacterSelectScreen.EXPERIMENTER_ID:
+		CharacterSelectScreen.HUISHENG_ID:
+			resolved_character_id = CharacterSelectScreen.HUISHENG_ID
+			character_scene = huisheng_character_scene
+		CharacterSelectScreen.PANSHI_ID, CharacterSelectScreen.LEGACY_EXPERIMENTER_ID:
+			resolved_character_id = CharacterSelectScreen.PANSHI_ID
 			character_scene = experimenter_character_scene
+		_:
+			push_warning("Unknown character id '%s'. Falling back to Panshi." % character_id)
 
 	if _character_select_screen != null:
 		_character_select_screen.queue_free()
 		_character_select_screen = null
 
-	_start_run_with_character(character_scene, character_id)
+	_start_run_with_character(character_scene, resolved_character_id)
 
 
-func _start_run_with_character(character_scene: PackedScene, character_id := CharacterSelectScreen.EXPERIMENTER_ID) -> void:
+func _start_run_with_character(character_scene: PackedScene, character_id := CharacterSelectScreen.PANSHI_ID) -> void:
 	if character_scene == null:
 		push_error("Cannot start run because no character scene was assigned.")
 		return
@@ -270,6 +279,12 @@ func _get_character_inventory() -> QuiverInventory:
 	return _character.get("inventory") as QuiverInventory
 
 
+func _get_character_stats() -> QuiverCharacterStats:
+	if _character == null:
+		return null
+	return _character.get("character_stats") as QuiverCharacterStats
+
+
 func _reset_character_inventory() -> void:
 	var inventory := _get_character_inventory()
 	if inventory == null:
@@ -286,6 +301,8 @@ func _bind_character_weapon_ui() -> void:
 
 	if gui.has_method("bind_inventory"):
 		gui.bind_inventory(_get_character_inventory())
+	if gui.has_method("bind_character_stats"):
+		gui.bind_character_stats(_get_character_stats())
 	if gui.has_method("bind_weapon_holder"):
 		gui.bind_weapon_holder(_get_weapon_holder())
 
@@ -560,7 +577,7 @@ func _get_layer_clear_inventory_text() -> String:
 func _restart_run_from_layer_clear() -> void:
 	var character_id := _selected_character_id
 	if character_id == "":
-		character_id = CharacterSelectScreen.EXPERIMENTER_ID
+		character_id = CharacterSelectScreen.PANSHI_ID
 
 	_hide_layer_clear_screen()
 	_set_character_control_enabled(true)
@@ -569,8 +586,10 @@ func _restart_run_from_layer_clear() -> void:
 
 func _get_selected_character_scene() -> PackedScene:
 	match _selected_character_id:
-		CharacterSelectScreen.TECHNICIAN_ID:
+		CharacterSelectScreen.LIUYING_ID, CharacterSelectScreen.LEGACY_TECHNICIAN_ID:
 			return technician_character_scene
+		CharacterSelectScreen.HUISHENG_ID:
+			return huisheng_character_scene
 		_:
 			return experimenter_character_scene
 

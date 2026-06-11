@@ -13,7 +13,23 @@ func _ready():
 	super._ready()
 	update_ui()
 
+
+func bind_player_stats(new_stats: QuiverCharacterStats) -> void:
+	var update_callable := Callable(self, "update_ui")
+	if player_stats is QuiverCharacterStats and player_stats.stats_changed.is_connected(update_callable):
+		player_stats.stats_changed.disconnect(update_callable)
+
+	player_stats = new_stats
+	max_life = 0
+	if player_stats is QuiverCharacterStats and not player_stats.stats_changed.is_connected(update_callable):
+		player_stats.stats_changed.connect(update_callable)
+	update_ui()
+
+
 func update_ui():
+	if player_stats == null:
+		return
+
 	# label.text = "%d/%d" % [player_stats.current_life, player_stats.max_life]
 	
 	if player_stats.max_life != max_life:

@@ -20,9 +20,15 @@ Story and worldbuilding baseline:
 
 This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shooter Core. See `LICENSES/THIRD_PARTY_NOTICES.md` for source and license details.
 
+## Current Playable Subjects
+
+- Panshi / Bulwark: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer.
+- Liuying / Reflex: a neural-reflex subject tuned for fast repositioning and room clears. Low HP, high movement speed, starts with the Containment Nailgun.
+- Huisheng / Echo: a resonance subject reserved for the future energy-skill branch. Medium HP, balanced movement, starts with the Energy Saber.
+
 ## Current Prototype Controls
 
-- Start run: choose Subject 07 or Tech 13 on the opening screen; the selected subject wakes from a cryo pod in the Cryo Wake Bay
+- Start run: choose Panshi, Liuying, or Huisheng on the opening screen; the selected adaptive subject wakes from a cryo pod in the Cryo Wake Bay
 - Move: WASD
 - Aim: mouse
 - Primary fire: left mouse button
@@ -37,8 +43,9 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 
 The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
 
-- Subject 07 starts with the Laser Pointer.
-- Tech 13 starts with the Containment Nailgun.
+- Panshi starts with the Laser Pointer, 8 HP, and steadier but slower movement.
+- Liuying starts with the Containment Nailgun, 5 HP, and faster movement.
+- Huisheng starts with the Energy Saber, 6 HP, and balanced movement as the future energy-skill subject.
 - `1` Starting ranged weapon: hold or press the left mouse button to attack toward the mouse cursor.
 - `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
 - `3` Power Gauntlets: left mouse button lunges into a short punch, right mouse button fires a ranged energy bolt from the lower muzzle.

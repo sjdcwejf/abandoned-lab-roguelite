@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://cxl7rbtvsb5nc"]
+[gd_scene load_steps=8 format=3 uid="uid://cxl7rbtvsb5nc"]
 
 [ext_resource type="Script" path="res://tiny_wizard/tiny_wizard_main.gd" id="1_5rjdy"]
 [ext_resource type="PackedScene" uid="uid://bnuih6qfwgu2p" path="res://tiny_wizard/player/player_character.tscn" id="2_5wjcq"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/player/containment_technician_character.tscn" id="3_technician"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/huisheng_character.tscn" id="4_huisheng"]
 [ext_resource type="PackedScene" uid="uid://c45gqa1w6c20d" path="res://tiny_wizard/gui/gui.tscn" id="13_ucw2f"]
 [ext_resource type="Resource" uid="uid://bpvgw7v25bbsx" path="res://tiny_wizard/player/inventory/inventory.tres" id="14_ui8tp"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/gui/character_select/character_select.tscn" id="15_select"]
@@ -12,6 +13,7 @@ y_sort_enabled = true
 script = ExtResource("1_5rjdy")
 experimenter_character_scene = ExtResource("2_5wjcq")
 technician_character_scene = ExtResource("3_technician")
+huisheng_character_scene = ExtResource("4_huisheng")
 character_select_scene = ExtResource("15_select")
 metadata/_edit_vertical_guides_ = [0.0]
 

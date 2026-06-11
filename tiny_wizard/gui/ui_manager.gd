@@ -24,6 +24,14 @@ func bind_weapon_holder(weapon_holder: Node) -> void:
 	_weapon_backpack_ui.bind_weapon_holder(weapon_holder)
 
 
+func bind_character_stats(new_stats: QuiverCharacterStats) -> void:
+	var hearts_ui := get_node_or_null("TopUI/TextureRect/MarginContainer/HBoxContainer/HeartsUI")
+	if hearts_ui == null:
+		return
+	if hearts_ui.has_method("bind_player_stats"):
+		hearts_ui.call("bind_player_stats", new_stats)
+
+
 func bind_inventory(new_inventory: QuiverInventory) -> void:
 	inventory = new_inventory
 	var inventory_ui := get_node_or_null("TopUI/TextureRect/MarginContainer/HBoxContainer/InventoryUI")
