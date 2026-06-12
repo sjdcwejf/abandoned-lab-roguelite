@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="2_boss"]
@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_physics"]
 [ext_resource type="Script" path="res://tiny_wizard/room/formal_boss_room.gd" id="5_boss_script"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/black_hole/black_hole.tscn" id="6_black_hole"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/fusion_boss/fusion_boss.gd" id="7_fusion_boss"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/fusion_boss/fusion_boss_behavior.gd" id="8_fusion_behavior"]
 
 [sub_resource type="Resource" id="Resource_boss_stats"]
 resource_local_to_scene = true
@@ -20,6 +22,9 @@ acceleration = 0.35
 friction = 0.1
 impulse_force = 250.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_boss_detector"]
+radius = 520.0
+
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("5_boss_script")
 
@@ -27,15 +32,23 @@ script = ExtResource("5_boss_script")
 modulate = Color(1, 0.28, 0.36, 1)
 position = Vector2(512, 310)
 scale = Vector2(1.35, 1.35)
+script = ExtResource("7_fusion_boss")
 character_stats = SubResource("Resource_boss_stats")
 physics_stats = SubResource("Resource_boss_physics")
+boss_display_name = "Fusion Node: Entropy Strain"
 protomatter_drop_chance = 1.0
-protomatter_min_drop = 3
-protomatter_max_drop = 5
+protomatter_min_drop = 5
+protomatter_max_drop = 8
 green_blood_splatter_scale = 1.6
 
 [node name="Visual" parent="Enemies/PrototypeBoss" index="0"]
 modulate = Color(0.85, 0.35, 1, 1)
+
+[node name="Behavior" parent="Enemies/PrototypeBoss" index="1"]
+script = ExtResource("8_fusion_behavior")
+
+[node name="CollisionShape2D" parent="Enemies/PrototypeBoss/Behavior/PlayerDetector" index="0"]
+shape = SubResource("CircleShape2D_boss_detector")
 
 [node name="ExitBlackHole" parent="." index="7" instance=ExtResource("6_black_hole")]
 position = Vector2(512, 400)

@@ -83,11 +83,11 @@ Formal sector room roles:
 - Data Vaults: guarded reward rooms
 - Raven Cache: random weapon pickup room
 - Raven Safehouse: fixed pre-boss merchant room with Raven's armory terminal and story guidance
-- Fusion Node: sector boss room with an Entropy Rift exit
+- Fusion Node: sector boss room with a named health bar, charge pursuit, green poison volleys, low-health summons, and an Entropy Rift exit
 
 Combat rooms close their visible doors when entered and reopen them after all enemies are defeated. Hidden doors remain locked, so the player cannot leave the generated layout through missing room exits.
 
-Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments. Fragments are collected into the inventory, shown in the resource UI, and used as Raven's current weapon-trade currency. Later versions can also spend them on permanent upgrades or story unlocks.
+Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments, burst green blood on death, and open the Entropy Rift after defeat. Fragments are collected into the inventory, shown in the resource UI, and used as Raven's current weapon-trade currency. Later versions can also spend them on permanent upgrades or story unlocks.
 
 Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Protomatter Fragments. Supply purchases and random temporary black markets are reserved for later versions.
 

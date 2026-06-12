@@ -3,8 +3,12 @@ extends Room
 
 signal tutorial_boss_defeated
 
+const BOSS_HEALTH_UI_SCRIPT := preload("res://tiny_wizard/gui/boss_health_ui/boss_health_ui.gd")
+
 var _boss_defeated := false
 var _reward_drop_origin := Vector2.ZERO
+var _boss_health_ui: CanvasLayer
+var _boss_node: Node
 
 @onready var exit_black_hole := $ExitBlackHole as LabBlackHole
 
@@ -13,6 +17,15 @@ func _ready() -> void:
 	super._ready()
 	if exit_black_hole != null:
 		exit_black_hole.set_active(false)
+	_boss_node = $Enemies.get_node_or_null("PrototypeBoss")
+	_setup_boss_health_ui()
+	_connect_boss_signals()
+
+
+func enter_room() -> void:
+	super.enter_room()
+	if _boss_health_ui != null and not _boss_defeated and _boss_node != null and is_instance_valid(_boss_node):
+		_boss_health_ui.call("show_bar")
 
 
 func _on_enemies_child_exiting_tree(node: Node) -> void:
@@ -22,12 +35,7 @@ func _on_enemies_child_exiting_tree(node: Node) -> void:
 	if $Enemies.get_child_count() != 1:
 		return
 
-	_boss_defeated = true
-	if node is Node2D:
-		_reward_drop_origin = (node as Node2D).global_position
-	else:
-		_reward_drop_origin = get_room_global_position() + ROOM_SIZE * 0.5
-	tutorial_boss_defeated.emit()
+	_complete_boss_defeat(node)
 
 
 func activate_exit_black_hole() -> void:
@@ -39,3 +47,39 @@ func get_reward_drop_origin() -> Vector2:
 	if _reward_drop_origin == Vector2.ZERO:
 		return get_room_global_position() + ROOM_SIZE * 0.5
 	return _reward_drop_origin
+
+
+func _setup_boss_health_ui() -> void:
+	_boss_health_ui = BOSS_HEALTH_UI_SCRIPT.new() as CanvasLayer
+	if _boss_health_ui == null:
+		return
+	add_child(_boss_health_ui)
+	if _boss_node != null:
+		_boss_health_ui.call("bind_boss", _boss_node)
+
+
+func _connect_boss_signals() -> void:
+	if _boss_node == null or not _boss_node.has_signal("boss_defeated"):
+		return
+
+	var defeated_callable := Callable(self, "_on_boss_defeated")
+	if not _boss_node.is_connected("boss_defeated", defeated_callable):
+		_boss_node.connect("boss_defeated", defeated_callable)
+
+
+func _on_boss_defeated() -> void:
+	_complete_boss_defeat(_boss_node)
+
+
+func _complete_boss_defeat(node: Node) -> void:
+	if _boss_defeated:
+		return
+
+	_boss_defeated = true
+	if _boss_health_ui != null:
+		_boss_health_ui.call("hide_bar")
+	if node is Node2D:
+		_reward_drop_origin = (node as Node2D).global_position
+	else:
+		_reward_drop_origin = get_room_global_position() + ROOM_SIZE * 0.5
+	tutorial_boss_defeated.emit()
