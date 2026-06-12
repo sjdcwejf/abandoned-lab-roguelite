@@ -12,7 +12,7 @@
 [sub_resource type="Resource" id="Resource_tutorial_boss_stats"]
 resource_local_to_scene = true
 script = ExtResource("4_stats")
-max_life = 12
+max_life = 24
 
 [sub_resource type="Resource" id="Resource_tutorial_boss_physics"]
 resource_local_to_scene = true

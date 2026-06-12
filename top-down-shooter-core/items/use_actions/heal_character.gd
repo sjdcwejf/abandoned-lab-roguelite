@@ -16,14 +16,15 @@ enum HealingType {HEALTH, SHIELD}
 # Returns false if the character is already full health.
 func use(user: QuiverCharacter)->bool:
 	if user.character_stats != null:
-		var stats = user.character_stats as QuiverCharacterStats
+		var stats := user.character_stats as QuiverCharacterStats
 		if healing_type == HealingType.HEALTH:
-			if stats.current_life < stats.max_life:
-				stats.current_life += healing_power
+			var current_life := int(stats.get("current_life"))
+			var max_life := int(stats.get("max_life"))
+			if current_life < max_life:
+				stats.set("current_life", mini(max_life, current_life + healing_power))
 				return true
 		elif healing_type == HealingType.SHIELD:
 			if "current_shield" in stats:
 				stats.current_shield += healing_power
 				return true
 	return false
-

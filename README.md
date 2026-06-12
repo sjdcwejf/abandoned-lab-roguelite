@@ -89,7 +89,7 @@ Combat rooms close their visible doors when entered and reopen them after all en
 
 Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments, burst green blood on death, and open the Entropy Rift after defeat. Fragments are collected into the inventory, shown in the resource UI, and used as Raven's current weapon-trade currency. Later versions can also spend them on permanent upgrades or story unlocks.
 
-Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Protomatter Fragments. Supply purchases and random temporary black markets are reserved for later versions.
+Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Protomatter Fragments. The current offer is also shown as a weapon preview on Raven's counter. Supply purchases and random temporary black markets are reserved for later versions.
 
 Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby destructible resin-rock tiles, including stones blocking reward pickups.
 

@@ -3,6 +3,7 @@ extends "res://top-down-shooter-core/gui/player_ui/player_ui.gd"
 const HEART_SCENE = preload("res://tiny_wizard/gui/life_ui/heart/heart.tscn")
 
 var max_life := 0
+var heart_slots := 0
 
 enum {EMPTY, HALF, FULL, FULL_SHIELD, HALF_SHIELD}
 
@@ -21,6 +22,7 @@ func bind_player_stats(new_stats: QuiverCharacterStats) -> void:
 
 	player_stats = new_stats
 	max_life = 0
+	heart_slots = 0
 	if player_stats is QuiverCharacterStats and not player_stats.stats_changed.is_connected(update_callable):
 		player_stats.stats_changed.connect(update_callable)
 	update_ui()
@@ -32,8 +34,9 @@ func update_ui():
 
 	# label.text = "%d/%d" % [player_stats.current_life, player_stats.max_life]
 	
-	if player_stats.max_life != max_life:
-		var difference = (player_stats.max_life - max_life)/2
+	var needed_heart_slots := ceili(float(player_stats.max_life) / 2.0)
+	if needed_heart_slots != heart_slots:
+		var difference := needed_heart_slots - heart_slots
 		
 		if difference > 0:
 			for i in range(difference):
@@ -48,9 +51,10 @@ func update_ui():
 				heart_container.remove_child(h)
 				h.queue_free()
 		
+		heart_slots = needed_heart_slots
 		max_life = player_stats.max_life
 		
-	var life = player_stats.current_life
+	var life := int(player_stats.current_life)
 	
 	for heart in heart_container.get_children():
 		if life>=2:
@@ -62,8 +66,10 @@ func update_ui():
 		elif life <= 0:
 			heart.set_state(EMPTY)
 			
-	var shield_count = player_stats.current_shield
-	var difference = (shield_count+1) / 2 - shield_container.get_child_count()
+	var shield_count := 0
+	if "current_shield" in player_stats:
+		shield_count = int(player_stats.get("current_shield"))
+	var difference := ceili(float(shield_count) / 2.0) - shield_container.get_child_count()
 	if difference > 0:
 		for i in range(difference):
 			var shield = HEART_SCENE.instantiate()

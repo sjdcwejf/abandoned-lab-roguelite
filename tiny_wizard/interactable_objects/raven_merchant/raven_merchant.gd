@@ -21,6 +21,7 @@ var _candidate_character: Node2D
 var _dialog_open := false
 var _selected_weapon_scene: PackedScene
 var _selected_weapon_name := ""
+var _offer_preview_instance: Node2D
 
 @onready var interact_area: Area2D = $InteractArea
 @onready var prompt: CanvasItem = $Prompt
@@ -31,6 +32,7 @@ var _selected_weapon_name := ""
 @onready var status_label: Label = $DialogPanel/MarginContainer/VBoxContainer/Status
 @onready var hint_label: Label = $DialogPanel/MarginContainer/VBoxContainer/Hint
 @onready var status_light: CanvasItem = $Console/StatusLight
+@onready var offer_preview: Node2D = $Console/OfferPreview
 
 
 func _ready() -> void:
@@ -86,12 +88,14 @@ func _refresh_offer(character: Node2D) -> void:
 	_selected_weapon_scene = _pick_unowned_weapon(character)
 	if _selected_weapon_scene == null:
 		_selected_weapon_name = ""
+		_clear_offer_preview()
 		stock_label.text = "Stock: sold out for your current loadout."
 		status_label.text = "Raven has nothing new to sell right now."
 		hint_label.text = "Leave the safehouse when ready."
 		return
 
 	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
+	_build_offer_preview(_selected_weapon_scene)
 	var currency_count := _get_currency_count(character)
 	if weapon_cost <= 0:
 		stock_label.text = "Stock: %s\nPrice: Free" % _selected_weapon_name
@@ -180,3 +184,44 @@ func _get_weapon_name(weapon_scene: PackedScene) -> String:
 		weapon_name = (weapon as LabWeapon).get_inventory_display_name()
 	weapon.free()
 	return weapon_name
+
+
+func _build_offer_preview(weapon_scene: PackedScene) -> void:
+	_clear_offer_preview()
+	if weapon_scene == null:
+		return
+
+	_offer_preview_instance = weapon_scene.instantiate() as Node2D
+	if _offer_preview_instance == null:
+		return
+
+	offer_preview.add_child(_offer_preview_instance)
+	_offer_preview_instance.position = Vector2.ZERO
+	_offer_preview_instance.rotation = -0.2
+	_offer_preview_instance.scale = Vector2(0.72, 0.72)
+	_disable_preview_interaction(_offer_preview_instance)
+
+
+func _clear_offer_preview() -> void:
+	if offer_preview == null:
+		return
+	for child in offer_preview.get_children():
+		child.queue_free()
+	_offer_preview_instance = null
+
+
+func _disable_preview_interaction(root: Node) -> void:
+	root.process_mode = Node.PROCESS_MODE_DISABLED
+	if root is CollisionObject2D:
+		var collision_object := root as CollisionObject2D
+		collision_object.collision_layer = 0
+		collision_object.collision_mask = 0
+		if collision_object is Area2D:
+			(collision_object as Area2D).monitoring = false
+			(collision_object as Area2D).monitorable = false
+
+	if root is CollisionShape2D:
+		(root as CollisionShape2D).disabled = true
+
+	for child in root.get_children():
+		_disable_preview_interaction(child)
