@@ -16,8 +16,8 @@ func _process(delta):
 		_random_movement = Vector2.RIGHT.rotated(randf()*2*PI) 
 		_t = CHANGE_DIRECTION_TIME
 	
-	if player_detector.player_is_in_range():
-		_player_movement = 0.33*global_position.direction_to(player_detector.get_player_position())
+		if player_detector.player_is_in_range():
+			_player_movement = 0.33 * global_position.direction_to(player_detector.get_player_position())
 	else:
 		_player_movement = Vector2.ZERO
 	

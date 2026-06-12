@@ -3,13 +3,23 @@ extends QuiverCharacter
 
 
 const PROTOMATTER_FRAGMENT_ITEM := preload("res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tres")
+const GREEN_BLOOD_SPLATTER_SCRIPT := preload("res://tiny_wizard/effects/green_blood_splatter.gd")
 
 @export_range(0.0, 1.0, 0.01) var protomatter_drop_chance := 0.45
 @export_range(0, 8, 1) var protomatter_min_drop := 1
 @export_range(0, 8, 1) var protomatter_max_drop := 1
 @export var protomatter_drop_spread := 22.0
+@export var green_blood_splatter_enabled := true
+@export var green_blood_spawn_offset := Vector2(0.0, -28.0)
+@export_range(0.2, 4.0, 0.1) var green_blood_splatter_scale := 1.0
 
 var _protomatter_dropped := false
+
+
+func hit(damage := 1, from := Vector2.ZERO) -> void:
+	if green_blood_splatter_enabled and int(damage) > 0 and character_stats != null and character_stats.current_life > 0:
+		_spawn_green_blood_splatter(from)
+	super.hit(damage, from)
 
 
 func die() -> void:
@@ -56,3 +66,22 @@ func _get_drop_parent() -> Node:
 	if parent.name == "Enemies" and parent.get_parent() != null:
 		return parent.get_parent()
 	return parent
+
+
+func _spawn_green_blood_splatter(hit_from: Vector2) -> void:
+	var effect_parent := _get_drop_parent()
+	if effect_parent == null:
+		return
+
+	var splatter: Node2D = GREEN_BLOOD_SPLATTER_SCRIPT.new() as Node2D
+	if splatter == null:
+		return
+
+	splatter.name = "GreenBloodSplatter"
+	splatter.call("setup", hit_from, green_blood_splatter_scale)
+	var spawn_position := global_position + green_blood_spawn_offset
+	if effect_parent is Node2D:
+		splatter.position = (effect_parent as Node2D).to_local(spawn_position)
+	else:
+		splatter.global_position = spawn_position
+	effect_parent.call_deferred("add_child", splatter)

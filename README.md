@@ -45,7 +45,7 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
 
 - Panshi starts with the Laser Pointer, 8 HP, and steadier but slower movement.
-- Liuying starts with the Containment Nailgun, 5 HP, very high movement speed, a 15% dodge chance, movement afterimages, and an independent movement momentum passive that boosts speed after 2 seconds of uninterrupted movement.
+- Liuying starts with the Containment Nailgun, 5 HP, very high movement speed, a 15% dodge chance, decoy afterimages, and an independent movement momentum passive that boosts speed after 2 seconds of uninterrupted movement.
 - Huisheng starts with the Energy Saber, 6 HP, and balanced movement as the future energy-skill subject.
 - `1` Starting ranged weapon: hold or press the left mouse button to attack toward the mouse cursor.
 - `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
@@ -59,7 +59,7 @@ The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` t
 Each subject now has an energy resource and one active skill on `Q`. The HUD shows the current skill, energy, and readiness state:
 
 - Panshi - Bulwark Protocol: costs 40 energy, gains temporary shield, reduces incoming damage, and emits a short defensive pulse.
-- Liuying - Phase Assault: costs 30 energy, has 2 charges, dashes through enemies, deals reduced weapon-based damage, applies Vulnerable for 3 seconds, and briefly avoids damage during the dash. Liuying also leaves short blue afterimages while moving.
+- Liuying - Phase Assault: costs 30 energy, has 2 charges, dashes through enemies, deals reduced weapon-based damage, applies Vulnerable for 3 seconds, and briefly avoids damage during the dash. Liuying also leaves short blue afterimages while moving; nearby red and black fly enemies prefer those afterimages as temporary decoy targets.
 - Huisheng - Echo Pulse: costs 35 energy and emits a resonance wave that damages nearby enemies and slows affected specimens.
 
 The current energy system is a foundation for later character-specific skill pools. Upgrade selection, skill mutations, and energy-spending build choices are not implemented yet.

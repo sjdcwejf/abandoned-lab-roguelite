@@ -9,6 +9,9 @@ const META_ORIGINAL_SPEED := "echo_original_speed"
 const META_VULNERABLE_DAMAGE_MULTIPLIER := "lab_vulnerable_damage_multiplier"
 const META_VULNERABLE_END_TIME := "lab_vulnerable_end_time"
 const VULNERABLE_MARK_NAME := "LiuyingVulnerableMark"
+const LIUYING_DECOY_GROUP := "lab_decoy_targets"
+const META_DECOY_OWNER := "lab_decoy_owner"
+const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 
 @export_enum("panshi", "liuying", "huisheng") var ability_id := ABILITY_PANSHI
 @export var enemy_collision_mask := 8
@@ -38,6 +41,7 @@ const VULNERABLE_MARK_NAME := "LiuyingVulnerableMark"
 @export var liuying_afterimage_lifetime := 0.5
 @export var liuying_afterimage_min_distance := 14.0
 @export var liuying_afterimage_color := Color(0.58, 0.78, 1.0, 0.38)
+@export var liuying_afterimage_decoy_enabled := true
 @export var liuying_energy_cost := 30.0
 @export var liuying_fire_rate_time := 0.0
 @export var liuying_fire_cooldown_multiplier := 1.0
@@ -601,6 +605,10 @@ func _spawn_liuying_afterimage() -> void:
 	add_child(afterimage)
 	afterimage.global_transform = visual.global_transform
 	afterimage.modulate = liuying_afterimage_color
+	if liuying_afterimage_decoy_enabled:
+		afterimage.add_to_group(LIUYING_DECOY_GROUP)
+		afterimage.set_meta(META_DECOY_OWNER, _character)
+		afterimage.set_meta(META_DECOY_EXPIRES_AT, Time.get_ticks_msec() + int(liuying_afterimage_lifetime * 1000.0))
 
 	var copied_any := false
 	for child_name in ["Shadow", "Body", "Head", "Hat"]:
