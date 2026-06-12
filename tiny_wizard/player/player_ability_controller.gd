@@ -20,6 +20,7 @@ const VULNERABLE_MARK_NAME := "LiuyingVulnerableMark"
 @export var panshi_damage_multiplier := 0.7
 @export var panshi_pulse_radius := 132.0
 @export var panshi_pulse_damage := 1
+@export var panshi_energy_cost := 40.0
 
 @export_group("Liuying")
 @export var liuying_charge_count := 2
@@ -33,6 +34,11 @@ const VULNERABLE_MARK_NAME := "LiuyingVulnerableMark"
 @export_range(0.0, 1.0, 0.01) var liuying_dodge_chance := 0.15
 @export var liuying_momentum_required_time := 2.0
 @export var liuying_momentum_speed_multiplier := 1.2
+@export var liuying_afterimage_interval := 0.08
+@export var liuying_afterimage_lifetime := 0.5
+@export var liuying_afterimage_min_distance := 14.0
+@export var liuying_afterimage_color := Color(0.58, 0.78, 1.0, 0.38)
+@export var liuying_energy_cost := 30.0
 @export var liuying_fire_rate_time := 0.0
 @export var liuying_fire_cooldown_multiplier := 1.0
 
@@ -42,6 +48,7 @@ const VULNERABLE_MARK_NAME := "LiuyingVulnerableMark"
 @export var huisheng_pulse_damage := 1
 @export var huisheng_slow_duration := 2.0
 @export var huisheng_slow_multiplier := 0.55
+@export var huisheng_energy_cost := 35.0
 
 var _character: QuiverCharacter
 var _cooldown_remaining := 0.0
@@ -54,6 +61,9 @@ var _liuying_charge_timer := 0.0
 var _liuying_moving_time := 0.0
 var _liuying_base_speed := 0.0
 var _liuying_momentum_active := false
+var _liuying_afterimage_timer := 0.0
+var _liuying_afterimage_position := Vector2.ZERO
+var _liuying_has_afterimage_position := false
 var _rng := RandomNumberGenerator.new()
 var _aura_ring: Line2D
 var _aura_tween: Tween
@@ -109,6 +119,7 @@ func get_cooldown_remaining() -> float:
 
 
 func _tick_timers(delta: float) -> void:
+	_tick_energy_regen(delta)
 	if ability_id == ABILITY_LIUYING:
 		_tick_liuying_charges(delta)
 		_tick_liuying_momentum(delta)
@@ -122,6 +133,41 @@ func _tick_timers(delta: float) -> void:
 		_active_remaining = maxf(0.0, _active_remaining - delta)
 		if _active_remaining <= 0.0 and ability_id == ABILITY_PANSHI:
 			_end_panshi_protocol()
+
+
+func _tick_energy_regen(delta: float) -> void:
+	var stats := _get_energy_stats()
+	if stats == null:
+		return
+	var regen := float(stats.get("energy_regen_per_second"))
+	if regen <= 0.0:
+		return
+	stats.call("restore_energy", regen * delta)
+
+
+func _try_spend_energy(amount: float) -> bool:
+	if amount <= 0.0:
+		return true
+
+	var stats := _get_energy_stats()
+	if stats == null:
+		return true
+
+	var spent := bool(stats.call("spend_energy", amount))
+	if not spent:
+		_show_no_energy_feedback()
+	return spent
+
+
+func _get_energy_stats() -> Object:
+	if _character == null:
+		return null
+	var stats := _character.character_stats
+	if stats == null:
+		return null
+	if not stats.has_method("spend_energy") or not stats.has_method("restore_energy"):
+		return null
+	return stats
 
 
 func _try_activate() -> void:
@@ -138,6 +184,9 @@ func _try_activate() -> void:
 
 
 func _activate_panshi() -> void:
+	if not _try_spend_energy(panshi_energy_cost):
+		return
+
 	_cooldown_remaining = panshi_cooldown
 	_active_remaining = panshi_duration
 	_panshi_shield_added = 0
@@ -167,6 +216,8 @@ func _activate_liuying() -> void:
 		_initialize_liuying_state()
 	if _liuying_charges <= 0:
 		return
+	if not _try_spend_energy(liuying_energy_cost):
+		return
 
 	_consume_liuying_charge()
 	_invulnerable_remaining = liuying_invulnerable_time
@@ -189,9 +240,70 @@ func _activate_liuying() -> void:
 
 
 func _activate_huisheng() -> void:
+	if not _try_spend_energy(huisheng_energy_cost):
+		return
+
 	_cooldown_remaining = huisheng_cooldown
 	_show_pulse(Color(0.64, 0.46, 1.0, 0.92), huisheng_pulse_radius, 0.48)
 	_damage_targets_in_radius(huisheng_pulse_radius, huisheng_pulse_damage, true)
+
+
+func get_ability_display_name() -> String:
+	match ability_id:
+		ABILITY_LIUYING:
+			return "Phase Assault"
+		ABILITY_HUISHENG:
+			return "Echo Pulse"
+		_:
+			return "Bulwark Protocol"
+
+
+func get_ability_energy_cost() -> float:
+	match ability_id:
+		ABILITY_LIUYING:
+			return liuying_energy_cost
+		ABILITY_HUISHENG:
+			return huisheng_energy_cost
+		_:
+			return panshi_energy_cost
+
+
+func get_energy_current() -> float:
+	var stats := _get_energy_stats()
+	if stats == null:
+		return 0.0
+	return float(stats.get("current_energy"))
+
+
+func get_energy_max() -> float:
+	var stats := _get_energy_stats()
+	if stats == null:
+		return 0.0
+	return float(stats.get("max_energy"))
+
+
+func get_energy_ratio() -> float:
+	var max_energy := get_energy_max()
+	if max_energy <= 0.0:
+		return 0.0
+	return clampf(get_energy_current() / max_energy, 0.0, 1.0)
+
+
+func get_ability_status_text() -> String:
+	var energy_cost := get_ability_energy_cost()
+	if get_energy_max() > 0.0 and get_energy_current() + 0.001 < energy_cost:
+		return "Need %.0f energy" % energy_cost
+
+	if ability_id == ABILITY_LIUYING:
+		if _liuying_charges <= 0:
+			return "Recharge %.1fs" % _liuying_charge_timer
+		if _liuying_momentum_active:
+			return "Momentum active"
+		return "Charges %d/%d" % [_liuying_charges, _get_liuying_max_charges()]
+
+	if _cooldown_remaining > 0.0:
+		return "Cooldown %.1fs" % _cooldown_remaining
+	return "Ready"
 
 
 func _initialize_liuying_state() -> void:
@@ -237,12 +349,15 @@ func _tick_liuying_momentum(delta: float) -> void:
 	if _liuying_base_speed <= 0.0:
 		_liuying_base_speed = _character.physics_stats.max_speed
 
-	if _get_movement_input().length() > 0.1:
+	var is_moving := _get_movement_input().length() > 0.1
+	if is_moving:
 		_liuying_moving_time += delta
 		if _liuying_moving_time >= liuying_momentum_required_time:
 			_set_liuying_momentum(true)
 	else:
 		_reset_liuying_momentum()
+
+	_tick_liuying_afterimages(delta, is_moving)
 
 
 func _set_liuying_momentum(is_active: bool) -> void:
@@ -263,6 +378,8 @@ func _set_liuying_momentum(is_active: bool) -> void:
 func _reset_liuying_momentum() -> void:
 	_liuying_moving_time = 0.0
 	_set_liuying_momentum(false)
+	_liuying_afterimage_timer = 0.0
+	_liuying_has_afterimage_position = false
 
 
 func _get_movement_input() -> Vector2:
@@ -438,6 +555,89 @@ func _show_vulnerable_mark(target_node: Node) -> void:
 
 func _show_dodge_feedback() -> void:
 	_show_pulse(Color(0.76, 0.88, 1.0, 0.85), 42.0, 0.14)
+
+
+func _show_no_energy_feedback() -> void:
+	_show_pulse(Color(0.95, 0.22, 0.28, 0.82), 38.0, 0.12)
+
+
+func _tick_liuying_afterimages(delta: float, is_moving: bool) -> void:
+	if ability_id != ABILITY_LIUYING or _character == null:
+		return
+	if not is_moving:
+		_liuying_afterimage_timer = 0.0
+		_liuying_has_afterimage_position = false
+		return
+
+	_liuying_afterimage_timer -= delta
+	if _liuying_afterimage_timer > 0.0:
+		return
+
+	var current_position := _character.global_position
+	if _liuying_has_afterimage_position:
+		var moved_distance := current_position.distance_to(_liuying_afterimage_position)
+		if moved_distance < liuying_afterimage_min_distance:
+			return
+
+	_spawn_liuying_afterimage()
+	_liuying_afterimage_position = current_position
+	_liuying_has_afterimage_position = true
+	_liuying_afterimage_timer = liuying_afterimage_interval
+
+
+func _spawn_liuying_afterimage() -> void:
+	if _character == null:
+		return
+
+	var visual := _character.get_node_or_null("Visual") as Node2D
+	if visual == null:
+		return
+
+	var afterimage := Node2D.new()
+	afterimage.name = "LiuyingAfterimage"
+	afterimage.top_level = true
+	afterimage.z_as_relative = false
+	afterimage.z_index = 18
+	add_child(afterimage)
+	afterimage.global_transform = visual.global_transform
+	afterimage.modulate = liuying_afterimage_color
+
+	var copied_any := false
+	for child_name in ["Shadow", "Body", "Head", "Hat"]:
+		var source := visual.get_node_or_null(child_name)
+		var copy := _duplicate_afterimage_part(source)
+		if copy == null:
+			continue
+		afterimage.add_child(copy)
+		copied_any = true
+
+	if not copied_any:
+		afterimage.queue_free()
+		return
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(afterimage, "modulate", Color(liuying_afterimage_color.r, liuying_afterimage_color.g, liuying_afterimage_color.b, 0.0), liuying_afterimage_lifetime).set_ease(Tween.EASE_OUT)
+	tween.tween_property(afterimage, "scale", afterimage.scale * 1.03, liuying_afterimage_lifetime).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.finished.connect(Callable(afterimage, "queue_free"))
+
+
+func _duplicate_afterimage_part(source: Node) -> Node:
+	if source == null:
+		return null
+	if not source is CanvasItem:
+		return null
+
+	var copy := source.duplicate()
+	copy.name = "%sAfterimage" % source.name
+	copy.process_mode = Node.PROCESS_MODE_DISABLED
+	if copy is AnimatedSprite2D:
+		(copy as AnimatedSprite2D).stop()
+	if copy is CanvasItem:
+		var canvas_copy := copy as CanvasItem
+		canvas_copy.modulate = Color.WHITE
+		canvas_copy.self_modulate = Color.WHITE
+	return copy
 
 
 func _create_aura_ring() -> void:

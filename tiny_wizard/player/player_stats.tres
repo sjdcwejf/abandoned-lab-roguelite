@@ -5,3 +5,5 @@
 [resource]
 script = ExtResource("1_fpjwe")
 max_life = 6
+max_energy = 100.0
+energy_regen_per_second = 10.0

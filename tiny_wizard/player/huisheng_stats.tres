@@ -5,3 +5,5 @@
 [resource]
 script = ExtResource("1_stats")
 max_life = 6
+max_energy = 120.0
+energy_regen_per_second = 14.0

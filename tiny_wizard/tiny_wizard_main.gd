@@ -285,6 +285,12 @@ func _get_character_stats() -> QuiverCharacterStats:
 	return _character.get("character_stats") as QuiverCharacterStats
 
 
+func _get_ability_controller() -> LabPlayerAbilityController:
+	if _character == null:
+		return null
+	return _character.get_node_or_null("AbilityController") as LabPlayerAbilityController
+
+
 func _reset_character_inventory() -> void:
 	var inventory := _get_character_inventory()
 	if inventory == null:
@@ -305,6 +311,8 @@ func _bind_character_weapon_ui() -> void:
 		gui.bind_character_stats(_get_character_stats())
 	if gui.has_method("bind_weapon_holder"):
 		gui.bind_weapon_holder(_get_weapon_holder())
+	if gui.has_method("bind_ability_controller"):
+		gui.bind_ability_controller(_get_ability_controller())
 
 
 func _respawn_character_at_start() -> void:
