@@ -645,7 +645,9 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 	match room.lab_room_type:
 		"tutorial_start":
-			_show_tutorial_hint("Raven left a test blade nearby. Press F to pick it up. Press 4 to equip it, then move right.")
+			_show_tutorial_hint("Calibration gate online. Move through the right door to reach Raven's safehouse.")
+		"tutorial_merchant":
+			_show_tutorial_hint("Raven left a test blade here. Press F to pick it up. Press 4 to equip it, then continue right.")
 		"tutorial_combat":
 			_show_tutorial_hint("Clear the specimens. Open the cache for a Breach Charge. Press E to plant it, crack the resin, then recover the data.")
 		"tutorial_boss":

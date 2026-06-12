@@ -4,6 +4,7 @@ extends RefCounted
 
 const TUTORIAL_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_start_room.tscn")
 const START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_formal_start_room.tscn")
+const TUTORIAL_RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_tutorial_raven_safehouse_room.tscn")
 const TUTORIAL_COMBAT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_tutorial_combat_room.tscn")
 const TUTORIAL_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_tutorial_boss_room.tscn")
 const COMBAT_ROOM_A_SCENE := preload("res://tiny_wizard/room/room_types/room_1.tscn")
@@ -103,17 +104,23 @@ const TUTORIAL_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "tutorial_start",
-		"label": "Cryo Wake Bay",
+		"label": "Abyss Calibration Gate",
 		"scene": TUTORIAL_START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
+		"type": "tutorial_merchant",
+		"label": "Raven Tutorial Safehouse",
+		"scene": TUTORIAL_RAVEN_SAFEHOUSE_ROOM_SCENE,
+	},
+	{
+		"coord": Vector2i(2, 0),
 		"type": "tutorial_combat",
 		"label": "Breach Training Lab",
 		"scene": TUTORIAL_COMBAT_ROOM_SCENE,
 	},
 	{
-		"coord": Vector2i(2, 0),
+		"coord": Vector2i(3, 0),
 		"type": "tutorial_boss",
 		"label": "Low-Grade Fusion Chamber",
 		"scene": TUTORIAL_BOSS_ROOM_SCENE,

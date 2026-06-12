@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/raven_merchant/raven_merchant.tscn" id="2_raven"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/weapon_stand/weapon_stand.tscn" id="3_weapon_stand"]
+
+[node name="Room" instance=ExtResource("1_base_room")]
+lab_room_type = "tutorial_merchant"
+lab_room_label = "Raven Tutorial Safehouse"
+
+[node name="RavenMerchant" parent="." index="8" instance=ExtResource("2_raven")]
+position = Vector2(650, 304)
+merchant_message = "Calibration cleared. Take the test blade before entering live training."
+
+[node name="TutorialWeaponStand" parent="." index="9" instance=ExtResource("3_weapon_stand")]
+position = Vector2(352, 318)
+target_slot_number = 4
