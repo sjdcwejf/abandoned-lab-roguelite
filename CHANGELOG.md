@@ -2,6 +2,24 @@
 
 这个文件记录项目的主要功能变化，方便团队成员快速了解每次版本推进的内容。
 
+## v0.1.12 - 实验室视觉与教学流程重排
+
+日期：2026-06-12
+
+### 新增
+
+- 新增实验室主题房间墙面美术资源 `lab_room_walls.png`，替换继承模板的旧房间墙面表现。
+- 新增实验室主题 HUD 背景资源 `lab_ui_background.png`，让顶部 UI 更接近《生化协议：熵区》的包装方向。
+- 新增概念图 `abyss_calibration_zone_mockup.png`，作为后续校准区/教学区视觉参考。
+- 新增教学专用 Raven Tutorial Safehouse 房间，内含渡鸦商人与 4 号测试剑武器台。
+
+### 调整
+
+- 教学流程从 3 个房间扩展为 4 个房间：Abyss Calibration Gate、Raven Tutorial Safehouse、Breach Training Lab、Low-Grade Fusion Chamber。
+- 教学出生房间改名为 Abyss Calibration Gate，更偏向“校准入口”而不是普通休眠出生房。
+- 测试剑拾取教学从出生房拆分到渡鸦教学安全屋，减少出生房承担过多功能。
+- 教学提示文字同步更新，引导玩家先进入渡鸦安全屋，再拾取测试剑并继续进入战斗训练。
+
 ## v0.1.11 - 实验体主动技能原型
 
 日期：2026-06-11
