@@ -23,7 +23,7 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 ## Current Playable Subjects
 
 - Panshi / Bulwark: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer, and can trigger Bulwark Protocol.
-- Liuying / Reflex: a neural-reflex subject tuned for fast repositioning and room clears. Low HP, high movement speed, starts with the Containment Nailgun, and can trigger Reflex Slip.
+- Liuying / Shadow: a neural-reflex subject tuned for high-speed flanks and risky repositioning. Low HP, very high movement speed, starts with the Containment Nailgun, has a 15% dodge chance, and can trigger Phase Assault.
 - Huisheng / Echo: a resonance subject tuned for energy-control experiments. Medium HP, balanced movement, starts with the Energy Saber, and can trigger Echo Pulse.
 
 ## Current Prototype Controls
@@ -45,7 +45,7 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
 
 - Panshi starts with the Laser Pointer, 8 HP, and steadier but slower movement.
-- Liuying starts with the Containment Nailgun, 5 HP, and faster movement.
+- Liuying starts with the Containment Nailgun, 5 HP, very high movement speed, a 15% dodge chance, and a movement momentum speed boost after 2 seconds of uninterrupted movement.
 - Huisheng starts with the Energy Saber, 6 HP, and balanced movement as the future energy-skill subject.
 - `1` Starting ranged weapon: hold or press the left mouse button to attack toward the mouse cursor.
 - `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
@@ -59,16 +59,18 @@ The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` t
 Each subject now has one active skill on `Q`:
 
 - Panshi - Bulwark Protocol: gains temporary shield, reduces incoming damage, and emits a short defensive pulse.
-- Liuying - Reflex Slip: dashes in the movement direction, briefly avoids damage, and temporarily reduces weapon cooldowns.
+- Liuying - Phase Assault: has 2 charges, dashes through enemies, deals reduced weapon-based damage, applies Vulnerable for 3 seconds, and briefly avoids damage during the dash.
 - Huisheng - Echo Pulse: emits a resonance wave that damages nearby enemies and slows affected specimens.
 
 ## Current Dungeon Prototype
 
-The current flow starts with a 3-room wake sequence, then enters a randomized 8-room Abyss Facility sector.
+The current flow starts with a 5-room wake sequence, then enters a randomized 8-room Abyss Facility sector.
 
 Wake sequence:
 
-- Cryo Wake Bay: subject selection, cryo pods, starter weapon stand
+- Abyss Calibration Gate: subject selection and cryo pods
+- Target Calibration Range: functional TARGET A/B/C/D shooting targets that unlock the right door when all targets are online
+- Raven Tutorial Safehouse: Raven guidance and the Test Sword weapon stand
 - Breach Training Lab: guarded cache, Breach Charge, resin-sealed reward chest
 - Low-Grade Fusion Chamber: tutorial Fusion encounter and Entropy Rift exit
 
@@ -83,9 +85,9 @@ Formal sector room roles:
 
 Combat rooms close their visible doors when entered and reopen them after all enemies are defeated. Hidden doors remain locked, so the player cannot leave the generated layout through missing room exits.
 
-Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments. For now, fragments are collected into the inventory and shown in the resource UI; later versions can spend them in Raven's shop, permanent upgrades, or story unlocks.
+Neutralized specimens can now drop Protomatter Fragments. Fusion-class enemies always drop several fragments. Fragments are collected into the inventory, shown in the resource UI, and used as Raven's current weapon-trade currency. Later versions can also spend them on permanent upgrades or story unlocks.
 
-Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Research Data. Supply purchases and random temporary black markets are reserved for later versions.
+Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Protomatter Fragments. Supply purchases and random temporary black markets are reserved for later versions.
 
 Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby destructible resin-rock tiles, including stones blocking reward pickups.
 

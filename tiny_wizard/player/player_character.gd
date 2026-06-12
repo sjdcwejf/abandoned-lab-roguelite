@@ -17,6 +17,8 @@ func hit(damage:=1, from:=Vector2.ZERO):
 		damage = ability_controller.modify_incoming_damage(int(damage))
 
 	super.hit(damage, from)
+	if ability_controller != null:
+		ability_controller.notify_damage_taken()
 	$Visual/AnimationPlayer.play("Blink")
 
 

@@ -4,6 +4,8 @@ class_name QuiverCharacter
 
 enum RotationType {NONE, AIMING, MOVING}
 
+const META_VULNERABLE_DAMAGE_MULTIPLIER := "lab_vulnerable_damage_multiplier"
+
 @export var character_stats: QuiverCharacterStats
 @export var inventory: QuiverInventory
 
@@ -77,11 +79,14 @@ func _physics_process(delta):
 			_impulse = Vector2.ZERO
 
 func hit(damage:=1, from:=Vector2.ZERO):
-	character_stats.damage(damage)
+	var final_damage := int(damage)
+	if has_meta(META_VULNERABLE_DAMAGE_MULTIPLIER):
+		final_damage = maxi(1, ceili(float(final_damage) * float(get_meta(META_VULNERABLE_DAMAGE_MULTIPLIER))))
+
+	character_stats.damage(final_damage)
 	if character_stats.current_life == 0:
 		die()
 	_impulse = from*physics_stats.impulse_force
 
 func die():
 	queue_free()
-

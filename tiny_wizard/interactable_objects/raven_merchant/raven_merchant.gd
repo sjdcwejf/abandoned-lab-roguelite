@@ -2,7 +2,8 @@ class_name LabRavenMerchant
 extends Node2D
 
 
-const CURRENCY_NAME := "Research Data"
+const CURRENCY_NAME := "Protomatter Fragment"
+const CURRENCY_DISPLAY_NAME := "Protomatter"
 const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
 	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
@@ -91,10 +92,15 @@ func _refresh_offer(character: Node2D) -> void:
 		return
 
 	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
-	var data_count := _get_research_data_count(character)
-	stock_label.text = "Stock: %s\nPrice: %d Research Data" % [_selected_weapon_name, weapon_cost]
-	status_label.text = "You have %d Research Data." % data_count
-	hint_label.text = "Press F to buy."
+	var currency_count := _get_currency_count(character)
+	if weapon_cost <= 0:
+		stock_label.text = "Stock: %s\nPrice: Free" % _selected_weapon_name
+		status_label.text = "No %s required." % CURRENCY_DISPLAY_NAME
+		hint_label.text = "Press F to claim."
+	else:
+		stock_label.text = "Stock: %s\nPrice: %d %s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME]
+		status_label.text = "You have %d %s." % [currency_count, CURRENCY_DISPLAY_NAME]
+		hint_label.text = "Press F to buy."
 
 
 func _try_purchase(character: Node2D) -> void:
@@ -107,9 +113,9 @@ func _try_purchase(character: Node2D) -> void:
 		status_label.text = "No inventory link. Raven refuses the trade."
 		return
 
-	var data_count := int(inventory.get_item_amount(CURRENCY_NAME))
-	if data_count < weapon_cost:
-		status_label.text = "Need %d Research Data. You have %d." % [weapon_cost, data_count]
+	var currency_count := int(inventory.get_item_amount(CURRENCY_NAME))
+	if currency_count < weapon_cost:
+		status_label.text = "Need %d %s. You have %d." % [weapon_cost, CURRENCY_DISPLAY_NAME, currency_count]
 		return
 
 	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
@@ -128,7 +134,10 @@ func _try_purchase(character: Node2D) -> void:
 		inventory.remove_item(CURRENCY_NAME, weapon_cost)
 
 	_refresh_offer(character)
-	status_label.text = "Purchased %s. Added to slot %d." % [purchased_name, slot_index + 1]
+	if weapon_cost <= 0:
+		status_label.text = "Claimed %s. Added to slot %d." % [purchased_name, slot_index + 1]
+	else:
+		status_label.text = "Purchased %s. Added to slot %d." % [purchased_name, slot_index + 1]
 
 
 func _pick_unowned_weapon(character: Node2D) -> PackedScene:
@@ -154,7 +163,7 @@ func _pick_unowned_weapon(character: Node2D) -> PackedScene:
 	return null
 
 
-func _get_research_data_count(character: Node2D) -> int:
+func _get_currency_count(character: Node2D) -> int:
 	var inventory := character.get("inventory") as QuiverInventory
 	if inventory == null:
 		return 0

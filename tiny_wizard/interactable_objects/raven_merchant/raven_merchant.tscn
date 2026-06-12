@@ -134,7 +134,7 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.86, 0.86, 1)
 theme_override_font_sizes/font_size = 11
-text = "You have 0 Research Data."
+text = "You have 0 Protomatter."
 autowrap_mode = 3
 
 [node name="Hint" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]

@@ -260,7 +260,7 @@ grow_vertical = 2
 mouse_filter = 2
 offset_bottom = -58.0
 theme_override_font_sizes/font_size = 13
-text = "Liuying - Reflex"
+text = "Liuying - Shadow"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -276,7 +276,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.48, 1)
 theme_override_font_sizes/font_size = 10
-text = "Fast | HP 5 | Nailgun"
+text = "Fast | Dodge 15% | Nailgun"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -293,7 +293,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.65, 0.42, 1)
 theme_override_font_sizes/font_size = 9
-text = "Reflex-tuned runner for fast clears."
+text = "Phase raider built for high-risk flanks."
 horizontal_alignment = 1
 vertical_alignment = 1
 

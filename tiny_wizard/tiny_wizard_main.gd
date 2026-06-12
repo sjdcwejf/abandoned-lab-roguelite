@@ -645,7 +645,9 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 	match room.lab_room_type:
 		"tutorial_start":
-			_show_tutorial_hint("Calibration gate online. Move through the right door to reach Raven's safehouse.")
+			_show_tutorial_hint("Calibration gate online. Move right to enter the target range.")
+		"tutorial_targets":
+			_show_tutorial_hint("Hit TARGET A, B, C, and D with any weapon. All targets online will unlock the right door.")
 		"tutorial_merchant":
 			_show_tutorial_hint("Raven left a test blade here. Press F to pick it up. Press 4 to equip it, then continue right.")
 		"tutorial_combat":

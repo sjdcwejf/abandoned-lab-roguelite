@@ -2,6 +2,44 @@
 
 这个文件记录项目的主要功能变化，方便团队成员快速了解每次版本推进的内容。
 
+## v0.1.14 - 教学目标校准房
+
+日期：2026-06-12
+
+### 新增
+
+- 新增 Target Calibration Range 教学房间，固定出现在出生房之后。
+- 新增可交互训练靶 TARGET A/B/C/D，靶标被武器命中后会亮灯并保留完成状态。
+- 目标校准房会统计已激活靶标数量，四个靶标全部点亮后打开右门。
+- 新增训练靶通用场景与脚本，后续可扩展为按顺序打靶、角色专属校准或隐藏奖励。
+
+### 调整
+
+- 教学流程从 4 个房间扩展为 5 个房间：Abyss Calibration Gate、Target Calibration Range、Raven Tutorial Safehouse、Breach Training Lab、Low-Grade Fusion Chamber。
+- 出生房移除原本只作装饰的 TARGET A/B/C/D，避免与新互动靶场重复。
+- 教学提示文字更新为先进入目标校准房，再前往渡鸦安全屋。
+
+### 修复
+
+- 修复渡鸦军械终端仍读取 Research Data，导致玩家拾取紫色 Protomatter Fragment 后商店仍显示 0 货币的问题；现在渡鸦购买统一消耗 Protomatter Fragment。
+
+## v0.1.13 - 流影核心手感 MVP
+
+日期：2026-06-12
+
+### 新增
+
+- Liuying / Shadow 新增 15% 天生闪避，触发时直接免疫本次伤害。
+- Liuying 新增移动动量被动：连续移动 2 秒且未受击后，移动速度提升 20%，真正受击或停下会重置。
+- Liuying 主动技能从 Reflex Slip 调整为 Phase Assault：拥有 2 层充能，每层 8 秒冷却。
+- Phase Assault 会向移动方向冲刺，穿过敌人时造成基于当前武器的 50% 伤害，并施加 3 秒 Vulnerable。
+- 新增通用 Vulnerable 受击状态，被标记目标受到后续伤害时会按易伤倍率结算，并显示橙色易伤环。
+
+### 调整
+
+- Liuying 基础移动速度从 245 提升到 285，强化其“高机动、高风险高回报”的角色定位。
+- 角色选择界面、README 和剧情设定文档同步更新 Liuying 的 Shadow / Phase Assault 文案。
+
 ## v0.1.12 - 实验室视觉与教学流程重排
 
 日期：2026-06-12

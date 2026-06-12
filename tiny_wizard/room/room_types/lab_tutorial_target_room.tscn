@@ -1,0 +1,66 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/tutorial_target_room.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/training_target/training_target.tscn" id="3_target"]
+
+[node name="Room" instance=ExtResource("1_base_room")]
+script = ExtResource("2_script")
+lab_room_type = "tutorial_targets"
+lab_room_label = "Target Calibration Range"
+
+[node name="CalibrationZone" type="Node2D" parent="." index="7"]
+y_sort_enabled = true
+
+[node name="StatusPanel" type="Node2D" parent="CalibrationZone"]
+position = Vector2(512, 116)
+z_index = 8
+
+[node name="Panel" type="Polygon2D" parent="CalibrationZone/StatusPanel"]
+color = Color(0.035, 0.065, 0.072, 0.95)
+polygon = PackedVector2Array(-192, -42, 192, -42, 192, 42, -192, 42)
+
+[node name="Header" type="Polygon2D" parent="CalibrationZone/StatusPanel"]
+color = Color(0.05, 0.35, 0.39, 0.95)
+polygon = PackedVector2Array(-180, -32, 180, -32, 180, -12, -180, -12)
+
+[node name="Title" type="Label" parent="CalibrationZone/StatusPanel"]
+position = Vector2(-166, -31)
+z_index = 1
+theme_override_font_sizes/font_size = 12
+text = "TARGET CALIBRATION"
+
+[node name="StatusText" type="Label" parent="CalibrationZone/StatusPanel"]
+position = Vector2(-166, -2)
+z_index = 1
+theme_override_font_sizes/font_size = 13
+text = "CALIBRATE TARGETS 0/4"
+
+[node name="FloorGuides" type="Node2D" parent="CalibrationZone"]
+z_index = -1
+
+[node name="CenterLine" type="Line2D" parent="CalibrationZone/FloorGuides"]
+points = PackedVector2Array(180, 300, 844, 300)
+width = 3.0
+default_color = Color(0.12, 0.34, 0.38, 0.78)
+
+[node name="VerticalLine" type="Line2D" parent="CalibrationZone/FloorGuides"]
+points = PackedVector2Array(512, 170, 512, 480)
+width = 3.0
+default_color = Color(0.12, 0.34, 0.38, 0.78)
+
+[node name="TargetA" parent="CalibrationZone" index="2" instance=ExtResource("3_target")]
+position = Vector2(250, 220)
+target_id = "A"
+
+[node name="TargetB" parent="CalibrationZone" index="3" instance=ExtResource("3_target")]
+position = Vector2(774, 220)
+target_id = "B"
+
+[node name="TargetC" parent="CalibrationZone" index="4" instance=ExtResource("3_target")]
+position = Vector2(250, 430)
+target_id = "C"
+
+[node name="TargetD" parent="CalibrationZone" index="5" instance=ExtResource("3_target")]
+position = Vector2(774, 430)
+target_id = "D"
