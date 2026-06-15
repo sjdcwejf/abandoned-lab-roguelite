@@ -59,7 +59,17 @@ func _hit_collider(target: Object) -> void:
 		if damage_target is Node2D:
 			hit_from = ((damage_target as Node2D).global_position - global_position).normalized()
 		damage_target.hit(damage, hit_from)
+		_notify_owner_weapon_hit(damage_target)
 	queue_free()
+
+
+func _notify_owner_weapon_hit(damage_target: Object) -> void:
+	if owner_character == null:
+		return
+	var ability_controller := owner_character.get_node_or_null("AbilityController") as LabPlayerAbilityController
+	if ability_controller == null:
+		return
+	ability_controller.notify_weapon_hit(damage_target, damage)
 
 
 func _find_damage_target(target: Object) -> Object:

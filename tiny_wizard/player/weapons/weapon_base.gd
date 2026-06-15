@@ -112,4 +112,14 @@ func apply_damage_to_target(target: Object, amount: int, hit_from := Vector2.ZER
 		final_hit_from = ((damage_target as Node2D).global_position - hit_origin).normalized()
 
 	damage_target.hit(amount, final_hit_from)
+	_notify_owner_weapon_hit(damage_target, amount)
 	return true
+
+
+func _notify_owner_weapon_hit(damage_target: Object, amount: int) -> void:
+	if owner_character == null:
+		return
+	var ability_controller := owner_character.get_node_or_null("AbilityController") as LabPlayerAbilityController
+	if ability_controller == null:
+		return
+	ability_controller.notify_weapon_hit(damage_target, amount)

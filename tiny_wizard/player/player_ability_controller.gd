@@ -24,6 +24,8 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export var panshi_pulse_radius := 132.0
 @export var panshi_pulse_damage := 1
 @export var panshi_energy_cost := 40.0
+@export var tiemu_plating_cooldown := 5.0
+@export_range(0, 10, 1) var tiemu_plating_damage_reduction := 1
 
 @export_group("Liuying")
 @export var liuying_charge_count := 2
@@ -43,8 +45,8 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export var liuying_afterimage_color := Color(0.58, 0.78, 1.0, 0.38)
 @export var liuying_afterimage_decoy_enabled := true
 @export var liuying_energy_cost := 30.0
-@export var liuying_fire_rate_time := 0.0
-@export var liuying_fire_cooldown_multiplier := 1.0
+@export var liuying_fire_rate_time := 2.0
+@export var liuying_fire_cooldown_multiplier := 0.75
 
 @export_group("Huisheng")
 @export var huisheng_cooldown := 9.0
@@ -53,12 +55,16 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export var huisheng_slow_duration := 2.0
 @export var huisheng_slow_multiplier := 0.55
 @export var huisheng_energy_cost := 35.0
+@export var huisheng_resonance_energy_per_hit := 4.0
+@export var huisheng_resonance_hit_cooldown := 0.35
 
 var _character: QuiverCharacter
 var _cooldown_remaining := 0.0
 var _active_remaining := 0.0
 var _invulnerable_remaining := 0.0
 var _fire_rate_remaining := 0.0
+var _tiemu_plating_cooldown_remaining := 0.0
+var _huisheng_resonance_cooldown_remaining := 0.0
 var _panshi_shield_added := 0
 var _liuying_charges := 0
 var _liuying_charge_timer := 0.0
@@ -94,6 +100,7 @@ func should_ignore_damage() -> bool:
 	if _invulnerable_remaining > 0.0:
 		return true
 	if ability_id == ABILITY_LIUYING and liuying_dodge_chance > 0.0 and _rng.randf() < liuying_dodge_chance:
+		_trigger_liuying_ghost_tempo()
 		_show_dodge_feedback()
 		return true
 	return false
@@ -105,6 +112,10 @@ func notify_damage_taken() -> void:
 
 
 func modify_incoming_damage(damage: int) -> int:
+	if ability_id == ABILITY_PANSHI and _tiemu_plating_cooldown_remaining <= 0.0 and tiemu_plating_damage_reduction > 0:
+		_tiemu_plating_cooldown_remaining = tiemu_plating_cooldown
+		_show_pulse(Color(0.36, 0.96, 1.0, 0.72), 46.0, 0.14)
+		return maxi(0, damage - tiemu_plating_damage_reduction)
 	if ability_id == ABILITY_PANSHI and _active_remaining > 0.0:
 		return maxi(1, ceili(float(damage) * panshi_damage_multiplier))
 	return damage
@@ -122,6 +133,12 @@ func get_cooldown_remaining() -> float:
 	return _cooldown_remaining
 
 
+func notify_weapon_hit(_target: Object, _damage: int) -> void:
+	if ability_id != ABILITY_HUISHENG:
+		return
+	_try_huisheng_resonance_return()
+
+
 func _tick_timers(delta: float) -> void:
 	_tick_energy_regen(delta)
 	if ability_id == ABILITY_LIUYING:
@@ -133,6 +150,10 @@ func _tick_timers(delta: float) -> void:
 		_invulnerable_remaining = maxf(0.0, _invulnerable_remaining - delta)
 	if _fire_rate_remaining > 0.0:
 		_fire_rate_remaining = maxf(0.0, _fire_rate_remaining - delta)
+	if _tiemu_plating_cooldown_remaining > 0.0:
+		_tiemu_plating_cooldown_remaining = maxf(0.0, _tiemu_plating_cooldown_remaining - delta)
+	if _huisheng_resonance_cooldown_remaining > 0.0:
+		_huisheng_resonance_cooldown_remaining = maxf(0.0, _huisheng_resonance_cooldown_remaining - delta)
 	if _active_remaining > 0.0:
 		_active_remaining = maxf(0.0, _active_remaining - delta)
 		if _active_remaining <= 0.0 and ability_id == ABILITY_PANSHI:
@@ -225,7 +246,7 @@ func _activate_liuying() -> void:
 
 	_consume_liuying_charge()
 	_invulnerable_remaining = liuying_invulnerable_time
-	_fire_rate_remaining = liuying_fire_rate_time
+	_trigger_liuying_ghost_tempo()
 
 	var direction := _get_liuying_dash_direction()
 
@@ -299,6 +320,8 @@ func get_ability_status_text() -> String:
 		return "Need %.0f energy" % energy_cost
 
 	if ability_id == ABILITY_LIUYING:
+		if _fire_rate_remaining > 0.0:
+			return "Ghost tempo %.1fs" % _fire_rate_remaining
 		if _liuying_charges <= 0:
 			return "Recharge %.1fs" % _liuying_charge_timer
 		if _liuying_momentum_active:
@@ -308,6 +331,27 @@ func get_ability_status_text() -> String:
 	if _cooldown_remaining > 0.0:
 		return "Cooldown %.1fs" % _cooldown_remaining
 	return "Ready"
+
+
+func _trigger_liuying_ghost_tempo() -> void:
+	if liuying_fire_rate_time <= 0.0:
+		return
+	_fire_rate_remaining = maxf(_fire_rate_remaining, liuying_fire_rate_time)
+
+
+func _try_huisheng_resonance_return() -> void:
+	if _huisheng_resonance_cooldown_remaining > 0.0:
+		return
+
+	var stats := _get_energy_stats()
+	if stats == null:
+		return
+	if float(stats.get("current_energy")) >= float(stats.get("max_energy")):
+		return
+
+	stats.call("restore_energy", huisheng_resonance_energy_per_hit)
+	_huisheng_resonance_cooldown_remaining = huisheng_resonance_hit_cooldown
+	_show_pulse(Color(0.64, 0.46, 1.0, 0.52), 34.0, 0.12)
 
 
 func _initialize_liuying_state() -> void:

@@ -24,9 +24,9 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 
 ## Current Playable Subjects
 
-- Tiemu / Iron Curtain: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer, and can trigger Iron Curtain Protocol.
-- Liuying / Shadow: a neural-reflex subject tuned for high-speed flanks and risky repositioning. Low HP, very high movement speed, starts with the Containment Nailgun, has a 15% dodge chance, and can trigger Phase Assault.
-- Huisheng / Echo: a resonance subject tuned for energy-control experiments. Medium HP, balanced movement, starts with the Energy Saber, and can trigger Echo Pulse.
+- Tiemu / Iron Curtain: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer, can trigger Iron Curtain Protocol, and passively absorbs 1 incoming damage every 5 seconds.
+- Liuying / Shadow: a neural-reflex subject tuned for high-speed flanks and risky repositioning. Low HP, very high movement speed, starts with the Containment Nailgun, has a 15% dodge chance, and gains faster attacks after dodging or using Phase Assault.
+- Huisheng / Echo: a resonance subject tuned for energy-control experiments. Medium HP, balanced movement, starts with the Energy Saber, can trigger Echo Pulse, and restores energy from weapon hits.
 
 ## Current Prototype Controls
 
@@ -46,9 +46,9 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 
 The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
 
-- Tiemu starts with the Laser Pointer, 8 HP, and steadier but slower movement.
-- Liuying starts with the Containment Nailgun, 5 HP, very high movement speed, a 15% dodge chance, decoy afterimages, and an independent movement momentum passive that boosts speed after 2 seconds of uninterrupted movement.
-- Huisheng starts with the Energy Saber, 6 HP, and balanced movement as the future energy-skill subject.
+- Tiemu starts with the Laser Pointer, 8 HP, steadier but slower movement, and Stabilized Plating that absorbs 1 incoming damage every 5 seconds.
+- Liuying starts with the Containment Nailgun, 5 HP, very high movement speed, a 15% dodge chance, decoy afterimages, an independent movement momentum passive, and Ghost Tempo after dodging or dashing.
+- Huisheng starts with the Energy Saber, 6 HP, high energy capacity, and Resonance Return that restores energy from weapon hits.
 - `1` Starting ranged weapon: hold or press the left mouse button to attack toward the mouse cursor.
 - `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
 - `3` Power Gauntlets: left mouse button lunges into a short punch, right mouse button fires a ranged energy bolt from the lower muzzle.
@@ -63,6 +63,12 @@ Each subject now has an energy resource and one active skill on `Q`. The HUD sho
 - Tiemu - Iron Curtain Protocol: costs 40 energy, gains temporary shield, reduces incoming damage, and emits a short defensive pulse.
 - Liuying - Phase Assault: costs 30 energy, has 2 charges, dashes through enemies, deals reduced weapon-based damage, applies Vulnerable for 3 seconds, and briefly avoids damage during the dash. Liuying also leaves short blue afterimages while moving; nearby red and black fly enemies prefer those afterimages as temporary decoy targets.
 - Huisheng - Echo Pulse: costs 35 energy and emits a resonance wave that damages nearby enemies and slows affected specimens.
+
+Current core passives:
+
+- Tiemu - Stabilized Plating: every 5 seconds, automatically absorbs 1 incoming damage.
+- Liuying - Ghost Tempo: dodging or using Phase Assault gives 2 seconds of faster weapon rhythm.
+- Huisheng - Resonance Return: weapon hits restore a small amount of energy on a short cooldown.
 
 The current energy system is a foundation for later character-specific skill pools. Upgrade selection, skill mutations, and energy-spending build choices are not implemented yet.
 
