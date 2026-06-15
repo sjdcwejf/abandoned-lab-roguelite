@@ -54,49 +54,49 @@ const FALLBACK_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "start",
-		"label": "Sealing Airlock",
+		"label": "封存气闸",
 		"scene": START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
 		"type": "combat",
-		"label": "Sealed Specimen Ward 1",
+		"label": "封存样本间 1",
 		"scene": COMBAT_ROOM_A_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "combat",
-		"label": "Sealed Specimen Ward 2",
+		"label": "封存样本间 2",
 		"scene": COMBAT_ROOM_B_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 0),
 		"type": "weapon",
-		"label": "Raven Armory Cache",
+		"label": "渡鸦军械缓存",
 		"scene": WEAPON_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 1),
 		"type": "merchant",
-		"label": "Raven Quarantine Shop",
+		"label": "渡鸦检疫商店",
 		"scene": RAVEN_SAFEHOUSE_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 2),
 		"type": "boss",
-		"label": "A-03 Recovery Chamber",
+		"label": "A-03 回收室",
 		"scene": BOSS_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, -1),
 		"type": "reward",
-		"label": "Evidence Vault 1",
+		"label": "证物库 1",
 		"scene": REWARD_ROOM_A_SCENE,
 	},
 	{
 		"coord": Vector2i(2, -1),
 		"type": "reward",
-		"label": "Evidence Vault 2",
+		"label": "证物库 2",
 		"scene": REWARD_ROOM_B_SCENE,
 	},
 ]
@@ -105,31 +105,31 @@ const TUTORIAL_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "tutorial_start",
-		"label": "Sealing Protocol Wake Bay",
+		"label": "封存协议唤醒区",
 		"scene": TUTORIAL_START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
 		"type": "tutorial_targets",
-		"label": "Target Sync Range",
+		"label": "靶场同步室",
 		"scene": TUTORIAL_TARGET_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "tutorial_merchant",
-		"label": "Raven Armory Annex",
+		"label": "渡鸦军械附属间",
 		"scene": TUTORIAL_RAVEN_SAFEHOUSE_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 0),
 		"type": "tutorial_combat",
-		"label": "Breach Charge Training Lab",
+		"label": "破障训练实验室",
 		"scene": TUTORIAL_COMBAT_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(4, 0),
 		"type": "tutorial_boss",
-		"label": "A-03 Recovery Chamber",
+		"label": "A-03 回收室",
 		"scene": TUTORIAL_BOSS_ROOM_SCENE,
 	},
 ]
@@ -280,7 +280,7 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	main_room_types.append("merchant")
 	main_room_types.append("boss")
 
-	room_specs.append(_make_spec(Vector2i.ZERO, "start", "Sealing Airlock", START_ROOM_SCENE))
+	room_specs.append(_make_spec(Vector2i.ZERO, "start", "封存气闸", START_ROOM_SCENE))
 
 	for path_index in range(1, main_path.size()):
 		var room_type := main_room_types[path_index - 1] as String
@@ -373,16 +373,16 @@ static func _next_label(room_type: String, label_counts: Dictionary) -> String:
 
 	match room_type:
 		"combat":
-			return "Sealed Specimen Ward %d" % count
+			return "封存样本间 %d" % count
 		"reward":
-			return "Evidence Vault %d" % count
+			return "证物库 %d" % count
 		"weapon":
-			return "Raven Armory Cache"
+			return "渡鸦军械缓存"
 		"merchant":
-			return "Raven Quarantine Shop"
+			return "渡鸦检疫商店"
 		"boss":
-			return "A-03 Recovery Chamber"
-	return "Room %d" % count
+			return "A-03 回收室"
+	return "房间 %d" % count
 
 
 static func _shuffle_array(values: Array, rng: RandomNumberGenerator) -> void:

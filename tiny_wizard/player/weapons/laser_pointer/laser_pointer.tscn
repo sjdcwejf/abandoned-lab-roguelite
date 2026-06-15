@@ -5,7 +5,7 @@
 
 [node name="LaserPointer" type="Node2D"]
 script = ExtResource("1_laser")
-display_name = "Laser Pointer"
+display_name = "校准激光笔"
 inventory_size = Vector2i(2, 1)
 inventory_color = Color(0.18, 0.66, 0.95, 1)
 

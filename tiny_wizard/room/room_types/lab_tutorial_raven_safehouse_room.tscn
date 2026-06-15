@@ -6,11 +6,11 @@
 
 [node name="Room" instance=ExtResource("1_base_room")]
 lab_room_type = "tutorial_merchant"
-lab_room_label = "Raven Armory Annex"
+lab_room_label = "渡鸦军械附属间"
 
 [node name="RavenMerchant" parent="." index="8" instance=ExtResource("2_raven")]
 position = Vector2(650, 304)
-merchant_message = "Target sync cleared. Take the quarantine blade before entering live training."
+merchant_message = "靶场同步已完成。进入实战训练前，拿上这把检疫刃。"
 
 [node name="TutorialWeaponStand" parent="." index="9" instance=ExtResource("3_weapon_stand")]
 position = Vector2(352, 318)

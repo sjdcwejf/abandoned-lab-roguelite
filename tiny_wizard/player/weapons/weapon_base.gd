@@ -15,7 +15,7 @@ func get_inventory_display_name() -> String:
 		return display_name
 	if name != "":
 		return name
-	return "Weapon"
+	return "武器"
 
 
 func get_inventory_size() -> Vector2i:

@@ -3,6 +3,7 @@ extends CanvasLayer
 
 const WEAPON_BACKPACK_UI_SCRIPT := preload("res://tiny_wizard/gui/weapon_backpack_ui/weapon_backpack_ui.gd")
 const ABILITY_UI_SCRIPT := preload("res://tiny_wizard/gui/ability_ui/ability_ui.gd")
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 
 @export var inventory : QuiverInventory
 
@@ -11,6 +12,7 @@ var _ability_ui: Control
 
 
 func _ready() -> void:
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_weapon_backpack_ui = WEAPON_BACKPACK_UI_SCRIPT.new()
 	_weapon_backpack_ui.name = "WeaponBackpackUI"
 	add_child(_weapon_backpack_ui)
@@ -18,6 +20,7 @@ func _ready() -> void:
 	_ability_ui = ABILITY_UI_SCRIPT.new()
 	_ability_ui.name = "AbilityUI"
 	add_child(_ability_ui)
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 
 
 func change_arrow_texture(new_texture):

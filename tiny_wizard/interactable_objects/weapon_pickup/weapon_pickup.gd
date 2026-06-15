@@ -5,7 +5,7 @@ extends Node2D
 signal weapon_picked_up(slot_index: int)
 
 @export var weapon_scene: PackedScene
-@export var weapon_label := "Weapon"
+@export var weapon_label := "武器"
 @export var equip_on_pickup := false
 @export_range(0, 8) var target_slot_number := 0
 @export var preview_rotation := -0.28

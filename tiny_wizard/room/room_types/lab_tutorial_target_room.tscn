@@ -7,7 +7,7 @@
 [node name="Room" instance=ExtResource("1_base_room")]
 script = ExtResource("2_script")
 lab_room_type = "tutorial_targets"
-lab_room_label = "Target Sync Range"
+lab_room_label = "靶场同步室"
 
 [node name="CalibrationZone" type="Node2D" parent="." index="7"]
 y_sort_enabled = true
@@ -28,13 +28,13 @@ polygon = PackedVector2Array(-180, -32, 180, -32, 180, -12, -180, -12)
 position = Vector2(-166, -31)
 z_index = 1
 theme_override_font_sizes/font_size = 12
-text = "TARGET SYNC"
+text = "靶场同步"
 
 [node name="StatusText" type="Label" parent="CalibrationZone/StatusPanel"]
 position = Vector2(-166, -2)
 z_index = 1
 theme_override_font_sizes/font_size = 13
-text = "SYNC TARGETS 0/4"
+text = "同步靶标 0/4"
 
 [node name="FloorGuides" type="Node2D" parent="CalibrationZone"]
 z_index = -1

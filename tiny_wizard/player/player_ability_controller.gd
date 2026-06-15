@@ -6,11 +6,12 @@ const STATUS_EFFECTS := preload("res://tiny_wizard/status_effects/status_effect_
 const ABILITY_PANSHI := "panshi"
 const ABILITY_LIUYING := "liuying"
 const ABILITY_HUISHENG := "huisheng"
+const ABILITY_SHITONG := "shitong"
 const LIUYING_DECOY_GROUP := "lab_decoy_targets"
 const META_DECOY_OWNER := "lab_decoy_owner"
 const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 
-@export_enum("panshi", "liuying", "huisheng") var ability_id := ABILITY_PANSHI
+@export_enum("panshi", "liuying", "huisheng", "shitong") var ability_id := ABILITY_PANSHI
 @export var enemy_collision_mask := 8
 
 @export_group("Tiemu")
@@ -58,6 +59,19 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export var huisheng_resonance_energy_per_hit := 4.0
 @export var huisheng_resonance_hit_cooldown := 0.35
 
+@export_group("Shitong")
+@export var shitong_cooldown := 10.0
+@export var shitong_energy_cost := 45.0
+@export var shitong_gaze_radius := 172.0
+@export var shitong_gaze_damage := 1
+@export var shitong_corrosion_duration := 4.2
+@export var shitong_corrosion_damage := 1
+@export var shitong_corrosion_tick_interval := 0.85
+@export var shitong_passive_corrosion_duration := 2.6
+@export var shitong_passive_corrosion_damage := 1
+@export var shitong_passive_tick_interval := 1.15
+@export var shitong_passive_hit_cooldown := 0.48
+
 var _character: QuiverCharacter
 var _cooldown_remaining := 0.0
 var _active_remaining := 0.0
@@ -65,6 +79,7 @@ var _invulnerable_remaining := 0.0
 var _fire_rate_remaining := 0.0
 var _tiemu_plating_cooldown_remaining := 0.0
 var _huisheng_resonance_cooldown_remaining := 0.0
+var _shitong_passive_cooldown_remaining := 0.0
 var _panshi_shield_added := 0
 var _liuying_charges := 0
 var _liuying_charge_timer := 0.0
@@ -136,9 +151,11 @@ func get_cooldown_remaining() -> float:
 
 
 func notify_weapon_hit(_target: Object, _damage: int) -> void:
-	if ability_id != ABILITY_HUISHENG:
-		return
-	_try_huisheng_resonance_return()
+	match ability_id:
+		ABILITY_HUISHENG:
+			_try_huisheng_resonance_return()
+		ABILITY_SHITONG:
+			_try_shitong_parasitic_corrosion(_target)
 
 
 func _tick_timers(delta: float) -> void:
@@ -156,6 +173,8 @@ func _tick_timers(delta: float) -> void:
 		_tiemu_plating_cooldown_remaining = maxf(0.0, _tiemu_plating_cooldown_remaining - delta)
 	if _huisheng_resonance_cooldown_remaining > 0.0:
 		_huisheng_resonance_cooldown_remaining = maxf(0.0, _huisheng_resonance_cooldown_remaining - delta)
+	if _shitong_passive_cooldown_remaining > 0.0:
+		_shitong_passive_cooldown_remaining = maxf(0.0, _shitong_passive_cooldown_remaining - delta)
 	if _active_remaining > 0.0:
 		_active_remaining = maxf(0.0, _active_remaining - delta)
 		if _active_remaining <= 0.0 and ability_id == ABILITY_PANSHI:
@@ -206,6 +225,8 @@ func _try_activate() -> void:
 			_activate_liuying()
 		ABILITY_HUISHENG:
 			_activate_huisheng()
+		ABILITY_SHITONG:
+			_activate_shitong()
 		_:
 			_activate_panshi()
 
@@ -281,14 +302,32 @@ func _activate_huisheng() -> void:
 	_damage_targets_in_radius(huisheng_pulse_radius, huisheng_pulse_damage, true)
 
 
+func _activate_shitong() -> void:
+	if not _try_spend_energy(shitong_energy_cost):
+		return
+
+	_cooldown_remaining = shitong_cooldown
+	_show_aura(Color(0.46, 1.0, 0.48, 0.42), 72.0, 1.2)
+	_show_pulse(Color(0.42, 1.0, 0.48, 0.9), shitong_gaze_radius, 0.46)
+	_apply_corrosion_to_targets_in_radius(
+		shitong_gaze_radius,
+		shitong_gaze_damage,
+		shitong_corrosion_duration,
+		shitong_corrosion_damage,
+		shitong_corrosion_tick_interval
+	)
+
+
 func get_ability_display_name() -> String:
 	match ability_id:
 		ABILITY_LIUYING:
-			return "Phase Assault"
+			return "相位突袭"
 		ABILITY_HUISHENG:
-			return "Echo Pulse"
+			return "回声脉冲"
+		ABILITY_SHITONG:
+			return "蚀瞳凝视"
 		_:
-			return "Iron Curtain Protocol"
+			return "铁幕协议"
 
 
 func get_ability_energy_cost() -> float:
@@ -297,6 +336,8 @@ func get_ability_energy_cost() -> float:
 			return liuying_energy_cost
 		ABILITY_HUISHENG:
 			return huisheng_energy_cost
+		ABILITY_SHITONG:
+			return shitong_energy_cost
 		_:
 			return panshi_energy_cost
 
@@ -325,29 +366,36 @@ func get_energy_ratio() -> float:
 func get_ability_status_text() -> String:
 	var energy_cost := get_ability_energy_cost()
 	if get_energy_max() > 0.0 and get_energy_current() + 0.001 < energy_cost:
-		return "Need %.0f energy" % energy_cost
+		return "能量不足 %.0f" % energy_cost
 
 	if ability_id == ABILITY_LIUYING:
 		if _fire_rate_remaining > 0.0:
-			return "Ghost tempo %.1fs" % _fire_rate_remaining
+			return "残影节奏 %.1f 秒" % _fire_rate_remaining
 		if _liuying_charges <= 0:
-			return "Recharge %.1fs" % _liuying_charge_timer
+			return "充能中 %.1f 秒" % _liuying_charge_timer
 		if _liuying_momentum_active:
-			return "Momentum active"
-		return "Charges %d/%d" % [_liuying_charges, _get_liuying_max_charges()]
+			return "动量已激活"
+		return "层数 %d/%d" % [_liuying_charges, _get_liuying_max_charges()]
 
 	if ability_id == ABILITY_PANSHI:
 		if _active_remaining > 0.0:
-			return "Iron wall %.1fs" % _active_remaining
+			return "铁幕 %.1f 秒" % _active_remaining
 		if _cooldown_remaining > 0.0:
-			return "Cooldown %.1fs" % _cooldown_remaining
+			return "冷却 %.1f 秒" % _cooldown_remaining
 		if _tiemu_plating_cooldown_remaining > 0.0:
-			return "Plating %.1fs" % _tiemu_plating_cooldown_remaining
-		return "Ready"
+			return "装甲 %.1f 秒" % _tiemu_plating_cooldown_remaining
+		return "就绪"
+
+	if ability_id == ABILITY_SHITONG:
+		if _cooldown_remaining > 0.0:
+			return "污染冷却 %.1f 秒" % _cooldown_remaining
+		if _shitong_passive_cooldown_remaining > 0.0:
+			return "寄宿 %.1f 秒" % _shitong_passive_cooldown_remaining
+		return "腐蚀就绪"
 
 	if _cooldown_remaining > 0.0:
-		return "Cooldown %.1fs" % _cooldown_remaining
-	return "Ready"
+		return "冷却 %.1f 秒" % _cooldown_remaining
+	return "就绪"
 
 
 func _trigger_liuying_ghost_tempo() -> void:
@@ -369,6 +417,26 @@ func _try_huisheng_resonance_return() -> void:
 	stats.call("restore_energy", huisheng_resonance_energy_per_hit)
 	_huisheng_resonance_cooldown_remaining = huisheng_resonance_hit_cooldown
 	_show_pulse(Color(0.64, 0.46, 1.0, 0.52), 34.0, 0.12)
+
+
+func _try_shitong_parasitic_corrosion(target: Object) -> void:
+	if _shitong_passive_cooldown_remaining > 0.0:
+		return
+	var damage_target := _find_damage_target(target)
+	if damage_target == null:
+		return
+
+	STATUS_EFFECTS.apply_damage_over_time(
+		damage_target,
+		STATUS_EFFECTS.STATUS_CORROSION,
+		shitong_passive_corrosion_duration,
+		shitong_passive_corrosion_damage,
+		shitong_passive_tick_interval,
+		Color(0.54, 1.0, 0.36, 0.84)
+	)
+	_shitong_passive_cooldown_remaining = shitong_passive_hit_cooldown
+	if damage_target is Node2D:
+		_show_corrosion_flash((damage_target as Node2D).global_position)
 
 
 func _initialize_liuying_state() -> void:
@@ -500,6 +568,57 @@ func _damage_targets_along_segment(start_position: Vector2, end_position: Vector
 		_damage_targets_at_position(sample_position, radius, damage, false, apply_vulnerable, hit_targets)
 
 
+func _apply_corrosion_to_targets_in_radius(
+	radius: float,
+	immediate_damage: int,
+	duration: float,
+	tick_damage: int,
+	tick_interval: float
+) -> void:
+	if _character == null or _character.get_world_2d() == null:
+		return
+
+	var shape := CircleShape2D.new()
+	shape.radius = radius
+
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape
+	query.transform = Transform2D(0.0, _character.global_position)
+	query.collision_mask = enemy_collision_mask
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	if _character is CollisionObject2D:
+		query.exclude = [(_character as CollisionObject2D).get_rid()]
+
+	var results: Array[Dictionary] = _character.get_world_2d().direct_space_state.intersect_shape(query, 32)
+	var hit_targets := {}
+	for result in results:
+		var collider: Object = result.get("collider") as Object
+		var damage_target: Object = _find_damage_target(collider)
+		if damage_target == null:
+			continue
+
+		var instance_id := damage_target.get_instance_id()
+		if hit_targets.has(instance_id):
+			continue
+		hit_targets[instance_id] = true
+
+		var hit_from := Vector2.ZERO
+		if damage_target is Node2D:
+			hit_from = ((damage_target as Node2D).global_position - _character.global_position).normalized()
+
+		if immediate_damage > 0:
+			damage_target.call("hit", immediate_damage, hit_from)
+		STATUS_EFFECTS.apply_damage_over_time(
+			damage_target,
+			STATUS_EFFECTS.STATUS_CORROSION,
+			duration,
+			tick_damage,
+			tick_interval,
+			Color(0.48, 1.0, 0.3, 0.92)
+		)
+
+
 func _damage_targets_at_position(
 	origin: Vector2,
 	radius: float,
@@ -569,6 +688,25 @@ func _show_dodge_feedback() -> void:
 
 func _show_no_energy_feedback() -> void:
 	_show_pulse(Color(0.95, 0.22, 0.28, 0.82), 38.0, 0.12)
+
+
+func _show_corrosion_flash(position: Vector2) -> void:
+	var flash := Line2D.new()
+	flash.name = "CorrosionFlash"
+	flash.top_level = true
+	flash.z_index = 31
+	flash.width = 3.0
+	flash.closed = true
+	flash.default_color = Color(0.54, 1.0, 0.32, 0.86)
+	flash.points = _circle_points(18.0)
+	flash.global_position = position
+	add_child(flash)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(flash, "scale", Vector2(1.9, 1.9), 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(flash, "modulate", Color(1, 1, 1, 0), 0.18).set_ease(Tween.EASE_OUT)
+	tween.finished.connect(Callable(flash, "queue_free"))
 
 
 func _tick_liuying_afterimages(delta: float, is_moving: bool) -> void:

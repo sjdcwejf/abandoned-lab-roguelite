@@ -22,7 +22,7 @@ func _ready() -> void:
 	collision_layer = 8
 	collision_mask = 0
 	if label != null:
-		label.text = "TARGET %s" % target_id
+		label.text = "靶标 %s" % target_id
 	_set_visual_state(false)
 
 

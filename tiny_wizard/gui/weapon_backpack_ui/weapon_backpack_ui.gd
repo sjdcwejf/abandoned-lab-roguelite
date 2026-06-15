@@ -7,6 +7,7 @@ const GRID_ROWS := 4
 const CELL_SIZE := Vector2(54, 54)
 const CELL_GAP := 4.0
 const MAX_QUICK_SLOTS := 4
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 
 var weapon_holder: Node
 var _item_layer: Control
@@ -18,6 +19,7 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_build_ui()
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -102,7 +104,7 @@ func _build_ui() -> void:
 
 	var title := Label.new()
 	title.name = "Title"
-	title.text = "Backpack"
+	title.text = "背包"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 20)
 	title.add_theme_color_override("font_color", Color(0.86, 0.96, 1.0, 1.0))
@@ -192,13 +194,13 @@ func _add_weapon_block(slot_info: Dictionary, cell: Vector2i, weapon_size: Vecto
 	margin.add_child(labels)
 
 	var slot_label := Label.new()
-	slot_label.text = "Slot %d" % int(slot_info.get("slot", 0))
+	slot_label.text = "%d 号位" % int(slot_info.get("slot", 0))
 	slot_label.add_theme_font_size_override("font_size", 11)
 	slot_label.add_theme_color_override("font_color", Color(0.06, 0.07, 0.08, 0.9))
 	labels.add_child(slot_label)
 
 	var name_label := Label.new()
-	name_label.text = str(slot_info.get("name", "Weapon"))
+	name_label.text = str(slot_info.get("name", "武器"))
 	name_label.clip_text = true
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name_label.add_theme_font_size_override("font_size", 13)
@@ -207,10 +209,12 @@ func _add_weapon_block(slot_info: Dictionary, cell: Vector2i, weapon_size: Vecto
 
 	if bool(slot_info.get("equipped", false)):
 		var active_label := Label.new()
-		active_label.text = "ACTIVE"
+		active_label.text = "已装备"
 		active_label.add_theme_font_size_override("font_size", 10)
 		active_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.95))
 		labels.add_child(active_label)
+
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(block)
 
 
 func _find_open_cell(weapon_size: Vector2i, occupied: Dictionary) -> Vector2i:

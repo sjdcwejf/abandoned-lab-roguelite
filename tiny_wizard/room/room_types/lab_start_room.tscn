@@ -5,7 +5,7 @@
 
 [node name="Room" instance=ExtResource("1_base_room")]
 lab_room_type = "start"
-lab_room_label = "Sealing Protocol Wake Bay"
+lab_room_label = "封存协议唤醒区"
 
 [node name="CalibrationZone" type="Node2D" parent="." index="11"]
 y_sort_enabled = true
@@ -29,13 +29,13 @@ polygon = PackedVector2Array(-104, -32, 104, -32, 104, -14, -104, -14)
 position = Vector2(-96, -31)
 z_index = 1
 theme_override_font_sizes/font_size = 12
-text = "BROADCAST"
+text = "广播"
 
 [node name="ScreenText" type="Label" parent="CalibrationZone/BroadcastScreen"]
 position = Vector2(-96, -7)
 z_index = 1
 theme_override_font_sizes/font_size = 12
-text = "RETURNER ONLINE / CAL-07"
+text = "返归者在线 / CAL-07"
 
 [node name="WarningScreen" type="Node2D" parent="CalibrationZone"]
 position = Vector2(790, 92)
@@ -53,13 +53,13 @@ polygon = PackedVector2Array(-104, -32, 104, -32, 104, -14, -104, -14)
 position = Vector2(-96, -31)
 z_index = 1
 theme_override_font_sizes/font_size = 12
-text = "NOTICE"
+text = "注意"
 
 [node name="ScreenText" type="Label" parent="CalibrationZone/WarningScreen"]
 position = Vector2(-96, -7)
 z_index = 1
 theme_override_font_sizes/font_size = 12
-text = "RETURNERS MUST CALIBRATE"
+text = "返归者必须完成校准"
 
 [node name="LoreMarkers" type="Node2D" parent="CalibrationZone"]
 z_index = 6
@@ -78,7 +78,7 @@ polygon = PackedVector2Array(-8, -10, 8, -10, 8, 10, -8, 10)
 [node name="Label" type="Label" parent="CalibrationZone/LoreMarkers/LogMarker"]
 position = Vector2(-28, 24)
 theme_override_font_sizes/font_size = 12
-text = "LOG-00"
+text = "日志-00"
 
 [node name="EvidenceMarker" type="Node2D" parent="CalibrationZone/LoreMarkers"]
 position = Vector2(698, 446)
@@ -94,7 +94,7 @@ polygon = PackedVector2Array(-8, -10, 8, -10, 8, 10, -8, 10)
 [node name="Label" type="Label" parent="CalibrationZone/LoreMarkers/EvidenceMarker"]
 position = Vector2(-32, 24)
 theme_override_font_sizes/font_size = 12
-text = "EVID-001"
+text = "证物-001"
 
 [node name="FileTerminal" type="Node2D" parent="CalibrationZone/LoreMarkers"]
 position = Vector2(512, 132)
@@ -110,7 +110,7 @@ polygon = PackedVector2Array(-13, -10, 13, -10, 13, 10, -13, 10)
 [node name="Label" type="Label" parent="CalibrationZone/LoreMarkers/FileTerminal"]
 position = Vector2(-26, 26)
 theme_override_font_sizes/font_size = 12
-text = "FILE-07"
+text = "档案-07"
 
 [node name="CalibrationCrates" type="Node2D" parent="CalibrationZone"]
 z_index = 2
@@ -136,19 +136,25 @@ color = Color(0.24, 0.18, 0.1, 1)
 polygon = PackedVector2Array(-27, -21, 27, -21, 27, 21, -27, 21)
 
 [node name="TiemuSleepPod" parent="." index="8" instance=ExtResource("3_sleep_pod")]
-position = Vector2(560, 194)
+position = Vector2(500, 194)
 character_id = "panshi"
 pod_label = "铁幕"
 accent_color = Color(0.35, 0.85, 0.95, 1)
 
 [node name="LiuyingSleepPod" parent="." index="9" instance=ExtResource("3_sleep_pod")]
-position = Vector2(700, 194)
+position = Vector2(620, 194)
 character_id = "liuying"
 pod_label = "流影"
 accent_color = Color(0.95, 0.58, 0.22, 1)
 
 [node name="HuishengSleepPod" parent="." index="10" instance=ExtResource("3_sleep_pod")]
-position = Vector2(840, 194)
+position = Vector2(740, 194)
 character_id = "huisheng"
 pod_label = "回声"
 accent_color = Color(0.58, 0.42, 1, 1)
+
+[node name="ShitongSleepPod" parent="." index="11" instance=ExtResource("3_sleep_pod")]
+position = Vector2(860, 194)
+character_id = "shitong"
+pod_label = "蚀瞳"
+accent_color = Color(0.48, 1, 0.34, 1)

@@ -123,15 +123,18 @@ func _weapon_scene_key(weapon_scene: PackedScene) -> String:
 
 func _get_weapon_label(weapon_scene: PackedScene) -> String:
 	if weapon_scene == null:
-		return "Weapon"
+		return "武器"
 
 	var weapon := weapon_scene.instantiate()
 	if weapon == null:
-		return "Weapon"
+		return "武器"
 	if weapon is LabWeapon:
 		var label := (weapon as LabWeapon).get_inventory_display_name()
 		weapon.free()
 		return label
 
 	weapon.free()
-	return weapon_scene.resource_path.get_file().get_basename().replace("_", " ").capitalize()
+	var base_name := weapon_scene.resource_path.get_file().get_basename()
+	if base_name != "":
+		return "未命名武器：%s" % base_name
+	return "未命名武器"

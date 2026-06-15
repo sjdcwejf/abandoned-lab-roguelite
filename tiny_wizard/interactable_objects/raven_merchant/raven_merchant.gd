@@ -3,7 +3,8 @@ extends Node2D
 
 
 const CURRENCY_NAME := "Protomatter Fragment"
-const CURRENCY_DISPLAY_NAME := "Protomatter Shards"
+const CURRENCY_DISPLAY_NAME := "原质碎片"
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
 	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
@@ -12,8 +13,8 @@ const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
 ]
 
-@export var merchant_title := "RAVEN QUARANTINE ARMORY"
-@export_multiline var merchant_message := "A-03 signal ahead. Patch your nerves and count your charges."
+@export var merchant_title := "渡鸦检疫军械库"
+@export_multiline var merchant_message := "A-03 信号就在前方。补好神经接口，数清你的炸药。"
 @export_range(0, 99, 1) var weapon_cost := 1
 @export var equip_purchase_immediately := false
 
@@ -36,6 +37,7 @@ var _offer_preview_instance: Node2D
 
 
 func _ready() -> void:
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	prompt.visible = false
 	dialog_panel.visible = false
 	title_label.text = merchant_title
@@ -89,22 +91,22 @@ func _refresh_offer(character: Node2D) -> void:
 	if _selected_weapon_scene == null:
 		_selected_weapon_name = ""
 		_clear_offer_preview()
-		stock_label.text = "Stock: sold out for your current loadout."
-		status_label.text = "Raven has nothing new to sell right now."
-		hint_label.text = "Leave the quarantine shop when ready."
+		stock_label.text = "库存：当前构筑无可售新武器。"
+		status_label.text = "渡鸦暂时没有新的东西卖给你。"
+		hint_label.text = "准备好后离开检疫商店。"
 		return
 
 	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
 	_build_offer_preview(_selected_weapon_scene)
 	var currency_count := _get_currency_count(character)
 	if weapon_cost <= 0:
-		stock_label.text = "Stock: %s\nPrice: Free" % _selected_weapon_name
-		status_label.text = "No %s required." % CURRENCY_DISPLAY_NAME
-		hint_label.text = "Press F to claim."
+		stock_label.text = "库存：%s\n价格：免费" % _selected_weapon_name
+		status_label.text = "不需要消耗%s。" % CURRENCY_DISPLAY_NAME
+		hint_label.text = "按 F 领取。"
 	else:
-		stock_label.text = "Stock: %s\nPrice: %d %s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME]
-		status_label.text = "You have %d %s." % [currency_count, CURRENCY_DISPLAY_NAME]
-		hint_label.text = "Press F to buy."
+		stock_label.text = "库存：%s\n价格：%d 个%s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME]
+		status_label.text = "你持有 %d 个%s。" % [currency_count, CURRENCY_DISPLAY_NAME]
+		hint_label.text = "按 F 购买。"
 
 
 func _try_purchase(character: Node2D) -> void:
@@ -114,24 +116,24 @@ func _try_purchase(character: Node2D) -> void:
 
 	var inventory := character.get("inventory") as QuiverInventory
 	if inventory == null:
-		status_label.text = "No inventory link. Raven refuses the trade."
+		status_label.text = "未检测到背包连接。渡鸦拒绝交易。"
 		return
 
 	var currency_count := int(inventory.get_item_amount(CURRENCY_NAME))
 	if currency_count < weapon_cost:
-		status_label.text = "Need %d %s. You have %d." % [weapon_cost, CURRENCY_DISPLAY_NAME, currency_count]
+		status_label.text = "需要 %d 个%s，你现在有 %d 个。" % [weapon_cost, CURRENCY_DISPLAY_NAME, currency_count]
 		return
 
 	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
 	if weapon_holder == null or not weapon_holder.has_method("add_weapon_scene"):
-		status_label.text = "No weapon rig detected."
+		status_label.text = "未检测到武器挂架。"
 		return
 
 	var purchased_scene := _selected_weapon_scene
 	var purchased_name := _selected_weapon_name
 	var slot_index := int(weapon_holder.add_weapon_scene(purchased_scene, equip_purchase_immediately))
 	if slot_index < 0:
-		status_label.text = "Weapon transfer failed."
+		status_label.text = "武器转移失败。"
 		return
 
 	if weapon_cost > 0:
@@ -139,9 +141,9 @@ func _try_purchase(character: Node2D) -> void:
 
 	_refresh_offer(character)
 	if weapon_cost <= 0:
-		status_label.text = "Claimed %s. Added to slot %d." % [purchased_name, slot_index + 1]
+		status_label.text = "已领取 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
 	else:
-		status_label.text = "Purchased %s. Added to slot %d." % [purchased_name, slot_index + 1]
+		status_label.text = "已购买 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
 
 
 func _pick_unowned_weapon(character: Node2D) -> PackedScene:
@@ -176,7 +178,7 @@ func _get_currency_count(character: Node2D) -> int:
 
 func _get_weapon_name(weapon_scene: PackedScene) -> String:
 	if weapon_scene == null:
-		return "Unknown Weapon"
+		return "未知武器"
 
 	var weapon_name := weapon_scene.resource_path.get_file().get_basename().replace("_", " ").capitalize()
 	var weapon := weapon_scene.instantiate()

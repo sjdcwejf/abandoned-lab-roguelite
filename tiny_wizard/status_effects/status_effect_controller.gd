@@ -6,6 +6,7 @@ const STATUS_CONTROLLER_NAME := "StatusEffectController"
 const STATUS_VULNERABLE := "vulnerable"
 const STATUS_SLOW := "slow"
 const STATUS_CORROSION := "corrosion"
+const META_PENDING_CONTROLLER := "lab_status_effect_controller_pending"
 const META_VULNERABLE_DAMAGE_MULTIPLIER := "lab_vulnerable_damage_multiplier"
 const META_VULNERABLE_END_TIME := "lab_vulnerable_end_time"
 
@@ -62,18 +63,27 @@ static func get_or_create(target: Object):
 	var existing := target_node.get_node_or_null(STATUS_CONTROLLER_NAME)
 	if existing != null and existing.has_method("apply_status"):
 		return existing
+	if target_node.has_meta(META_PENDING_CONTROLLER):
+		var pending = target_node.get_meta(META_PENDING_CONTROLLER)
+		if pending is Node and is_instance_valid(pending) and (pending as Node).has_method("apply_status"):
+			return pending
 
 	var script := load("res://tiny_wizard/status_effects/status_effect_controller.gd") as Script
 	var controller = script.new()
 	controller.name = STATUS_CONTROLLER_NAME
 	controller.set("_target", target_node)
-	target_node.add_child(controller)
+	target_node.set_meta(META_PENDING_CONTROLLER, controller)
+	target_node.call_deferred("add_child", controller)
 	return controller
 
 
 func _ready() -> void:
 	if _target == null:
 		_target = get_parent()
+	if _target != null and _target.has_meta(META_PENDING_CONTROLLER):
+		var pending = _target.get_meta(META_PENDING_CONTROLLER)
+		if pending == self:
+			_target.remove_meta(META_PENDING_CONTROLLER)
 
 
 func _process(delta: float) -> void:

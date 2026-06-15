@@ -4,4 +4,4 @@
 
 [node name="Room" instance=ExtResource("1_base_room")]
 lab_room_type = "start"
-lab_room_label = "Sealing Airlock"
+lab_room_label = "封存气闸"

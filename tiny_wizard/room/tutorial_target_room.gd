@@ -1,7 +1,7 @@
 extends Room
 
 
-@export var completion_message := "TARGET SYNC COMPLETE"
+@export var completion_message := "靶场同步完成"
 
 var _targets: Array[Node] = []
 
@@ -57,8 +57,8 @@ func _update_status() -> void:
 			active_count += 1
 
 	if _targets.is_empty():
-		status_label.text = "TARGET ARRAY OFFLINE"
+		status_label.text = "靶阵离线"
 	elif active_count >= _targets.size():
 		status_label.text = completion_message
 	else:
-		status_label.text = "SYNC TARGETS %d/%d" % [active_count, _targets.size()]
+		status_label.text = "同步靶标 %d/%d" % [active_count, _targets.size()]

@@ -46,7 +46,7 @@ const GUI_SCENE = preload("res://tiny_wizard/gui/gui.tscn")
 
 var room_pos := Vector2i.ZERO
 var lab_room_type := "combat"
-var lab_room_label := "Combat Room"
+var lab_room_label := "战斗房"
 var is_cleared := false
 
 signal door_entered(direction)

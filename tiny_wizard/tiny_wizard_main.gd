@@ -1,6 +1,7 @@
 extends Node2D
 
 
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
@@ -12,6 +13,7 @@ const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 @export var experimenter_character_scene: PackedScene
 @export var technician_character_scene: PackedScene
 @export var huisheng_character_scene: PackedScene
+@export var shitong_character_scene: PackedScene
 @export var character_select_scene: PackedScene
 
 var _current_room := Vector2i.ZERO
@@ -32,10 +34,12 @@ var rooms := {}
 
 
 func _ready():
+	CHINESE_FONT_BOOTSTRAP.install()
 	_current_room = start_room_coord
 	$Camera2D.position = _room_camera_position(_current_room)
 	_setup_tutorial_hint()
 	_setup_layer_clear_screen()
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_show_character_select()
 
 
@@ -174,6 +178,7 @@ func _show_character_select() -> void:
 
 	_character_select_screen = screen
 	add_child(_character_select_screen)
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(_character_select_screen)
 	_character_select_screen.character_selected.connect(_on_character_selected)
 
 
@@ -187,6 +192,9 @@ func _on_character_selected(character_id: String) -> void:
 		CharacterSelectScreen.HUISHENG_ID:
 			resolved_character_id = CharacterSelectScreen.HUISHENG_ID
 			character_scene = huisheng_character_scene
+		CharacterSelectScreen.SHITONG_ID:
+			resolved_character_id = CharacterSelectScreen.SHITONG_ID
+			character_scene = shitong_character_scene
 		CharacterSelectScreen.PANSHI_ID, CharacterSelectScreen.LEGACY_EXPERIMENTER_ID:
 			resolved_character_id = CharacterSelectScreen.PANSHI_ID
 			character_scene = experimenter_character_scene
@@ -248,6 +256,7 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_tutorial_reward_pickups_remaining = 0
 	_current_room = start_room_coord
 	rooms = LabDungeonGenerator.generate_tutorial($Rooms)
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
 	_register_rooms()
 	_update_room_doors()
 	_enter_start_room(wake_character_id)
@@ -262,6 +271,7 @@ func _start_formal_run() -> void:
 	else:
 		rooms = _collect_existing_rooms()
 
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
 	_register_rooms()
 	_update_room_doors()
 	_enter_start_room()
@@ -342,7 +352,7 @@ func _on_tutorial_boss_defeated() -> void:
 	_tutorial_rewards_dropped = true
 	_tutorial_rewards_granted = true
 	_activate_tutorial_exit_black_hole()
-	_show_tutorial_hint("Sealing wake sequence complete. Enter the Descent Rift to reach the sealed sector.")
+	_show_tutorial_hint("封存唤醒序列完成。进入下行裂隙，前往正式封存区。")
 	print("Sealing wake sequence complete. Descent Rift activated.")
 
 
@@ -428,20 +438,20 @@ func _setup_layer_clear_screen() -> void:
 	margin.add_child(layout)
 
 	var title := Label.new()
-	title.text = "SEALING PROTOCOL COMPLETE"
+	title.text = "封存协议完成"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 26)
 	title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
 	layout.add_child(title)
 
 	var summary := Label.new()
-	summary.text = "Failed Subject A-03 neutralized. Current build snapshot:"
+	summary.text = "失格者 A-03 已肃清。当前构筑快照："
 	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	summary.add_theme_font_size_override("font_size", 14)
 	summary.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
 	layout.add_child(summary)
 
-	layout.add_child(_make_layer_clear_section_title("Weapons"))
+	layout.add_child(_make_layer_clear_section_title("武器构筑"))
 
 	_layer_clear_weapons_label = Label.new()
 	_layer_clear_weapons_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -449,7 +459,7 @@ func _setup_layer_clear_screen() -> void:
 	_layer_clear_weapons_label.add_theme_color_override("font_color", Color(0.88, 0.92, 0.92, 1.0))
 	layout.add_child(_wrap_layer_clear_detail(_layer_clear_weapons_label))
 
-	layout.add_child(_make_layer_clear_section_title("Recovered Evidence"))
+	layout.add_child(_make_layer_clear_section_title("回收物资"))
 
 	_layer_clear_inventory_label = Label.new()
 	_layer_clear_inventory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -463,13 +473,13 @@ func _setup_layer_clear_screen() -> void:
 	layout.add_child(buttons)
 
 	var restart_button := Button.new()
-	restart_button.text = "Restart Run"
+	restart_button.text = "重新开始"
 	restart_button.custom_minimum_size = Vector2(150, 42)
 	restart_button.pressed.connect(_restart_run_from_layer_clear)
 	buttons.add_child(restart_button)
 
 	var next_layer_button := Button.new()
-	next_layer_button.text = "Deeper Sealed Sector Coming Soon"
+	next_layer_button.text = "更深封存区：下一版本开放"
 	next_layer_button.disabled = true
 	next_layer_button.custom_minimum_size = Vector2(190, 42)
 	buttons.add_child(next_layer_button)
@@ -547,7 +557,7 @@ func _refresh_layer_clear_screen() -> void:
 func _get_layer_clear_weapon_text() -> String:
 	var weapon_holder := _get_weapon_holder()
 	if weapon_holder == null or not weapon_holder.has_method("get_quick_weapon_slots"):
-		return "No weapons."
+		return "无武器。"
 
 	var lines := PackedStringArray()
 	var slots := weapon_holder.call("get_quick_weapon_slots", 4) as Array
@@ -558,23 +568,23 @@ func _get_layer_clear_weapon_text() -> String:
 
 		var line := "%d. %s" % [
 			int(slot_info.get("slot", 0)),
-			str(slot_info.get("name", "Weapon"))
+			str(slot_info.get("name", "武器"))
 		]
 		if bool(slot_info.get("equipped", false)):
-			line += "  ACTIVE"
+			line += "  已装备"
 		lines.append(line)
 
 	if lines.is_empty():
-		return "No weapons."
+		return "无武器。"
 	return "\n".join(lines)
 
 
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "Research Data: 0    Protomatter Shards: 0    Biometric Keys: 0    Breach Charges: 0"
+		return "研究数据：0    原质碎片：0    生物识别钥：0    破障炸药：0"
 
-	return "Research Data: %d    Protomatter Shards: %d    Biometric Keys: %d    Breach Charges: %d" % [
+	return "研究数据：%d    原质碎片：%d    生物识别钥：%d    破障炸药：%d" % [
 		inventory.get_item_amount("Research Data"),
 		inventory.get_item_amount("Protomatter Fragment"),
 		inventory.get_item_amount("Biometric Key"),
@@ -598,6 +608,8 @@ func _get_selected_character_scene() -> PackedScene:
 			return technician_character_scene
 		CharacterSelectScreen.HUISHENG_ID:
 			return huisheng_character_scene
+		CharacterSelectScreen.SHITONG_ID:
+			return shitong_character_scene
 		_:
 			return experimenter_character_scene
 
@@ -653,20 +665,20 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 	match room.lab_room_type:
 		"tutorial_start":
-			_show_tutorial_hint("Sealing Protocol online. Move right to begin target sync.")
+			_show_tutorial_hint("封存协议已上线。向右移动，开始靶场同步。")
 		"tutorial_targets":
-			_show_tutorial_hint("Sync TARGET A, B, C, and D with any weapon. All targets online will unlock the right door.")
+			_show_tutorial_hint("用任意武器同步 A、B、C、D 四个靶标。全部点亮后，右侧门会解锁。")
 		"tutorial_merchant":
-			_show_tutorial_hint("Raven left a quarantine blade here. Press F to pick it up. Press 4 to equip it, then continue right.")
+			_show_tutorial_hint("渡鸦留下了一把检疫刃。按 F 拾取，按 4 装备，然后继续向右。")
 		"tutorial_combat":
-			_show_tutorial_hint("Clear the specimens. Open the cache for a Breach Charge. Press E to plant it, crack the quarantine resin, then recover the data.")
+			_show_tutorial_hint("清理守卫样本。打开补给箱取得破障炸药，按 E 放置，炸开检疫树脂后回收物资。")
 		"tutorial_boss":
 			if _tutorial_rewards_granted:
-				_show_tutorial_hint("Sealing wake sequence complete. Enter the Descent Rift to reach the sealed sector.")
+				_show_tutorial_hint("封存唤醒序列完成。进入下行裂隙，前往正式封存区。")
 			elif _tutorial_rewards_dropped:
-				_show_tutorial_hint("Enter the Descent Rift to reach the sealed sector.")
+				_show_tutorial_hint("进入下行裂隙，前往正式封存区。")
 			else:
-				_show_tutorial_hint("Neutralize Failed Subject A-03, then enter the Descent Rift.")
+				_show_tutorial_hint("肃清失格者 A-03，然后进入下行裂隙。")
 		_:
 			_hide_tutorial_hint()
 

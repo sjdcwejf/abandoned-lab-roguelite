@@ -250,7 +250,21 @@ func _get_weapon_scene_inventory_info(weapon_scene: PackedScene) -> Dictionary:
 
 func _fallback_weapon_name(weapon_scene: PackedScene) -> String:
 	if weapon_scene == null or weapon_scene.resource_path == "":
-		return "Weapon"
+		return "武器"
+
+	match weapon_scene.resource_path:
+		"res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn":
+			return "校准激光笔"
+		"res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn":
+			return "封控钉枪"
+		"res://tiny_wizard/player/weapons/energy_saber/energy_saber.tscn":
+			return "能量光剑"
+		"res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn":
+			return "动力拳套"
+		"res://tiny_wizard/player/weapons/test_sword/test_sword.tscn":
+			return "检疫刃"
 
 	var base_name := weapon_scene.resource_path.get_file().get_basename()
-	return base_name.replace("_", " ").capitalize()
+	if base_name != "":
+		return "未命名武器：%s" % base_name
+	return "未命名武器"

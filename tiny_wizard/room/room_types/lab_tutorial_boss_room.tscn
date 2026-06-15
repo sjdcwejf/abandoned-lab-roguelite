@@ -28,7 +28,7 @@ radius = 520.0
 [node name="Room" instance=ExtResource("1_base_room")]
 script = ExtResource("2_script")
 lab_room_type = "tutorial_boss"
-lab_room_label = "A-03 Recovery Chamber"
+lab_room_label = "A-03 回收室"
 
 [node name="PrototypeBoss" parent="Enemies" index="0" instance=ExtResource("3_boss")]
 modulate = Color(1, 0.28, 0.36, 1)
@@ -37,7 +37,7 @@ scale = Vector2(1.35, 1.35)
 script = ExtResource("7_fusion_boss")
 character_stats = SubResource("Resource_tutorial_boss_stats")
 physics_stats = SubResource("Resource_tutorial_boss_physics")
-boss_display_name = "Failed Subject A-03: Breach Husk"
+boss_display_name = "失格者 A-03：破仓体"
 protomatter_drop_chance = 1.0
 protomatter_min_drop = 5
 protomatter_max_drop = 8

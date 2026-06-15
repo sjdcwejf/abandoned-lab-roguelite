@@ -3,7 +3,7 @@ extends Node2D
 
 
 @export var character_id := ""
-@export var pod_label := "Sleep Pod"
+@export var pod_label := "休眠仓"
 @export var accent_color := Color(0.35, 0.85, 0.95, 1.0)
 
 var _is_open := false

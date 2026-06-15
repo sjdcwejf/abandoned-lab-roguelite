@@ -43,7 +43,7 @@ position = Vector2(-50, 66)
 z_index = 8
 custom_minimum_size = Vector2(100, 20)
 theme_override_font_sizes/font_size = 13
-text = "Sleep Pod"
+text = "休眠仓"
 horizontal_alignment = 1
 
 [node name="WakePoint" type="Marker2D" parent="."]

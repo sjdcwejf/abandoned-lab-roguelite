@@ -2,6 +2,8 @@ class_name LabAbilityUI
 extends Control
 
 
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+
 var ability_controller: Node
 var _title_label: Label
 var _energy_label: Label
@@ -22,6 +24,7 @@ func _ready() -> void:
 	offset_bottom = 190.0
 	visible = false
 	_build_ui()
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 
 
 func _process(_delta: float) -> void:
@@ -56,7 +59,7 @@ func _build_ui() -> void:
 
 	_title_label = Label.new()
 	_title_label.name = "Title"
-	_title_label.text = "Q  SKILL"
+	_title_label.text = "Q 技能"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.add_theme_font_size_override("font_size", 12)
 	_title_label.add_theme_color_override("font_color", Color(0.74, 0.94, 1.0, 1.0))
@@ -100,12 +103,12 @@ func _refresh() -> void:
 		return
 
 	visible = true
-	_title_label.text = "Q  %s" % ability_controller.get_ability_display_name().to_upper()
-	_energy_label.text = "%.0f / %.0f EN" % [
+	_title_label.text = "Q %s" % ability_controller.get_ability_display_name()
+	_energy_label.text = "能量 %.0f / %.0f" % [
 		ability_controller.get_energy_current(),
 		ability_controller.get_energy_max()
 	]
-	_status_label.text = ability_controller.get_ability_status_text().to_upper()
+	_status_label.text = ability_controller.get_ability_status_text()
 	_energy_bar.value = ability_controller.get_energy_ratio() * 100.0
 
 

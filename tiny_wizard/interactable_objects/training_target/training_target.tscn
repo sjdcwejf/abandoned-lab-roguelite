@@ -24,7 +24,7 @@ polygon = PackedVector2Array(0, -7, 7, 0, 0, 7, -7, 0)
 [node name="Label" type="Label" parent="."]
 position = Vector2(-24, 42)
 theme_override_font_sizes/font_size = 12
-text = "TARGET A"
+text = "靶标 A"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_target")

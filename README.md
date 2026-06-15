@@ -1,139 +1,137 @@
-# Bio Protocol: Entropy Zone
+# 生化协议：熵区
 
-中文暂定名：《生化协议：熵区》。
+《生化协议：熵区》是一款面向 Steam 的 2D 像素风、俯视角/斜俯视角、房间制动作 Roguelite 原型。故事发生在极渊岛地下封存设施：一座被熵区吞没的企业生物工程基地。
 
-A Steam-focused 2D pixel-art, top-down room-based action roguelite prototype set inside Abyss Island's sealed underground complex, a corporate bioengineering site swallowed by the entropy zone.
+当前设计方向：
 
-Current design direction:
+- 主题：生化恐怖、企业阴谋、异星原质、适应性实验体
+- 核心循环：进房间、清怪、捡武器、形成构筑、死亡重开
+- 引擎：Godot 4
+- 当前 MVP 武器：校准激光笔、能量光剑、动力拳套
 
-- Theme: bio-horror, corporate conspiracy, alien protomatter, adaptive test subjects
-- Core loop: enter room, clear enemies, pick up weapons, build a run, die, restart
-- Engine: Godot 4
-- MVP weapons:
-  - Laser Pointer
-  - Energy Saber
-  - Power Gauntlets
+设定与文档来源优先级：
 
-Story and worldbuilding source order:
+- `docs/前期故事梗概与人物信息.md`：长期剧情、美术和角色方向来源。
+- `docs/角色设定.md`：记录当前可玩角色铁幕、流影、回声、蚀瞳。
+- `docs/剧情设定_生化协议_熵区.md`：当前世界观与章节包装来源。
+- `docs/状态效果系统.md`：状态效果系统说明。
+- `docs/中文文本与字体规范.md`：中文文本、字体和编码规范。
 
-- `docs/前期故事梗概与人物信息.md` is the long-term story, art, and character-direction source.
-- `docs/角色设定.md` records the current playable implementation: Tiemu, Liuying, and Huisheng, plus the planned fourth subject Shitong.
-- `docs/剧情设定_生化协议_熵区.md` is the current worldbuilding source.
-- `docs/状态效果系统.md`
+本项目当前基于 Quiver 的 Tiny Wizard Demo 与 Top-Down Shooter Core 改造。来源和许可见 `LICENSES/THIRD_PARTY_NOTICES.md`。
 
-This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shooter Core. See `LICENSES/THIRD_PARTY_NOTICES.md` for source and license details.
+## 当前可玩实验体
 
-## Current Playable Subjects
+- 铁幕：防线型适应性实验体。高生命、移动较慢，初始武器为校准激光笔；主动技能为铁幕协议，被动可以定期吸收伤害。
+- 流影：高速游击型实验体。低生命、高移速，初始武器为封控钉枪；拥有闪避概率、移动残影、动量加速与相位突袭。
+- 回声：能量控制型实验体。中等生命、能量上限较高，初始武器为能量光剑；主动技能为回声脉冲，被动可以通过武器命中回复能量。
+- 蚀瞳：腐蚀污染型实验体。中等生命、较高能量，初始武器为校准激光笔；主动技能为蚀瞳凝视，被动可以让武器命中附加腐蚀持续伤害。
 
-- Tiemu / Iron Curtain: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer, can trigger Iron Curtain Protocol, and passively absorbs 1 incoming damage every 5 seconds.
-- Liuying / Shadow: a neural-reflex subject tuned for high-speed flanks and risky repositioning. Low HP, very high movement speed, starts with the Containment Nailgun, has a 15% dodge chance, and gains faster attacks after dodging or using Phase Assault.
-- Huisheng / Echo: a resonance subject tuned for energy-control experiments. Medium HP, balanced movement, starts with the Energy Saber, can trigger Echo Pulse, and restores energy from weapon hits.
+## 当前操作
 
-Shitong is the planned fourth subject from the long-term character direction. Shitong is not selectable or implemented in the current prototype yet.
+- 开始游戏：在开场界面选择铁幕、流影、回声或蚀瞳，被选实验体会从封存协议唤醒区的休眠仓苏醒。
+- 移动：WASD
+- 瞄准：鼠标
+- 主攻击：鼠标左键
+- 旧版方向射击：方向键
+- 放置破障炸药：E
+- 角色技能：Q
+- 副攻击：鼠标右键
+- 切换武器：拾取后按 1 / 2 / 3 / 4
+- 预留冲刺键：Space
+- 交互 / 拾取武器台物品：F
 
-## Current Prototype Controls
+## 当前武器原型
 
-- Start run: choose Tiemu, Liuying, or Huisheng on the opening screen; the selected adaptive subject wakes from a pod in the Sealing Protocol Wake Bay
-- Move: WASD
-- Aim: mouse
-- Primary fire: left mouse button
-- Legacy directional fire: arrow keys
-- Plant Breach Charge: E
-- Character skill: Q
-- Secondary fire: right mouse button
-- Switch MVP weapons: 1 / 2 / 3 / 4 after pickup
-- Reserved dash: Space
-- Interact / pick up weapon stand item: F
+玩家开局会根据角色携带专属初始武器，并可在流程中拾取更多武器。
 
-## Current Weapon Prototype
+- 铁幕开局携带校准激光笔，生命 8，移动较慢但更稳。
+- 流影开局携带封控钉枪，生命 5，移速很高，有 15% 闪避概率。
+- 回声开局携带能量光剑，生命 6，能量上限较高。
+- 蚀瞳开局携带校准激光笔，生命 6，能量 110，擅长腐蚀持续伤害。
+- `1`：初始远程武器，按住或点击鼠标左键朝鼠标方向攻击。
+- `2`：能量光剑，鼠标左键挥出短距离可见斩击。
+- `3`：动力拳套，鼠标左键近距离出拳，鼠标右键从下方枪口发射能量弹。
+- `4`：检疫刃，在封存协议唤醒区从渡鸦留下的武器台拾取后解锁。
 
-The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` to switch between the current MVP weapons:
+光束、近战和投射物武器都通过目标的 `hit()` 方法结算伤害。旧版 Tiny Wizard 方向箭矢武器仍保留在角色场景中用于兼容，但已隐藏，并且不再接入主攻击。
 
-- Tiemu starts with the Laser Pointer, 8 HP, steadier but slower movement, and Stabilized Plating that absorbs 1 incoming damage every 5 seconds.
-- Liuying starts with the Containment Nailgun, 5 HP, very high movement speed, a 15% dodge chance, decoy afterimages, an independent movement momentum passive, and Ghost Tempo after dodging or dashing.
-- Huisheng starts with the Energy Saber, 6 HP, high energy capacity, and Resonance Return that restores energy from weapon hits.
-- `1` Starting ranged weapon: hold or press the left mouse button to attack toward the mouse cursor.
-- `2` Energy Saber: press or hold left mouse button to swing a short-range blade with a visible slash arc.
-- `3` Power Gauntlets: left mouse button lunges into a short punch, right mouse button fires a ranged energy bolt from the lower muzzle.
-- `4` Quarantine Blade: unlocked by picking up Raven's quarantine blade from the starter weapon stand in the Sealing Protocol Wake Bay.
-- Beam, melee, and projectile weapons all route damage through targets that expose the inherited `hit()` method.
-- The old Tiny Wizard arrow shooter is kept in the player scene for compatibility, but hidden and disconnected from primary fire.
+## 当前技能原型
 
-## Current Skill Prototype
+每名实验体现在都有能量资源和一个 `Q` 主动技能。HUD 会显示技能名、能量和状态：
 
-Each subject now has an energy resource and one active skill on `Q`. The HUD shows the current skill, energy, and readiness state:
+- 铁幕：铁幕协议。消耗 40 能量，获得临时护盾，降低受到的伤害，释放会伤害并减速附近样本的防御冲击，同时短暂提升武器节奏。
+- 流影：相位突袭。消耗 30 能量，拥有 2 层充能，向前突进并穿过敌人，造成较低武器系数伤害，施加易伤，并在突进时短暂无敌。流影移动时会留下蓝色残影，附近红/黑飞虫会优先锁定这些残影。
+- 回声：回声脉冲。消耗 35 能量，释放共振波，对附近敌人造成伤害并施加减速。
+- 蚀瞳：蚀瞳凝视。消耗 45 能量，释放范围污染波，对附近敌人造成少量即时伤害并施加持续腐蚀。
 
-- Tiemu - Iron Curtain Protocol: costs 40 energy, gains temporary shield, reduces incoming damage, emits a defensive shockwave that damages and slows nearby specimens, and slightly improves weapon rhythm while active.
-- Liuying - Phase Assault: costs 30 energy, has 2 charges, dashes through enemies, deals reduced weapon-based damage, applies Vulnerable for 3 seconds, and briefly avoids damage during the dash. Liuying also leaves short blue afterimages while moving; nearby red and black fly enemies prefer those afterimages as temporary decoy targets.
-- Huisheng - Echo Pulse: costs 35 energy and emits a resonance wave that damages nearby enemies and slows affected specimens.
+当前核心被动：
 
-Current core passives:
+- 铁幕：稳定装甲，每 5 秒自动吸收 1 点即将受到的伤害。
+- 流影：残影节奏，闪避或使用相位突袭后短暂提高武器节奏。
+- 回声：共振回流，武器命中会在短冷却后回复少量能量。
+- 蚀瞳：原质寄宿，武器命中会按短冷却为敌人施加腐蚀持续伤害。
 
-- Tiemu - Stabilized Plating: every 5 seconds, automatically absorbs 1 incoming damage.
-- Liuying - Ghost Tempo: dodging or using Phase Assault gives 2 seconds of faster weapon rhythm.
-- Huisheng - Resonance Return: weapon hits restore a small amount of energy on a short cooldown.
+当前能量系统是后续角色专属技能池的基础。技能升级、技能变体和能量消耗构筑选择尚未实装。
 
-The current energy system is a foundation for later character-specific skill pools. Upgrade selection, skill mutations, and energy-spending build choices are not implemented yet.
+## 当前状态效果原型
 
-## Current Status Effect Prototype
+项目已有通用状态效果控制器：`res://tiny_wizard/status_effects/status_effect_controller.gd`。
 
-The prototype now has a reusable status effect controller at `res://tiny_wizard/status_effects/status_effect_controller.gd`.
+- 易伤：由流影的相位突袭施加，使目标受到更多伤害，并显示橙色状态环。
+- 减速：由回声脉冲和铁幕协议施加，临时降低目标移动速度，并显示紫色状态环。
+- 持续伤害：由蚀瞳的原质寄宿和蚀瞳凝视调用，可继续扩展到中毒、燃烧和污染区域。
 
-- Vulnerable: used by Liuying's Phase Assault, increases damage taken and shows an orange status ring.
-- Slow: used by Huisheng's Echo Pulse, temporarily reduces movement speed and shows a purple status ring.
-- Damage over time: foundation is available for future corrosion, poison, burning, and Shitong-style contamination effects.
+## 当前交互物美术方向
 
-## Current Prop Art Direction
+第一版实验室交互物已开始替换继承项目中的奇幻地牢剪影：
 
-The first laboratory prop pass replaces inherited fantasy/dungeon silhouettes with sealed bio-lab interactables:
+- 宝箱改为封存补给箱和样本保险箱。
+- 可炸石头改为熵化封堵体 / 检疫破损残骸，保留破障炸药摧毁逻辑。
+- 武器台和随机武器掉落改为渡鸦军械封存舱方向。
 
-- Treasure chests are now sealed supply caches and sample safes.
-- Destructible rocks are now entropy barricades / quarantine breach debris that still work with Breach Charges.
-- Weapon stands and random weapon pickups now read as Raven armory containment pods.
+## 当前地牢流程
 
-## Current Dungeon Prototype
+当前流程先进入 5 个房间的封存协议教学段，再进入随机生成的 8 房间正式封存区。
 
-The current flow starts with a 5-room Sealing Protocol wake sequence, then enters a randomized 8-room sealed sector.
+教学段：
 
-Wake sequence:
+- 封存协议唤醒区：角色选择与休眠仓苏醒。
+- 靶场同步室：同步 A/B/C/D 四个靶标，全部点亮后解锁右侧门。
+- 渡鸦军械附属间：渡鸦引导与检疫刃武器台。
+- 破障训练实验室：守卫补给箱、破障炸药、检疫树脂后的奖励箱。
+- A-03 回收室：失格者 A-03 战斗与下行裂隙出口。
 
-- Sealing Protocol Wake Bay: subject selection and sleep pods
-- Target Sync Range: functional TARGET A/B/C/D shooting targets that unlock the right door when all targets are online
-- Raven Armory Annex: Raven guidance and the Quarantine Blade weapon stand
-- Breach Charge Training Lab: guarded cache, Breach Charge, quarantine-resin reward chest
-- A-03 Recovery Chamber: Failed Subject A-03 encounter and Descent Rift exit
+正式封存区房间职责：
 
-Formal sector room roles:
+- 封存气闸：正式关卡出生房。
+- 封存样本间：怪物房，进门锁门，清怪开门。
+- 证物库：有怪物守卫的奖励房。
+- 渡鸦军械缓存：随机武器掉落房。
+- 渡鸦检疫商店：固定出现在 Boss 房前的独立商店房，只放置渡鸦商人与军械终端。
+- A-03 回收室：正式 Boss 房，包含失格者 A-03：破仓体、Boss 血条、冲刺追击、绿色毒液弹幕、低血量召唤和下行裂隙出口。
 
-- Sealing Airlock: formal run spawn room
-- Sealed Specimen Wards: combat rooms that lock until enemies are cleared
-- Evidence Vaults: guarded reward rooms
-- Raven Armory Cache: random weapon pickup room
-- Raven Quarantine Shop: fixed pre-boss merchant room with Raven's armory terminal and story guidance
-- A-03 Recovery Chamber: sector boss room for Failed Subject A-03: Breach Husk, with a named health bar, charge pursuit, green poison volleys, low-health summons, and a Descent Rift exit
+怪物房进入后会关闭可见门，清理全部敌人后重新打开。隐藏门会保持锁定，避免玩家从没有连接的出口离开生成布局。
 
-Combat rooms close their visible doors when entered and reopen them after all enemies are defeated. Hidden doors remain locked, so the player cannot leave the generated layout through missing room exits.
+被肃清的样本会掉落原质碎片。A-03 类敌人会必定掉落多个原质碎片，死亡时产生绿色血液爆裂，并开启下行裂隙。原质碎片会进入背包、显示在资源 UI 中，并作为当前渡鸦武器交易货币。后续版本可以继续把原质碎片用于永久升级或剧情解锁。
 
-Neutralized specimens can now drop Protomatter Fragments, the in-game resource for 原质碎片. A-03-class enemies always drop several fragments, burst green blood on death, and open the Descent Rift after defeat. Fragments are collected into the inventory, shown in the resource UI, and used as Raven's current weapon-trade currency. Later versions can also spend them on permanent upgrades or story unlocks.
+渡鸦当前固定出现在正式封存区 Boss 前的安全屋。靠近渡鸦按 `F` 打开军械面板，再按 `F` 购买一把玩家尚未拥有的武器。当前售卖武器也会显示在渡鸦柜台上。补给购买和随机临时黑市留到后续版本。
 
-Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Protomatter Fragments. The current offer is also shown as a weapon preview on Raven's counter. Supply purchases and random temporary black markets are reserved for later versions.
+破障炸药数量大于 0 时，按 `E` 可以放置。短暂引信后会摧毁附近熵化封堵体，包括挡住奖励的检疫残骸。
 
-Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby entropy barricade tiles, including quarantine debris blocking reward pickups.
+当前版本角色死亡后不会结束整个流程，而是恢复生命并回到当前流程的出生房。
 
-For now, player death immediately restores health and respawns the subject in the current run's start room instead of ending the run.
+## 在 Godot 中打开
 
-## Open In Godot
-
-Import this file in Godot 4:
+用 Godot 4 导入这个文件：
 
 ```text
 /Users/tianyisongdemacbook/Documents/个人项目/abandoned-lab-roguelite/project.godot
 ```
 
-The current main scene remains:
+当前主场景：
 
 ```text
 res://tiny_wizard/main.tscn
 ```
 
-The `tiny_wizard` directory name is intentionally kept during the first migration step so the inherited scene paths continue to load. It can be renamed after the project is stable.
+`tiny_wizard` 目录名在第一阶段迁移中暂时保留，用于保证继承场景路径继续正常加载。等项目结构稳定后再统一改名。
