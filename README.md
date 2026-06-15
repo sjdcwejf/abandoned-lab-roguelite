@@ -81,6 +81,14 @@ The prototype now has a reusable status effect controller at `res://tiny_wizard/
 - Slow: used by Huisheng's Echo Pulse, temporarily reduces movement speed and shows a purple status ring.
 - Damage over time: foundation is available for future corrosion, poison, burning, and Shitong-style contamination effects.
 
+## Current Prop Art Direction
+
+The first laboratory prop pass replaces inherited fantasy/dungeon silhouettes with sealed bio-lab interactables:
+
+- Treasure chests are now sealed supply caches and sample safes.
+- Destructible rocks are now entropy barricades / quarantine breach debris that still work with Breach Charges.
+- Weapon stands and random weapon pickups now read as Raven armory containment pods.
+
 ## Current Dungeon Prototype
 
 The current flow starts with a 5-room Sealing Protocol wake sequence, then enters a randomized 8-room sealed sector.
@@ -108,7 +116,7 @@ Neutralized specimens can now drop Protomatter Fragments, the in-game resource f
 
 Raven currently appears in a dedicated safehouse immediately before the formal sector boss. Press `F` near Raven to open the armory panel, then press `F` again to buy the offered unowned weapon for Protomatter Fragments. The current offer is also shown as a weapon preview on Raven's counter. Supply purchases and random temporary black markets are reserved for later versions.
 
-Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby destructible resin-rock tiles, including stones blocking reward pickups.
+Breach Charges are planted with `E` when the Breach Charge count is above zero. After a short fuse, they destroy nearby entropy barricade tiles, including quarantine debris blocking reward pickups.
 
 For now, player death immediately restores health and respawns the subject in the current run's start room instead of ending the run.
 
