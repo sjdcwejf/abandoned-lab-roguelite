@@ -19,6 +19,7 @@ Story and worldbuilding baseline:
 - `docs/剧情设定_生化协议_熵区.md`
 - `docs/前期故事梗概与人物信息.md`
 - `docs/角色设定.md`
+- `docs/状态效果系统.md`
 
 This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shooter Core. See `LICENSES/THIRD_PARTY_NOTICES.md` for source and license details.
 
@@ -71,6 +72,14 @@ Current core passives:
 - Huisheng - Resonance Return: weapon hits restore a small amount of energy on a short cooldown.
 
 The current energy system is a foundation for later character-specific skill pools. Upgrade selection, skill mutations, and energy-spending build choices are not implemented yet.
+
+## Current Status Effect Prototype
+
+The prototype now has a reusable status effect controller at `res://tiny_wizard/status_effects/status_effect_controller.gd`.
+
+- Vulnerable: used by Liuying's Phase Assault, increases damage taken and shows an orange status ring.
+- Slow: used by Huisheng's Echo Pulse, temporarily reduces movement speed and shows a purple status ring.
+- Damage over time: foundation is available for future corrosion, poison, burning, and Shitong-style contamination effects.
 
 ## Current Dungeon Prototype
 

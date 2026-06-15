@@ -2,13 +2,10 @@ class_name LabPlayerAbilityController
 extends Node2D
 
 
+const STATUS_EFFECTS := preload("res://tiny_wizard/status_effects/status_effect_controller.gd")
 const ABILITY_PANSHI := "panshi"
 const ABILITY_LIUYING := "liuying"
 const ABILITY_HUISHENG := "huisheng"
-const META_ORIGINAL_SPEED := "echo_original_speed"
-const META_VULNERABLE_DAMAGE_MULTIPLIER := "lab_vulnerable_damage_multiplier"
-const META_VULNERABLE_END_TIME := "lab_vulnerable_end_time"
-const VULNERABLE_MARK_NAME := "LiuyingVulnerableMark"
 const LIUYING_DECOY_GROUP := "lab_decoy_targets"
 const META_DECOY_OWNER := "lab_decoy_owner"
 const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
@@ -506,9 +503,9 @@ func _damage_targets_at_position(origin: Vector2, radius: float, damage: int, ap
 			hit_from = ((damage_target as Node2D).global_position - origin).normalized()
 		damage_target.call("hit", damage, hit_from)
 		if apply_slow:
-			_apply_echo_slow(damage_target)
+			STATUS_EFFECTS.apply_slow(damage_target, huisheng_slow_duration, huisheng_slow_multiplier)
 		if apply_vulnerable:
-			_apply_liuying_vulnerable(damage_target)
+			STATUS_EFFECTS.apply_vulnerable(damage_target, liuying_vulnerable_duration, liuying_vulnerable_damage_multiplier)
 
 
 func _find_damage_target(target: Object) -> Object:
@@ -527,78 +524,6 @@ func _find_damage_target(target: Object) -> Object:
 			return current
 		current = current.get_parent()
 	return null
-
-
-func _apply_echo_slow(target: Object) -> void:
-	if not target is QuiverCharacter:
-		return
-
-	var slowed_character := target as QuiverCharacter
-	var physics_stats := slowed_character.physics_stats
-	if physics_stats == null:
-		return
-
-	if not slowed_character.has_meta(META_ORIGINAL_SPEED):
-		slowed_character.set_meta(META_ORIGINAL_SPEED, physics_stats.max_speed)
-
-	var original_speed := float(slowed_character.get_meta(META_ORIGINAL_SPEED))
-	physics_stats.max_speed = minf(physics_stats.max_speed, original_speed * huisheng_slow_multiplier)
-
-	var timer := get_tree().create_timer(huisheng_slow_duration)
-	timer.timeout.connect(func() -> void:
-		if not is_instance_valid(slowed_character):
-			return
-		if slowed_character.has_meta(META_ORIGINAL_SPEED):
-			var speed := float(slowed_character.get_meta(META_ORIGINAL_SPEED))
-			if slowed_character.physics_stats != null:
-				slowed_character.physics_stats.max_speed = speed
-			slowed_character.remove_meta(META_ORIGINAL_SPEED)
-	)
-
-
-func _apply_liuying_vulnerable(target: Object) -> void:
-	if not target is Node:
-		return
-
-	var target_node := target as Node
-	var expires_at := Time.get_ticks_msec() + int(liuying_vulnerable_duration * 1000.0)
-	target_node.set_meta(META_VULNERABLE_DAMAGE_MULTIPLIER, liuying_vulnerable_damage_multiplier)
-	target_node.set_meta(META_VULNERABLE_END_TIME, expires_at)
-	_show_vulnerable_mark(target_node)
-
-	var timer := get_tree().create_timer(liuying_vulnerable_duration)
-	timer.timeout.connect(func() -> void:
-		if not is_instance_valid(target_node):
-			return
-		if not target_node.has_meta(META_VULNERABLE_END_TIME):
-			return
-		if int(target_node.get_meta(META_VULNERABLE_END_TIME)) > Time.get_ticks_msec():
-			return
-		target_node.remove_meta(META_VULNERABLE_DAMAGE_MULTIPLIER)
-		target_node.remove_meta(META_VULNERABLE_END_TIME)
-		var mark := target_node.get_node_or_null(VULNERABLE_MARK_NAME)
-		if mark != null:
-			mark.queue_free()
-	)
-
-
-func _show_vulnerable_mark(target_node: Node) -> void:
-	if not target_node is Node2D:
-		return
-
-	var mark := target_node.get_node_or_null(VULNERABLE_MARK_NAME) as Line2D
-	if mark == null:
-		mark = Line2D.new()
-		mark.name = VULNERABLE_MARK_NAME
-		mark.z_index = 32
-		mark.width = 3.0
-		mark.closed = true
-		mark.points = _circle_points(34.0)
-		target_node.add_child(mark)
-
-	mark.position = Vector2.ZERO
-	mark.default_color = Color(1.0, 0.66, 0.25, 0.9)
-	mark.modulate = Color.WHITE
 
 
 func _show_dodge_feedback() -> void:
