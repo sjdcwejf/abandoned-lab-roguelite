@@ -18,6 +18,7 @@ Story and worldbuilding baseline:
 
 - `docs/剧情设定_生化协议_熵区.md`
 - `docs/前期故事梗概与人物信息.md`
+- `docs/角色设定.md`
 
 This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shooter Core. See `LICENSES/THIRD_PARTY_NOTICES.md` for source and license details.
 
