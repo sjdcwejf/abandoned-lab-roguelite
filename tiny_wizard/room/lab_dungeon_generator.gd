@@ -54,49 +54,49 @@ const FALLBACK_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "start",
-		"label": "Safehouse Airlock",
+		"label": "Sealing Airlock",
 		"scene": START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
 		"type": "combat",
-		"label": "Specimen Cell 1",
+		"label": "Sealed Specimen Ward 1",
 		"scene": COMBAT_ROOM_A_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "combat",
-		"label": "Specimen Cell 2",
+		"label": "Sealed Specimen Ward 2",
 		"scene": COMBAT_ROOM_B_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 0),
 		"type": "weapon",
-		"label": "Raven Cache",
+		"label": "Raven Armory Cache",
 		"scene": WEAPON_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 1),
 		"type": "merchant",
-		"label": "Raven Safehouse",
+		"label": "Raven Quarantine Shop",
 		"scene": RAVEN_SAFEHOUSE_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 2),
 		"type": "boss",
-		"label": "Fusion Node",
+		"label": "A-03 Recovery Chamber",
 		"scene": BOSS_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, -1),
 		"type": "reward",
-		"label": "Data Vault 1",
+		"label": "Evidence Vault 1",
 		"scene": REWARD_ROOM_A_SCENE,
 	},
 	{
 		"coord": Vector2i(2, -1),
 		"type": "reward",
-		"label": "Data Vault 2",
+		"label": "Evidence Vault 2",
 		"scene": REWARD_ROOM_B_SCENE,
 	},
 ]
@@ -105,31 +105,31 @@ const TUTORIAL_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(0, 0),
 		"type": "tutorial_start",
-		"label": "Abyss Calibration Gate",
+		"label": "Sealing Protocol Wake Bay",
 		"scene": TUTORIAL_START_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(1, 0),
 		"type": "tutorial_targets",
-		"label": "Target Calibration Range",
+		"label": "Target Sync Range",
 		"scene": TUTORIAL_TARGET_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "tutorial_merchant",
-		"label": "Raven Tutorial Safehouse",
+		"label": "Raven Armory Annex",
 		"scene": TUTORIAL_RAVEN_SAFEHOUSE_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(3, 0),
 		"type": "tutorial_combat",
-		"label": "Breach Training Lab",
+		"label": "Breach Charge Training Lab",
 		"scene": TUTORIAL_COMBAT_ROOM_SCENE,
 	},
 	{
 		"coord": Vector2i(4, 0),
 		"type": "tutorial_boss",
-		"label": "Low-Grade Fusion Chamber",
+		"label": "A-03 Recovery Chamber",
 		"scene": TUTORIAL_BOSS_ROOM_SCENE,
 	},
 ]
@@ -280,7 +280,7 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	main_room_types.append("merchant")
 	main_room_types.append("boss")
 
-	room_specs.append(_make_spec(Vector2i.ZERO, "start", "Safehouse Airlock", START_ROOM_SCENE))
+	room_specs.append(_make_spec(Vector2i.ZERO, "start", "Sealing Airlock", START_ROOM_SCENE))
 
 	for path_index in range(1, main_path.size()):
 		var room_type := main_room_types[path_index - 1] as String
@@ -373,15 +373,15 @@ static func _next_label(room_type: String, label_counts: Dictionary) -> String:
 
 	match room_type:
 		"combat":
-			return "Specimen Cell %d" % count
+			return "Sealed Specimen Ward %d" % count
 		"reward":
-			return "Data Vault %d" % count
+			return "Evidence Vault %d" % count
 		"weapon":
-			return "Raven Cache"
+			return "Raven Armory Cache"
 		"merchant":
-			return "Raven Safehouse"
+			return "Raven Quarantine Shop"
 		"boss":
-			return "Fusion Node"
+			return "A-03 Recovery Chamber"
 	return "Room %d" % count
 
 

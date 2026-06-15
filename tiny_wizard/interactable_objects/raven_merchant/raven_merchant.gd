@@ -3,7 +3,7 @@ extends Node2D
 
 
 const CURRENCY_NAME := "Protomatter Fragment"
-const CURRENCY_DISPLAY_NAME := "Protomatter"
+const CURRENCY_DISPLAY_NAME := "Protomatter Shards"
 const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
 	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
@@ -12,8 +12,8 @@ const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
 ]
 
-@export var merchant_title := "RAVEN ARMORY"
-@export_multiline var merchant_message := "Boss signal ahead. Patch your nerves and count your charges."
+@export var merchant_title := "RAVEN QUARANTINE ARMORY"
+@export_multiline var merchant_message := "A-03 signal ahead. Patch your nerves and count your charges."
 @export_range(0, 99, 1) var weapon_cost := 1
 @export var equip_purchase_immediately := false
 
@@ -91,7 +91,7 @@ func _refresh_offer(character: Node2D) -> void:
 		_clear_offer_preview()
 		stock_label.text = "Stock: sold out for your current loadout."
 		status_label.text = "Raven has nothing new to sell right now."
-		hint_label.text = "Leave the safehouse when ready."
+		hint_label.text = "Leave the quarantine shop when ready."
 		return
 
 	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)

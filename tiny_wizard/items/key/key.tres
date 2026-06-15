@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource( "1_3uhtu" )
 name = "Biometric Key"
-short_description = "A copied Abyss Facility access signature."
+short_description = "A copied Sealing Protocol access signature."
 long_description = null
 stackable = true
 stack_size = null

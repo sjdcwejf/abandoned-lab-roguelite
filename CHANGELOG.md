@@ -2,6 +2,19 @@
 
 这个文件记录项目的主要功能变化，方便团队成员快速了解每次版本推进的内容。
 
+## v0.1.22 - 封存协议设定包装
+
+日期：2026-06-15
+
+### 调整
+
+- 统一当前世界观包装为《生化协议：熵区》的“封存协议”第一章方向。
+- 游戏内角色选择、休眠仓、README 和剧情设定文档中，将当前防线型角色从旧称 Panshi / Bulwark 统一包装为“铁幕 / Tiemu / Iron Curtain”。
+- 当前 Boss 正式包装为“失格者 A-03：破仓体 / Failed Subject A-03: Breach Husk”，替换原有 Fusion 类临时命名。
+- 教学关、正式关、房间标签和结算文案统一为 Sealing Protocol Wake Bay、Target Sync Range、Raven Armory Annex、Sealing Airlock、Evidence Vault、Raven Quarantine Shop、A-03 Recovery Chamber 等命名。
+- 黑洞出口统一包装为“下行裂隙 / Descent Rift”，武器台测试剑改为“检疫刃 / Quarantine Blade”。
+- 统一术语为“原质 / Protomatter”，击杀掉落资源显示为 Protomatter Shards，内部背包键仍保留 `Protomatter Fragment` 以保证掉落、商店和存量统计稳定。
+
 ## v0.1.21 - 前期故事梗概归档
 
 日期：2026-06-15

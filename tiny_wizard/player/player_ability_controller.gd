@@ -16,7 +16,7 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export_enum("panshi", "liuying", "huisheng") var ability_id := ABILITY_PANSHI
 @export var enemy_collision_mask := 8
 
-@export_group("Panshi")
+@export_group("Tiemu")
 @export var panshi_cooldown := 12.0
 @export var panshi_duration := 4.0
 @export var panshi_shield_gain := 2
@@ -259,7 +259,7 @@ func get_ability_display_name() -> String:
 		ABILITY_HUISHENG:
 			return "Echo Pulse"
 		_:
-			return "Bulwark Protocol"
+			return "Iron Curtain Protocol"
 
 
 func get_ability_energy_cost() -> float:

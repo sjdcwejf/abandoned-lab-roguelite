@@ -11,7 +11,7 @@ scene_to_spawn = ExtResource("2_qfkbo")
 [resource]
 script = ExtResource("1_2ib5n")
 name = "Breach Charge"
-short_description = "A compact charge for breaking resin-sealed debris."
+short_description = "A compact charge for breaking quarantine-resin debris."
 long_description = null
 stackable = true
 stack_size = null

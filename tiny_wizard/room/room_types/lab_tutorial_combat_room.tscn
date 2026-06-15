@@ -13,7 +13,7 @@
 [node name="Room" instance=ExtResource("1_base_room")]
 script = ExtResource("2_script")
 lab_room_type = "tutorial_combat"
-lab_room_label = "Breach Training Lab"
+lab_room_label = "Breach Charge Training Lab"
 rock_chest_path = NodePath("RockWrappedChest")
 
 [node name="TrainingBlackFly" parent="Enemies" index="0" instance=ExtResource("8_black_fly")]

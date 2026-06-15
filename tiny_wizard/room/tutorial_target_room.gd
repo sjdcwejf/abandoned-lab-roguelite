@@ -61,4 +61,4 @@ func _update_status() -> void:
 	elif active_count >= _targets.size():
 		status_label.text = completion_message
 	else:
-		status_label.text = "CALIBRATE TARGETS %d/%d" % [active_count, _targets.size()]
+		status_label.text = "SYNC TARGETS %d/%d" % [active_count, _targets.size()]

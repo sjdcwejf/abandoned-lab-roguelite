@@ -109,7 +109,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.66, 0.82, 0.86, 1)
 theme_override_font_sizes/font_size = 12
-text = "Abyss Facility wake sequence online. Choose one adaptive subject."
+text = "Sealing Protocol wake sequence online. Choose one adaptive subject."
 horizontal_alignment = 1
 
 [node name="Choices" type="HBoxContainer" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
@@ -171,7 +171,7 @@ grow_vertical = 2
 mouse_filter = 2
 offset_bottom = -58.0
 theme_override_font_sizes/font_size = 13
-text = "Panshi - Bulwark"
+text = "Tiemu - Iron Curtain"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -187,7 +187,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.74, 0.88, 0.9, 1)
 theme_override_font_sizes/font_size = 10
-text = "Stable | HP 8 | Laser"
+text = "Heavy | HP 8 | Laser"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -204,7 +204,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.62, 0.74, 0.78, 1)
 theme_override_font_sizes/font_size = 9
-text = "Stable strain built to hold the line."
+text = "A-12 bulwark strain built to hold the line."
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -276,7 +276,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.48, 1)
 theme_override_font_sizes/font_size = 10
-text = "Fast | Dodge 15% | Nailgun"
+text = "Mobility | Dodge 15% | Nailgun"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -293,7 +293,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.65, 0.42, 1)
 theme_override_font_sizes/font_size = 9
-text = "Phase raider built for high-risk flanks."
+text = "A-07 shadow strain built for high-risk flanks."
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -383,6 +383,6 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.7, 0.62, 0.86, 1)
 theme_override_font_sizes/font_size = 9
-text = "Resonance subject for future energy skills."
+text = "B-04 resonance strain tuned for energy control."
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -117,14 +117,14 @@ theme_override_constants/separation = 7
 layout_mode = 2
 theme_override_colors/font_color = Color(0.46, 0.94, 1, 1)
 theme_override_font_sizes/font_size = 15
-text = "RAVEN ARMORY"
+text = "RAVEN QUARANTINE ARMORY"
 horizontal_alignment = 1
 
 [node name="Message" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.84, 0.9, 0.9, 1)
 theme_override_font_sizes/font_size = 12
-text = "Boss signal ahead. Patch your nerves and count your charges."
+text = "A-03 signal ahead. Patch your nerves and count your charges."
 autowrap_mode = 3
 
 [node name="Stock" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]
@@ -138,7 +138,7 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.86, 0.86, 1)
 theme_override_font_sizes/font_size = 11
-text = "You have 0 Protomatter."
+text = "You have 0 Protomatter Shards."
 autowrap_mode = 3
 
 [node name="Hint" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]

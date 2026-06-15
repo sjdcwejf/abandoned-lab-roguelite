@@ -191,7 +191,7 @@ func _on_character_selected(character_id: String) -> void:
 			resolved_character_id = CharacterSelectScreen.PANSHI_ID
 			character_scene = experimenter_character_scene
 		_:
-			push_warning("Unknown character id '%s'. Falling back to Panshi." % character_id)
+			push_warning("Unknown character id '%s'. Falling back to Tiemu." % character_id)
 
 	if _character_select_screen != null:
 		_character_select_screen.queue_free()
@@ -332,7 +332,7 @@ func _respawn_character_at_start() -> void:
 		character_stats.set_life_to_max()
 	start_room.enter_room()
 	_update_tutorial_hint_for_room(start_room)
-	print("Subject respawned in Safehouse Airlock.")
+	print("Subject respawned in Sealing Airlock.")
 
 
 func _on_tutorial_boss_defeated() -> void:
@@ -342,8 +342,8 @@ func _on_tutorial_boss_defeated() -> void:
 	_tutorial_rewards_dropped = true
 	_tutorial_rewards_granted = true
 	_activate_tutorial_exit_black_hole()
-	_show_tutorial_hint("Wake sequence complete. Enter the Entropy Rift to reach the Abyss Facility.")
-	print("Wake sequence complete. Entropy Rift activated.")
+	_show_tutorial_hint("Sealing wake sequence complete. Enter the Descent Rift to reach the sealed sector.")
+	print("Sealing wake sequence complete. Descent Rift activated.")
 
 
 func _activate_tutorial_exit_black_hole() -> void:
@@ -360,7 +360,7 @@ func _on_black_hole_entered(body: Node2D) -> void:
 		RUN_STATE_TUTORIAL:
 			if not _tutorial_rewards_granted:
 				return
-			print("Wake sequence complete. Entering the Abyss Facility.")
+			print("Sealing wake sequence complete. Entering the sealed sector.")
 			call_deferred("_start_formal_run")
 		RUN_STATE_FORMAL:
 			call_deferred("_complete_formal_layer")
@@ -428,14 +428,14 @@ func _setup_layer_clear_screen() -> void:
 	margin.add_child(layout)
 
 	var title := Label.new()
-	title.text = "ABYSS SECTOR SEALED"
+	title.text = "SEALING PROTOCOL COMPLETE"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 26)
 	title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
 	layout.add_child(title)
 
 	var summary := Label.new()
-	summary.text = "Fusion node neutralized. Current build snapshot:"
+	summary.text = "Failed Subject A-03 neutralized. Current build snapshot:"
 	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	summary.add_theme_font_size_override("font_size", 14)
 	summary.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
@@ -449,7 +449,7 @@ func _setup_layer_clear_screen() -> void:
 	_layer_clear_weapons_label.add_theme_color_override("font_color", Color(0.88, 0.92, 0.92, 1.0))
 	layout.add_child(_wrap_layer_clear_detail(_layer_clear_weapons_label))
 
-	layout.add_child(_make_layer_clear_section_title("Recovered Assets"))
+	layout.add_child(_make_layer_clear_section_title("Recovered Evidence"))
 
 	_layer_clear_inventory_label = Label.new()
 	_layer_clear_inventory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -469,7 +469,7 @@ func _setup_layer_clear_screen() -> void:
 	buttons.add_child(restart_button)
 
 	var next_layer_button := Button.new()
-	next_layer_button.text = "Deeper Sector Coming Soon"
+	next_layer_button.text = "Deeper Sealed Sector Coming Soon"
 	next_layer_button.disabled = true
 	next_layer_button.custom_minimum_size = Vector2(190, 42)
 	buttons.add_child(next_layer_button)
@@ -572,9 +572,9 @@ func _get_layer_clear_weapon_text() -> String:
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "Research Data: 0    Protomatter: 0    Biometric Keys: 0    Breach Charges: 0"
+		return "Research Data: 0    Protomatter Shards: 0    Biometric Keys: 0    Breach Charges: 0"
 
-	return "Research Data: %d    Protomatter: %d    Biometric Keys: %d    Breach Charges: %d" % [
+	return "Research Data: %d    Protomatter Shards: %d    Biometric Keys: %d    Breach Charges: %d" % [
 		inventory.get_item_amount("Research Data"),
 		inventory.get_item_amount("Protomatter Fragment"),
 		inventory.get_item_amount("Biometric Key"),
@@ -653,20 +653,20 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 	match room.lab_room_type:
 		"tutorial_start":
-			_show_tutorial_hint("Calibration gate online. Move right to enter the target range.")
+			_show_tutorial_hint("Sealing Protocol online. Move right to begin target sync.")
 		"tutorial_targets":
-			_show_tutorial_hint("Hit TARGET A, B, C, and D with any weapon. All targets online will unlock the right door.")
+			_show_tutorial_hint("Sync TARGET A, B, C, and D with any weapon. All targets online will unlock the right door.")
 		"tutorial_merchant":
-			_show_tutorial_hint("Raven left a test blade here. Press F to pick it up. Press 4 to equip it, then continue right.")
+			_show_tutorial_hint("Raven left a quarantine blade here. Press F to pick it up. Press 4 to equip it, then continue right.")
 		"tutorial_combat":
-			_show_tutorial_hint("Clear the specimens. Open the cache for a Breach Charge. Press E to plant it, crack the resin, then recover the data.")
+			_show_tutorial_hint("Clear the specimens. Open the cache for a Breach Charge. Press E to plant it, crack the quarantine resin, then recover the data.")
 		"tutorial_boss":
 			if _tutorial_rewards_granted:
-				_show_tutorial_hint("Wake sequence complete. Enter the Entropy Rift to reach the Abyss Facility.")
+				_show_tutorial_hint("Sealing wake sequence complete. Enter the Descent Rift to reach the sealed sector.")
 			elif _tutorial_rewards_dropped:
-				_show_tutorial_hint("Enter the Entropy Rift to reach the Abyss Facility.")
+				_show_tutorial_hint("Enter the Descent Rift to reach the sealed sector.")
 			else:
-				_show_tutorial_hint("Neutralize the low-grade Fusion, then enter the Entropy Rift.")
+				_show_tutorial_hint("Neutralize Failed Subject A-03, then enter the Descent Rift.")
 		_:
 			_hide_tutorial_hint()
 
@@ -688,7 +688,7 @@ func _print_dungeon_summary() -> void:
 	var seed_text := ""
 	if _run_state == RUN_STATE_FORMAL and use_generated_lab_dungeon:
 		seed_text = " (seed %d)" % LabDungeonGenerator.last_seed
-	print("Generated %d-room %s Abyss Facility sector%s:" % [rooms.size(), _run_state, seed_text])
+	print("Generated %d-room %s Sealing Protocol sector%s:" % [rooms.size(), _run_state, seed_text])
 	for room_pos in rooms:
 		var room = rooms[room_pos]
 		print(" - ", room.lab_room_label, " [", room.lab_room_type, "] at ", room_pos)

@@ -67,7 +67,7 @@ func _pick_unowned_weapon_scene(rng: RandomNumberGenerator) -> PackedScene:
 	if candidates.is_empty():
 		return null
 	var selected_scene := candidates[rng.randi_range(0, candidates.size() - 1)] as PackedScene
-	print("Raven Cache dropped %s from %d unowned candidates." % [_get_weapon_label(selected_scene), candidates.size()])
+	print("Raven Armory Cache dropped %s from %d unowned candidates." % [_get_weapon_label(selected_scene), candidates.size()])
 	return selected_scene
 
 

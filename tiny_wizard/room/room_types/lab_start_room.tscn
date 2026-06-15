@@ -5,7 +5,7 @@
 
 [node name="Room" instance=ExtResource("1_base_room")]
 lab_room_type = "start"
-lab_room_label = "Abyss Calibration Gate"
+lab_room_label = "Sealing Protocol Wake Bay"
 
 [node name="CalibrationZone" type="Node2D" parent="." index="11"]
 y_sort_enabled = true
@@ -135,10 +135,10 @@ position = Vector2(878, 428)
 color = Color(0.24, 0.18, 0.1, 1)
 polygon = PackedVector2Array(-27, -21, 27, -21, 27, 21, -27, 21)
 
-[node name="PanshiSleepPod" parent="." index="8" instance=ExtResource("3_sleep_pod")]
+[node name="TiemuSleepPod" parent="." index="8" instance=ExtResource("3_sleep_pod")]
 position = Vector2(560, 194)
 character_id = "panshi"
-pod_label = "Panshi"
+pod_label = "Tiemu"
 accent_color = Color(0.35, 0.85, 0.95, 1)
 
 [node name="LiuyingSleepPod" parent="." index="9" instance=ExtResource("3_sleep_pod")]

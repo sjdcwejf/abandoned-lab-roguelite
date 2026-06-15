@@ -7,7 +7,7 @@ signal boss_defeated
 const DEFAULT_SUMMON_SCENE := preload("res://tiny_wizard/enemies/black_fly/black_fly.tscn")
 const POISON_PROJECTILE_SCENE := preload("res://tiny_wizard/enemies/fusion_boss/fusion_poison_projectile.tscn")
 
-@export var boss_display_name := "Prototype Fusion"
+@export var boss_display_name := "Failed Subject A-03: Breach Husk"
 @export var far_distance := 270.0
 @export var mid_distance := 120.0
 @export var chase_speed_multiplier := 1.0

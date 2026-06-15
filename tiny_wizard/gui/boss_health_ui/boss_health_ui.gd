@@ -21,7 +21,7 @@ func bind_boss(boss: Node) -> void:
 
 	var display_name := str(_boss.get("boss_display_name"))
 	if display_name.strip_edges().is_empty():
-		display_name = "Fusion Node"
+		display_name = "Failed Subject A-03"
 	_name_label.text = display_name
 
 	if _boss.has_signal("boss_stats_changed"):
@@ -89,7 +89,7 @@ func _build_ui() -> void:
 	layout.add_child(header)
 
 	_name_label = Label.new()
-	_name_label.text = "Fusion Node"
+	_name_label.text = "Failed Subject A-03"
 	_name_label.add_theme_color_override("font_color", Color(0.76, 1.0, 0.86))
 	_name_label.add_theme_font_size_override("font_size", 14)
 	header.add_child(_name_label)
