@@ -14,11 +14,11 @@ Current design direction:
   - Energy Saber
   - Power Gauntlets
 
-Story and worldbuilding baseline:
+Story and worldbuilding source order:
 
-- `docs/剧情设定_生化协议_熵区.md`
-- `docs/前期故事梗概与人物信息.md`
-- `docs/角色设定.md`
+- `docs/前期故事梗概与人物信息.md` is the long-term story, art, and character-direction source.
+- `docs/角色设定.md` records the current playable implementation: Tiemu, Liuying, and Huisheng, plus the planned fourth subject Shitong.
+- `docs/剧情设定_生化协议_熵区.md` is the current worldbuilding source.
 - `docs/状态效果系统.md`
 
 This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shooter Core. See `LICENSES/THIRD_PARTY_NOTICES.md` for source and license details.
@@ -28,6 +28,8 @@ This project is currently based on Quiver's Tiny Wizard Demo and Top-Down Shoote
 - Tiemu / Iron Curtain: a stable adaptive strain built to hold the line. High HP, slower movement, starts with the Laser Pointer, can trigger Iron Curtain Protocol, and passively absorbs 1 incoming damage every 5 seconds.
 - Liuying / Shadow: a neural-reflex subject tuned for high-speed flanks and risky repositioning. Low HP, very high movement speed, starts with the Containment Nailgun, has a 15% dodge chance, and gains faster attacks after dodging or using Phase Assault.
 - Huisheng / Echo: a resonance subject tuned for energy-control experiments. Medium HP, balanced movement, starts with the Energy Saber, can trigger Echo Pulse, and restores energy from weapon hits.
+
+Shitong is the planned fourth subject from the long-term character direction. Shitong is not selectable or implemented in the current prototype yet.
 
 ## Current Prototype Controls
 
@@ -61,7 +63,7 @@ The player now equips a new MVP weapon slot at startup. Press `1`, `2`, or `3` t
 
 Each subject now has an energy resource and one active skill on `Q`. The HUD shows the current skill, energy, and readiness state:
 
-- Tiemu - Iron Curtain Protocol: costs 40 energy, gains temporary shield, reduces incoming damage, and emits a short defensive pulse.
+- Tiemu - Iron Curtain Protocol: costs 40 energy, gains temporary shield, reduces incoming damage, emits a defensive shockwave that damages and slows nearby specimens, and slightly improves weapon rhythm while active.
 - Liuying - Phase Assault: costs 30 energy, has 2 charges, dashes through enemies, deals reduced weapon-based damage, applies Vulnerable for 3 seconds, and briefly avoids damage during the dash. Liuying also leaves short blue afterimages while moving; nearby red and black fly enemies prefer those afterimages as temporary decoy targets.
 - Huisheng - Echo Pulse: costs 35 energy and emits a resonance wave that damages nearby enemies and slows affected specimens.
 

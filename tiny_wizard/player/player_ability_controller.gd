@@ -19,8 +19,11 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export var panshi_shield_gain := 2
 @export var panshi_damage_multiplier := 0.7
 @export var panshi_pulse_radius := 132.0
-@export var panshi_pulse_damage := 1
+@export var panshi_pulse_damage := 2
 @export var panshi_energy_cost := 40.0
+@export var tiemu_pulse_slow_duration := 1.8
+@export var tiemu_pulse_slow_multiplier := 0.62
+@export var tiemu_fire_cooldown_multiplier := 0.82
 @export var tiemu_plating_cooldown := 5.0
 @export_range(0, 10, 1) var tiemu_plating_damage_reduction := 1
 
@@ -119,6 +122,8 @@ func modify_incoming_damage(damage: int) -> int:
 
 
 func get_fire_cooldown_multiplier() -> float:
+	if ability_id == ABILITY_PANSHI and _active_remaining > 0.0:
+		return tiemu_fire_cooldown_multiplier
 	if _fire_rate_remaining > 0.0:
 		return liuying_fire_cooldown_multiplier
 	return 1.0
@@ -220,7 +225,13 @@ func _activate_panshi() -> void:
 
 	_show_aura(Color(0.42, 0.9, 1.0, 0.82), 78.0, panshi_duration)
 	_show_pulse(Color(0.38, 0.9, 1.0, 0.9), panshi_pulse_radius, 0.35)
-	_damage_targets_in_radius(panshi_pulse_radius, panshi_pulse_damage, false)
+	_damage_targets_in_radius(
+		panshi_pulse_radius,
+		panshi_pulse_damage,
+		true,
+		tiemu_pulse_slow_duration,
+		tiemu_pulse_slow_multiplier
+	)
 
 
 func _end_panshi_protocol() -> void:
@@ -324,6 +335,15 @@ func get_ability_status_text() -> String:
 		if _liuying_momentum_active:
 			return "Momentum active"
 		return "Charges %d/%d" % [_liuying_charges, _get_liuying_max_charges()]
+
+	if ability_id == ABILITY_PANSHI:
+		if _active_remaining > 0.0:
+			return "Iron wall %.1fs" % _active_remaining
+		if _cooldown_remaining > 0.0:
+			return "Cooldown %.1fs" % _cooldown_remaining
+		if _tiemu_plating_cooldown_remaining > 0.0:
+			return "Plating %.1fs" % _tiemu_plating_cooldown_remaining
+		return "Ready"
 
 	if _cooldown_remaining > 0.0:
 		return "Cooldown %.1fs" % _cooldown_remaining
@@ -453,12 +473,18 @@ func _get_liuying_dash_damage() -> int:
 	return maxi(1, ceili(float(base_damage) * liuying_dash_damage_ratio))
 
 
-func _damage_targets_in_radius(radius: float, damage: int, apply_slow: bool) -> void:
+func _damage_targets_in_radius(
+	radius: float,
+	damage: int,
+	apply_slow: bool,
+	slow_duration := -1.0,
+	slow_multiplier := -1.0
+) -> void:
 	if _character == null or _character.get_world_2d() == null:
 		return
 
 	var hit_targets: Dictionary = {}
-	_damage_targets_at_position(_character.global_position, radius, damage, apply_slow, false, hit_targets)
+	_damage_targets_at_position(_character.global_position, radius, damage, apply_slow, false, hit_targets, slow_duration, slow_multiplier)
 
 
 func _damage_targets_along_segment(start_position: Vector2, end_position: Vector2, radius: float, damage: int, apply_vulnerable: bool) -> void:
@@ -474,7 +500,16 @@ func _damage_targets_along_segment(start_position: Vector2, end_position: Vector
 		_damage_targets_at_position(sample_position, radius, damage, false, apply_vulnerable, hit_targets)
 
 
-func _damage_targets_at_position(origin: Vector2, radius: float, damage: int, apply_slow: bool, apply_vulnerable: bool, hit_targets: Dictionary) -> void:
+func _damage_targets_at_position(
+	origin: Vector2,
+	radius: float,
+	damage: int,
+	apply_slow: bool,
+	apply_vulnerable: bool,
+	hit_targets: Dictionary,
+	slow_duration := -1.0,
+	slow_multiplier := -1.0
+) -> void:
 	var shape := CircleShape2D.new()
 	shape.radius = radius
 
@@ -503,7 +538,9 @@ func _damage_targets_at_position(origin: Vector2, radius: float, damage: int, ap
 			hit_from = ((damage_target as Node2D).global_position - origin).normalized()
 		damage_target.call("hit", damage, hit_from)
 		if apply_slow:
-			STATUS_EFFECTS.apply_slow(damage_target, huisheng_slow_duration, huisheng_slow_multiplier)
+			var final_slow_duration := huisheng_slow_duration if slow_duration <= 0.0 else slow_duration
+			var final_slow_multiplier := huisheng_slow_multiplier if slow_multiplier <= 0.0 else slow_multiplier
+			STATUS_EFFECTS.apply_slow(damage_target, final_slow_duration, final_slow_multiplier)
 		if apply_vulnerable:
 			STATUS_EFFECTS.apply_vulnerable(damage_target, liuying_vulnerable_duration, liuying_vulnerable_damage_multiplier)
 

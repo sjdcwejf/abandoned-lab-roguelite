@@ -102,14 +102,14 @@ theme_override_constants/separation = 8
 [node name="Title" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "BIO PROTOCOL: ENTROPY ZONE"
+text = "生化协议：熵区"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.66, 0.82, 0.86, 1)
 theme_override_font_sizes/font_size = 12
-text = "Sealing Protocol wake sequence online. Choose one adaptive subject."
+text = "封存协议唤醒序列已启动。选择一名适格实验体。"
 horizontal_alignment = 1
 
 [node name="Choices" type="HBoxContainer" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
@@ -171,7 +171,7 @@ grow_vertical = 2
 mouse_filter = 2
 offset_bottom = -116.0
 theme_override_font_sizes/font_size = 13
-text = "Tiemu - Iron Curtain"
+text = "铁幕"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -187,7 +187,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.74, 0.88, 0.9, 1)
 theme_override_font_sizes/font_size = 10
-text = "A-12 | Defense / Shield\nHP 8 | EN 90 | SPD 185"
+text = "A-12 | 防线 / 护盾\n生命 8 | 能量 90 | 速度 185"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -204,7 +204,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.62, 0.74, 0.78, 1)
 theme_override_font_sizes/font_size = 9
-text = "Weapon: Laser Pointer\nQ: Iron Curtain Protocol\nPassive: absorbs 1 hit damage / 5s."
+text = "武器：校准激光笔\nQ：护盾 + 冲击减速\n被动：每 5 秒吸收伤害"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -261,7 +261,7 @@ grow_vertical = 2
 mouse_filter = 2
 offset_bottom = -116.0
 theme_override_font_sizes/font_size = 13
-text = "Liuying - Shadow"
+text = "流影"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -277,7 +277,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.48, 1)
 theme_override_font_sizes/font_size = 10
-text = "A-07 | Mobility / Decoy\nHP 5 | EN 100 | SPD 285"
+text = "A-07 | 机动 / 残影\n生命 5 | 能量 100 | 速度 285"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -294,7 +294,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.65, 0.42, 1)
 theme_override_font_sizes/font_size = 9
-text = "Weapon: Containment Nailgun\nQ: Phase Assault x2\nPassive: dodge/dash speeds attacks."
+text = "武器：收容钉枪\nQ：相位突袭 x2\n被动：闪避或突袭后加快攻击"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -352,7 +352,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 13
-text = "Huisheng - Echo"
+text = "回声"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -368,7 +368,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.68, 1, 1)
 theme_override_font_sizes/font_size = 10
-text = "B-04 | Energy / Control\nHP 6 | EN 120 | SPD 205"
+text = "B-04 | 能量 / 控制\n生命 6 | 能量 120 | 速度 205"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -385,7 +385,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.7, 0.62, 0.86, 1)
 theme_override_font_sizes/font_size = 9
-text = "Weapon: Energy Saber\nQ: Echo Pulse\nPassive: weapon hits restore energy."
+text = "武器：能量光剑\nQ：回声脉冲\n被动：武器命中回复能量"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
