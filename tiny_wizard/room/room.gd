@@ -43,6 +43,7 @@ const GUI_SCENE = preload("res://tiny_wizard/gui/gui.tscn")
 @export var hide_down_door := false
 @export var hide_left_door := false
 @export var hide_up_door := false
+@export var lock_chests_until_cleared := true
 
 var room_pos := Vector2i.ZERO
 var lab_room_type := "combat"
@@ -53,6 +54,9 @@ signal door_entered(direction)
 signal room_cleared(room: Room)
 
 func _ready():
+	if get_tree().current_scene != self:
+		_set_enemies_active(false)
+	_update_room_chest_locks()
 	# This spawns the player if launching the scene from the editor
 	# This allows to run the room and test it without having to launch the game
 	if get_tree().current_scene == self:
@@ -98,8 +102,8 @@ func enter_room():
 	var enemies = $Enemies.get_children()
 	if enemies.size() > 0 and not is_cleared:
 		# Wake up Enemies
-		for enemy in enemies:
-			enemy.set_deferred("process_mode", Node.PROCESS_MODE_INHERIT)
+		_set_enemies_active(true, true)
+		_update_room_chest_locks()
 		
 		# Close doors
 		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
@@ -143,12 +147,45 @@ func _mark_room_cleared() -> void:
 	if is_cleared:
 		return
 	is_cleared = true
+	_update_room_chest_locks()
 	_on_room_cleared()
 	room_cleared.emit(self)
 
 
 func _on_room_cleared() -> void:
 	pass
+
+
+func _set_enemies_active(active: bool, deferred := false) -> void:
+	if not has_node("Enemies"):
+		return
+
+	var next_mode := Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	for enemy in $Enemies.get_children():
+		if deferred:
+			enemy.set_deferred("process_mode", next_mode)
+		else:
+			enemy.process_mode = next_mode
+
+
+func _update_room_chest_locks() -> void:
+	if not lock_chests_until_cleared:
+		_set_chests_locked_recursive(self, false)
+		return
+	if not has_node("Enemies"):
+		_set_chests_locked_recursive(self, false)
+		return
+
+	var should_lock := not is_cleared and $Enemies.get_child_count() > 0
+	_set_chests_locked_recursive(self, should_lock)
+
+
+func _set_chests_locked_recursive(root: Node, locked: bool) -> void:
+	if root is LabChest:
+		(root as LabChest).set_room_locked(locked)
+
+	for child in root.get_children():
+		_set_chests_locked_recursive(child, locked)
 
 
 func _is_door_hidden(direction: Direction) -> bool:

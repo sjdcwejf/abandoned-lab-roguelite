@@ -31,6 +31,8 @@ func trigger(object: QuiverInteractableObject, character: QuiverCharacter):
 			active = false
 			# Visual opening
 			chest.open()
+			if object.has_method("mark_opened"):
+				object.call("mark_opened")
 			# Spawn items
 			for item in items:
 				if item is QuiverItem:
