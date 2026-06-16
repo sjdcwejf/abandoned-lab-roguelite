@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource( "1_isq16" )
-name = "Research Data"
-short_description = "Recovered Sealing Protocol data used by Raven and permanent systems."
+name = "Protomatter Fragment"
+short_description = "Legacy pickup now converted into an unstable protomatter shard."
 long_description = null
 stackable = true
 stack_size = null

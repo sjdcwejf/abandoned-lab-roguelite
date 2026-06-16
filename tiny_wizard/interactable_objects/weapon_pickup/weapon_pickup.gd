@@ -77,6 +77,9 @@ func _pick_up(character: Node2D) -> void:
 	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
 	if weapon_holder == null or not weapon_holder.has_method("add_weapon_scene"):
 		return
+	if weapon_holder.has_method("has_weapon_scene") and bool(weapon_holder.call("has_weapon_scene", weapon_scene)):
+		print("%s already owned; pickup ignored." % weapon_label)
+		return
 
 	var slot_index := -1
 	if target_slot_number > 0 and weapon_holder.has_method("add_weapon_scene_to_slot"):

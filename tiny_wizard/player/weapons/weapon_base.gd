@@ -3,6 +3,7 @@ extends Node2D
 
 
 @export var display_name := ""
+@export var weapon_id := ""
 @export var inventory_size := Vector2i(2, 1)
 @export var inventory_color := Color(0.26, 0.62, 0.9, 1.0)
 
@@ -16,6 +17,14 @@ func get_inventory_display_name() -> String:
 	if name != "":
 		return name
 	return "武器"
+
+
+func get_weapon_id() -> String:
+	if weapon_id != "":
+		return weapon_id
+	if scene_file_path != "":
+		return scene_file_path
+	return name
 
 
 func get_inventory_size() -> Vector2i:

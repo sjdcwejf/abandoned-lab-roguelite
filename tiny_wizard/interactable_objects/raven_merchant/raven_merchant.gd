@@ -128,6 +128,10 @@ func _try_purchase(character: Node2D) -> void:
 	if weapon_holder == null or not weapon_holder.has_method("add_weapon_scene"):
 		status_label.text = "未检测到武器挂架。"
 		return
+	if weapon_holder.has_method("has_weapon_scene") and bool(weapon_holder.call("has_weapon_scene", _selected_weapon_scene)):
+		status_label.text = "你已经拥有 %s。渡鸦换了一件货。" % _selected_weapon_name
+		_refresh_offer(character)
+		return
 
 	var purchased_scene := _selected_weapon_scene
 	var purchased_name := _selected_weapon_name

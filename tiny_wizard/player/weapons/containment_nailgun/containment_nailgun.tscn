@@ -7,6 +7,7 @@
 [node name="ContainmentNailgun" type="Node2D"]
 script = ExtResource("1_nailgun")
 display_name = "封控钉枪"
+weapon_id = "containment_nailgun"
 inventory_size = Vector2i(2, 1)
 inventory_color = Color(0.44, 0.62, 0.72, 1)
 projectile_scene = ExtResource("2_nail")

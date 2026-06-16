@@ -201,6 +201,9 @@ func get_owned_weapon_scene_keys() -> Dictionary:
 func get_weapon_scene_key(weapon_scene: PackedScene) -> String:
 	if weapon_scene == null:
 		return ""
+	var weapon_id := _get_weapon_scene_weapon_id(weapon_scene)
+	if weapon_id != "":
+		return weapon_id
 	if weapon_scene.resource_path != "":
 		return weapon_scene.resource_path
 	return str(weapon_scene.get_instance_id())
@@ -230,6 +233,18 @@ func _add_owned_weapon_scene_key(owned: Dictionary, weapon_scene) -> void:
 	if key == "":
 		return
 	owned[key] = true
+
+
+func _get_weapon_scene_weapon_id(weapon_scene: PackedScene) -> String:
+	var weapon := weapon_scene.instantiate()
+	if weapon == null:
+		return ""
+
+	var key := ""
+	if weapon is LabWeapon:
+		key = (weapon as LabWeapon).get_weapon_id()
+	weapon.free()
+	return key
 
 
 func _get_weapon_scene_inventory_info(weapon_scene: PackedScene) -> Dictionary:

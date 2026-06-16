@@ -100,7 +100,7 @@ func _enter_start_room(wake_character_id := "") -> void:
 	_character.global_position = _get_start_spawn_position(start_room, wake_character_id)
 	start_room.enter_room()
 	_print_dungeon_summary()
-	_update_tutorial_hint_for_room(start_room)
+	_update_room_feedback_for_room(start_room)
 
 
 func move_camera(direction: Vector2):
@@ -121,7 +121,7 @@ func move_camera(direction: Vector2):
 	if _character != null:
 		_character.global_position = next_room.get_spawning_point(direction).global_position
 	next_room.enter_room()
-	_update_tutorial_hint_for_room(next_room)
+	_update_room_feedback_for_room(next_room)
 
 
 func get_room(room_coord: Vector2i):
@@ -341,7 +341,7 @@ func _respawn_character_at_start() -> void:
 	if character_stats != null:
 		character_stats.set_life_to_max()
 	start_room.enter_room()
-	_update_tutorial_hint_for_room(start_room)
+	_update_room_feedback_for_room(start_room)
 	print("Subject respawned in Sealing Airlock.")
 
 
@@ -585,10 +585,9 @@ func _get_layer_clear_weapon_text() -> String:
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "研究数据：0    原质碎片：0    生物识别钥：0    破障炸药：0"
+		return "原质碎片：0    生物识别钥：0    破障炸药：0"
 
-	return "研究数据：%d    原质碎片：%d    生物识别钥：%d    破障炸药：%d" % [
-		inventory.get_item_amount("Research Data"),
+	return "原质碎片：%d    生物识别钥：%d    破障炸药：%d" % [
 		inventory.get_item_amount("Protomatter Fragment"),
 		inventory.get_item_amount("Biometric Key"),
 		inventory.get_item_amount("Breach Charge")
@@ -661,6 +660,16 @@ func _setup_tutorial_hint() -> void:
 	_tutorial_hint_panel.add_child(_tutorial_hint_label)
 
 
+func _update_room_feedback_for_room(room: Room) -> void:
+	if _run_state == RUN_STATE_TUTORIAL:
+		_update_tutorial_hint_for_room(room)
+		return
+	if _run_state == RUN_STATE_FORMAL:
+		_update_formal_room_feedback(room)
+		return
+	_hide_tutorial_hint()
+
+
 func _update_tutorial_hint_for_room(room: Room) -> void:
 	if _run_state != RUN_STATE_TUTORIAL:
 		_hide_tutorial_hint()
@@ -684,6 +693,53 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 				_show_tutorial_hint("肃清失格者 A-03，然后进入下行裂隙。")
 		_:
 			_hide_tutorial_hint()
+
+
+func _update_formal_room_feedback(room: Room) -> void:
+	var type_label := _get_formal_room_type_label(room.lab_room_type)
+	var objective := _get_formal_room_objective(room.lab_room_type)
+	var room_label := room.lab_room_label
+	if room_label == "":
+		room_label = type_label
+
+	if objective == "":
+		_show_tutorial_hint("%s | %s" % [room_label, type_label])
+	else:
+		_show_tutorial_hint("%s | %s\n目标：%s" % [room_label, type_label, objective])
+
+
+func _get_formal_room_type_label(room_type: String) -> String:
+	match room_type:
+		"start":
+			return "起点房"
+		"combat":
+			return "怪物房"
+		"reward":
+			return "奖励房"
+		"weapon":
+			return "武器房"
+		"merchant":
+			return "安全屋"
+		"boss":
+			return "Boss 房"
+	return "未知区域"
+
+
+func _get_formal_room_objective(room_type: String) -> String:
+	match room_type:
+		"start":
+			return "确认装备状态，进入封存区。"
+		"combat":
+			return "清除房内样本，解除门锁。"
+		"reward":
+			return "肃清守卫样本，回收补给箱。"
+		"weapon":
+			return "回收随机军械，整理当前构筑。"
+		"merchant":
+			return "与渡鸦交易，补充装备后前往下一房间。"
+		"boss":
+			return "击败失格者 A-03，稳定下行裂隙。"
+	return ""
 
 
 func _show_tutorial_hint(text: String) -> void:

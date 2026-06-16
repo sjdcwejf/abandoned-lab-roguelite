@@ -8,6 +8,7 @@ size = Vector2(74, 42)
 [node name="EnergySaber" type="Node2D"]
 script = ExtResource("1_saber")
 display_name = "能量光剑"
+weapon_id = "energy_saber"
 inventory_size = Vector2i(3, 1)
 inventory_color = Color(0.22, 0.92, 0.86, 1)
 damage = 2

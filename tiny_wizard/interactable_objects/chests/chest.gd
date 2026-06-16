@@ -11,6 +11,7 @@ var _opened := false
 func _ready():
 	super._ready()
 	action.items = items
+	_stabilize_physics_body()
 	_apply_room_lock()
 
 
@@ -44,6 +45,18 @@ func _apply_room_lock() -> void:
 
 
 func _freeze_physics_body() -> void:
+	_stabilize_physics_body()
+	var body := get_node_or_null(physics_body_path) as RigidBody2D
+	if body == null:
+		return
+
+	body.contact_monitor = false
+	body.collision_layer = 0
+	body.collision_mask = 0
+	_disable_collision_shapes(body)
+
+
+func _stabilize_physics_body() -> void:
 	var body := get_node_or_null(physics_body_path) as RigidBody2D
 	if body == null:
 		return
@@ -52,4 +65,13 @@ func _freeze_physics_body() -> void:
 	body.angular_velocity = 0.0
 	body.freeze = true
 	body.freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
-	body.contact_monitor = false
+	body.lock_rotation = true
+	body.contact_monitor = true
+	body.max_contacts_reported = 8
+
+
+func _disable_collision_shapes(root: Node) -> void:
+	for child in root.get_children():
+		if child is CollisionShape2D:
+			(child as CollisionShape2D).set_deferred("disabled", true)
+		_disable_collision_shapes(child)

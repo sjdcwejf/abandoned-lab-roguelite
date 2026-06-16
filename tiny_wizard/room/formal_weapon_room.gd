@@ -116,6 +116,9 @@ func _find_weapon_holder(root: Node) -> Node:
 func _weapon_scene_key(weapon_scene: PackedScene) -> String:
 	if weapon_scene == null:
 		return ""
+	var weapon_holder := _get_active_weapon_holder()
+	if weapon_holder != null and weapon_holder.has_method("get_weapon_scene_key"):
+		return str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
 	if weapon_scene.resource_path != "":
 		return weapon_scene.resource_path
 	return str(weapon_scene.get_instance_id())
