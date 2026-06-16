@@ -359,7 +359,10 @@ func _on_tutorial_boss_defeated() -> void:
 func _activate_tutorial_exit_black_hole() -> void:
 	var boss_room: Room = get_current_room()
 	if boss_room != null and boss_room.has_method("activate_exit_black_hole"):
-		boss_room.call("activate_exit_black_hole")
+		var avoid_position: Variant = null
+		if _character != null and is_instance_valid(_character):
+			avoid_position = _character.global_position
+		boss_room.call("activate_exit_black_hole", avoid_position)
 
 
 func _on_black_hole_entered(body: Node2D) -> void:
