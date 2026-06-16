@@ -4,7 +4,7 @@ const HEART_SCENE = preload("res://tiny_wizard/gui/life_ui/heart/heart.tscn")
 
 var max_life := 0
 var heart_slots := 0
-var _shield_value_label: Label
+var shield_slots := 0
 
 enum {EMPTY, HALF, FULL, FULL_SHIELD, HALF_SHIELD}
 
@@ -13,7 +13,6 @@ enum {EMPTY, HALF, FULL, FULL_SHIELD, HALF_SHIELD}
 
 func _ready():
 	super._ready()
-	_setup_value_labels()
 	update_ui()
 
 
@@ -25,6 +24,7 @@ func bind_player_stats(new_stats: QuiverCharacterStats) -> void:
 	player_stats = new_stats
 	max_life = 0
 	_set_heart_slot_count(0)
+	_set_shield_slot_count(0)
 	if player_stats is QuiverCharacterStats and not player_stats.stats_changed.is_connected(update_callable):
 		player_stats.stats_changed.connect(update_callable)
 	update_ui()
@@ -63,18 +63,15 @@ func update_ui():
 	var shield_count := 0
 	if "current_shield" in player_stats:
 		shield_count = int(player_stats.get("current_shield"))
-	_update_shield_value_label(shield_count)
+	_set_shield_slot_count(ceili(float(shield_count) / 2.0))
 
-
-func _setup_value_labels() -> void:
-	if _shield_value_label == null:
-		_shield_value_label = Label.new()
-		_shield_value_label.name = "ShieldValue"
-		_shield_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_shield_value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		_shield_value_label.add_theme_color_override("font_color", Color(0.6, 0.82, 1.0, 1.0))
-		_shield_value_label.add_theme_font_size_override("font_size", 14)
-		shield_container.add_child(_shield_value_label)
+	for shield in shield_container.get_children():
+		if shield_count >= 2:
+			shield.set_state(FULL_SHIELD)
+			shield_count -= 2
+		elif shield_count == 1:
+			shield.set_state(HALF_SHIELD)
+			shield_count -= 1
 
 
 func _set_heart_slot_count(target_count: int) -> void:
@@ -91,8 +88,15 @@ func _set_heart_slot_count(target_count: int) -> void:
 	heart_slots = target_count
 
 
-func _update_shield_value_label(shield_count: int) -> void:
-	if _shield_value_label == null:
-		return
-	_shield_value_label.visible = shield_count > 0
-	_shield_value_label.text = "护盾 +%d" % shield_count
+func _set_shield_slot_count(target_count: int) -> void:
+	target_count = maxi(0, target_count)
+	while shield_container.get_child_count() > target_count:
+		var child := shield_container.get_child(shield_container.get_child_count() - 1)
+		shield_container.remove_child(child)
+		child.queue_free()
+
+	while shield_container.get_child_count() < target_count:
+		var shield = HEART_SCENE.instantiate()
+		shield_container.add_child(shield)
+
+	shield_slots = target_count
