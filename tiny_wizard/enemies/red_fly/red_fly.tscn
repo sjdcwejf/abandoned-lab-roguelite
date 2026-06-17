@@ -2,10 +2,10 @@
 
 [ext_resource type="PackedScene" uid="uid://ckan5lwiqvq2a" path="res://top-down-shooter-core/character/character.tscn" id="1_5wxj1"]
 [ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="2_72r4n"]
-[ext_resource type="Script" path="res://tiny_wizard/enemies/black_fly/Visual.gd" id="2_w4t8f"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/red_fly/crawler_visual.gd" id="2_w4t8f"]
 [ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="3_acbgk"]
 [ext_resource type="Texture2D" uid="uid://cjjugml0purnn" path="res://tiny_wizard/assets/placeholder_art/shadow.png" id="3_m8u5l"]
-[ext_resource type="Texture2D" uid="uid://c20wpkdou740u" path="res://tiny_wizard/assets/placeholder_art/red_fly.png" id="5_sbtwb"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/maintenance_crawler_sheet.png" id="5_sbtwb"]
 [ext_resource type="Script" path="res://tiny_wizard/enemies/red_fly/red_fly_behavior.gd" id="7_a27uj"]
 [ext_resource type="PackedScene" uid="uid://c81dr52jie1dv" path="res://tiny_wizard/enemies/red_fly/red_fly_weapon.tscn" id="7_g7bvv"]
 [ext_resource type="PackedScene" uid="uid://cbx5e1m0wvfyn" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="8_8aefy"]
@@ -53,7 +53,7 @@ radius = 15.0923
 radius = 253.333
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_6gp4s"]
-radius = 7.0
+radius = 16.0
 
 [node name="RedFly" instance=ExtResource("1_5wxj1")]
 process_mode = 4
@@ -69,7 +69,7 @@ physics_stats = SubResource("Resource_d044m")
 script = ExtResource("2_w4t8f")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual" index="0"]
-position = Vector2(0, -52)
+position = Vector2(0, -30)
 sprite_frames = SubResource("SpriteFrames_63q4l")
 autoplay = "default"
 
@@ -95,4 +95,5 @@ z_index = -1
 shape = SubResource("CircleShape2D_qgtul")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(0, -30)
 shape = SubResource("CircleShape2D_6gp4s")
