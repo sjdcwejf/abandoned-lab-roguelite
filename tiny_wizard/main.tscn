@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://tiny_wizard/tiny_wizard_main.gd" id="1_5rjdy"]
 [ext_resource type="PackedScene" uid="uid://bnuih6qfwgu2p" path="res://tiny_wizard/player/player_character.tscn" id="2_5wjcq"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/player/containment_technician_character.tscn" id="3_technician"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/player/huisheng_character.tscn" id="4_huisheng"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/liuying_character.tscn" id="3_liuying"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/fengqun_character.tscn" id="4_fengqun"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/player/shitong_character.tscn" id="5_shitong"]
 [ext_resource type="PackedScene" uid="uid://c45gqa1w6c20d" path="res://tiny_wizard/gui/gui.tscn" id="13_ucw2f"]
 [ext_resource type="Resource" uid="uid://bpvgw7v25bbsx" path="res://tiny_wizard/player/inventory/inventory.tres" id="14_ui8tp"]
@@ -12,9 +12,9 @@
 [node name="BioProtocolEntropyZonePrototype" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_5rjdy")
-experimenter_character_scene = ExtResource("2_5wjcq")
-technician_character_scene = ExtResource("3_technician")
-huisheng_character_scene = ExtResource("4_huisheng")
+tiemu_character_scene = ExtResource("2_5wjcq")
+liuying_character_scene = ExtResource("3_liuying")
+fengqun_character_scene = ExtResource("4_fengqun")
 shitong_character_scene = ExtResource("5_shitong")
 character_select_scene = ExtResource("15_select")
 metadata/_edit_vertical_guides_ = [0.0]

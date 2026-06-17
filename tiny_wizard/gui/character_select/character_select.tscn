@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/gui/character_select/character_select.gd" id="1_select"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/test_subject_07_portrait.png" id="3_experimenter"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/containment_technician_13_portrait.png" id="4_technician"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/test_subject_07_portrait.png" id="3_tiemu"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/hero_portraits/liuying_a07_portrait.png" id="4_liuying"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.035, 0.041, 0.047, 0.58)
@@ -119,7 +119,7 @@ size_flags_stretch_ratio = 0.0
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="ExperimenterCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
+[node name="TiemuCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
 layout_mode = 2
 custom_minimum_size = Vector2(220, 350)
 size_flags_horizontal = 0
@@ -130,7 +130,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_card_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_card_pressed")
 theme_override_styles/focus = SubResource("StyleBoxFlat_card_hover")
 
-[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard"]
+[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TiemuCard"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -142,11 +142,11 @@ offset_bottom = -164.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_experimenter")
+texture = ExtResource("3_tiemu")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard"]
+[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TiemuCard"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -161,7 +161,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.015, 0.018, 0.021, 0.82)
 
-[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard/NameBar"]
+[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TiemuCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -175,7 +175,7 @@ text = "铁幕"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard/NameBar"]
+[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TiemuCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -191,7 +191,7 @@ text = "A-12 | 防线 / 护盾\n生命 8 | 能量 90 | 速度 185"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard/NameBar"]
+[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TiemuCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -209,7 +209,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="TechnicianCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
+[node name="LiuyingCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
 layout_mode = 2
 custom_minimum_size = Vector2(220, 350)
 size_flags_horizontal = 0
@@ -220,7 +220,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_card_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_card_pressed")
 theme_override_styles/focus = SubResource("StyleBoxFlat_card_hover")
 
-[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard"]
+[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/LiuyingCard"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -232,11 +232,11 @@ offset_bottom = -164.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("4_technician")
+texture = ExtResource("4_liuying")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard"]
+[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/LiuyingCard"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -251,7 +251,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.015, 0.018, 0.021, 0.82)
 
-[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard/NameBar"]
+[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/LiuyingCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -265,7 +265,7 @@ text = "流影"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard/NameBar"]
+[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/LiuyingCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -281,7 +281,7 @@ text = "A-07 | 机动 / 残影\n生命 5 | 能量 100 | 速度 285"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard/NameBar"]
+[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/LiuyingCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -299,7 +299,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="EchoCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
+[node name="FengqunCard" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices"]
 layout_mode = 2
 custom_minimum_size = Vector2(220, 350)
 size_flags_horizontal = 0
@@ -310,8 +310,8 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_card_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_card_pressed")
 theme_override_styles/focus = SubResource("StyleBoxFlat_card_hover")
 
-[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard"]
-modulate = Color(0.68, 0.76, 1, 1)
+[node name="Portrait" type="TextureRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/FengqunCard"]
+modulate = Color(0.68, 1, 0.88, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -323,11 +323,11 @@ offset_bottom = -164.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_experimenter")
+texture = ExtResource("3_tiemu")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard"]
+[node name="NameBar" type="ColorRect" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/FengqunCard"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -342,7 +342,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.015, 0.018, 0.021, 0.82)
 
-[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard/NameBar"]
+[node name="Name" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/FengqunCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -352,11 +352,11 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 13
-text = "回声"
+text = "蜂群"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard/NameBar"]
+[node name="Role" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/FengqunCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -366,13 +366,13 @@ offset_bottom = -76.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.78, 0.68, 1, 1)
+theme_override_colors/font_color = Color(0.56, 1, 0.84, 1)
 theme_override_font_sizes/font_size = 10
-text = "B-04 | 能量 / 控制\n生命 6 | 能量 120 | 速度 205"
+text = "B-04 | 无人机 / 支援\n生命 6 | 能量 120 | 速度 205"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard/NameBar"]
+[node name="Bio" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/FengqunCard/NameBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -383,9 +383,9 @@ offset_right = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.7, 0.62, 0.86, 1)
+theme_override_colors/font_color = Color(0.58, 0.9, 0.78, 1)
 theme_override_font_sizes/font_size = 9
-text = "武器：能量光剑\nQ：回声脉冲\n被动：武器命中回复能量"
+text = "武器：能量光剑\nQ：蜂群指令\n被动：集群回流"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -414,7 +414,7 @@ offset_bottom = -164.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_experimenter")
+texture = ExtResource("3_tiemu")
 expand_mode = 1
 stretch_mode = 5
 

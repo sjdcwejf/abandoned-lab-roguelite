@@ -2,7 +2,7 @@ class_name LabChineseFontBootstrap
 extends RefCounted
 
 
-const TEST_GLYPHS := "中文铁幕流影回声蚀瞳"
+const TEST_GLYPHS := "中文铁幕流影蜂群蚀瞳"
 
 static var _installed := false
 static var _installed_font_path := ""

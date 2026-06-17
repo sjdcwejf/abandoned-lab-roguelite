@@ -5,39 +5,35 @@ extends CanvasLayer
 signal character_selected(character_id: String)
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
-const PANSHI_ID := "panshi"
+const TIEMU_ID := "tiemu"
 const LIUYING_ID := "liuying"
-const HUISHENG_ID := "huisheng"
+const FENGQUN_ID := "fengqun"
 const SHITONG_ID := "shitong"
-const EXPERIMENTER_ID := PANSHI_ID
-const TECHNICIAN_ID := LIUYING_ID
-const LEGACY_EXPERIMENTER_ID := "experimenter"
-const LEGACY_TECHNICIAN_ID := "containment_technician"
 
-@onready var experimenter_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ExperimenterCard
-@onready var technician_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TechnicianCard
-@onready var echo_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/EchoCard
+@onready var tiemu_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/TiemuCard
+@onready var liuying_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/LiuyingCard
+@onready var fengqun_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/FengqunCard
 @onready var shitong_card: Button = $Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Choices/ShitongCard
 
 
 func _ready() -> void:
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
-	experimenter_card.pressed.connect(_on_experimenter_pressed)
-	technician_card.pressed.connect(_on_technician_pressed)
-	echo_card.pressed.connect(_on_echo_pressed)
+	tiemu_card.pressed.connect(_on_tiemu_pressed)
+	liuying_card.pressed.connect(_on_liuying_pressed)
+	fengqun_card.pressed.connect(_on_fengqun_pressed)
 	shitong_card.pressed.connect(_on_shitong_pressed)
 
 
-func _on_experimenter_pressed() -> void:
-	character_selected.emit(PANSHI_ID)
+func _on_tiemu_pressed() -> void:
+	character_selected.emit(TIEMU_ID)
 
 
-func _on_technician_pressed() -> void:
+func _on_liuying_pressed() -> void:
 	character_selected.emit(LIUYING_ID)
 
 
-func _on_echo_pressed() -> void:
-	character_selected.emit(HUISHENG_ID)
+func _on_fengqun_pressed() -> void:
+	character_selected.emit(FENGQUN_ID)
 
 
 func _on_shitong_pressed() -> void:

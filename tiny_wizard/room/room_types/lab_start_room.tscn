@@ -137,7 +137,7 @@ polygon = PackedVector2Array(-27, -21, 27, -21, 27, 21, -27, 21)
 
 [node name="TiemuSleepPod" parent="." index="8" instance=ExtResource("3_sleep_pod")]
 position = Vector2(500, 194)
-character_id = "panshi"
+character_id = "tiemu"
 pod_label = "铁幕"
 accent_color = Color(0.35, 0.85, 0.95, 1)
 
@@ -147,10 +147,10 @@ character_id = "liuying"
 pod_label = "流影"
 accent_color = Color(0.95, 0.58, 0.22, 1)
 
-[node name="HuishengSleepPod" parent="." index="10" instance=ExtResource("3_sleep_pod")]
+[node name="FengqunSleepPod" parent="." index="10" instance=ExtResource("3_sleep_pod")]
 position = Vector2(740, 194)
-character_id = "huisheng"
-pod_label = "回声"
+character_id = "fengqun"
+pod_label = "蜂群"
 accent_color = Color(0.58, 0.42, 1, 1)
 
 [node name="ShitongSleepPod" parent="." index="11" instance=ExtResource("3_sleep_pod")]

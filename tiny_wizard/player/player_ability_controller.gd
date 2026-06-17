@@ -3,25 +3,25 @@ extends Node2D
 
 
 const STATUS_EFFECTS := preload("res://tiny_wizard/status_effects/status_effect_controller.gd")
-const ABILITY_PANSHI := "panshi"
+const ABILITY_TIEMU := "tiemu"
 const ABILITY_LIUYING := "liuying"
-const ABILITY_HUISHENG := "huisheng"
+const ABILITY_FENGQUN := "fengqun"
 const ABILITY_SHITONG := "shitong"
 const LIUYING_DECOY_GROUP := "lab_decoy_targets"
 const META_DECOY_OWNER := "lab_decoy_owner"
 const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 
-@export_enum("panshi", "liuying", "huisheng", "shitong") var ability_id := ABILITY_PANSHI
+@export_enum("tiemu", "liuying", "fengqun", "shitong") var ability_id := ABILITY_TIEMU
 @export var enemy_collision_mask := 8
 
 @export_group("Tiemu")
-@export var panshi_cooldown := 12.0
-@export var panshi_duration := 4.0
-@export var panshi_shield_gain := 2
-@export var panshi_damage_multiplier := 0.7
-@export var panshi_pulse_radius := 132.0
-@export var panshi_pulse_damage := 2
-@export var panshi_energy_cost := 40.0
+@export var tiemu_cooldown := 12.0
+@export var tiemu_duration := 4.0
+@export var tiemu_shield_gain := 2
+@export var tiemu_damage_multiplier := 0.7
+@export var tiemu_pulse_radius := 132.0
+@export var tiemu_pulse_damage := 2
+@export var tiemu_energy_cost := 40.0
 @export var tiemu_pulse_slow_duration := 1.8
 @export var tiemu_pulse_slow_multiplier := 0.62
 @export var tiemu_fire_cooldown_multiplier := 0.82
@@ -49,15 +49,15 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export var liuying_fire_rate_time := 2.0
 @export var liuying_fire_cooldown_multiplier := 0.75
 
-@export_group("Huisheng")
-@export var huisheng_cooldown := 9.0
-@export var huisheng_pulse_radius := 180.0
-@export var huisheng_pulse_damage := 1
-@export var huisheng_slow_duration := 2.0
-@export var huisheng_slow_multiplier := 0.55
-@export var huisheng_energy_cost := 35.0
-@export var huisheng_resonance_energy_per_hit := 4.0
-@export var huisheng_resonance_hit_cooldown := 0.35
+@export_group("Fengqun")
+@export var fengqun_cooldown := 9.0
+@export var fengqun_pulse_radius := 180.0
+@export var fengqun_pulse_damage := 1
+@export var fengqun_slow_duration := 2.0
+@export var fengqun_slow_multiplier := 0.55
+@export var fengqun_energy_cost := 35.0
+@export var fengqun_network_energy_per_hit := 4.0
+@export var fengqun_network_hit_cooldown := 0.35
 
 @export_group("Shitong")
 @export var shitong_cooldown := 10.0
@@ -78,9 +78,9 @@ var _active_remaining := 0.0
 var _invulnerable_remaining := 0.0
 var _fire_rate_remaining := 0.0
 var _tiemu_plating_cooldown_remaining := 0.0
-var _huisheng_resonance_cooldown_remaining := 0.0
+var _fengqun_network_cooldown_remaining := 0.0
 var _shitong_passive_cooldown_remaining := 0.0
-var _panshi_shield_added := 0
+var _tiemu_shield_added := 0
 var _liuying_charges := 0
 var _liuying_charge_timer := 0.0
 var _liuying_moving_time := 0.0
@@ -127,17 +127,17 @@ func notify_damage_taken() -> void:
 
 
 func modify_incoming_damage(damage: int) -> int:
-	if ability_id == ABILITY_PANSHI and _tiemu_plating_cooldown_remaining <= 0.0 and tiemu_plating_damage_reduction > 0:
+	if ability_id == ABILITY_TIEMU and _tiemu_plating_cooldown_remaining <= 0.0 and tiemu_plating_damage_reduction > 0:
 		_tiemu_plating_cooldown_remaining = tiemu_plating_cooldown
 		_show_pulse(Color(0.36, 0.96, 1.0, 0.72), 46.0, 0.14)
 		return maxi(0, damage - tiemu_plating_damage_reduction)
-	if ability_id == ABILITY_PANSHI and _active_remaining > 0.0:
-		return maxi(1, ceili(float(damage) * panshi_damage_multiplier))
+	if ability_id == ABILITY_TIEMU and _active_remaining > 0.0:
+		return maxi(1, ceili(float(damage) * tiemu_damage_multiplier))
 	return damage
 
 
 func get_fire_cooldown_multiplier() -> float:
-	if ability_id == ABILITY_PANSHI and _active_remaining > 0.0:
+	if ability_id == ABILITY_TIEMU and _active_remaining > 0.0:
 		return tiemu_fire_cooldown_multiplier
 	if _fire_rate_remaining > 0.0:
 		return liuying_fire_cooldown_multiplier
@@ -152,8 +152,8 @@ func get_cooldown_remaining() -> float:
 
 func notify_weapon_hit(_target: Object, _damage: int) -> void:
 	match ability_id:
-		ABILITY_HUISHENG:
-			_try_huisheng_resonance_return()
+		ABILITY_FENGQUN:
+			_try_fengqun_network_return()
 		ABILITY_SHITONG:
 			_try_shitong_parasitic_corrosion(_target)
 
@@ -171,14 +171,14 @@ func _tick_timers(delta: float) -> void:
 		_fire_rate_remaining = maxf(0.0, _fire_rate_remaining - delta)
 	if _tiemu_plating_cooldown_remaining > 0.0:
 		_tiemu_plating_cooldown_remaining = maxf(0.0, _tiemu_plating_cooldown_remaining - delta)
-	if _huisheng_resonance_cooldown_remaining > 0.0:
-		_huisheng_resonance_cooldown_remaining = maxf(0.0, _huisheng_resonance_cooldown_remaining - delta)
+	if _fengqun_network_cooldown_remaining > 0.0:
+		_fengqun_network_cooldown_remaining = maxf(0.0, _fengqun_network_cooldown_remaining - delta)
 	if _shitong_passive_cooldown_remaining > 0.0:
 		_shitong_passive_cooldown_remaining = maxf(0.0, _shitong_passive_cooldown_remaining - delta)
 	if _active_remaining > 0.0:
 		_active_remaining = maxf(0.0, _active_remaining - delta)
-		if _active_remaining <= 0.0 and ability_id == ABILITY_PANSHI:
-			_end_panshi_protocol()
+		if _active_remaining <= 0.0 and ability_id == ABILITY_TIEMU:
+			_end_tiemu_protocol()
 
 
 func _tick_energy_regen(delta: float) -> void:
@@ -223,45 +223,45 @@ func _try_activate() -> void:
 	match ability_id:
 		ABILITY_LIUYING:
 			_activate_liuying()
-		ABILITY_HUISHENG:
-			_activate_huisheng()
+		ABILITY_FENGQUN:
+			_activate_fengqun()
 		ABILITY_SHITONG:
 			_activate_shitong()
 		_:
-			_activate_panshi()
+			_activate_tiemu()
 
 
-func _activate_panshi() -> void:
-	if not _try_spend_energy(panshi_energy_cost):
+func _activate_tiemu() -> void:
+	if not _try_spend_energy(tiemu_energy_cost):
 		return
 
-	_cooldown_remaining = panshi_cooldown
-	_active_remaining = panshi_duration
-	_panshi_shield_added = 0
+	_cooldown_remaining = tiemu_cooldown
+	_active_remaining = tiemu_duration
+	_tiemu_shield_added = 0
 
 	var stats := _character.character_stats
 	if "current_shield" in stats:
-		stats.current_shield += panshi_shield_gain
-		_panshi_shield_added = panshi_shield_gain
+		stats.current_shield += tiemu_shield_gain
+		_tiemu_shield_added = tiemu_shield_gain
 
-	_show_aura(Color(0.42, 0.9, 1.0, 0.82), 78.0, panshi_duration)
-	_show_pulse(Color(0.38, 0.9, 1.0, 0.9), panshi_pulse_radius, 0.35)
+	_show_aura(Color(0.42, 0.9, 1.0, 0.82), 78.0, tiemu_duration)
+	_show_pulse(Color(0.38, 0.9, 1.0, 0.9), tiemu_pulse_radius, 0.35)
 	_damage_targets_in_radius(
-		panshi_pulse_radius,
-		panshi_pulse_damage,
+		tiemu_pulse_radius,
+		tiemu_pulse_damage,
 		true,
 		tiemu_pulse_slow_duration,
 		tiemu_pulse_slow_multiplier
 	)
 
 
-func _end_panshi_protocol() -> void:
+func _end_tiemu_protocol() -> void:
 	if _character == null:
 		return
 	var stats := _character.character_stats
-	if "current_shield" in stats and _panshi_shield_added > 0:
-		stats.current_shield = maxi(0, stats.current_shield - _panshi_shield_added)
-	_panshi_shield_added = 0
+	if "current_shield" in stats and _tiemu_shield_added > 0:
+		stats.current_shield = maxi(0, stats.current_shield - _tiemu_shield_added)
+	_tiemu_shield_added = 0
 	_hide_aura()
 
 
@@ -293,13 +293,13 @@ func _activate_liuying() -> void:
 	_show_pulse(Color(0.95, 0.72, 0.34, 0.85), 54.0, 0.18)
 
 
-func _activate_huisheng() -> void:
-	if not _try_spend_energy(huisheng_energy_cost):
+func _activate_fengqun() -> void:
+	if not _try_spend_energy(fengqun_energy_cost):
 		return
 
-	_cooldown_remaining = huisheng_cooldown
-	_show_pulse(Color(0.64, 0.46, 1.0, 0.92), huisheng_pulse_radius, 0.48)
-	_damage_targets_in_radius(huisheng_pulse_radius, huisheng_pulse_damage, true)
+	_cooldown_remaining = fengqun_cooldown
+	_show_pulse(Color(0.34, 0.96, 0.82, 0.92), fengqun_pulse_radius, 0.48)
+	_damage_targets_in_radius(fengqun_pulse_radius, fengqun_pulse_damage, true)
 
 
 func _activate_shitong() -> void:
@@ -322,8 +322,8 @@ func get_ability_display_name() -> String:
 	match ability_id:
 		ABILITY_LIUYING:
 			return "相位突袭"
-		ABILITY_HUISHENG:
-			return "回声脉冲"
+		ABILITY_FENGQUN:
+			return "蜂群指令"
 		ABILITY_SHITONG:
 			return "蚀瞳凝视"
 		_:
@@ -334,12 +334,12 @@ func get_ability_energy_cost() -> float:
 	match ability_id:
 		ABILITY_LIUYING:
 			return liuying_energy_cost
-		ABILITY_HUISHENG:
-			return huisheng_energy_cost
+		ABILITY_FENGQUN:
+			return fengqun_energy_cost
 		ABILITY_SHITONG:
 			return shitong_energy_cost
 		_:
-			return panshi_energy_cost
+			return tiemu_energy_cost
 
 
 func get_energy_current() -> float:
@@ -377,7 +377,7 @@ func get_ability_status_text() -> String:
 			return "动量已激活"
 		return "层数 %d/%d" % [_liuying_charges, _get_liuying_max_charges()]
 
-	if ability_id == ABILITY_PANSHI:
+	if ability_id == ABILITY_TIEMU:
 		if _active_remaining > 0.0:
 			return "铁幕 %.1f 秒" % _active_remaining
 		if _cooldown_remaining > 0.0:
@@ -393,6 +393,13 @@ func get_ability_status_text() -> String:
 			return "寄宿 %.1f 秒" % _shitong_passive_cooldown_remaining
 		return "腐蚀就绪"
 
+	if ability_id == ABILITY_FENGQUN:
+		if _cooldown_remaining > 0.0:
+			return "集群冷却 %.1f 秒" % _cooldown_remaining
+		if _fengqun_network_cooldown_remaining > 0.0:
+			return "回流 %.1f 秒" % _fengqun_network_cooldown_remaining
+		return "集群就绪"
+
 	if _cooldown_remaining > 0.0:
 		return "冷却 %.1f 秒" % _cooldown_remaining
 	return "就绪"
@@ -404,8 +411,8 @@ func _trigger_liuying_ghost_tempo() -> void:
 	_fire_rate_remaining = maxf(_fire_rate_remaining, liuying_fire_rate_time)
 
 
-func _try_huisheng_resonance_return() -> void:
-	if _huisheng_resonance_cooldown_remaining > 0.0:
+func _try_fengqun_network_return() -> void:
+	if _fengqun_network_cooldown_remaining > 0.0:
 		return
 
 	var stats := _get_energy_stats()
@@ -414,9 +421,9 @@ func _try_huisheng_resonance_return() -> void:
 	if float(stats.get("current_energy")) >= float(stats.get("max_energy")):
 		return
 
-	stats.call("restore_energy", huisheng_resonance_energy_per_hit)
-	_huisheng_resonance_cooldown_remaining = huisheng_resonance_hit_cooldown
-	_show_pulse(Color(0.64, 0.46, 1.0, 0.52), 34.0, 0.12)
+	stats.call("restore_energy", fengqun_network_energy_per_hit)
+	_fengqun_network_cooldown_remaining = fengqun_network_hit_cooldown
+	_show_pulse(Color(0.34, 0.96, 0.82, 0.52), 34.0, 0.12)
 
 
 func _try_shitong_parasitic_corrosion(target: Object) -> void:
@@ -657,8 +664,8 @@ func _damage_targets_at_position(
 			hit_from = ((damage_target as Node2D).global_position - origin).normalized()
 		damage_target.call("hit", damage, hit_from)
 		if apply_slow:
-			var final_slow_duration := huisheng_slow_duration if slow_duration <= 0.0 else slow_duration
-			var final_slow_multiplier := huisheng_slow_multiplier if slow_multiplier <= 0.0 else slow_multiplier
+			var final_slow_duration := fengqun_slow_duration if slow_duration <= 0.0 else slow_duration
+			var final_slow_multiplier := fengqun_slow_multiplier if slow_multiplier <= 0.0 else slow_multiplier
 			STATUS_EFFECTS.apply_slow(damage_target, final_slow_duration, final_slow_multiplier)
 		if apply_vulnerable:
 			STATUS_EFFECTS.apply_vulnerable(damage_target, liuying_vulnerable_duration, liuying_vulnerable_damage_multiplier)

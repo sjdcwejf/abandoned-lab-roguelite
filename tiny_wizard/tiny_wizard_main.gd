@@ -10,9 +10,9 @@ const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 @export var play_tutorial := true
 @export var dungeon_seed := 0
 @export var start_room_coord := Vector2i.ZERO
-@export var experimenter_character_scene: PackedScene
-@export var technician_character_scene: PackedScene
-@export var huisheng_character_scene: PackedScene
+@export var tiemu_character_scene: PackedScene
+@export var liuying_character_scene: PackedScene
+@export var fengqun_character_scene: PackedScene
 @export var shitong_character_scene: PackedScene
 @export var character_select_scene: PackedScene
 
@@ -167,13 +167,13 @@ func _find_sleep_pod(root: Node, character_id: String) -> LabSleepPod:
 
 func _show_character_select() -> void:
 	if character_select_scene == null:
-		_start_run_with_character(experimenter_character_scene, CharacterSelectScreen.PANSHI_ID)
+		_start_run_with_character(tiemu_character_scene, CharacterSelectScreen.TIEMU_ID)
 		return
 
 	var screen := character_select_scene.instantiate() as CharacterSelectScreen
 	if screen == null:
 		push_error("Character select scene is not a CharacterSelectScreen.")
-		_start_run_with_character(experimenter_character_scene, CharacterSelectScreen.PANSHI_ID)
+		_start_run_with_character(tiemu_character_scene, CharacterSelectScreen.TIEMU_ID)
 		return
 
 	_character_select_screen = screen
@@ -183,23 +183,23 @@ func _show_character_select() -> void:
 
 
 func _on_character_selected(character_id: String) -> void:
-	var resolved_character_id := CharacterSelectScreen.PANSHI_ID
-	var character_scene := experimenter_character_scene
+	var resolved_character_id := CharacterSelectScreen.TIEMU_ID
+	var character_scene := tiemu_character_scene
 	match character_id:
-		CharacterSelectScreen.LIUYING_ID, CharacterSelectScreen.LEGACY_TECHNICIAN_ID:
+		CharacterSelectScreen.LIUYING_ID:
 			resolved_character_id = CharacterSelectScreen.LIUYING_ID
-			character_scene = technician_character_scene
-		CharacterSelectScreen.HUISHENG_ID:
-			resolved_character_id = CharacterSelectScreen.HUISHENG_ID
-			character_scene = huisheng_character_scene
+			character_scene = liuying_character_scene
+		CharacterSelectScreen.FENGQUN_ID:
+			resolved_character_id = CharacterSelectScreen.FENGQUN_ID
+			character_scene = fengqun_character_scene
 		CharacterSelectScreen.SHITONG_ID:
 			resolved_character_id = CharacterSelectScreen.SHITONG_ID
 			character_scene = shitong_character_scene
-		CharacterSelectScreen.PANSHI_ID, CharacterSelectScreen.LEGACY_EXPERIMENTER_ID:
-			resolved_character_id = CharacterSelectScreen.PANSHI_ID
-			character_scene = experimenter_character_scene
+		CharacterSelectScreen.TIEMU_ID:
+			resolved_character_id = CharacterSelectScreen.TIEMU_ID
+			character_scene = tiemu_character_scene
 		_:
-			push_warning("Unknown character id '%s'. Falling back to Tiemu." % character_id)
+			push_warning("未知角色 ID：'%s'。已回退为铁幕。" % character_id)
 
 	if _character_select_screen != null:
 		_character_select_screen.queue_free()
@@ -208,7 +208,7 @@ func _on_character_selected(character_id: String) -> void:
 	_start_run_with_character(character_scene, resolved_character_id)
 
 
-func _start_run_with_character(character_scene: PackedScene, character_id := CharacterSelectScreen.PANSHI_ID) -> void:
+func _start_run_with_character(character_scene: PackedScene, character_id := CharacterSelectScreen.TIEMU_ID) -> void:
 	if character_scene == null:
 		push_error("Cannot start run because no character scene was assigned.")
 		return
@@ -597,7 +597,7 @@ func _get_layer_clear_inventory_text() -> String:
 func _restart_run_from_layer_clear() -> void:
 	var character_id := _selected_character_id
 	if character_id == "":
-		character_id = CharacterSelectScreen.PANSHI_ID
+		character_id = CharacterSelectScreen.TIEMU_ID
 
 	_hide_layer_clear_screen()
 	_set_character_control_enabled(true)
@@ -606,14 +606,14 @@ func _restart_run_from_layer_clear() -> void:
 
 func _get_selected_character_scene() -> PackedScene:
 	match _selected_character_id:
-		CharacterSelectScreen.LIUYING_ID, CharacterSelectScreen.LEGACY_TECHNICIAN_ID:
-			return technician_character_scene
-		CharacterSelectScreen.HUISHENG_ID:
-			return huisheng_character_scene
+		CharacterSelectScreen.LIUYING_ID:
+			return liuying_character_scene
+		CharacterSelectScreen.FENGQUN_ID:
+			return fengqun_character_scene
 		CharacterSelectScreen.SHITONG_ID:
 			return shitong_character_scene
 		_:
-			return experimenter_character_scene
+			return tiemu_character_scene
 
 
 func _setup_tutorial_hint() -> void:

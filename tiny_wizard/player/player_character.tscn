@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://ckan5lwiqvq2a" path="res://top-down-shooter-core/character/character.tscn" id="1_4ld63"]
 [ext_resource type="Script" path="res://tiny_wizard/player/player_character.gd" id="2_q71sv"]
-[ext_resource type="Resource" path="res://tiny_wizard/player/panshi_stats.tres" id="3_4j7bh"]
+[ext_resource type="Resource" path="res://tiny_wizard/player/tiemu_stats.tres" id="3_4j7bh"]
 [ext_resource type="Resource" uid="uid://bpvgw7v25bbsx" path="res://tiny_wizard/player/inventory/inventory.tres" id="4_ubej3"]
 [ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="5_mb7yt"]
 [ext_resource type="Script" path="res://tiny_wizard/player/character_visual.gd" id="5_phrov"]
@@ -355,7 +355,7 @@ script = ExtResource("10_fjnx3")
 
 [node name="AbilityController" type="Node2D" parent="." index="3"]
 script = ExtResource("15_ability")
-ability_id = "panshi"
+ability_id = "tiemu"
 
 [connection signal="shoot" from="." to="Visual/WeaponHolder" method="primary_fire"]
 [connection signal="animation_finished" from="Visual/Head" to="Visual" method="_on_head_animation_finished"]
