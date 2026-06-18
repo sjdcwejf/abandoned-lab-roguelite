@@ -19,7 +19,6 @@ cooldown = 0.22
 punch_damage = 2
 punch_cooldown = 0.34
 punch_active_time = 0.12
-punch_knockback_multiplier = 1.45
 punch_lunge_distance = 16.0
 punch_recover_time = 0.12
 
