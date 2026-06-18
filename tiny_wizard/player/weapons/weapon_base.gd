@@ -2,6 +2,9 @@ class_name LabWeapon
 extends Node2D
 
 
+const ENEMY_PROJECTILE_GROUP := &"enemy_projectiles"
+
+
 @export var display_name := ""
 @export var weapon_id := ""
 @export var inventory_size := Vector2i(2, 1)
@@ -122,6 +125,21 @@ func apply_damage_to_target(target: Object, amount: int, hit_from := Vector2.ZER
 
 	damage_target.hit(amount, final_hit_from)
 	_notify_owner_weapon_hit(damage_target, amount)
+	return true
+
+
+func try_destroy_enemy_projectile(target: Object, deflect_direction := Vector2.ZERO) -> bool:
+	if not target is Node:
+		return false
+
+	var projectile := target as Node
+	if not projectile.is_in_group(ENEMY_PROJECTILE_GROUP):
+		return false
+
+	if projectile.has_method("deflect_by_melee"):
+		projectile.call("deflect_by_melee", deflect_direction)
+	else:
+		projectile.queue_free()
 	return true
 
 

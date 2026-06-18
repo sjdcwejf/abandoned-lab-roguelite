@@ -5,6 +5,9 @@ extends LabProjectileWeapon
 @export var punch_cooldown := 0.34
 @export var punch_active_time := 0.12
 @export_flags_2d_physics var punch_collision_mask := 8
+@export_flags_2d_physics var projectile_collision_mask := 4
+@export var punch_knockback_multiplier := 1.35
+@export var can_destroy_enemy_projectiles := true
 @export var punch_lunge_distance := 16.0
 @export var punch_recover_time := 0.12
 
@@ -27,10 +30,12 @@ func _ready() -> void:
 	_base_scale = scale
 	if punch_area != null:
 		punch_area.collision_layer = 0
-		punch_area.collision_mask = punch_collision_mask
+		punch_area.collision_mask = punch_collision_mask | (projectile_collision_mask if can_destroy_enemy_projectiles else 0)
 		punch_area.monitoring = false
 		if not punch_area.body_entered.is_connected(_on_punch_area_body_entered):
 			punch_area.body_entered.connect(_on_punch_area_body_entered)
+		if not punch_area.area_entered.is_connected(_on_punch_area_area_entered):
+			punch_area.area_entered.connect(_on_punch_area_area_entered)
 	if punch_shape != null:
 		punch_shape.disabled = true
 	if punch_visual != null:
@@ -91,12 +96,20 @@ func _damage_overlapping_punch_targets() -> void:
 	if punch_area == null:
 		return
 	for body in punch_area.get_overlapping_bodies():
-		_hit_punch_body(body)
+		if not _try_destroy_projectile(body):
+			_hit_punch_body(body)
+	for area in punch_area.get_overlapping_areas():
+		_try_destroy_projectile(area)
 
 
 func _on_punch_area_body_entered(body: Node2D) -> void:
-	if _punch_active_timer > 0.0:
+	if _punch_active_timer > 0.0 and not _try_destroy_projectile(body):
 		_hit_punch_body(body)
+
+
+func _on_punch_area_area_entered(area: Area2D) -> void:
+	if _punch_active_timer > 0.0:
+		_try_destroy_projectile(area)
 
 
 func _hit_punch_body(body: Node2D) -> void:
@@ -108,9 +121,24 @@ func _hit_punch_body(body: Node2D) -> void:
 	if _punch_targets_hit.has(instance_id):
 		return
 
-	if apply_damage_to_target(damage_target, punch_damage, Vector2.ZERO, get_fire_origin()):
+	var knockback_direction := aim_direction
+	if owner_character != null and damage_target is Node2D:
+		knockback_direction = owner_character.global_position.direction_to((damage_target as Node2D).global_position)
+	if knockback_direction.length() < 0.01:
+		knockback_direction = Vector2.RIGHT
+
+	if apply_damage_to_target(damage_target, punch_damage, knockback_direction.normalized() * punch_knockback_multiplier):
 		_punch_targets_hit[instance_id] = true
 		_play_hit_flash()
+
+
+func _try_destroy_projectile(projectile: Node) -> bool:
+	if not can_destroy_enemy_projectiles:
+		return false
+	if try_destroy_enemy_projectile(projectile, aim_direction):
+		_play_hit_flash()
+		return true
+	return false
 
 
 func _play_punch_animation() -> void:

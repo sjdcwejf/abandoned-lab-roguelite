@@ -37,3 +37,14 @@ func _on_body_entered(body: Node) -> void:
 	_has_hit_target = true
 	body.call("hit", damage, _direction)
 	queue_free()
+
+
+func deflect_by_melee(_deflect_direction := Vector2.ZERO) -> void:
+	if _has_hit_target:
+		return
+	_has_hit_target = true
+	monitoring = false
+	monitorable = false
+	collision_layer = 0
+	collision_mask = 0
+	queue_free()
