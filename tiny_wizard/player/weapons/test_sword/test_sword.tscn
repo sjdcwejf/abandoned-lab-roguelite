@@ -14,6 +14,7 @@ inventory_color = Color(0.78, 0.72, 0.48, 1)
 damage = 2
 cooldown = 0.32
 active_time = 0.12
+knockback_multiplier = 1.05
 swing_start_angle = -0.5
 swing_end_angle = 0.42
 swing_recover_time = 0.09
