@@ -8,6 +8,7 @@ const WEAPON_POOL := [
 	preload("res://tiny_wizard/player/weapons/energy_saber/energy_saber.tscn"),
 	preload("res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn"),
 	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
+	preload("res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.tscn"),
 ]
 
 var _weapon_holder: Node

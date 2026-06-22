@@ -5,6 +5,7 @@ extends Area2D
 @export var speed := 560.0
 @export_range(1, 10, 1) var damage := 1
 @export var lifetime := 1.25
+@export_range(0.0, 4.0, 0.05) var knockback_multiplier := 1.0
 
 var direction := Vector2.RIGHT
 var owner_character: Node2D
@@ -57,7 +58,7 @@ func _hit_collider(target: Object) -> void:
 	if damage_target != null:
 		var hit_from := Vector2.ZERO
 		if damage_target is Node2D:
-			hit_from = ((damage_target as Node2D).global_position - global_position).normalized()
+			hit_from = ((damage_target as Node2D).global_position - global_position).normalized() * knockback_multiplier
 		damage_target.hit(damage, hit_from)
 		_notify_owner_weapon_hit(damage_target)
 	queue_free()

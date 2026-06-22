@@ -11,18 +11,20 @@ const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/energy_saber/energy_saber.tscn"),
 	preload("res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn"),
 	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
+	preload("res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.tscn"),
 ]
 
 @export var merchant_title := "渡鸦检疫军械库"
 @export_multiline var merchant_message := "A-03 信号就在前方。补好神经接口，数清你的炸药。"
 @export_range(0, 99, 1) var weapon_cost := 1
-@export var equip_purchase_immediately := false
+@export var equip_purchase_immediately := true
 
 var _candidate_character: Node2D
 var _dialog_open := false
 var _selected_weapon_scene: PackedScene
 var _selected_weapon_name := ""
 var _offer_preview_instance: Node2D
+var _awaiting_weapon_replacement := false
 
 @onready var interact_area: Area2D = $InteractArea
 @onready var prompt: CanvasItem = $Prompt
@@ -50,6 +52,11 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if _candidate_character == null:
+		return
+	if _dialog_open and _awaiting_weapon_replacement:
+		var replacement_slot := _get_pressed_replacement_slot()
+		if replacement_slot >= 0:
+			_try_purchase(_candidate_character, replacement_slot)
 		return
 	if Input.is_action_just_pressed("interact"):
 		if _dialog_open:
@@ -80,6 +87,8 @@ func _open_armory(character: Node2D) -> void:
 
 func _set_dialog_open(open: bool) -> void:
 	_dialog_open = open
+	if not _dialog_open:
+		_awaiting_weapon_replacement = false
 	dialog_panel.visible = _dialog_open
 	if status_light is Polygon2D:
 		var light := status_light as Polygon2D
@@ -87,6 +96,7 @@ func _set_dialog_open(open: bool) -> void:
 
 
 func _refresh_offer(character: Node2D) -> void:
+	_awaiting_weapon_replacement = false
 	_selected_weapon_scene = _pick_unowned_weapon(character)
 	if _selected_weapon_scene == null:
 		_selected_weapon_name = ""
@@ -99,17 +109,19 @@ func _refresh_offer(character: Node2D) -> void:
 	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
 	_build_offer_preview(_selected_weapon_scene)
 	var currency_count := _get_currency_count(character)
+	var quick_slots_full := _are_quick_slots_full(character)
+	var replacement_note := "\n武器栏已满：购买时可选择替换 1—4 号位。" if quick_slots_full else ""
 	if weapon_cost <= 0:
-		stock_label.text = "库存：%s\n价格：免费" % _selected_weapon_name
+		stock_label.text = "库存：%s\n价格：免费%s" % [_selected_weapon_name, replacement_note]
 		status_label.text = "不需要消耗%s。" % CURRENCY_DISPLAY_NAME
-		hint_label.text = "按 F 领取。"
+		hint_label.text = "按 F 领取并装备。"
 	else:
-		stock_label.text = "库存：%s\n价格：%d 个%s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME]
+		stock_label.text = "库存：%s\n价格：%d 个%s%s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME, replacement_note]
 		status_label.text = "你持有 %d 个%s。" % [currency_count, CURRENCY_DISPLAY_NAME]
-		hint_label.text = "按 F 购买。"
+		hint_label.text = "按 F 购买并装备。"
 
 
-func _try_purchase(character: Node2D) -> void:
+func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 	if _selected_weapon_scene == null:
 		_set_dialog_open(false)
 		return
@@ -135,7 +147,22 @@ func _try_purchase(character: Node2D) -> void:
 
 	var purchased_scene := _selected_weapon_scene
 	var purchased_name := _selected_weapon_name
-	var slot_index := int(weapon_holder.add_weapon_scene(purchased_scene, equip_purchase_immediately))
+	var replaced_weapon_name := ""
+	var slot_index := -1
+	if weapon_holder.has_method("has_free_quick_slot") and not bool(weapon_holder.call("has_free_quick_slot")):
+		if replacement_slot < 0:
+			_awaiting_weapon_replacement = true
+			status_label.text = "请选择要替换的武器槽位。确认前不会扣除%s。" % CURRENCY_DISPLAY_NAME
+			hint_label.text = "按 1 / 2 / 3 / 4 选择替换槽位。"
+			return
+		if not weapon_holder.has_method("replace_weapon_scene_in_slot"):
+			status_label.text = "武器栏已满，当前挂架不支持替换。"
+			return
+		if weapon_holder.has_method("get_weapon_display_name_at_slot"):
+			replaced_weapon_name = str(weapon_holder.call("get_weapon_display_name_at_slot", replacement_slot))
+		slot_index = int(weapon_holder.call("replace_weapon_scene_in_slot", purchased_scene, replacement_slot))
+	else:
+		slot_index = int(weapon_holder.add_weapon_scene(purchased_scene, equip_purchase_immediately))
 	if slot_index < 0:
 		status_label.text = "武器转移失败。"
 		return
@@ -144,10 +171,27 @@ func _try_purchase(character: Node2D) -> void:
 		inventory.remove_item(CURRENCY_NAME, weapon_cost)
 
 	_refresh_offer(character)
-	if weapon_cost <= 0:
+	if replaced_weapon_name != "":
+		status_label.text = "已获得 %s，替换了 %s，并装备到 %d 号位。" % [purchased_name, replaced_weapon_name, slot_index + 1]
+	elif weapon_cost <= 0:
 		status_label.text = "已领取 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
 	else:
 		status_label.text = "已购买 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
+
+
+func _get_pressed_replacement_slot() -> int:
+	for slot_index in range(4):
+		var action_name := "weapon_slot_%d" % (slot_index + 1)
+		if InputMap.has_action(action_name) and Input.is_action_just_pressed(action_name):
+			return slot_index
+	return -1
+
+
+func _are_quick_slots_full(character: Node2D) -> bool:
+	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
+	if weapon_holder == null or not weapon_holder.has_method("has_free_quick_slot"):
+		return false
+	return not bool(weapon_holder.call("has_free_quick_slot"))
 
 
 func _pick_unowned_weapon(character: Node2D) -> PackedScene:

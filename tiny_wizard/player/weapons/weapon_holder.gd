@@ -4,6 +4,8 @@ extends Node2D
 signal weapon_loadout_changed
 signal weapon_equipped(slot_index: int)
 
+const MAX_QUICK_SLOTS := 4
+
 @export var starting_weapon_scene: PackedScene
 @export var weapon_scenes: Array[PackedScene] = []
 @export var owner_character_path: NodePath
@@ -84,9 +86,11 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 	var new_index := _find_empty_weapon_slot()
 	if new_index >= 0:
 		weapon_scenes[new_index] = weapon_scene
-	else:
+	elif weapon_scenes.size() < MAX_QUICK_SLOTS:
 		weapon_scenes.append(weapon_scene)
 		new_index = weapon_scenes.size() - 1
+	else:
+		return -1
 	if equip_immediately:
 		equip_weapon_by_index(new_index)
 	else:
@@ -95,7 +99,7 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 
 
 func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_immediately := false) -> int:
-	if weapon_scene == null or slot_index < 0:
+	if weapon_scene == null or slot_index < 0 or slot_index >= MAX_QUICK_SLOTS:
 		return -1
 
 	var existing_index := find_weapon_scene_index(weapon_scene)
@@ -115,6 +119,49 @@ func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_
 	return slot_index
 
 
+func replace_current_weapon_scene(weapon_scene: PackedScene) -> int:
+	var target_index := current_weapon_index
+	if target_index < 0 or target_index >= MAX_QUICK_SLOTS:
+		target_index = 0
+	return replace_weapon_scene_in_slot(weapon_scene, target_index)
+
+
+func replace_weapon_scene_in_slot(weapon_scene: PackedScene, slot_index: int) -> int:
+	if weapon_scene == null or slot_index < 0 or slot_index >= MAX_QUICK_SLOTS:
+		return -1
+
+	var existing_index := find_weapon_scene_index(weapon_scene)
+	if existing_index >= 0:
+		equip_weapon_by_index(existing_index)
+		return existing_index
+
+	while weapon_scenes.size() <= slot_index:
+		weapon_scenes.append(null)
+	weapon_scenes[slot_index] = weapon_scene
+	current_weapon_index = -1
+	equip_weapon_by_index(slot_index)
+	return slot_index
+
+
+func has_free_quick_slot() -> bool:
+	return _find_empty_weapon_slot() >= 0 or weapon_scenes.size() < MAX_QUICK_SLOTS
+
+
+func get_current_weapon_display_name() -> String:
+	if current_weapon_index < 0 or current_weapon_index >= weapon_scenes.size():
+		return "当前武器"
+	return get_weapon_display_name_at_slot(current_weapon_index)
+
+
+func get_weapon_display_name_at_slot(slot_index: int) -> String:
+	if slot_index < 0 or slot_index >= weapon_scenes.size():
+		return "当前武器"
+	var weapon_scene := weapon_scenes[slot_index] as PackedScene
+	if weapon_scene == null:
+		return "当前武器"
+	return str(_get_weapon_scene_inventory_info(weapon_scene).get("name", "当前武器"))
+
+
 func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
 	if current_weapon != null:
 		current_weapon.unequip()
@@ -123,7 +170,7 @@ func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
 
 	weapon_scenes.clear()
 	for weapon_scene in new_weapon_scenes:
-		if weapon_scene is PackedScene:
+		if weapon_scene is PackedScene and weapon_scenes.size() < MAX_QUICK_SLOTS:
 			weapon_scenes.append(weapon_scene)
 
 	current_weapon_index = -1
@@ -134,9 +181,9 @@ func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
 		weapon_loadout_changed.emit()
 
 
-func get_quick_weapon_slots(max_slots := 4) -> Array:
+func get_quick_weapon_slots(max_slots := MAX_QUICK_SLOTS) -> Array:
 	var slots := []
-	for index in range(max_slots):
+	for index in range(mini(max_slots, MAX_QUICK_SLOTS)):
 		var weapon_scene: PackedScene = null
 		if index < weapon_scenes.size():
 			weapon_scene = weapon_scenes[index]
@@ -210,7 +257,7 @@ func get_weapon_scene_key(weapon_scene: PackedScene) -> String:
 
 
 func _handle_weapon_switch() -> void:
-	for index in range(weapon_scenes.size()):
+	for index in range(mini(weapon_scenes.size(), MAX_QUICK_SLOTS)):
 		if weapon_scenes[index] == null:
 			continue
 		var action_name: String = "weapon_slot_%d" % (index + 1)
@@ -219,7 +266,7 @@ func _handle_weapon_switch() -> void:
 
 
 func _find_empty_weapon_slot() -> int:
-	for index in range(weapon_scenes.size()):
+	for index in range(mini(weapon_scenes.size(), MAX_QUICK_SLOTS)):
 		if weapon_scenes[index] == null:
 			return index
 	return -1
@@ -278,6 +325,8 @@ func _fallback_weapon_name(weapon_scene: PackedScene) -> String:
 			return "动力拳套"
 		"res://tiny_wizard/player/weapons/test_sword/test_sword.tscn":
 			return "检疫刃"
+		"res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.tscn":
+			return "检疫霰弹枪"
 
 	var base_name := weapon_scene.resource_path.get_file().get_basename()
 	if base_name != "":
