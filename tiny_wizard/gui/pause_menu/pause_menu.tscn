@@ -1,0 +1,213 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/gui/pause_menu/pause_menu.gd" id="1_pause"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/gui/audio_settings/audio_settings_panel.tscn" id="2_settings"]
+
+[sub_resource type="StyleBoxFlat" id="StylePanel"]
+bg_color = Color(0.025, 0.045, 0.052, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.21, 0.72, 0.76, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleButton"]
+bg_color = Color(0.08, 0.16, 0.18, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.7, 0.74, 0.82)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleButtonHover"]
+bg_color = Color(0.1, 0.29, 0.31, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.95, 0.92, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleDanger"]
+bg_color = Color(0.24, 0.075, 0.06, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.92, 0.39, 0.27, 0.92)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="PauseMenu" type="Control"]
+visible = false
+process_mode = 3
+z_index = 100
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_pause")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.003, 0.009, 0.012, 0.78)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PausePanel" type="PanelContainer" parent="Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(390, 400)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StylePanel")
+
+[node name="Margin" type="MarginContainer" parent="Center/PausePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 34
+theme_override_constants/margin_bottom = 28
+
+[node name="Layout" type="VBoxContainer" parent="Center/PausePanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Status" type="Label" parent="Center/PausePanel/Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.85, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "封存行动 / 暂停"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Center/PausePanel/Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "协议暂挂"
+horizontal_alignment = 1
+
+[node name="Divider" type="HSeparator" parent="Center/PausePanel/Margin/Layout"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Center/PausePanel/Margin/Layout"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="Center/PausePanel/Margin/Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+text = "继续游戏"
+
+[node name="SettingsButton" type="Button" parent="Center/PausePanel/Margin/Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+text = "音量设置"
+
+[node name="MainMenuButton" type="Button" parent="Center/PausePanel/Margin/Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleDanger")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+text = "返回主菜单"
+
+[node name="Hint" type="Label" parent="Center/PausePanel/Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.54, 0.66, 0.68, 1)
+theme_override_font_sizes/font_size = 12
+text = "按 Esc 继续行动"
+horizontal_alignment = 1
+
+[node name="AudioSettingsPanel" parent="Center" instance=ExtResource("2_settings")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ReturnConfirmation" type="PanelContainer" parent="Center"]
+visible = false
+unique_name_in_owner = true
+custom_minimum_size = Vector2(460, 260)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StylePanel")
+
+[node name="Margin" type="MarginContainer" parent="Center/ReturnConfirmation"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 26
+
+[node name="Layout" type="VBoxContainer" parent="Center/ReturnConfirmation/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="Center/ReturnConfirmation/Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.73, 0.56, 1)
+theme_override_font_sizes/font_size = 23
+text = "终止本次封存行动？"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="Center/ReturnConfirmation/Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.88, 0.89, 1)
+theme_override_font_sizes/font_size = 14
+text = "当前流程进度将丢失，确认返回主菜单？"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Center/ReturnConfirmation/Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ConfirmReturnButton" type="Button" parent="Center/ReturnConfirmation/Margin/Layout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 46)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleDanger")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+text = "确认返回"
+
+[node name="CancelReturnButton" type="Button" parent="Center/ReturnConfirmation/Margin/Layout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 46)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+text = "取消"

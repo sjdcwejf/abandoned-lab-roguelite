@@ -24,13 +24,18 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_inventory"):
+		if get_tree().paused:
+			return
 		visible = not visible
 		get_viewport().set_input_as_handled()
-		return
 
-	if visible and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-		visible = false
-		get_viewport().set_input_as_handled()
+
+func is_open() -> bool:
+	return visible
+
+
+func close_inventory() -> void:
+	visible = false
 
 
 func bind_weapon_holder(new_weapon_holder: Node) -> void:

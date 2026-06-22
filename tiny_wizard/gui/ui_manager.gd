@@ -3,15 +3,18 @@ extends CanvasLayer
 
 const WEAPON_BACKPACK_UI_SCRIPT := preload("res://tiny_wizard/gui/weapon_backpack_ui/weapon_backpack_ui.gd")
 const ABILITY_UI_SCRIPT := preload("res://tiny_wizard/gui/ability_ui/ability_ui.gd")
+const PAUSE_MENU_SCENE := preload("res://tiny_wizard/gui/pause_menu/pause_menu.tscn")
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 
 @export var inventory : QuiverInventory
 
 var _weapon_backpack_ui: WeaponBackpackUI
 var _ability_ui: Control
+var _pause_menu: LabPauseMenu
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_weapon_backpack_ui = WEAPON_BACKPACK_UI_SCRIPT.new()
 	_weapon_backpack_ui.name = "WeaponBackpackUI"
@@ -20,7 +23,45 @@ func _ready() -> void:
 	_ability_ui = ABILITY_UI_SCRIPT.new()
 	_ability_ui.name = "AbilityUI"
 	add_child(_ability_ui)
+
+	_pause_menu = PAUSE_MENU_SCENE.instantiate() as LabPauseMenu
+	_pause_menu.name = "PauseMenu"
+	add_child(_pause_menu)
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("pause_game"):
+		return
+	if handle_pause_request():
+		get_viewport().set_input_as_handled()
+
+
+func handle_pause_request() -> bool:
+	if _weapon_backpack_ui != null and _weapon_backpack_ui.is_open():
+		_weapon_backpack_ui.close_inventory()
+		return true
+
+	if _pause_menu != null and _pause_menu.is_open():
+		_pause_menu.handle_escape()
+		return true
+
+	if not _current_scene_allows_pause():
+		return false
+
+	_pause_menu.open_menu()
+	return true
+
+
+func is_pause_menu_open() -> bool:
+	return _pause_menu != null and _pause_menu.is_open()
+
+
+func _current_scene_allows_pause() -> bool:
+	var current_scene := get_tree().current_scene
+	if current_scene == null or not current_scene.has_method("can_pause_game"):
+		return false
+	return bool(current_scene.call("can_pause_game"))
 
 
 func change_arrow_texture(new_texture):

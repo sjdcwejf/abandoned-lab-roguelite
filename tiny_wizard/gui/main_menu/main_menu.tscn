@@ -1,0 +1,212 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/gui/main_menu/main_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/concept/test_subject_07_concept.png" id="2_background"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/gui/audio_settings/audio_settings_panel.tscn" id="3_settings"]
+
+[sub_resource type="StyleBoxFlat" id="StyleButton"]
+bg_color = Color(0.035, 0.09, 0.1, 0.92)
+border_width_left = 2
+border_width_top = 1
+border_width_right = 2
+border_width_bottom = 1
+border_color = Color(0.16, 0.66, 0.72, 0.86)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleButtonHover"]
+bg_color = Color(0.08, 0.24, 0.26, 0.96)
+border_width_left = 2
+border_width_top = 1
+border_width_right = 2
+border_width_bottom = 1
+border_color = Color(0.35, 0.94, 0.98, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleButtonPressed"]
+bg_color = Color(0.12, 0.34, 0.34, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.48, 1, 0.84, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleFocus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 1, 0.88, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleTitleRule"]
+bg_color = Color(0.2, 0.86, 0.9, 0.86)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="MainMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.012, 0.016, 0.55)
+
+[node name="LeftBand" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_right = 0.54
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.025, 0.032, 0.82)
+
+[node name="MainActions" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.07
+anchor_top = 0.11
+anchor_right = 0.47
+anchor_bottom = 0.91
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="Protocol" type="Label" parent="MainActions"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+text = "弥赛亚动力 / 封存协议"
+
+[node name="Title" type="Label" parent="MainActions"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 43
+text = "生化协议：熵区"
+
+[node name="EnglishTitle" type="Label" parent="MainActions"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.52, 0.68, 0.72, 1)
+theme_override_font_sizes/font_size = 13
+text = "极渊岛地下封存设施 / 熵区接入终端"
+
+[node name="Rule" type="Panel" parent="MainActions"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleTitleRule")
+
+[node name="Status" type="Label" parent="MainActions"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "极渊岛地下设施信号恢复。封存对象等待唤醒。"
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="MainActions"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="MainActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+theme_override_styles/pressed = SubResource("StyleButtonPressed")
+theme_override_styles/focus = SubResource("StyleFocus")
+text = "开始游戏"
+
+[node name="SettingsButton" type="Button" parent="MainActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+theme_override_styles/pressed = SubResource("StyleButtonPressed")
+theme_override_styles/focus = SubResource("StyleFocus")
+text = "设置"
+
+[node name="QuitButton" type="Button" parent="MainActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButtonHover")
+theme_override_styles/pressed = SubResource("StyleButtonPressed")
+theme_override_styles/focus = SubResource("StyleFocus")
+text = "退出游戏"
+
+[node name="Version" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -210.0
+offset_top = -42.0
+offset_right = -22.0
+offset_bottom = -18.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.5, 0.62, 0.64, 0.9)
+text = "原型构建 0.1.50"
+horizontal_alignment = 2
+
+[node name="SettingsCenter" type="CenterContainer" parent="."]
+visible = false
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="AudioSettingsPanel" parent="SettingsCenter" instance=ExtResource("3_settings")]
+unique_name_in_owner = true
+layout_mode = 2

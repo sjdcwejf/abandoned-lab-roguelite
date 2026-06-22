@@ -34,6 +34,7 @@ var rooms := {}
 
 
 func _ready():
+	get_tree().paused = false
 	CHINESE_FONT_BOOTSTRAP.install()
 	_current_room = start_room_coord
 	$Camera2D.position = _room_camera_position(_current_room)
@@ -41,6 +42,16 @@ func _ready():
 	_setup_layer_clear_screen()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_show_character_select()
+
+
+func can_pause_game() -> bool:
+	if _character_select_screen != null and is_instance_valid(_character_select_screen):
+		return false
+	if _layer_clear_root != null and _layer_clear_root.visible:
+		return false
+	if _run_state == RUN_STATE_LAYER_COMPLETE:
+		return false
+	return _character != null and is_instance_valid(_character)
 
 
 func _collect_existing_rooms() -> Dictionary:
