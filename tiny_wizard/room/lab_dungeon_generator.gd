@@ -15,6 +15,7 @@ const REWARD_ROOM_B_SCENE := preload("res://tiny_wizard/room/room_types/lab_rewa
 const WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/room_4.tscn")
 const RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn")
 const BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_boss_room.tscn")
+const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
 const MAIN_PATH_ROOM_COUNT := 6
@@ -62,12 +63,14 @@ const FALLBACK_ROOM_LAYOUT := [
 		"type": "combat",
 		"label": "封存样本间 1",
 		"scene": COMBAT_ROOM_A_SCENE,
+		"depth": 1,
 	},
 	{
 		"coord": Vector2i(2, 0),
 		"type": "combat",
 		"label": "封存样本间 2",
 		"scene": COMBAT_ROOM_B_SCENE,
+		"depth": 2,
 	},
 	{
 		"coord": Vector2i(3, 0),
@@ -148,6 +151,8 @@ static func generate(rooms_parent: Node2D, requested_seed := 0) -> Dictionary:
 	var generated_rooms := {}
 	for spec in room_layout:
 		var room := _instantiate_room(spec)
+		if spec["type"] == "combat":
+			FORMAL_ENCOUNTER_GENERATOR.populate(room, rng, int(spec.get("depth", 1)))
 		rooms_parent.add_child(room)
 		generated_rooms[room.room_pos] = room
 
@@ -280,13 +285,13 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	main_room_types.append("merchant")
 	main_room_types.append("boss")
 
-	room_specs.append(_make_spec(Vector2i.ZERO, "start", "封存气闸", START_ROOM_SCENE))
+	room_specs.append(_make_spec(Vector2i.ZERO, "start", "封存气闸", START_ROOM_SCENE, 0))
 
 	for path_index in range(1, main_path.size()):
 		var room_type := main_room_types[path_index - 1] as String
 		var coord := main_path[path_index] as Vector2i
 		var scene := _take_scene(scene_pools, room_type, rng)
-		room_specs.append(_make_spec(coord, room_type, _next_label(room_type, label_counts), scene))
+		room_specs.append(_make_spec(coord, room_type, _next_label(room_type, label_counts), scene, path_index))
 
 	for coord in reward_coords:
 		var scene := _take_scene(scene_pools, "reward", rng)
@@ -358,12 +363,13 @@ static func _default_scene_pool(room_type: String) -> Array:
 	return COMBAT_ROOM_SCENES
 
 
-static func _make_spec(coord: Vector2i, room_type: String, label: String, scene: PackedScene) -> Dictionary:
+static func _make_spec(coord: Vector2i, room_type: String, label: String, scene: PackedScene, depth := 0) -> Dictionary:
 	return {
 		"coord": coord,
 		"type": room_type,
 		"label": label,
 		"scene": scene,
+		"depth": depth,
 	}
 
 
