@@ -25,6 +25,7 @@ var _selected_weapon_scene: PackedScene
 var _selected_weapon_name := ""
 var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
+var _retired_weapon_keys := {}
 
 @onready var interact_area: Area2D = $InteractArea
 @onready var prompt: CanvasItem = $Prompt
@@ -148,6 +149,7 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 	var purchased_scene := _selected_weapon_scene
 	var purchased_name := _selected_weapon_name
 	var replaced_weapon_name := ""
+	var replaced_weapon_scene: PackedScene
 	var slot_index := -1
 	if weapon_holder.has_method("has_free_quick_slot") and not bool(weapon_holder.call("has_free_quick_slot")):
 		if replacement_slot < 0:
@@ -160,6 +162,7 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 			return
 		if weapon_holder.has_method("get_weapon_display_name_at_slot"):
 			replaced_weapon_name = str(weapon_holder.call("get_weapon_display_name_at_slot", replacement_slot))
+		replaced_weapon_scene = _get_weapon_scene_at_slot(weapon_holder, replacement_slot)
 		slot_index = int(weapon_holder.call("replace_weapon_scene_in_slot", purchased_scene, replacement_slot))
 	else:
 		slot_index = int(weapon_holder.add_weapon_scene(purchased_scene, equip_purchase_immediately))
@@ -169,6 +172,8 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 
 	if weapon_cost > 0:
 		inventory.remove_item(CURRENCY_NAME, weapon_cost)
+	if replaced_weapon_scene != null:
+		_retire_weapon_scene(weapon_holder, replaced_weapon_scene)
 
 	_refresh_offer(character)
 	if replaced_weapon_name != "":
@@ -211,10 +216,29 @@ func _pick_unowned_weapon(character: Node2D) -> PackedScene:
 		var weapon_key := weapon_scene.resource_path
 		if weapon_holder.has_method("get_weapon_scene_key"):
 			weapon_key = str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
+		if _retired_weapon_keys.has(weapon_key):
+			continue
 		if not owned.has(weapon_key):
 			return weapon_scene
 
 	return null
+
+
+func _get_weapon_scene_at_slot(weapon_holder: Node, slot_index: int) -> PackedScene:
+	var weapon_scenes := weapon_holder.get("weapon_scenes") as Array
+	if weapon_scenes == null or slot_index < 0 or slot_index >= weapon_scenes.size():
+		return null
+	return weapon_scenes[slot_index] as PackedScene
+
+
+func _retire_weapon_scene(weapon_holder: Node, weapon_scene: PackedScene) -> void:
+	if weapon_scene == null:
+		return
+	var weapon_key := weapon_scene.resource_path
+	if weapon_holder.has_method("get_weapon_scene_key"):
+		weapon_key = str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
+	if weapon_key != "":
+		_retired_weapon_keys[weapon_key] = true
 
 
 func _get_currency_count(character: Node2D) -> int:
