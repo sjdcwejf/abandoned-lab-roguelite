@@ -3,10 +3,18 @@ extends Node2D
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
+const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn")
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 const MAX_FORMAL_LAYER_COUNT := 2
+const POLLUTION_EVENT_LAYER := 2
+const POLLUTION_EVENT_SOURCE_COUNT := 3
+const POLLUTION_EVENT_SOURCE_POSITIONS := [
+	Vector2(386, 226),
+	Vector2(512, 326),
+	Vector2(638, 226),
+]
 
 @export var use_generated_lab_dungeon := true
 @export var play_tutorial := true
@@ -293,10 +301,59 @@ func _start_formal_run(layer_index := 1) -> void:
 	else:
 		rooms = _collect_existing_rooms()
 
+	_install_formal_layer_events()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
 	_register_rooms()
 	_update_room_doors()
 	_enter_start_room()
+
+
+func _install_formal_layer_events() -> void:
+	if _formal_layer_index != POLLUTION_EVENT_LAYER:
+		return
+
+	var pollution_room := _pick_pollution_event_room()
+	if pollution_room == null:
+		push_warning("第二层没有找到可安装原质污染源事件的怪物房。")
+		return
+
+	_install_pollution_source_event(pollution_room)
+
+
+func _pick_pollution_event_room() -> Room:
+	var candidates: Array[Room] = []
+	for room_pos in rooms:
+		var room := rooms[room_pos] as Room
+		if room == null:
+			continue
+		if room.lab_room_type == "combat":
+			candidates.append(room)
+
+	if candidates.is_empty():
+		return null
+
+	candidates.sort_custom(func(a: Room, b: Room) -> bool:
+		return a.room_pos.length_squared() < b.room_pos.length_squared()
+	)
+	return candidates[0]
+
+
+func _install_pollution_source_event(room: Room) -> void:
+	var container := Node2D.new()
+	container.name = "PollutionSources"
+	room.add_child(container)
+
+	for index in range(POLLUTION_EVENT_SOURCE_COUNT):
+		var source := POLLUTION_SOURCE_SCENE.instantiate()
+		if source == null:
+			continue
+		source.name = "ProtomatterPollutionSource%d" % (index + 1)
+		source.position = POLLUTION_EVENT_SOURCE_POSITIONS[index % POLLUTION_EVENT_SOURCE_POSITIONS.size()]
+		container.add_child(source)
+		if room.has_method("register_pollution_source"):
+			room.call("register_pollution_source", source)
+
+	room.lab_room_label = "%s｜污染源" % room.lab_room_label
 
 
 func _get_weapon_holder() -> Node:
@@ -770,6 +827,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "起点房"
 		"combat":
 			return "怪物房"
+		"pollution":
+			return "污染事件房"
 		"reward":
 			return "奖励房"
 		"weapon":
@@ -787,6 +846,8 @@ func _get_formal_room_objective(room_type: String) -> String:
 			return "确认装备状态，进入封存区。"
 		"combat":
 			return "清除房内样本，解除门锁。"
+		"pollution":
+			return "清除原质污染源，并肃清房内样本。"
 		"reward":
 			return "肃清守卫样本，回收补给箱。"
 		"weapon":

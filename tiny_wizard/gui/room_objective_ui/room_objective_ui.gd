@@ -149,15 +149,21 @@ func _refresh() -> void:
 	if _current_room.is_cleared and completion_text != "":
 		_objective_label.text = completion_text
 	else:
-		_objective_label.text = "当前目标：%s" % _objective_text
+		_objective_label.text = "当前目标：%s" % _get_objective_text()
 
 	_progress_label.text = _get_progress_text()
 
 
+func _get_objective_text() -> String:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return _objective_text
+	if _has_pollution_objective():
+		return "清除原质污染源，并肃清房内样本。"
+	return _objective_text
+
+
 func _get_progress_text() -> String:
 	if _current_room == null or not is_instance_valid(_current_room):
-		return ""
-	if not _current_room.has_method("has_enemy_clear_objective") or not bool(_current_room.call("has_enemy_clear_objective")):
 		return ""
 
 	var remaining := 0
@@ -166,6 +172,13 @@ func _get_progress_text() -> String:
 
 	if _current_room.is_cleared:
 		return "封锁解除"
+	if _has_pollution_objective():
+		var pollution_total := int(_current_room.call("get_pollution_source_total"))
+		var pollution_remaining := int(_current_room.call("get_pollution_source_remaining"))
+		var pollution_cleared := maxi(0, pollution_total - pollution_remaining)
+		return "污染源：%d/%d    剩余样本：%d" % [pollution_cleared, pollution_total, remaining]
+	if not _current_room.has_method("has_enemy_clear_objective") or not bool(_current_room.call("has_enemy_clear_objective")):
+		return ""
 	if _current_room.lab_room_type == "boss":
 		return "目标生命信号：未稳定"
 	return "剩余样本：%d" % remaining
@@ -178,11 +191,21 @@ func _get_completion_text() -> String:
 	match _current_room.lab_room_type:
 		"combat":
 			return "封锁解除：异常样本已清除。"
+		"pollution":
+			return "封锁解除：原质污染源已清除。"
 		"reward":
 			return "奖励解锁：守卫样本已清除。"
 		"boss":
 			return "下行裂隙稳定：可进入裂隙。"
 	return ""
+
+
+func _has_pollution_objective() -> bool:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return false
+	if not _current_room.has_method("has_pollution_source_objective"):
+		return false
+	return bool(_current_room.call("has_pollution_source_objective"))
 
 
 func _make_panel_style() -> StyleBoxFlat:
