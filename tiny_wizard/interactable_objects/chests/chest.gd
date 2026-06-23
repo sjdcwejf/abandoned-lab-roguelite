@@ -3,6 +3,8 @@ extends QuiverInteractableObject
 
 @export var items := []
 @export var physics_body_path := NodePath("RigidBody2D")
+@export var build_reward_enabled := false
+@export var build_catalog: BuildCatalog
 
 var _room_locked := false
 var _opened := false
@@ -35,6 +37,19 @@ func mark_opened() -> void:
 
 func is_opened() -> bool:
 	return _opened
+
+
+func spawn_build_reward(character: Node) -> void:
+	if not build_reward_enabled or build_catalog == null:
+		return
+	var definition := BuildPoolResolver.pick_candidate(character, build_catalog, [&"reward"])
+	if definition == null:
+		return
+	var pickup_scene := load("res://tiny_wizard/build/build_item_pickup.tscn") as PackedScene
+	var pickup := pickup_scene.instantiate() as BuildItemPickup
+	pickup.setup(definition)
+	pickup.position = position + Vector2(48, -12)
+	call_deferred("add_sibling", pickup)
 
 
 func _apply_room_lock() -> void:

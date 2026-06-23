@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/guarded_reward_room.gd" id="2_reward_script"]
@@ -7,6 +7,7 @@
 [ext_resource type="Resource" path="res://tiny_wizard/items/key/key.tres" id="4_key"]
 [ext_resource type="Resource" path="res://tiny_wizard/items/hearts/half_shield.tres" id="5_shield"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black_fly"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_data/test_build_catalog.tres" id="7_build_catalog"]
 
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("2_reward_script")
@@ -23,3 +24,5 @@ position = Vector2(512, 220)
 [node name="GuardedRewardChest" parent="." index="7" instance=ExtResource("2_chest")]
 position = Vector2(512, 360)
 items = [ExtResource("3_coin"), ExtResource("4_key"), ExtResource("5_shield")]
+build_reward_enabled = true
+build_catalog = ExtResource("7_build_catalog")

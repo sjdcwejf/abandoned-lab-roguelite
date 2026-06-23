@@ -10,7 +10,7 @@ const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 @export var play_tutorial := true
 @export var dungeon_seed := 0
 @export var start_room_coord := Vector2i.ZERO
-@export var tiemu_character_scene: PackedScene
+@export var tiemu_character_scene: PackedScene = preload("res://tiny_wizard/player/tiemu_character.tscn")
 @export var liuying_character_scene: PackedScene
 @export var fengqun_character_scene: PackedScene
 @export var shitong_character_scene: PackedScene

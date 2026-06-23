@@ -10,6 +10,8 @@ var arrow_types = {
 }
 
 func hit(damage:=1, from:=Vector2.ZERO):
+	var life_before := character_stats.current_life if character_stats != null else -1
+	var shield_before := int(character_stats.get("current_shield")) if character_stats != null and "current_shield" in character_stats else 0
 	var ability_controller := get_node_or_null("AbilityController") as LabPlayerAbilityController
 	if ability_controller != null:
 		if ability_controller.should_ignore_damage():
@@ -17,6 +19,19 @@ func hit(damage:=1, from:=Vector2.ZERO):
 		damage = ability_controller.modify_incoming_damage(int(damage))
 
 	super.hit(damage, from)
+	var build_controller := get_node_or_null("TiemuBuildController") as TiemuBuildController
+	var shield_after := int(character_stats.get("current_shield")) if character_stats != null and "current_shield" in character_stats else 0
+	var received_amount := maxi(0, life_before - character_stats.current_life) + maxi(0, shield_before - shield_after) if character_stats != null else 0
+	if build_controller != null and received_amount > 0:
+		var event := CombatEvent.new()
+		event.event_type = CombatEvent.EventType.DAMAGE_DEALT
+		event.target = self
+		event.source = self
+		event.base_amount = damage
+		event.final_amount = received_amount
+		event.hit_position = global_position
+		event.tags = [&"incoming_damage"]
+		build_controller.dispatch_combat_event(event)
 	if ability_controller != null:
 		ability_controller.notify_damage_taken()
 	$Visual/AnimationPlayer.play("Blink")

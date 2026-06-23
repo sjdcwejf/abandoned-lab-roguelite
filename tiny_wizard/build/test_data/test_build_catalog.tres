@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuildCatalog" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_catalog.gd" id="1_catalog"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_data/artificial_enhanced_heart.tres" id="2_heart"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_data/reactive_bone_plate.tres" id="3_plate"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_data/protomatter_reflux_gland.tres" id="4_gland"]
+
+[resource]
+script = ExtResource("1_catalog")
+items = Array[ExtResource("2_heart")]([ExtResource("2_heart"), ExtResource("3_plate"), ExtResource("4_gland")])

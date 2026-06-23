@@ -12,10 +12,13 @@ const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn"),
 	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
 ]
+const BUILD_CATALOG := preload("res://tiny_wizard/build/test_data/test_build_catalog.tres")
 
 @export var merchant_title := "渡鸦检疫军械库"
 @export_multiline var merchant_message := "A-03 信号就在前方。补好神经接口，数清你的炸药。"
 @export_range(0, 99, 1) var weapon_cost := 1
+@export_range(0, 99, 1) var organ_cost := 2
+@export_range(0, 99, 1) var relic_cost := 2
 @export var equip_purchase_immediately := false
 
 var _candidate_character: Node2D
@@ -23,6 +26,9 @@ var _dialog_open := false
 var _selected_weapon_scene: PackedScene
 var _selected_weapon_name := ""
 var _offer_preview_instance: Node2D
+var _stock_generated := false
+var _organ_offer: BuildItemDefinition
+var _relic_offer: BuildItemDefinition
 
 @onready var interact_area: Area2D = $InteractArea
 @onready var prompt: CanvasItem = $Prompt
@@ -62,6 +68,7 @@ func _on_interact_area_body_entered(body: Node2D) -> void:
 	if not body.has_node("Visual/WeaponHolder"):
 		return
 	_candidate_character = body
+	_ensure_stock(body)
 	prompt.visible = true
 
 
@@ -74,6 +81,7 @@ func _on_interact_area_body_exited(body: Node2D) -> void:
 
 
 func _open_armory(character: Node2D) -> void:
+	_ensure_stock(character)
 	_refresh_offer(character)
 	_set_dialog_open(true)
 
@@ -87,6 +95,22 @@ func _set_dialog_open(open: bool) -> void:
 
 
 func _refresh_offer(character: Node2D) -> void:
+	var lines := PackedStringArray()
+	if _selected_weapon_scene != null:
+		_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
+		lines.append("[F] Weapon: %s - %d %s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME])
+		_build_offer_preview(_selected_weapon_scene)
+	else:
+		lines.append("[F] Weapon: sold out")
+		_clear_offer_preview()
+	lines.append("[2] Organ: %s" % _format_build_offer(_organ_offer, organ_cost))
+	lines.append("[3] Relic: %s" % _format_build_offer(_relic_offer, relic_cost))
+	stock_label.text = "\n".join(lines)
+	status_label.text = "You have %d %s." % [_get_currency_count(character), CURRENCY_DISPLAY_NAME]
+	hint_label.text = "F: weapon | 2: organ | 3: relic"
+
+
+func _refresh_offer_legacy(character: Node2D) -> void:
 	_selected_weapon_scene = _pick_unowned_weapon(character)
 	if _selected_weapon_scene == null:
 		_selected_weapon_name = ""
@@ -143,6 +167,7 @@ func _try_purchase(character: Node2D) -> void:
 	if weapon_cost > 0:
 		inventory.remove_item(CURRENCY_NAME, weapon_cost)
 
+	_selected_weapon_scene = null
 	_refresh_offer(character)
 	if weapon_cost <= 0:
 		status_label.text = "已领取 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
@@ -171,6 +196,64 @@ func _pick_unowned_weapon(character: Node2D) -> PackedScene:
 			return weapon_scene
 
 	return null
+
+
+func _ensure_stock(character: Node2D) -> void:
+	if _stock_generated:
+		return
+	_stock_generated = true
+	_selected_weapon_scene = _pick_unowned_weapon(character)
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	_organ_offer = BuildPoolResolver.pick_candidate(character, BUILD_CATALOG, [&"shop", &"organ"], rng)
+	_relic_offer = BuildPoolResolver.pick_candidate(character, BUILD_CATALOG, [&"shop", &"relic"], rng)
+
+
+func _format_build_offer(definition: BuildItemDefinition, cost: int) -> String:
+	if definition == null:
+		return "unavailable"
+	return "%s - %d %s" % [definition.display_name, cost, CURRENCY_DISPLAY_NAME]
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not _dialog_open or _candidate_character == null:
+		return
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	if event.keycode == KEY_2:
+		_try_purchase_build(_candidate_character, _organ_offer, organ_cost, true)
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_3:
+		_try_purchase_build(_candidate_character, _relic_offer, relic_cost, false)
+		get_viewport().set_input_as_handled()
+
+
+func _try_purchase_build(character: Node, definition: BuildItemDefinition, cost: int, is_organ_offer: bool) -> bool:
+	if definition == null:
+		status_label.text = "Build offer unavailable."
+		return false
+	var controller := character.get_node_or_null("TiemuBuildController") as TiemuBuildController
+	var inventory := character.get("inventory") as QuiverInventory
+	if controller == null or inventory == null:
+		status_label.text = "This character cannot install build items."
+		return false
+	var currency_count := int(inventory.get_item_amount(CURRENCY_NAME))
+	if currency_count < cost:
+		status_label.text = "Not enough %s." % CURRENCY_DISPLAY_NAME
+		return false
+	var result := controller.install(definition)
+	if not result.is_success():
+		status_label.text = "Installation failed: %s" % result.message
+		return false
+	if cost > 0:
+		inventory.remove_item(CURRENCY_NAME, cost)
+	if is_organ_offer:
+		_organ_offer = null
+	else:
+		_relic_offer = null
+	status_label.text = "Installed %s." % definition.display_name
+	_refresh_offer(character)
+	return true
 
 
 func _get_currency_count(character: Node2D) -> int:

@@ -39,6 +39,8 @@ func trigger(object: QuiverInteractableObject, character: QuiverCharacter):
 					var item_node = item.create_pickable_item()
 					item_node.position = object.position + chest.get_parent().position
 					object.call_deferred("add_sibling", item_node)
+			if object.has_method("spawn_build_reward"):
+				object.call("spawn_build_reward", character)
 	
 	if next_action is QuiverInteractableObjectAction:
 		# Trigger next action

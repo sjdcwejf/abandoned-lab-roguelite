@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_event_effect.gd" id="2_effect"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tscn" id="3_fragment"]
+
+[sub_resource type="Resource" id="Resource_drop"]
+script = ExtResource("2_effect")
+trigger = 5
+effect_type = 3
+target = 2
+magnitude = 1.0
+chance = 0.35
+resource_id = &"protomatter_fragment"
+scene = ExtResource("3_fragment")
+
+[resource]
+script = ExtResource("1_item")
+id = &"organ.protomatter_reflux_gland"
+display_name = "原质回流腺"
+description = "测试构筑物品：击杀敌人时有概率额外掉落原质碎片。"
+item_type = 0
+rarity = 1
+tags = Array[StringName]([&"organ", &"gland", &"protomatter"])
+pool_tags = Array[StringName]([&"enemy", &"reward", &"shop", &"organ"])
+organ_slot = 1
+event_effects = Array[ExtResource("2_effect")]([SubResource("Resource_drop")])

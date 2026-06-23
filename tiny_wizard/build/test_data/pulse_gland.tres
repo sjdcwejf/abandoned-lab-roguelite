@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_stat_modifier.gd" id="2_modifier"]
+
+[sub_resource type="Resource" id="Resource_modifier"]
+script = ExtResource("2_modifier")
+stat_id = &"attack_speed"
+operation = 0
+value = 0.12
+
+[resource]
+script = ExtResource("1_item")
+id = &"organ.pulse_gland"
+display_name = "脉冲腺体"
+description = "一枚用于测试铁幕构筑数据的器官。"
+item_type = 0
+rarity = 1
+tags = Array[StringName]([&"organ", &"bioelectric"])
+stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_modifier")])

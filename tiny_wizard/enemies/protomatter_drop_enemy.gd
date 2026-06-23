@@ -4,6 +4,8 @@ extends QuiverCharacter
 
 const PROTOMATTER_FRAGMENT_ITEM := preload("res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tres")
 const GREEN_BLOOD_SPLATTER_SCRIPT := preload("res://tiny_wizard/effects/green_blood_splatter.gd")
+const BUILD_ITEM_PICKUP_SCENE := preload("res://tiny_wizard/build/build_item_pickup.tscn")
+const TEST_BUILD_CATALOG := preload("res://tiny_wizard/build/test_data/test_build_catalog.tres")
 
 @export_range(0.0, 1.0, 0.01) var protomatter_drop_chance := 0.45
 @export_range(0, 8, 1) var protomatter_min_drop := 1
@@ -12,6 +14,8 @@ const GREEN_BLOOD_SPLATTER_SCRIPT := preload("res://tiny_wizard/effects/green_bl
 @export var green_blood_splatter_enabled := true
 @export var green_blood_spawn_offset := Vector2(0.0, -28.0)
 @export_range(0.2, 4.0, 0.1) var green_blood_splatter_scale := 1.0
+@export var build_item_drop_enabled := false
+@export_range(0.0, 1.0, 0.01) var build_item_drop_chance := 0.08
 
 var _protomatter_dropped := false
 
@@ -24,7 +28,28 @@ func hit(damage := 1, from := Vector2.ZERO) -> void:
 
 func die() -> void:
 	_drop_protomatter_fragments()
+	_try_drop_build_item()
 	super.die()
+
+
+func _try_drop_build_item() -> void:
+	if not build_item_drop_enabled or randf() > build_item_drop_chance:
+		return
+	var scene_root := get_tree().current_scene
+	var character := BuildPoolResolver.find_tiemu_character(scene_root)
+	var definition := BuildPoolResolver.pick_candidate(character, TEST_BUILD_CATALOG, [&"enemy"])
+	if definition == null:
+		return
+	var drop_parent := _get_drop_parent()
+	if drop_parent == null:
+		return
+	var pickup := BUILD_ITEM_PICKUP_SCENE.instantiate() as BuildItemPickup
+	pickup.setup(definition)
+	if drop_parent is Node2D:
+		pickup.position = (drop_parent as Node2D).to_local(global_position)
+	else:
+		pickup.global_position = global_position
+	drop_parent.call_deferred("add_child", pickup)
 
 
 func _drop_protomatter_fragments() -> void:
