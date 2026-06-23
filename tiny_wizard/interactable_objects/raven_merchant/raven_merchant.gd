@@ -29,6 +29,7 @@ var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
 var _retired_weapon_keys := {}
 var _choice_overlay: LabWeaponChoiceOverlay
+var _visual_time := 0.0
 
 @onready var interact_area: Area2D = $InteractArea
 @onready var prompt: CanvasItem = $Prompt
@@ -38,8 +39,11 @@ var _choice_overlay: LabWeaponChoiceOverlay
 @onready var stock_label: Label = $DialogPanel/MarginContainer/VBoxContainer/Stock
 @onready var status_label: Label = $DialogPanel/MarginContainer/VBoxContainer/Status
 @onready var hint_label: Label = $DialogPanel/MarginContainer/VBoxContainer/Hint
-@onready var status_light: CanvasItem = $Console/StatusLight
-@onready var offer_preview: Node2D = $Console/OfferPreview
+@onready var status_light: CanvasItem = get_node_or_null("CounterStatusLight") as CanvasItem
+@onready var offer_preview: Node2D = $OfferPreview
+@onready var raven_sprite: Sprite2D = get_node_or_null("RavenSprite") as Sprite2D
+@onready var counter_sprite: Sprite2D = get_node_or_null("CounterSprite") as Sprite2D
+@onready var counter_scan_line: Polygon2D = get_node_or_null("CounterScanLine") as Polygon2D
 
 
 func _ready() -> void:
@@ -55,6 +59,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	_update_idle_visuals(_delta)
 	if _candidate_character == null:
 		return
 	if _choice_overlay != null:
@@ -69,6 +74,26 @@ func _process(_delta: float) -> void:
 			_try_purchase(_candidate_character)
 		else:
 			_open_armory(_candidate_character)
+
+
+func _update_idle_visuals(delta: float) -> void:
+	_visual_time += delta
+	var slow_pulse := (sin(_visual_time * 2.6) + 1.0) * 0.5
+	var fast_pulse := (sin(_visual_time * 7.2) + 1.0) * 0.5
+
+	if raven_sprite != null:
+		raven_sprite.position.y = -40.0 + sin(_visual_time * 1.8) * 0.5
+
+	if counter_sprite != null:
+		counter_sprite.position.y = -24.0 + sin(_visual_time * 1.4) * 0.18
+
+	if counter_scan_line != null:
+		counter_scan_line.position.x = 58.0 + lerpf(-4.0, 4.0, slow_pulse)
+		counter_scan_line.color = Color(0.52, 1.0, 1.0, 0.18 + 0.16 * fast_pulse)
+
+	if status_light is Polygon2D and not _dialog_open:
+		var light := status_light as Polygon2D
+		light.color = Color(0.22 + 0.08 * slow_pulse, 0.78 + 0.16 * slow_pulse, 0.84 + 0.1 * slow_pulse, 1.0)
 
 
 func _on_interact_area_body_entered(body: Node2D) -> void:
@@ -345,7 +370,7 @@ func _build_offer_preview(weapon_scene: PackedScene) -> void:
 	offer_preview.add_child(_offer_preview_instance)
 	_offer_preview_instance.position = Vector2.ZERO
 	_offer_preview_instance.rotation = -0.2
-	_offer_preview_instance.scale = Vector2(0.72, 0.72)
+	_offer_preview_instance.scale = Vector2(0.45, 0.45)
 	_disable_preview_interaction(_offer_preview_instance)
 
 
