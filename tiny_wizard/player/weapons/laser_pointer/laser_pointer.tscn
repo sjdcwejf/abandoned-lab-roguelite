@@ -9,6 +9,13 @@ display_name = "校准激光笔"
 weapon_id = "calibration_laser"
 inventory_size = Vector2i(2, 1)
 inventory_color = Color(0.18, 0.66, 0.95, 1)
+rarity_name = "制式"
+combat_role = "持续远程"
+weapon_description = "稳定输出的实验室校准光束，适合保持距离处理单体目标。"
+stat_damage_text = "1 / 跳"
+stat_rate_text = "持续引导"
+stat_range_text = "远"
+special_text = "低爆发、长射程，适合作为安全输出武器。"
 
 [node name="WeaponSprite" type="Sprite2D" parent="."]
 position = Vector2(0, -12)

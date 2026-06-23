@@ -5,6 +5,7 @@ extends Node2D
 const CURRENCY_NAME := "Protomatter Fragment"
 const CURRENCY_DISPLAY_NAME := "原质碎片"
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
 const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
 	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
@@ -18,6 +19,7 @@ const WEAPON_STOCK := [
 @export_multiline var merchant_message := "A-03 信号就在前方。补好神经接口，数清你的炸药。"
 @export_range(0, 99, 1) var weapon_cost := 1
 @export var equip_purchase_immediately := true
+@export var use_weapon_comparison := true
 
 var _candidate_character: Node2D
 var _dialog_open := false
@@ -26,6 +28,7 @@ var _selected_weapon_name := ""
 var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
 var _retired_weapon_keys := {}
+var _choice_overlay: LabWeaponChoiceOverlay
 
 @onready var interact_area: Area2D = $InteractArea
 @onready var prompt: CanvasItem = $Prompt
@@ -53,6 +56,8 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if _candidate_character == null:
+		return
+	if _choice_overlay != null:
 		return
 	if _dialog_open and _awaiting_weapon_replacement:
 		var replacement_slot := _get_pressed_replacement_slot()
@@ -111,7 +116,7 @@ func _refresh_offer(character: Node2D) -> void:
 	_build_offer_preview(_selected_weapon_scene)
 	var currency_count := _get_currency_count(character)
 	var quick_slots_full := _are_quick_slots_full(character)
-	var replacement_note := "\n武器栏已满：购买时可选择替换 1—4 号位。" if quick_slots_full else ""
+	var replacement_note := "\n武器栏已满：购买时会打开替换确认。" if quick_slots_full else "\n购买前会打开武器对比。"
 	if weapon_cost <= 0:
 		stock_label.text = "库存：%s\n价格：免费%s" % [_selected_weapon_name, replacement_note]
 		status_label.text = "不需要消耗%s。" % CURRENCY_DISPLAY_NAME
@@ -123,27 +128,95 @@ func _refresh_offer(character: Node2D) -> void:
 
 
 func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
-	if _selected_weapon_scene == null:
-		_set_dialog_open(false)
+	var validation := _validate_purchase(character)
+	if not bool(validation.get("ok", false)):
+		status_label.text = str(validation.get("message", "交易失败。"))
+		if bool(validation.get("refresh", false)):
+			_refresh_offer(character)
 		return
+
+	if use_weapon_comparison and replacement_slot < 0:
+		_show_purchase_comparison(character, validation.get("weapon_holder") as Node)
+		return
+
+	_complete_purchase(character, replacement_slot)
+
+
+func _validate_purchase(character: Node2D) -> Dictionary:
+	if _selected_weapon_scene == null:
+		return {"ok": false, "message": "渡鸦暂时没有可售武器。"}
 
 	var inventory := character.get("inventory") as QuiverInventory
 	if inventory == null:
-		status_label.text = "未检测到背包连接。渡鸦拒绝交易。"
-		return
+		return {"ok": false, "message": "未检测到背包连接。渡鸦拒绝交易。"}
 
 	var currency_count := int(inventory.get_item_amount(CURRENCY_NAME))
 	if currency_count < weapon_cost:
-		status_label.text = "需要 %d 个%s，你现在有 %d 个。" % [weapon_cost, CURRENCY_DISPLAY_NAME, currency_count]
-		return
+		return {
+			"ok": false,
+			"message": "需要 %d 个%s，你现在有 %d 个。" % [weapon_cost, CURRENCY_DISPLAY_NAME, currency_count],
+		}
 
 	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
 	if weapon_holder == null or not weapon_holder.has_method("add_weapon_scene"):
-		status_label.text = "未检测到武器挂架。"
-		return
+		return {"ok": false, "message": "未检测到武器挂架。"}
 	if weapon_holder.has_method("has_weapon_scene") and bool(weapon_holder.call("has_weapon_scene", _selected_weapon_scene)):
-		status_label.text = "你已经拥有 %s。渡鸦换了一件货。" % _selected_weapon_name
-		_refresh_offer(character)
+		return {
+			"ok": false,
+			"message": "你已经拥有 %s。渡鸦换了一件货。" % _selected_weapon_name,
+			"refresh": true,
+		}
+
+	return {
+		"ok": true,
+		"inventory": inventory,
+		"weapon_holder": weapon_holder,
+	}
+
+
+func _show_purchase_comparison(character: Node2D, weapon_holder: Node) -> void:
+	if _choice_overlay != null:
+		return
+
+	var has_free_slot := true
+	if weapon_holder.has_method("has_free_quick_slot"):
+		has_free_slot = bool(weapon_holder.call("has_free_quick_slot"))
+
+	var price_text := "价格：免费"
+	if weapon_cost > 0:
+		price_text = "价格：%d 个%s" % [weapon_cost, CURRENCY_DISPLAY_NAME]
+
+	_choice_overlay = WEAPON_CHOICE_OVERLAY.present(self, {
+		"weapon_holder": weapon_holder,
+		"weapon_scene": _selected_weapon_scene,
+		"title": "渡鸦交易确认",
+		"action": "购买",
+		"cost": price_text,
+		"allow_empty_slot": has_free_slot,
+	})
+	_choice_overlay.confirmed.connect(func(slot_index: int) -> void:
+		_choice_overlay = null
+		if is_instance_valid(character):
+			_complete_purchase(character, slot_index)
+	)
+	_choice_overlay.cancelled.connect(func() -> void:
+		_choice_overlay = null
+		status_label.text = "交易已取消，未消耗%s。" % CURRENCY_DISPLAY_NAME
+	)
+
+
+func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
+	var validation := _validate_purchase(character)
+	if not bool(validation.get("ok", false)):
+		status_label.text = str(validation.get("message", "交易失败。"))
+		if bool(validation.get("refresh", false)):
+			_refresh_offer(character)
+		return
+
+	var inventory := validation.get("inventory") as QuiverInventory
+	var weapon_holder := validation.get("weapon_holder") as Node
+	if inventory == null or weapon_holder == null:
+		status_label.text = "交易连接中断。"
 		return
 
 	var purchased_scene := _selected_weapon_scene

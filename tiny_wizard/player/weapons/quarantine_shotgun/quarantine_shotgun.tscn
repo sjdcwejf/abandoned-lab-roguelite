@@ -16,6 +16,13 @@ cooldown = 0.68
 collision_mask = 73
 pellet_count = 5
 spread_degrees = 30.0
+rarity_name = "异常"
+combat_role = "近距爆发"
+weapon_description = "以原质弹丸形成扇形覆盖，近距离命中越多，爆发越高。"
+stat_damage_text = "5 x 1"
+stat_rate_text = "慢"
+stat_range_text = "近 / 中"
+special_text = "扇形霰弹，适合贴脸爆发和清理小群敌人。"
 
 [node name="WeaponVisual" type="Node2D" parent="."]
 

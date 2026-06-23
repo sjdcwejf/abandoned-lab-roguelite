@@ -22,6 +22,13 @@ punch_active_time = 0.12
 punch_knockback_multiplier = 1.45
 punch_lunge_distance = 16.0
 punch_recover_time = 0.12
+rarity_name = "改造"
+combat_role = "近战爆发 / 副射击"
+weapon_description = "双手动力外骨骼，近距离用拳头击打，下部枪口可进行副射击。"
+stat_damage_text = "拳击 2 / 射击 1"
+stat_rate_text = "拳击中 / 射击快"
+stat_range_text = "近 + 中"
+special_text = "拳击击退强，副射击可补足中距离输出。"
 
 [node name="LeftGauntlet" type="Polygon2D" parent="."]
 position = Vector2(9, -9)

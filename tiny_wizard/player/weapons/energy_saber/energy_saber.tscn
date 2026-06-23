@@ -19,6 +19,13 @@ swing_start_angle = -0.65
 swing_end_angle = 0.55
 swing_recover_time = 0.1
 swing_scale_peak = Vector2(1.12, 1.05)
+rarity_name = "改造"
+combat_role = "近战防御"
+weapon_description = "高温能量刃，适合贴身斩击和清理敌方弹幕。"
+stat_damage_text = "2 / 斩"
+stat_rate_text = "中"
+stat_range_text = "近"
+special_text = "挥动时可打消敌方弹幕，命中会造成击退。"
 
 [node name="Handle" type="Polygon2D" parent="."]
 z_index = 7
