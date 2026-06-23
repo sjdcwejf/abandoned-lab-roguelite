@@ -2,9 +2,11 @@ extends Node2D
 
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
+const MAX_FORMAL_LAYER_COUNT := 2
 
 @export var use_generated_lab_dungeon := true
 @export var play_tutorial := true
@@ -27,8 +29,12 @@ var _tutorial_reward_pickups_remaining := 0
 var _tutorial_hint_panel: PanelContainer
 var _tutorial_hint_label: Label
 var _layer_clear_root: Control
+var _layer_clear_title_label: Label
+var _layer_clear_summary_label: Label
 var _layer_clear_weapons_label: Label
 var _layer_clear_inventory_label: Label
+var _room_objective_ui: Node
+var _formal_layer_index := 0
 
 var rooms := {}
 
@@ -39,6 +45,7 @@ func _ready():
 	_current_room = start_room_coord
 	$Camera2D.position = _room_camera_position(_current_room)
 	_setup_tutorial_hint()
+	_setup_room_objective_ui()
 	_setup_layer_clear_screen()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_show_character_select()
@@ -273,12 +280,16 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_enter_start_room(wake_character_id)
 
 
-func _start_formal_run() -> void:
+func _start_formal_run(layer_index := 1) -> void:
 	_run_state = RUN_STATE_FORMAL
+	_formal_layer_index = clampi(layer_index, 1, MAX_FORMAL_LAYER_COUNT)
 	_hide_tutorial_hint()
+	_hide_room_objective()
+	_hide_layer_clear_screen()
+	_set_character_control_enabled(true)
 	_current_room = start_room_coord
 	if use_generated_lab_dungeon:
-		rooms = LabDungeonGenerator.generate($Rooms, dungeon_seed)
+		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index))
 	else:
 		rooms = _collect_existing_rooms()
 
@@ -385,9 +396,26 @@ func _on_black_hole_entered(body: Node2D) -> void:
 			if not _tutorial_rewards_granted:
 				return
 			print("Sealing wake sequence complete. Entering the sealed sector.")
-			call_deferred("_start_formal_run")
+			call_deferred("_start_formal_run", 1)
 		RUN_STATE_FORMAL:
-			call_deferred("_complete_formal_layer")
+			if _formal_layer_index < MAX_FORMAL_LAYER_COUNT:
+				call_deferred("_start_next_formal_layer")
+			else:
+				call_deferred("_complete_formal_layer")
+
+
+func _start_next_formal_layer() -> void:
+	if _run_state != RUN_STATE_FORMAL:
+		return
+	var next_layer := mini(_formal_layer_index + 1, MAX_FORMAL_LAYER_COUNT)
+	print("Entering Sealing Protocol layer %d." % next_layer)
+	_start_formal_run(next_layer)
+
+
+func _get_formal_layer_seed(layer_index: int) -> int:
+	if dungeon_seed == 0:
+		return 0
+	return dungeon_seed + maxi(0, layer_index - 1)
 
 
 func _complete_formal_layer() -> void:
@@ -396,9 +424,10 @@ func _complete_formal_layer() -> void:
 
 	_run_state = RUN_STATE_LAYER_COMPLETE
 	_hide_tutorial_hint()
+	_hide_room_objective()
 	_set_character_control_enabled(false)
 	_show_layer_clear_screen()
-	print("Formal layer complete.")
+	print("Formal layer %d complete." % _formal_layer_index)
 
 
 func _set_character_control_enabled(enabled: bool) -> void:
@@ -451,19 +480,19 @@ func _setup_layer_clear_screen() -> void:
 	layout.add_theme_constant_override("separation", 14)
 	margin.add_child(layout)
 
-	var title := Label.new()
-	title.text = "封存协议完成"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
-	layout.add_child(title)
+	_layer_clear_title_label = Label.new()
+	_layer_clear_title_label.text = "封存协议完成"
+	_layer_clear_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_layer_clear_title_label.add_theme_font_size_override("font_size", 26)
+	_layer_clear_title_label.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
+	layout.add_child(_layer_clear_title_label)
 
-	var summary := Label.new()
-	summary.text = "失格者 A-03 已肃清。当前构筑快照："
-	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	summary.add_theme_font_size_override("font_size", 14)
-	summary.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
-	layout.add_child(summary)
+	_layer_clear_summary_label = Label.new()
+	_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
+	_layer_clear_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_layer_clear_summary_label.add_theme_font_size_override("font_size", 14)
+	_layer_clear_summary_label.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
+	layout.add_child(_layer_clear_summary_label)
 
 	layout.add_child(_make_layer_clear_section_title("武器构筑"))
 
@@ -562,6 +591,10 @@ func _hide_layer_clear_screen() -> void:
 
 
 func _refresh_layer_clear_screen() -> void:
+	if _layer_clear_title_label != null:
+		_layer_clear_title_label.text = "第 %d 层封存协议完成" % _formal_layer_index
+	if _layer_clear_summary_label != null:
+		_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
 	if _layer_clear_weapons_label != null:
 		_layer_clear_weapons_label.text = _get_layer_clear_weapon_text()
 	if _layer_clear_inventory_label != null:
@@ -611,6 +644,7 @@ func _restart_run_from_layer_clear() -> void:
 		character_id = CharacterSelectScreen.TIEMU_ID
 
 	_hide_layer_clear_screen()
+	_formal_layer_index = 0
 	_set_character_control_enabled(true)
 	_start_run_with_character(_get_selected_character_scene(), character_id)
 
@@ -671,13 +705,24 @@ func _setup_tutorial_hint() -> void:
 	_tutorial_hint_panel.add_child(_tutorial_hint_label)
 
 
+func _setup_room_objective_ui() -> void:
+	_room_objective_ui = ROOM_OBJECTIVE_UI_SCRIPT.new()
+	if _room_objective_ui == null:
+		return
+	_room_objective_ui.name = "RoomObjectiveUI"
+	add_child(_room_objective_ui)
+
+
 func _update_room_feedback_for_room(room: Room) -> void:
 	if _run_state == RUN_STATE_TUTORIAL:
+		_hide_room_objective()
 		_update_tutorial_hint_for_room(room)
 		return
 	if _run_state == RUN_STATE_FORMAL:
+		_hide_tutorial_hint()
 		_update_formal_room_feedback(room)
 		return
+	_hide_room_objective()
 	_hide_tutorial_hint()
 
 
@@ -712,11 +757,11 @@ func _update_formal_room_feedback(room: Room) -> void:
 	var room_label := room.lab_room_label
 	if room_label == "":
 		room_label = type_label
+		room.lab_room_label = room_label
 
-	if objective == "":
-		_show_tutorial_hint("%s | %s" % [room_label, type_label])
-	else:
-		_show_tutorial_hint("%s | %s\n目标：%s" % [room_label, type_label, objective])
+	if _room_objective_ui == null:
+		return
+	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective)
 
 
 func _get_formal_room_type_label(room_type: String) -> String:
@@ -764,6 +809,12 @@ func _hide_tutorial_hint() -> void:
 	if _tutorial_hint_panel == null:
 		return
 	_tutorial_hint_panel.visible = false
+
+
+func _hide_room_objective() -> void:
+	if _room_objective_ui == null:
+		return
+	_room_objective_ui.hide_objective()
 
 
 func _print_dungeon_summary() -> void:
