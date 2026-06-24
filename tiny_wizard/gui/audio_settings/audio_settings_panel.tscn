@@ -29,7 +29,7 @@ corner_radius_bottom_left = 4
 [node name="AudioSettingsPanel" type="PanelContainer"]
 visible = false
 process_mode = 3
-custom_minimum_size = Vector2(460, 360)
+custom_minimum_size = Vector2(500, 500)
 theme_override_styles/panel = SubResource("StylePanel")
 script = ExtResource("1_settings")
 
@@ -42,24 +42,33 @@ theme_override_constants/margin_bottom = 24
 
 [node name="Layout" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Margin/Layout"]
+[node name="SettingsTitle" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 25
-text = "音量设置"
+text = "设置"
 horizontal_alignment = 1
 
 [node name="Divider" type="HSeparator" parent="Margin/Layout"]
 layout_mode = 2
 
+[node name="AudioSectionLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "音量"
+
 [node name="MasterRow" type="HBoxContainer" parent="Margin/Layout"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Name" type="Label" parent="Margin/Layout/MasterRow"]
-custom_minimum_size = Vector2(78, 0)
+[node name="MasterNameLabel" type="Label" parent="Margin/Layout/MasterRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
 layout_mode = 2
 text = "主音量"
 
@@ -83,8 +92,9 @@ horizontal_alignment = 2
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Name" type="Label" parent="Margin/Layout/MusicRow"]
-custom_minimum_size = Vector2(78, 0)
+[node name="MusicNameLabel" type="Label" parent="Margin/Layout/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
 layout_mode = 2
 text = "音乐"
 
@@ -108,8 +118,9 @@ horizontal_alignment = 2
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Name" type="Label" parent="Margin/Layout/SFXRow"]
-custom_minimum_size = Vector2(78, 0)
+[node name="SFXNameLabel" type="Label" parent="Margin/Layout/SFXRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
 layout_mode = 2
 text = "音效"
 
@@ -129,8 +140,58 @@ layout_mode = 2
 text = "85%"
 horizontal_alignment = 2
 
+[node name="DisplayDivider" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="DisplaySectionLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "显示"
+
+[node name="DisplayModeRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DisplayModeLabel" type="Label" parent="Margin/Layout/DisplayModeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "显示模式"
+
+[node name="DisplayModeOption" type="OptionButton" parent="Margin/Layout/DisplayModeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LanguageDivider" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="LanguageSectionLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "语言"
+
+[node name="LanguageRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LanguageLabel" type="Label" parent="Margin/Layout/LanguageRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "语言"
+
+[node name="LanguageOption" type="OptionButton" parent="Margin/Layout/LanguageRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="Spacer" type="Control" parent="Margin/Layout"]
-custom_minimum_size = Vector2(0, 10)
+custom_minimum_size = Vector2(0, 6)
 layout_mode = 2
 size_flags_vertical = 3
 
