@@ -4,6 +4,7 @@ extends Node2D
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
 const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn")
+const MAIN_MENU_SCENE := "res://tiny_wizard/gui/main_menu/main_menu.tscn"
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
@@ -41,6 +42,12 @@ var _layer_clear_title_label: Label
 var _layer_clear_summary_label: Label
 var _layer_clear_weapons_label: Label
 var _layer_clear_inventory_label: Label
+var _death_prompt_root: Control
+var _death_prompt_status_label: Label
+var _death_prompt_title_label: Label
+var _death_prompt_description_label: Label
+var _death_prompt_respawn_button: Button
+var _death_prompt_main_menu_button: Button
 var _room_objective_ui: Node
 var _formal_layer_index := 0
 
@@ -55,6 +62,7 @@ func _ready():
 	_setup_tutorial_hint()
 	_setup_room_objective_ui()
 	_setup_layer_clear_screen()
+	_setup_death_prompt_screen()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_show_character_select()
 
@@ -63,6 +71,8 @@ func can_pause_game() -> bool:
 	if _character_select_screen != null and is_instance_valid(_character_select_screen):
 		return false
 	if _layer_clear_root != null and _layer_clear_root.visible:
+		return false
+	if _death_prompt_root != null and _death_prompt_root.visible:
 		return false
 	if _run_state == RUN_STATE_LAYER_COMPLETE:
 		return false
@@ -241,6 +251,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 
 	_selected_character_id = character_id
 	_hide_layer_clear_screen()
+	_hide_death_prompt(false)
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
 
@@ -251,7 +262,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_reset_character_inventory()
 	_bind_character_weapon_ui()
 	if _character.has_signal("respawn_requested"):
-		_character.connect("respawn_requested", Callable(self, "_respawn_character_at_start"))
+		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
 
 	if play_tutorial:
 		_configure_character_for_tutorial()
@@ -419,9 +430,21 @@ func _respawn_character_at_start() -> void:
 	var character_stats := _character.get("character_stats") as QuiverCharacterStats
 	if character_stats != null:
 		character_stats.set_life_to_max()
+	_character.set("can_grab_items", true)
+	_set_character_control_enabled(true)
 	start_room.enter_room()
 	_update_room_feedback_for_room(start_room)
 	print("Subject respawned in Sealing Airlock.")
+
+
+func _on_character_death_requested() -> void:
+	if _death_prompt_root != null and _death_prompt_root.visible:
+		return
+
+	_set_character_control_enabled(false)
+	if _character != null and is_instance_valid(_character):
+		_character.set("can_grab_items", false)
+	_show_death_prompt()
 
 
 func _on_tutorial_boss_defeated() -> void:
@@ -704,6 +727,179 @@ func _restart_run_from_layer_clear() -> void:
 	_formal_layer_index = 0
 	_set_character_control_enabled(true)
 	_start_run_with_character(_get_selected_character_scene(), character_id)
+
+
+func _setup_death_prompt_screen() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "DeathPromptLayer"
+	layer.layer = 80
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+
+	_death_prompt_root = Control.new()
+	_death_prompt_root.name = "DeathPromptRoot"
+	_death_prompt_root.process_mode = Node.PROCESS_MODE_ALWAYS
+	_death_prompt_root.visible = false
+	_death_prompt_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_death_prompt_root)
+
+	var dimmer := ColorRect.new()
+	dimmer.name = "Dimmer"
+	dimmer.color = Color(0.0, 0.0, 0.0, 0.76)
+	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+	dimmer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_death_prompt_root.add_child(dimmer)
+
+	var center := CenterContainer.new()
+	center.name = "Center"
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_death_prompt_root.add_child(center)
+
+	var panel := PanelContainer.new()
+	panel.name = "Panel"
+	panel.custom_minimum_size = Vector2(500, 300)
+	panel.add_theme_stylebox_override("panel", _make_death_prompt_panel_style())
+	center.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 30)
+	margin.add_theme_constant_override("margin_top", 28)
+	margin.add_theme_constant_override("margin_right", 30)
+	margin.add_theme_constant_override("margin_bottom", 26)
+	panel.add_child(margin)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 16)
+	margin.add_child(layout)
+
+	_death_prompt_status_label = Label.new()
+	_death_prompt_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_death_prompt_status_label.add_theme_font_size_override("font_size", 13)
+	_death_prompt_status_label.add_theme_color_override("font_color", Color(0.35, 0.86, 0.9, 1.0))
+	layout.add_child(_death_prompt_status_label)
+
+	_death_prompt_title_label = Label.new()
+	_death_prompt_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_death_prompt_title_label.add_theme_font_size_override("font_size", 28)
+	_death_prompt_title_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.58, 1.0))
+	layout.add_child(_death_prompt_title_label)
+
+	_death_prompt_description_label = Label.new()
+	_death_prompt_description_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_death_prompt_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_death_prompt_description_label.add_theme_font_size_override("font_size", 14)
+	_death_prompt_description_label.add_theme_color_override("font_color", Color(0.82, 0.89, 0.91, 1.0))
+	layout.add_child(_death_prompt_description_label)
+
+	var buttons := HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 12)
+	layout.add_child(buttons)
+
+	_death_prompt_respawn_button = Button.new()
+	_death_prompt_respawn_button.custom_minimum_size = Vector2(175, 46)
+	_death_prompt_respawn_button.add_theme_stylebox_override("normal", _make_death_prompt_button_style())
+	_death_prompt_respawn_button.add_theme_stylebox_override("hover", _make_death_prompt_button_hover_style())
+	_death_prompt_respawn_button.pressed.connect(_confirm_death_respawn)
+	buttons.add_child(_death_prompt_respawn_button)
+
+	_death_prompt_main_menu_button = Button.new()
+	_death_prompt_main_menu_button.custom_minimum_size = Vector2(175, 46)
+	_death_prompt_main_menu_button.add_theme_stylebox_override("normal", _make_death_prompt_danger_button_style())
+	_death_prompt_main_menu_button.add_theme_stylebox_override("hover", _make_death_prompt_button_hover_style())
+	_death_prompt_main_menu_button.pressed.connect(_return_to_main_menu_from_death)
+	buttons.add_child(_death_prompt_main_menu_button)
+
+	_refresh_death_prompt_text()
+
+
+func _make_death_prompt_panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.025, 0.045, 0.052, 0.98)
+	style.border_color = Color(0.24, 0.72, 0.76, 0.9)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	return style
+
+
+func _make_death_prompt_button_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.16, 0.18, 0.96)
+	style.border_color = Color(0.24, 0.7, 0.74, 0.82)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	return style
+
+
+func _make_death_prompt_button_hover_style() -> StyleBoxFlat:
+	var style := _make_death_prompt_button_style()
+	style.bg_color = Color(0.1, 0.29, 0.31, 1.0)
+	style.border_color = Color(0.45, 0.95, 0.92, 1.0)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	return style
+
+
+func _make_death_prompt_danger_button_style() -> StyleBoxFlat:
+	var style := _make_death_prompt_button_style()
+	style.bg_color = Color(0.24, 0.075, 0.06, 0.98)
+	style.border_color = Color(0.92, 0.39, 0.27, 0.92)
+	return style
+
+
+func _show_death_prompt() -> void:
+	if _death_prompt_root == null:
+		return
+	_refresh_death_prompt_text()
+	_death_prompt_root.visible = true
+	get_tree().paused = true
+	if _death_prompt_respawn_button != null:
+		_death_prompt_respawn_button.grab_focus()
+
+
+func _hide_death_prompt(resume_world := true) -> void:
+	if _death_prompt_root != null:
+		_death_prompt_root.visible = false
+	if resume_world:
+		get_tree().paused = false
+
+
+func _refresh_death_prompt_text() -> void:
+	if _death_prompt_status_label != null:
+		_death_prompt_status_label.text = GameSettings.tr_ui("death_status")
+	if _death_prompt_title_label != null:
+		_death_prompt_title_label.text = GameSettings.tr_ui("death_title")
+	if _death_prompt_description_label != null:
+		_death_prompt_description_label.text = GameSettings.tr_ui("death_desc")
+	if _death_prompt_respawn_button != null:
+		_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn")
+	if _death_prompt_main_menu_button != null:
+		_death_prompt_main_menu_button.text = GameSettings.tr_ui("death_main_menu")
+
+
+func _confirm_death_respawn() -> void:
+	_hide_death_prompt()
+	_respawn_character_at_start()
+
+
+func _return_to_main_menu_from_death() -> void:
+	GameSettings.save_settings()
+	_hide_death_prompt()
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
 func _get_selected_character_scene() -> PackedScene:

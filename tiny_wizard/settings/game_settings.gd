@@ -49,8 +49,8 @@ const UI_TEXT := {
 		"en": "Quit Game",
 	},
 	"version": {
-		"zh": "原型构建 0.1.61",
-		"en": "Prototype Build 0.1.61",
+		"zh": "原型构建 0.1.62",
+		"en": "Prototype Build 0.1.62",
 	},
 	"settings_title": {
 		"zh": "设置",
@@ -163,6 +163,26 @@ const UI_TEXT := {
 	"cancel": {
 		"zh": "取消",
 		"en": "Cancel",
+	},
+	"death_status": {
+		"zh": "封存行动 / 生命体征中断",
+		"en": "Containment Run / Vitals Lost",
+	},
+	"death_title": {
+		"zh": "实验体失去响应",
+		"en": "Subject Unresponsive",
+	},
+	"death_desc": {
+		"zh": "安全屋可执行一次重构唤醒。确认后将回到当前流程的出生房，并恢复生命值。",
+		"en": "The safehouse can trigger a reconstruction wake. Confirm to return to this run's starting room with restored health.",
+	},
+	"death_respawn": {
+		"zh": "执行重生",
+		"en": "Reconstruct",
+	},
+	"death_main_menu": {
+		"zh": "返回主菜单",
+		"en": "Main Menu",
 	},
 }
 
