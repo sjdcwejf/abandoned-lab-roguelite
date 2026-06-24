@@ -6,8 +6,6 @@ const CURRENCY_NAME := "Protomatter Fragment"
 const CURRENCY_DISPLAY_NAME := "原质碎片"
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
-const BREACH_CHARGE_ITEM := preload("res://tiny_wizard/items/pickable_bomb/bomb.tres")
-const BIOMETRIC_KEY_ITEM := preload("res://tiny_wizard/items/key/key.tres")
 const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
 	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
@@ -18,24 +16,10 @@ const WEAPON_STOCK := [
 ]
 const OFFER_NONE := "none"
 const OFFER_WEAPON := "weapon"
-const OFFER_SUPPLY := "supply"
-const SUPPLY_STOCK := [
-	{
-		"item": BREACH_CHARGE_ITEM,
-		"name": "破障炸药",
-		"description": "用于炸开检疫树脂与封锁碎石。",
-	},
-	{
-		"item": BIOMETRIC_KEY_ITEM,
-		"name": "生物识别钥",
-		"description": "用于打开部分封存箱和权限锁。",
-	},
-]
 
 @export var merchant_title := "渡鸦检疫军械库"
 @export_multiline var merchant_message := "A-03 信号就在前方。补好神经接口，数清你的炸药。"
 @export_range(0, 99, 1) var weapon_cost := 1
-@export_range(0, 99, 1) var supply_cost := 1
 @export var equip_purchase_immediately := true
 @export var use_weapon_comparison := true
 
@@ -44,10 +28,6 @@ var _dialog_open := false
 var _selected_offer_type := OFFER_NONE
 var _selected_weapon_scene: PackedScene
 var _selected_weapon_name := ""
-var _selected_supply_item: QuiverItem
-var _selected_supply_name := ""
-var _selected_supply_description := ""
-var _supply_offer_index := 0
 var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
 var _retired_weapon_keys := {}
@@ -154,13 +134,10 @@ func _refresh_offer(character: Node2D) -> void:
 	_awaiting_weapon_replacement = false
 	_selected_weapon_scene = _pick_unowned_weapon(character)
 	if _selected_weapon_scene == null:
-		_refresh_supply_offer(character)
+		_show_no_weapon_stock(character)
 		return
 
 	_selected_offer_type = OFFER_WEAPON
-	_selected_supply_item = null
-	_selected_supply_name = ""
-	_selected_supply_description = ""
 	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
 	_build_offer_preview(_selected_weapon_scene)
 	var currency_count := _get_currency_count(character)
@@ -190,44 +167,20 @@ func _refresh_offer(character: Node2D) -> void:
 		hint_label.text = "按 F 购买并装备。"
 
 
-func _refresh_supply_offer(character: Node2D) -> void:
-	_selected_offer_type = OFFER_SUPPLY
+func _show_no_weapon_stock(character: Node2D) -> void:
+	_selected_offer_type = OFFER_NONE
+	_selected_weapon_scene = null
 	_selected_weapon_name = ""
-	_selected_supply_item = null
-	_selected_supply_name = ""
-	_selected_supply_description = ""
 	_clear_offer_preview()
-	if SUPPLY_STOCK.is_empty():
-		_selected_offer_type = OFFER_NONE
-		stock_label.text = "库存：当前构筑无可售新武器。"
-		status_label.text = "渡鸦暂时没有新的东西卖给你。"
-		hint_label.text = "准备好后离开检疫商店。"
-		return
 
-	var supply_data := SUPPLY_STOCK[_supply_offer_index % SUPPLY_STOCK.size()] as Dictionary
-	_selected_supply_item = supply_data.get("item") as QuiverItem
-	_selected_supply_name = str(supply_data.get("name", "检疫补给"))
-	_selected_supply_description = str(supply_data.get("description", "基础封存行动补给。"))
 	var currency_count := _get_currency_count(character)
-	stock_label.text = "武器库存：本轮暂无新武器。\n补给：%s\n价格：%d 个%s" % [
-		_selected_supply_name,
-		supply_cost,
+	stock_label.text = "库存：当前无武器可供购买。"
+	status_label.text = "你持有 %d 个%s。%s可用于购买武器。" % [
+		currency_count,
+		CURRENCY_DISPLAY_NAME,
 		CURRENCY_DISPLAY_NAME,
 	]
-	if supply_cost > 0 and currency_count < supply_cost:
-		status_label.text = "原质不足：需要 %d 个%s，你现在有 %d 个。" % [
-			supply_cost,
-			CURRENCY_DISPLAY_NAME,
-			currency_count,
-		]
-		hint_label.text = "清理样本获取原质碎片后再回来交易。"
-	else:
-		status_label.text = "你持有 %d 个%s。%s" % [
-			currency_count,
-			CURRENCY_DISPLAY_NAME,
-			_selected_supply_description,
-		]
-		hint_label.text = "按 F 购买补给；每次购买后终端会切换下一项补给。"
+	hint_label.text = "本商人没有新的武器库存。离开商店，前往下一处渡鸦军械终端。"
 
 
 func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
@@ -236,10 +189,6 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 		status_label.text = str(validation.get("message", "交易失败。"))
 		if bool(validation.get("refresh", false)):
 			_refresh_offer(character)
-		return
-
-	if _selected_offer_type == OFFER_SUPPLY:
-		_complete_supply_purchase(character, validation)
 		return
 
 	if _selected_offer_type == OFFER_WEAPON and replacement_slot < 0 and _are_quick_slots_full(character):
@@ -255,28 +204,19 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 
 func _validate_purchase(character: Node2D) -> Dictionary:
 	if _selected_offer_type == OFFER_NONE:
-		return {"ok": false, "message": "渡鸦暂时没有可售库存。"}
+		return {"ok": false, "message": "当前无武器可供购买。原质碎片可用于购买武器。"}
 	if _selected_offer_type == OFFER_WEAPON and _selected_weapon_scene == null:
 		return {"ok": false, "message": "渡鸦暂时没有可售武器。"}
-	if _selected_offer_type == OFFER_SUPPLY and _selected_supply_item == null:
-		return {"ok": false, "message": "渡鸦暂时没有可售补给。", "refresh": true}
 
 	var inventory := character.get("inventory") as QuiverInventory
 	if inventory == null:
 		return {"ok": false, "message": "未检测到背包连接。渡鸦拒绝交易。"}
 
 	var currency_count := int(inventory.get_item_amount(CURRENCY_NAME))
-	var current_cost := _get_current_offer_cost()
-	if currency_count < current_cost:
+	if currency_count < weapon_cost:
 		return {
 			"ok": false,
-			"message": "需要 %d 个%s，你现在有 %d 个。" % [current_cost, CURRENCY_DISPLAY_NAME, currency_count],
-		}
-
-	if _selected_offer_type == OFFER_SUPPLY:
-		return {
-			"ok": true,
-			"inventory": inventory,
+			"message": "需要 %d 个%s，你现在有 %d 个。" % [weapon_cost, CURRENCY_DISPLAY_NAME, currency_count],
 		}
 
 	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
@@ -294,12 +234,6 @@ func _validate_purchase(character: Node2D) -> Dictionary:
 		"inventory": inventory,
 		"weapon_holder": weapon_holder,
 	}
-
-
-func _get_current_offer_cost() -> int:
-	if _selected_offer_type == OFFER_SUPPLY:
-		return supply_cost
-	return weapon_cost
 
 
 func _show_purchase_comparison(character: Node2D, weapon_holder: Node) -> void:
@@ -336,32 +270,6 @@ func _show_purchase_comparison(character: Node2D, weapon_holder: Node) -> void:
 		_choice_overlay = null
 		status_label.text = "交易已取消，未消耗%s。" % CURRENCY_DISPLAY_NAME
 	)
-
-
-func _complete_supply_purchase(character: Node2D, validation: Dictionary) -> void:
-	var inventory := validation.get("inventory") as QuiverInventory
-	if inventory == null:
-		status_label.text = "交易连接中断。"
-		return
-	if _selected_supply_item == null:
-		status_label.text = "补给清单为空。"
-		_refresh_offer(character)
-		return
-
-	var purchased_name := _selected_supply_name
-	if not inventory.add_item(_selected_supply_item, 1):
-		status_label.text = "背包容量不足，无法购买 %s。" % purchased_name
-		return
-
-	if supply_cost > 0:
-		inventory.remove_item(CURRENCY_NAME, supply_cost)
-	_supply_offer_advance()
-	_refresh_offer(character)
-	status_label.text = "已购买 %s，花费 %d 个%s。" % [
-		purchased_name,
-		supply_cost,
-		CURRENCY_DISPLAY_NAME,
-	]
 
 
 func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
@@ -406,16 +314,16 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 		_retire_weapon_scene(weapon_holder, replaced_weapon_scene)
 
 	_refresh_offer(character)
+	var no_weapon_stock_after_purchase := _selected_offer_type == OFFER_NONE
 	if replaced_weapon_name != "":
 		status_label.text = "已获得 %s，替换了 %s，并装备到 %d 号位。" % [purchased_name, replaced_weapon_name, slot_index + 1]
 	elif weapon_cost <= 0:
 		status_label.text = "已领取 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
 	else:
 		status_label.text = "已购买 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
-
-
-func _supply_offer_advance() -> void:
-	_supply_offer_index += 1
+	if no_weapon_stock_after_purchase:
+		status_label.text += "\n当前无武器可供购买。%s可用于购买武器。" % CURRENCY_DISPLAY_NAME
+		hint_label.text = "本商人没有新的武器库存。离开商店，前往下一处渡鸦军械终端。"
 
 
 func _enter_weapon_replacement_mode() -> void:

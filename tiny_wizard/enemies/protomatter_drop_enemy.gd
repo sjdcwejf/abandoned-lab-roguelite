@@ -4,6 +4,11 @@ extends QuiverCharacter
 
 const PROTOMATTER_FRAGMENT_ITEM := preload("res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tres")
 const GREEN_BLOOD_SPLATTER_SCRIPT := preload("res://tiny_wizard/effects/green_blood_splatter.gd")
+const SAFE_DROP_LOCAL_MIN := Vector2(96.0, 126.0)
+const SAFE_DROP_LOCAL_MAX := Vector2(928.0, 462.0)
+const BOTTOM_DOOR_CENTER_X := 512.0
+const BOTTOM_DOOR_SAFE_HALF_WIDTH := 128.0
+const BOTTOM_DOOR_SAFE_Y := 420.0
 
 @export_range(0.0, 1.0, 0.01) var protomatter_drop_chance := 0.45
 @export_range(0, 8, 1) var protomatter_min_drop := 1
@@ -51,7 +56,7 @@ func _drop_protomatter_fragments() -> void:
 
 		var angle := randf() * TAU
 		var distance := randf_range(0.0, protomatter_drop_spread)
-		var drop_position := global_position + Vector2.from_angle(angle) * distance
+		var drop_position := _get_safe_drop_position(drop_parent, global_position + Vector2.from_angle(angle) * distance)
 		if drop_parent is Node2D:
 			item_node.position = (drop_parent as Node2D).to_local(drop_position)
 		else:
@@ -66,6 +71,25 @@ func _get_drop_parent() -> Node:
 	if parent.name == "Enemies" and parent.get_parent() != null:
 		return parent.get_parent()
 	return parent
+
+
+func _get_safe_drop_position(drop_parent: Node, desired_global_position: Vector2) -> Vector2:
+	if not drop_parent is Room:
+		return desired_global_position
+
+	var room := drop_parent as Room
+	var local_position := desired_global_position - room.get_room_global_position()
+	local_position.x = clampf(local_position.x, SAFE_DROP_LOCAL_MIN.x, SAFE_DROP_LOCAL_MAX.x)
+	local_position.y = clampf(local_position.y, SAFE_DROP_LOCAL_MIN.y, SAFE_DROP_LOCAL_MAX.y)
+
+	var is_near_bottom_door := (
+		local_position.y > BOTTOM_DOOR_SAFE_Y
+		and absf(local_position.x - BOTTOM_DOOR_CENTER_X) < BOTTOM_DOOR_SAFE_HALF_WIDTH
+	)
+	if is_near_bottom_door:
+		local_position.y = BOTTOM_DOOR_SAFE_Y
+
+	return room.get_room_global_position() + local_position
 
 
 func _spawn_green_blood_splatter(hit_from: Vector2) -> void:
