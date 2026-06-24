@@ -85,7 +85,7 @@ func _process(_delta: float) -> void:
 	_update_idle_visuals(_delta)
 	if _candidate_character == null:
 		return
-	if _choice_overlay != null:
+	if _has_active_choice_overlay():
 		return
 	if _dialog_open and _awaiting_weapon_replacement:
 		var replacement_slot := _get_pressed_replacement_slot()
@@ -143,6 +143,7 @@ func _set_dialog_open(open: bool) -> void:
 	_dialog_open = open
 	if not _dialog_open:
 		_awaiting_weapon_replacement = false
+		_close_choice_overlay()
 	dialog_panel.visible = _dialog_open
 	if status_light is Polygon2D:
 		var light := status_light as Polygon2D
@@ -164,14 +165,28 @@ func _refresh_offer(character: Node2D) -> void:
 	_build_offer_preview(_selected_weapon_scene)
 	var currency_count := _get_currency_count(character)
 	var quick_slots_full := _are_quick_slots_full(character)
-	var replacement_note := "\n武器栏已满：购买时会打开替换确认。" if quick_slots_full else "\n购买前会打开武器对比。"
+	var can_afford := weapon_cost <= 0 or currency_count >= weapon_cost
+	var replacement_note := "\n武器栏已满：按 1 / 2 / 3 / 4 选择替换槽位。" if quick_slots_full else "\n购买前会打开武器对比。"
 	if weapon_cost <= 0:
 		stock_label.text = "库存：%s\n价格：免费%s" % [_selected_weapon_name, replacement_note]
 		status_label.text = "不需要消耗%s。" % CURRENCY_DISPLAY_NAME
-		hint_label.text = "按 F 领取并装备。"
 	else:
 		stock_label.text = "库存：%s\n价格：%d 个%s%s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME, replacement_note]
 		status_label.text = "你持有 %d 个%s。" % [currency_count, CURRENCY_DISPLAY_NAME]
+
+	if not can_afford:
+		_awaiting_weapon_replacement = false
+		status_label.text = "原质不足：需要 %d 个%s，你现在有 %d 个。" % [
+			weapon_cost,
+			CURRENCY_DISPLAY_NAME,
+			currency_count,
+		]
+		hint_label.text = "清理样本获取原质碎片后再回来交易。"
+	elif quick_slots_full:
+		_enter_weapon_replacement_mode()
+	elif weapon_cost <= 0:
+		hint_label.text = "按 F 领取并装备。"
+	else:
 		hint_label.text = "按 F 购买并装备。"
 
 
@@ -199,12 +214,20 @@ func _refresh_supply_offer(character: Node2D) -> void:
 		supply_cost,
 		CURRENCY_DISPLAY_NAME,
 	]
-	status_label.text = "你持有 %d 个%s。%s" % [
-		currency_count,
-		CURRENCY_DISPLAY_NAME,
-		_selected_supply_description,
-	]
-	hint_label.text = "按 F 购买补给；每次购买后终端会切换下一项补给。"
+	if supply_cost > 0 and currency_count < supply_cost:
+		status_label.text = "原质不足：需要 %d 个%s，你现在有 %d 个。" % [
+			supply_cost,
+			CURRENCY_DISPLAY_NAME,
+			currency_count,
+		]
+		hint_label.text = "清理样本获取原质碎片后再回来交易。"
+	else:
+		status_label.text = "你持有 %d 个%s。%s" % [
+			currency_count,
+			CURRENCY_DISPLAY_NAME,
+			_selected_supply_description,
+		]
+		hint_label.text = "按 F 购买补给；每次购买后终端会切换下一项补给。"
 
 
 func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
@@ -217,6 +240,10 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 
 	if _selected_offer_type == OFFER_SUPPLY:
 		_complete_supply_purchase(character, validation)
+		return
+
+	if _selected_offer_type == OFFER_WEAPON and replacement_slot < 0 and _are_quick_slots_full(character):
+		_enter_weapon_replacement_mode()
 		return
 
 	if _selected_offer_type == OFFER_WEAPON and use_weapon_comparison and replacement_slot < 0:
@@ -276,7 +303,7 @@ func _get_current_offer_cost() -> int:
 
 
 func _show_purchase_comparison(character: Node2D, weapon_holder: Node) -> void:
-	if _choice_overlay != null:
+	if _has_active_choice_overlay():
 		return
 
 	var has_free_slot := true
@@ -295,6 +322,11 @@ func _show_purchase_comparison(character: Node2D, weapon_holder: Node) -> void:
 		"cost": price_text,
 		"allow_empty_slot": has_free_slot,
 	})
+	var active_overlay := _choice_overlay
+	_choice_overlay.tree_exiting.connect(func() -> void:
+		if _choice_overlay == active_overlay:
+			_choice_overlay = null
+	)
 	_choice_overlay.confirmed.connect(func(slot_index: int) -> void:
 		_choice_overlay = null
 		if is_instance_valid(character):
@@ -353,9 +385,7 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 	var slot_index := -1
 	if weapon_holder.has_method("has_free_quick_slot") and not bool(weapon_holder.call("has_free_quick_slot")):
 		if replacement_slot < 0:
-			_awaiting_weapon_replacement = true
-			status_label.text = "请选择要替换的武器槽位。确认前不会扣除%s。" % CURRENCY_DISPLAY_NAME
-			hint_label.text = "按 1 / 2 / 3 / 4 选择替换槽位。"
+			_enter_weapon_replacement_mode()
 			return
 		if not weapon_holder.has_method("replace_weapon_scene_in_slot"):
 			status_label.text = "武器栏已满，当前挂架不支持替换。"
@@ -386,6 +416,29 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 
 func _supply_offer_advance() -> void:
 	_supply_offer_index += 1
+
+
+func _enter_weapon_replacement_mode() -> void:
+	_awaiting_weapon_replacement = true
+	status_label.text = "武器栏已满：请选择要替换的槽位。确认前不会扣除%s。" % CURRENCY_DISPLAY_NAME
+	hint_label.text = "按 1 / 2 / 3 / 4 替换对应武器并购买。"
+
+
+func _has_active_choice_overlay() -> bool:
+	if _choice_overlay == null:
+		return false
+	if is_instance_valid(_choice_overlay):
+		return true
+	_choice_overlay = null
+	return false
+
+
+func _close_choice_overlay() -> void:
+	if _choice_overlay == null:
+		return
+	if is_instance_valid(_choice_overlay):
+		_choice_overlay.queue_free()
+	_choice_overlay = null
 
 
 func _get_pressed_replacement_slot() -> int:
