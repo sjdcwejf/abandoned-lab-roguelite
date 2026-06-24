@@ -4,11 +4,6 @@ extends QuiverCharacter
 
 signal respawn_requested
 
-var arrow_types = {
-	'normal': preload("res://tiny_wizard/player/weapon/bullet/arrow.tscn"),
-	'violet': preload("res://tiny_wizard/player/weapon/bullet/violet_arrow.tscn"),
-}
-
 func hit(damage:=1, from:=Vector2.ZERO):
 	var ability_controller := get_node_or_null("AbilityController") as LabPlayerAbilityController
 	if ability_controller != null:
@@ -33,11 +28,3 @@ func _process(delta):
 
 func die():
 	respawn_requested.emit()
-
-
-func change_arrow(arrow_scene):
-	$Visual/DistanceWeapon.bullet_scene = arrow_scene
-#	inventory.current_arrow = arrow_scene.instantiate().icon
-	var gui = get_node_or_null(gui_path)
-	if gui != null:
-		gui.change_arrow_texture(arrow_scene.instantiate().icon)

@@ -64,10 +64,6 @@ func _current_scene_allows_pause() -> bool:
 	return bool(current_scene.call("can_pause_game"))
 
 
-func change_arrow_texture(new_texture):
-	%ArrowUITexture.texture = new_texture
-
-
 func bind_weapon_holder(weapon_holder: Node) -> void:
 	if _weapon_backpack_ui == null:
 		return
