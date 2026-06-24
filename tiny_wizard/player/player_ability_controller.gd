@@ -40,11 +40,14 @@ const META_DECOY_EXPIRES_AT := "lab_decoy_expires_at"
 @export_range(0.0, 1.0, 0.01) var liuying_dodge_chance := 0.15
 @export var liuying_momentum_required_time := 2.0
 @export var liuying_momentum_speed_multiplier := 1.2
-@export var liuying_afterimage_interval := 0.08
-@export var liuying_afterimage_lifetime := 0.5
-@export var liuying_afterimage_min_distance := 14.0
-@export var liuying_afterimage_color := Color(0.58, 0.78, 1.0, 0.38)
+@export var liuying_afterimage_interval := 0.24
+@export var liuying_afterimage_lifetime := 0.26
+@export var liuying_afterimage_min_distance := 46.0
+@export var liuying_afterimage_color := Color(0.58, 0.78, 1.0, 0.2)
 @export var liuying_afterimage_decoy_enabled := true
+@export var liuying_dash_afterimage_count := 6
+@export var liuying_dash_afterimage_lifetime := 0.46
+@export var liuying_dash_afterimage_color := Color(0.66, 0.86, 1.0, 0.58)
 @export var liuying_energy_cost := 30.0
 @export var liuying_fire_rate_time := 2.0
 @export var liuying_fire_cooldown_multiplier := 0.75
@@ -289,6 +292,7 @@ func _activate_liuying() -> void:
 
 	var dash_damage := _get_liuying_dash_damage()
 	_damage_targets_along_segment(start_position, end_position, liuying_dash_hit_radius, dash_damage, true)
+	_spawn_liuying_dash_afterimages(start_position, end_position)
 	_show_dash_trail(start_position, end_position, Color(0.72, 0.78, 1.0, 0.92), 0.22)
 	_show_pulse(Color(0.95, 0.72, 0.34, 0.85), 54.0, 0.18)
 
@@ -748,18 +752,70 @@ func _spawn_liuying_afterimage() -> void:
 	if visual == null:
 		return
 
+	_spawn_liuying_afterimage_at_transform(
+		visual,
+		visual.global_transform,
+		liuying_afterimage_color,
+		liuying_afterimage_lifetime,
+		liuying_afterimage_decoy_enabled,
+		1.02,
+		18
+	)
+
+
+func _spawn_liuying_dash_afterimages(start_position: Vector2, end_position: Vector2) -> void:
+	if _character == null or liuying_dash_afterimage_count <= 0:
+		return
+
+	var visual := _character.get_node_or_null("Visual") as Node2D
+	if visual == null:
+		return
+
+	var segment := end_position - start_position
+	if segment.length() <= 1.0:
+		return
+
+	var count := maxi(1, liuying_dash_afterimage_count)
+	for index in range(count):
+		var progress := float(index + 1) / float(count + 1)
+		var image_transform := visual.global_transform
+		image_transform.origin = start_position.lerp(end_position, progress)
+
+		var image_color := liuying_dash_afterimage_color
+		image_color.a *= lerpf(0.62, 1.0, progress)
+		var image_lifetime := liuying_dash_afterimage_lifetime * lerpf(0.72, 1.0, progress)
+		_spawn_liuying_afterimage_at_transform(
+			visual,
+			image_transform,
+			image_color,
+			image_lifetime,
+			liuying_afterimage_decoy_enabled,
+			1.045,
+			20
+		)
+
+
+func _spawn_liuying_afterimage_at_transform(
+	visual: Node2D,
+	visual_transform: Transform2D,
+	color: Color,
+	lifetime: float,
+	decoy_enabled: bool,
+	scale_multiplier: float,
+	afterimage_z_index: int
+) -> void:
 	var afterimage := Node2D.new()
 	afterimage.name = "LiuyingAfterimage"
 	afterimage.top_level = true
 	afterimage.z_as_relative = false
-	afterimage.z_index = 18
+	afterimage.z_index = afterimage_z_index
 	add_child(afterimage)
-	afterimage.global_transform = visual.global_transform
-	afterimage.modulate = liuying_afterimage_color
-	if liuying_afterimage_decoy_enabled:
+	afterimage.global_transform = visual_transform
+	afterimage.modulate = color
+	if decoy_enabled:
 		afterimage.add_to_group(LIUYING_DECOY_GROUP)
 		afterimage.set_meta(META_DECOY_OWNER, _character)
-		afterimage.set_meta(META_DECOY_EXPIRES_AT, Time.get_ticks_msec() + int(liuying_afterimage_lifetime * 1000.0))
+		afterimage.set_meta(META_DECOY_EXPIRES_AT, Time.get_ticks_msec() + int(lifetime * 1000.0))
 
 	var copied_any := false
 	for child_name in ["Shadow", "Body", "Head", "Hat"]:
@@ -776,8 +832,8 @@ func _spawn_liuying_afterimage() -> void:
 
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(afterimage, "modulate", Color(liuying_afterimage_color.r, liuying_afterimage_color.g, liuying_afterimage_color.b, 0.0), liuying_afterimage_lifetime).set_ease(Tween.EASE_OUT)
-	tween.tween_property(afterimage, "scale", afterimage.scale * 1.03, liuying_afterimage_lifetime).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(afterimage, "modulate", Color(color.r, color.g, color.b, 0.0), lifetime).set_ease(Tween.EASE_OUT)
+	tween.tween_property(afterimage, "scale", afterimage.scale * scale_multiplier, lifetime).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.finished.connect(Callable(afterimage, "queue_free"))
 
 
