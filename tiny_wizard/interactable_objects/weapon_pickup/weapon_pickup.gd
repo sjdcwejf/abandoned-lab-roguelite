@@ -5,6 +5,7 @@ extends Node2D
 signal weapon_picked_up(slot_index: int)
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
 
 @export var weapon_scene: PackedScene
@@ -59,6 +60,7 @@ func _request_pickup(character: Node2D) -> void:
 	if weapon_holder.has_method("has_weapon_scene") and bool(weapon_holder.call("has_weapon_scene", weapon_scene)):
 		if prompt is Label:
 			(prompt as Label).text = "已拥有"
+		INTERACTION_FEEDBACK.show_from(self, "已经拥有 %s。" % weapon_label, 1.2)
 		return
 
 	if target_slot_number > 0:
@@ -157,6 +159,7 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 	else:
 		slot_index = int(weapon_holder.add_weapon_scene(weapon_scene, equip_on_pickup))
 	if slot_index < 0:
+		INTERACTION_FEEDBACK.show_from(self, "武器拾取失败。", 1.2)
 		return
 
 	_picked_up = true
@@ -165,6 +168,7 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 	visible = false
 	pickup_area.set_deferred("monitoring", false)
 	weapon_picked_up.emit(slot_index)
+	INTERACTION_FEEDBACK.show_from(self, "已获得 %s，装备到 %d 号位。" % [weapon_label, slot_index + 1], 1.4)
 	print("%s added to weapon slot %d." % [weapon_label, slot_index + 1])
 
 
@@ -199,7 +203,7 @@ func _on_pickup_area_body_entered(body: Node2D) -> void:
 	_candidate_character = body
 	_awaiting_slot_selection = false
 	if prompt is Label:
-		(prompt as Label).text = "F"
+		(prompt as Label).text = "按 F 拾取"
 	prompt.visible = true
 
 

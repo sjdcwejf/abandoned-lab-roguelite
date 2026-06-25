@@ -5,6 +5,7 @@ extends Node2D
 const CURRENCY_NAME := "Protomatter Fragment"
 const CURRENCY_DISPLAY_NAME := "原质碎片"
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
 const WEAPON_STOCK := [
 	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
@@ -103,6 +104,8 @@ func _on_interact_area_body_entered(body: Node2D) -> void:
 	if not body.has_node("Visual/WeaponHolder"):
 		return
 	_candidate_character = body
+	if prompt is Label:
+		(prompt as Label).text = "按 F 交易"
 	prompt.visible = true
 
 
@@ -187,6 +190,7 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 	var validation := _validate_purchase(character)
 	if not bool(validation.get("ok", false)):
 		status_label.text = str(validation.get("message", "交易失败。"))
+		INTERACTION_FEEDBACK.show_from(self, status_label.text, 1.4)
 		if bool(validation.get("refresh", false)):
 			_refresh_offer(character)
 		return
@@ -276,6 +280,7 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 	var validation := _validate_purchase(character)
 	if not bool(validation.get("ok", false)):
 		status_label.text = str(validation.get("message", "交易失败。"))
+		INTERACTION_FEEDBACK.show_from(self, status_label.text, 1.4)
 		if bool(validation.get("refresh", false)):
 			_refresh_offer(character)
 		return
@@ -324,6 +329,7 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 	if no_weapon_stock_after_purchase:
 		status_label.text += "\n当前无武器可供购买。%s可用于购买武器。" % CURRENCY_DISPLAY_NAME
 		hint_label.text = "本商人没有新的武器库存。离开商店，前往下一处渡鸦军械终端。"
+	INTERACTION_FEEDBACK.show_from(self, "交易完成：%s。" % purchased_name, 1.35)
 
 
 func _enter_weapon_replacement_mode() -> void:

@@ -1,5 +1,7 @@
 extends QuiverInteractableObjectAction
 
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
+
 # The items to spawn (an array of QuiverPickableItem packed scenes)
 var items := [] 
 # The path to the sprite to change it's texture to open
@@ -19,6 +21,7 @@ func trigger(object: QuiverInteractableObject, character: QuiverCharacter):
 				if (character.inventory as QuiverInventory).get_item_amount("Biometric Key") > 0:
 					character.inventory.remove_item("Biometric Key")
 				else:
+					INTERACTION_FEEDBACK.show_from(object, "需要生物识别钥才能打开。", 1.35)
 					# We cannot open it so we stop here
 					if next_action is QuiverInteractableObjectAction:
 						# Trigger next action
@@ -33,6 +36,7 @@ func trigger(object: QuiverInteractableObject, character: QuiverCharacter):
 			chest.open()
 			if object.has_method("mark_opened"):
 				object.call("mark_opened")
+			INTERACTION_FEEDBACK.show_from(object, "补给箱已打开。", 1.1)
 			# Spawn items
 			for item in items:
 				if item is QuiverItem:

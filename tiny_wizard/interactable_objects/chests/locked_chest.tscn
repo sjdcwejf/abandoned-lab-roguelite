@@ -38,3 +38,7 @@ shape = SubResource("CircleShape2D_yy5pk")
 script = ExtResource("4_3i1hb")
 chest_sprite = NodePath("../RigidBody2D/Object")
 locked = true
+
+[node name="InteractMechanic" parent="." index="2"]
+require_interact_input = true
+prompt_text = "按 F 打开保险箱"

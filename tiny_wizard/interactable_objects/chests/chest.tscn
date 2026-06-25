@@ -30,3 +30,7 @@ shape = SubResource("CircleShape2D_yy5pk")
 [node name="Action" parent="." index="1"]
 script = ExtResource("4_3i1hb")
 chest_sprite = NodePath("../RigidBody2D/Object")
+
+[node name="InteractMechanic" parent="." index="2"]
+require_interact_input = true
+prompt_text = "按 F 打开补给箱"

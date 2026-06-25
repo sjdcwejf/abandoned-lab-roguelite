@@ -4,6 +4,7 @@ extends Node2D
 signal weapon_picked_up(slot_index: int)
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 
 @export var weapon_scene: PackedScene
 @export var weapon_label := "检疫刃"
@@ -63,6 +64,7 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 	else:
 		slot_index = int(weapon_holder.add_weapon_scene(weapon_scene, equip_on_pickup))
 	if slot_index < 0:
+		INTERACTION_FEEDBACK.show_from(self, "武器拾取失败。", 1.2)
 		return
 
 	_picked_up = true
@@ -71,6 +73,7 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 	weapon_preview.visible = false
 	stand_light.visible = false
 	pickup_area.set_deferred("monitoring", false)
+	INTERACTION_FEEDBACK.show_from(self, "已获得 %s，装备到 %d 号位。" % [weapon_label, slot_index + 1], 1.4)
 	print("%s added to weapon slot %d." % [weapon_label, slot_index + 1])
 	weapon_picked_up.emit(slot_index)
 
@@ -81,7 +84,7 @@ func _on_pickup_area_body_entered(body: Node2D) -> void:
 	_candidate_character = body
 	_awaiting_slot_selection = false
 	if prompt is Label:
-		(prompt as Label).text = "F"
+		(prompt as Label).text = "按 F 拾取"
 	prompt.visible = true
 
 

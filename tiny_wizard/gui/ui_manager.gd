@@ -5,12 +5,14 @@ const WEAPON_BACKPACK_UI_SCRIPT := preload("res://tiny_wizard/gui/weapon_backpac
 const ABILITY_UI_SCRIPT := preload("res://tiny_wizard/gui/ability_ui/ability_ui.gd")
 const PAUSE_MENU_SCENE := preload("res://tiny_wizard/gui/pause_menu/pause_menu.tscn")
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const INTERACTION_FEEDBACK_SCRIPT := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 
 @export var inventory : QuiverInventory
 
 var _weapon_backpack_ui: WeaponBackpackUI
 var _ability_ui: Control
 var _pause_menu: LabPauseMenu
+var _interaction_feedback: LabInteractionFeedback
 
 
 func _ready() -> void:
@@ -23,6 +25,10 @@ func _ready() -> void:
 	_ability_ui = ABILITY_UI_SCRIPT.new()
 	_ability_ui.name = "AbilityUI"
 	add_child(_ability_ui)
+
+	_interaction_feedback = INTERACTION_FEEDBACK_SCRIPT.new()
+	_interaction_feedback.name = "InteractionFeedback"
+	add_child(_interaction_feedback)
 
 	_pause_menu = PAUSE_MENU_SCENE.instantiate() as LabPauseMenu
 	_pause_menu.name = "PauseMenu"

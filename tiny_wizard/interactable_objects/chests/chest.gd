@@ -37,11 +37,43 @@ func is_opened() -> bool:
 	return _opened
 
 
+func get_interaction_prompt(character: QuiverCharacter) -> String:
+	if _opened:
+		return ""
+	if _room_locked:
+		return "清理样本后解锁"
+	if _is_key_locked() and not _character_has_key(character):
+		return "需要生物识别钥"
+	return "按 F 打开补给箱"
+
+
+func get_interaction_block_message(character: QuiverCharacter) -> String:
+	if _opened:
+		return "补给箱已经打开。"
+	if _room_locked:
+		return "清理当前房间目标后，补给箱才会解锁。"
+	if _is_key_locked() and not _character_has_key(character):
+		return "需要生物识别钥才能打开。"
+	return ""
+
+
 func _apply_room_lock() -> void:
 	if action != null:
 		action.active = not _room_locked and not _opened
 
 	modulate = Color(0.45, 0.5, 0.54, 0.88) if _room_locked and not _opened else Color.WHITE
+
+
+func _is_key_locked() -> bool:
+	if action == null:
+		return false
+	return bool(action.get("locked"))
+
+
+func _character_has_key(character: QuiverCharacter) -> bool:
+	if character == null or character.inventory == null:
+		return false
+	return int((character.inventory as QuiverInventory).get_item_amount("Biometric Key")) > 0
 
 
 func _freeze_physics_body() -> void:
