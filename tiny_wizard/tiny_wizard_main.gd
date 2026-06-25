@@ -3,6 +3,7 @@ extends Node2D
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
+const MINIMAP_UI_SCRIPT := preload("res://tiny_wizard/gui/minimap_ui/minimap_ui.gd")
 const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn")
 const MAIN_MENU_SCENE := "res://tiny_wizard/gui/main_menu/main_menu.tscn"
 const RUN_STATE_TUTORIAL := "tutorial"
@@ -49,6 +50,7 @@ var _death_prompt_description_label: Label
 var _death_prompt_respawn_button: Button
 var _death_prompt_main_menu_button: Button
 var _room_objective_ui: Node
+var _minimap_ui: LabMinimapUI
 var _formal_layer_index := 0
 
 var rooms := {}
@@ -61,6 +63,7 @@ func _ready():
 	$Camera2D.position = _room_camera_position(_current_room)
 	_setup_tutorial_hint()
 	_setup_room_objective_ui()
+	_setup_minimap_ui()
 	_setup_layer_clear_screen()
 	_setup_death_prompt_screen()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
@@ -291,6 +294,7 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_tutorial_rewards_dropped = false
 	_tutorial_rewards_granted = false
 	_tutorial_reward_pickups_remaining = 0
+	_reset_minimap()
 	_current_room = start_room_coord
 	rooms = LabDungeonGenerator.generate_tutorial($Rooms)
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
@@ -304,6 +308,7 @@ func _start_formal_run(layer_index := 1) -> void:
 	_formal_layer_index = clampi(layer_index, 1, MAX_FORMAL_LAYER_COUNT)
 	_hide_tutorial_hint()
 	_hide_room_objective()
+	_hide_minimap()
 	_hide_layer_clear_screen()
 	_set_character_control_enabled(true)
 	_current_room = start_room_coord
@@ -316,6 +321,7 @@ func _start_formal_run(layer_index := 1) -> void:
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
 	_register_rooms()
 	_update_room_doors()
+	_set_minimap_rooms()
 	_enter_start_room()
 
 
@@ -505,6 +511,7 @@ func _complete_formal_layer() -> void:
 	_run_state = RUN_STATE_LAYER_COMPLETE
 	_hide_tutorial_hint()
 	_hide_room_objective()
+	_hide_minimap()
 	_set_character_control_enabled(false)
 	_show_layer_clear_screen()
 	print("Formal layer %d complete." % _formal_layer_index)
@@ -966,9 +973,18 @@ func _setup_room_objective_ui() -> void:
 	add_child(_room_objective_ui)
 
 
+func _setup_minimap_ui() -> void:
+	_minimap_ui = MINIMAP_UI_SCRIPT.new()
+	if _minimap_ui == null:
+		return
+	_minimap_ui.name = "MinimapUI"
+	add_child(_minimap_ui)
+
+
 func _update_room_feedback_for_room(room: Room) -> void:
 	if _run_state == RUN_STATE_TUTORIAL:
 		_hide_room_objective()
+		_hide_minimap()
 		_update_tutorial_hint_for_room(room)
 		return
 	if _run_state == RUN_STATE_FORMAL:
@@ -977,6 +993,7 @@ func _update_room_feedback_for_room(room: Room) -> void:
 		return
 	_hide_room_objective()
 	_hide_tutorial_hint()
+	_hide_minimap()
 
 
 func _update_tutorial_hint_for_room(room: Room) -> void:
@@ -1013,8 +1030,10 @@ func _update_formal_room_feedback(room: Room) -> void:
 		room.lab_room_label = room_label
 
 	if _room_objective_ui == null:
+		_update_minimap_current_room()
 		return
 	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective)
+	_update_minimap_current_room()
 
 
 func _get_formal_room_type_label(room_type: String) -> String:
@@ -1072,6 +1091,33 @@ func _hide_room_objective() -> void:
 	if _room_objective_ui == null:
 		return
 	_room_objective_ui.hide_objective()
+
+
+func _set_minimap_rooms() -> void:
+	if _minimap_ui == null:
+		return
+	_minimap_ui.set_rooms(rooms, _formal_layer_index)
+
+
+func _update_minimap_current_room() -> void:
+	if _minimap_ui == null:
+		return
+	if _run_state != RUN_STATE_FORMAL:
+		_minimap_ui.hide_map()
+		return
+	_minimap_ui.update_current_room(_current_room)
+
+
+func _hide_minimap() -> void:
+	if _minimap_ui == null:
+		return
+	_minimap_ui.hide_map()
+
+
+func _reset_minimap() -> void:
+	if _minimap_ui == null:
+		return
+	_minimap_ui.reset_map()
 
 
 func _print_dungeon_summary() -> void:
