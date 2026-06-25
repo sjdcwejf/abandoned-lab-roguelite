@@ -6,6 +6,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 
 var _current_room: Room
 var _floor_index := 1
+var _chapter_label := ""
 var _room_type_label := ""
 var _objective_text := ""
 
@@ -24,10 +25,11 @@ func _ready() -> void:
 	hide_objective()
 
 
-func show_room(room: Room, floor_index: int, room_type_label: String, objective_text: String) -> void:
+func show_room(room: Room, floor_index: int, room_type_label: String, objective_text: String, chapter_label := "") -> void:
 	_disconnect_room()
 	_current_room = room
 	_floor_index = floor_index
+	_chapter_label = chapter_label
 	_room_type_label = room_type_label
 	_objective_text = objective_text
 	_connect_room()
@@ -142,7 +144,10 @@ func _refresh() -> void:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return
 
-	_floor_label.text = "第 %d 层 / %s" % [_floor_index, _room_type_label]
+	if _chapter_label != "":
+		_floor_label.text = "%s｜第 %d 层 / %s" % [_chapter_label, _floor_index, _room_type_label]
+	else:
+		_floor_label.text = "第 %d 层 / %s" % [_floor_index, _room_type_label]
 	_room_label.text = _current_room.lab_room_label
 
 	var completion_text := _get_completion_text()

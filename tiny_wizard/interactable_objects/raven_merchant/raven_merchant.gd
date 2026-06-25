@@ -12,14 +12,7 @@ const RELIC_RECYCLE_VALUE := 5
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
-const WEAPON_STOCK := [
-	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
-	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
-	preload("res://tiny_wizard/player/weapons/energy_saber/energy_saber.tscn"),
-	preload("res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn"),
-	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
-	preload("res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.tscn"),
-]
+const WEAPON_CATALOG := preload("res://tiny_wizard/player/weapons/weapon_catalog.gd")
 const OFFER_NONE := "none"
 const OFFER_WEAPON := "weapon"
 const OFFER_RELIC_RECYCLE := "relic_recycle"
@@ -511,14 +504,12 @@ func _get_available_weapon_scenes(character: Node2D) -> Array[PackedScene]:
 	if weapon_holder.has_method("get_owned_weapon_scene_keys"):
 		owned = weapon_holder.call("get_owned_weapon_scene_keys") as Dictionary
 
-	for stock_entry in WEAPON_STOCK:
+	for stock_entry in WEAPON_CATALOG.get_weapon_pool_for_context(self):
 		var weapon_scene: PackedScene = stock_entry as PackedScene
 		if weapon_scene == null:
 			continue
 
-		var weapon_key := weapon_scene.resource_path
-		if weapon_holder.has_method("get_weapon_scene_key"):
-			weapon_key = str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
+		var weapon_key := WEAPON_CATALOG.get_weapon_key(weapon_scene, weapon_holder)
 		if _retired_weapon_keys.has(weapon_key):
 			continue
 		if not owned.has(weapon_key):
@@ -592,15 +583,7 @@ func _get_relic_count(character: Node2D) -> int:
 
 
 func _get_weapon_name(weapon_scene: PackedScene) -> String:
-	if weapon_scene == null:
-		return "未知武器"
-
-	var weapon_name := weapon_scene.resource_path.get_file().get_basename().replace("_", " ").capitalize()
-	var weapon := weapon_scene.instantiate()
-	if weapon is LabWeapon:
-		weapon_name = (weapon as LabWeapon).get_inventory_display_name()
-	weapon.free()
-	return weapon_name
+	return WEAPON_CATALOG.get_weapon_display_name(weapon_scene)
 
 
 func _build_offer_preview(weapon_scene: PackedScene) -> void:

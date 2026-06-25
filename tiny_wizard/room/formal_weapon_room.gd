@@ -2,14 +2,7 @@ extends Room
 
 
 const WEAPON_PICKUP_SCENE := preload("res://tiny_wizard/interactable_objects/weapon_pickup/weapon_pickup.tscn")
-const WEAPON_POOL := [
-	preload("res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.tscn"),
-	preload("res://tiny_wizard/player/weapons/containment_nailgun/containment_nailgun.tscn"),
-	preload("res://tiny_wizard/player/weapons/energy_saber/energy_saber.tscn"),
-	preload("res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlets.tscn"),
-	preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn"),
-	preload("res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.tscn"),
-]
+const WEAPON_CATALOG := preload("res://tiny_wizard/player/weapons/weapon_catalog.gd")
 
 var _weapon_holder: Node
 var _weapon_spawned := false
@@ -27,12 +20,13 @@ func enter_room() -> void:
 
 
 func _spawn_random_weapon() -> void:
-	if WEAPON_POOL.is_empty():
+	var weapon_pool := WEAPON_CATALOG.get_weapon_pool_for_context(self)
+	if weapon_pool.is_empty():
 		return
 
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	var weapon_scene := _pick_unowned_weapon_scene(rng)
+	var weapon_scene := _pick_unowned_weapon_scene(rng, weapon_pool)
 	if weapon_scene == null:
 		print("Weapon room has no unowned weapon to drop.")
 		return
@@ -51,11 +45,11 @@ func _spawn_random_weapon() -> void:
 	weapon_pickup.play_drop_animation(start_position, target_position)
 
 
-func _pick_unowned_weapon_scene(rng: RandomNumberGenerator) -> PackedScene:
+func _pick_unowned_weapon_scene(rng: RandomNumberGenerator, weapon_pool: Array[PackedScene]) -> PackedScene:
 	var candidates := []
 	var owned_weapon_keys := _get_owned_weapon_keys()
 	var weapon_holder := _get_active_weapon_holder()
-	for weapon_scene in WEAPON_POOL:
+	for weapon_scene in weapon_pool:
 		var packed_scene := weapon_scene as PackedScene
 		if packed_scene == null:
 			continue
@@ -115,30 +109,8 @@ func _find_weapon_holder(root: Node) -> Node:
 
 
 func _weapon_scene_key(weapon_scene: PackedScene) -> String:
-	if weapon_scene == null:
-		return ""
-	var weapon_holder := _get_active_weapon_holder()
-	if weapon_holder != null and weapon_holder.has_method("get_weapon_scene_key"):
-		return str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
-	if weapon_scene.resource_path != "":
-		return weapon_scene.resource_path
-	return str(weapon_scene.get_instance_id())
+	return WEAPON_CATALOG.get_weapon_key(weapon_scene, _get_active_weapon_holder())
 
 
 func _get_weapon_label(weapon_scene: PackedScene) -> String:
-	if weapon_scene == null:
-		return "武器"
-
-	var weapon := weapon_scene.instantiate()
-	if weapon == null:
-		return "武器"
-	if weapon is LabWeapon:
-		var label := (weapon as LabWeapon).get_inventory_display_name()
-		weapon.free()
-		return label
-
-	weapon.free()
-	var base_name := weapon_scene.resource_path.get_file().get_basename()
-	if base_name != "":
-		return "未命名武器：%s" % base_name
-	return "未命名武器"
+	return WEAPON_CATALOG.get_weapon_display_name(weapon_scene)

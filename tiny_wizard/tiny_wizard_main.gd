@@ -10,6 +10,7 @@ const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 const MAX_FORMAL_LAYER_COUNT := 2
+const FORMAL_CHAPTER_ID := 1
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -51,6 +52,9 @@ var _death_prompt_respawn_button: Button
 var _death_prompt_main_menu_button: Button
 var _room_objective_ui: Node
 var _minimap_ui: LabMinimapUI
+var _formal_chapter_id := FORMAL_CHAPTER_ID
+var _formal_chapter_title := ""
+var _formal_chapter_sector := ""
 var _formal_layer_index := 0
 
 var rooms := {}
@@ -306,6 +310,9 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 func _start_formal_run(layer_index := 1) -> void:
 	_run_state = RUN_STATE_FORMAL
 	_formal_layer_index = clampi(layer_index, 1, MAX_FORMAL_LAYER_COUNT)
+	_formal_chapter_id = FORMAL_CHAPTER_ID
+	_formal_chapter_title = LabDungeonGenerator.get_chapter_title(_formal_chapter_id)
+	_formal_chapter_sector = LabDungeonGenerator.get_chapter_sector_label(_formal_chapter_id)
 	_hide_tutorial_hint()
 	_hide_room_objective()
 	_hide_minimap()
@@ -313,7 +320,7 @@ func _start_formal_run(layer_index := 1) -> void:
 	_set_character_control_enabled(true)
 	_current_room = start_room_coord
 	if use_generated_lab_dungeon:
-		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index))
+		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index), _formal_chapter_id, _formal_layer_index)
 	else:
 		rooms = _collect_existing_rooms()
 
@@ -494,7 +501,7 @@ func _start_next_formal_layer() -> void:
 	if _run_state != RUN_STATE_FORMAL:
 		return
 	var next_layer := mini(_formal_layer_index + 1, MAX_FORMAL_LAYER_COUNT)
-	print("Entering Sealing Protocol layer %d." % next_layer)
+	print("Entering %s layer %d." % [_formal_chapter_title, next_layer])
 	_start_formal_run(next_layer)
 
 
@@ -679,7 +686,7 @@ func _hide_layer_clear_screen() -> void:
 
 func _refresh_layer_clear_screen() -> void:
 	if _layer_clear_title_label != null:
-		_layer_clear_title_label.text = "第 %d 层封存协议完成" % _formal_layer_index
+		_layer_clear_title_label.text = "%s｜第 %d 层完成" % [_formal_chapter_title, _formal_layer_index]
 	if _layer_clear_summary_label != null:
 		_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
 	if _layer_clear_weapons_label != null:
@@ -1033,7 +1040,7 @@ func _update_formal_room_feedback(room: Room) -> void:
 	if _room_objective_ui == null:
 		_update_minimap_current_room()
 		return
-	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective)
+	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective, _formal_chapter_title)
 	_update_minimap_current_room()
 
 
@@ -1097,7 +1104,7 @@ func _hide_room_objective() -> void:
 func _set_minimap_rooms() -> void:
 	if _minimap_ui == null:
 		return
-	_minimap_ui.set_rooms(rooms, _formal_layer_index)
+	_minimap_ui.set_rooms(rooms, _formal_layer_index, _formal_chapter_title)
 
 
 func _update_minimap_current_room() -> void:
@@ -1125,7 +1132,10 @@ func _print_dungeon_summary() -> void:
 	var seed_text := ""
 	if _run_state == RUN_STATE_FORMAL and use_generated_lab_dungeon:
 		seed_text = " (seed %d)" % LabDungeonGenerator.last_seed
-	print("Generated %d-room %s Sealing Protocol sector%s:" % [rooms.size(), _run_state, seed_text])
+	var chapter_text := ""
+	if _run_state == RUN_STATE_FORMAL:
+		chapter_text = " %s / %s" % [_formal_chapter_title, _formal_chapter_sector]
+	print("Generated %d-room %s%s sector%s:" % [rooms.size(), _run_state, chapter_text, seed_text])
 	for room_pos in rooms:
 		var room = rooms[room_pos]
 		print(" - ", room.lab_room_label, " [", room.lab_room_type, "] at ", room_pos)

@@ -12,6 +12,7 @@ var _rooms := {}
 var _explored := {}
 var _current_coord := Vector2i.ZERO
 var _floor_index := 1
+var _chapter_label := ""
 
 var _root: Control
 var _title_label: Label
@@ -26,9 +27,10 @@ func _ready() -> void:
 	hide_map()
 
 
-func set_rooms(room_map: Dictionary, floor_index: int) -> void:
+func set_rooms(room_map: Dictionary, floor_index: int, chapter_label := "") -> void:
 	_rooms = room_map.duplicate()
 	_floor_index = floor_index
+	_chapter_label = chapter_label
 	_explored.clear()
 	_refresh()
 
@@ -117,7 +119,10 @@ func _build_ui() -> void:
 
 func _refresh() -> void:
 	if _title_label != null:
-		_title_label.text = "封存地图｜第 %d 层" % _floor_index
+		if _chapter_label != "":
+			_title_label.text = "%s｜第 %d 层" % [_chapter_label, _floor_index]
+		else:
+			_title_label.text = "封存地图｜第 %d 层" % _floor_index
 	if _map_area == null:
 		return
 
