@@ -8,9 +8,14 @@ const CELL_SIZE := Vector2(54, 54)
 const CELL_GAP := 4.0
 const MAX_QUICK_SLOTS := 4
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const CURRENCY_NAME := "Protomatter Fragment"
+const RELIC_NAME := "Relic"
 
 var weapon_holder: Node
+var inventory: QuiverInventory
 var _item_layer: Control
+var _currency_label: Label
+var _relic_label: Label
 
 
 func _ready() -> void:
@@ -45,14 +50,23 @@ func bind_weapon_holder(new_weapon_holder: Node) -> void:
 	refresh()
 
 
+func bind_inventory(new_inventory: QuiverInventory) -> void:
+	_disconnect_inventory()
+	inventory = new_inventory
+	_connect_inventory()
+	_refresh_resource_summary()
+
+
 func refresh() -> void:
 	if _item_layer == null:
 		return
 
 	_clear_item_layer()
 	if weapon_holder == null or not is_instance_valid(weapon_holder):
+		_refresh_resource_summary()
 		return
 	if not weapon_holder.has_method("get_quick_weapon_slots"):
+		_refresh_resource_summary()
 		return
 
 	var slots := weapon_holder.call("get_quick_weapon_slots", MAX_QUICK_SLOTS) as Array
@@ -72,6 +86,8 @@ func refresh() -> void:
 		_mark_occupied(cell, weapon_size, occupied)
 		_add_weapon_block(slot_info, cell, weapon_size)
 
+	_refresh_resource_summary()
+
 
 func _build_ui() -> void:
 	var dimmer := ColorRect.new()
@@ -89,7 +105,7 @@ func _build_ui() -> void:
 
 	var panel := PanelContainer.new()
 	panel.name = "Panel"
-	panel.custom_minimum_size = Vector2(424, 322)
+	panel.custom_minimum_size = Vector2(424, 366)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	center.add_child(panel)
@@ -138,6 +154,22 @@ func _build_ui() -> void:
 	_item_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	grid_area.add_child(_item_layer)
 
+	var resources := HBoxContainer.new()
+	resources.name = "Resources"
+	resources.alignment = BoxContainer.ALIGNMENT_CENTER
+	resources.add_theme_constant_override("separation", 18)
+	layout.add_child(resources)
+
+	_currency_label = Label.new()
+	_currency_label.add_theme_font_size_override("font_size", 13)
+	_currency_label.add_theme_color_override("font_color", Color(0.78, 0.7, 1.0, 1.0))
+	resources.add_child(_currency_label)
+
+	_relic_label = Label.new()
+	_relic_label.add_theme_font_size_override("font_size", 13)
+	_relic_label.add_theme_color_override("font_color", Color(1.0, 0.34, 0.28, 1.0))
+	resources.add_child(_relic_label)
+
 
 func _connect_weapon_holder() -> void:
 	if weapon_holder == null or not is_instance_valid(weapon_holder):
@@ -163,6 +195,39 @@ func _disconnect_weapon_holder() -> void:
 	var equipped_callable := Callable(self, "_on_weapon_equipped")
 	if weapon_holder.has_signal("weapon_equipped") and weapon_holder.is_connected("weapon_equipped", equipped_callable):
 		weapon_holder.disconnect("weapon_equipped", equipped_callable)
+
+
+func _connect_inventory() -> void:
+	if inventory == null:
+		return
+	var changed_callable := Callable(self, "_on_inventory_item_changed")
+	if not inventory.item_changed.is_connected(changed_callable):
+		inventory.item_changed.connect(changed_callable)
+
+
+func _disconnect_inventory() -> void:
+	if inventory == null:
+		return
+	var changed_callable := Callable(self, "_on_inventory_item_changed")
+	if inventory.item_changed.is_connected(changed_callable):
+		inventory.item_changed.disconnect(changed_callable)
+
+
+func _on_inventory_item_changed(_item: QuiverItem) -> void:
+	_refresh_resource_summary()
+
+
+func _refresh_resource_summary() -> void:
+	if _currency_label == null or _relic_label == null:
+		return
+
+	var currency_count := 0
+	var relic_count := 0
+	if inventory != null:
+		currency_count = int(inventory.get_item_amount(CURRENCY_NAME))
+		relic_count = int(inventory.get_item_amount(RELIC_NAME))
+	_currency_label.text = "原质：%d" % currency_count
+	_relic_label.text = "遗物：%d" % relic_count
 
 
 func _on_weapon_equipped(_slot_index: int) -> void:

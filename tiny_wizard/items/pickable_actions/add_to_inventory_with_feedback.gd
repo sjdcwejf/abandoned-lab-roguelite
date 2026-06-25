@@ -37,7 +37,9 @@ func _should_show_pickup_feedback(pickable_item: QuiverPickableItem) -> bool:
 func _success_message(item: QuiverItem) -> String:
 	match item.name:
 		"Protomatter Fragment":
-			return "回收原质碎片。"
+			return "回收原质。"
+		"Relic":
+			return "获得遗物。"
 		"Breach Charge":
 			return "获得破障炸药。"
 		"Biometric Key":
@@ -57,7 +59,9 @@ func _display_name(item: QuiverItem) -> String:
 		return "未知物资"
 	match item.name:
 		"Protomatter Fragment":
-			return "原质碎片"
+			return "原质"
+		"Relic":
+			return "遗物"
 		"Breach Charge":
 			return "破障炸药"
 		"Biometric Key":

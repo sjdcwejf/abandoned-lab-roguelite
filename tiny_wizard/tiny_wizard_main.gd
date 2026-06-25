@@ -716,10 +716,11 @@ func _get_layer_clear_weapon_text() -> String:
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "原质碎片：0    生物识别钥：0    破障炸药：0"
+		return "原质：0    遗物：0    生物识别钥：0    破障炸药：0"
 
-	return "原质碎片：%d    生物识别钥：%d    破障炸药：%d" % [
+	return "原质：%d    遗物：%d    生物识别钥：%d    破障炸药：%d" % [
 		inventory.get_item_amount("Protomatter Fragment"),
+		inventory.get_item_amount("Relic"),
 		inventory.get_item_amount("Biometric Key"),
 		inventory.get_item_amount("Breach Charge")
 	]

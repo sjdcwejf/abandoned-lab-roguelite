@@ -319,9 +319,9 @@ vertical_alignment = 1
 [node name="DialogPanel" type="PanelContainer" parent="."]
 visible = false
 z_index = 30
-offset_left = -238.0
-offset_top = -244.0
-offset_right = 238.0
+offset_left = -286.0
+offset_top = -316.0
+offset_right = 286.0
 offset_bottom = -58.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_dialog")
 
@@ -349,7 +349,7 @@ autowrap_mode = 3
 [node name="Stock" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.78, 0.42, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "库存：武器"
 autowrap_mode = 3
 
@@ -357,7 +357,7 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.86, 0.86, 1)
 theme_override_font_sizes/font_size = 11
-text = "你持有 0 个原质碎片。"
+text = "你持有 0 个原质。"
 autowrap_mode = 3
 
 [node name="Hint" type="Label" parent="DialogPanel/MarginContainer/VBoxContainer"]

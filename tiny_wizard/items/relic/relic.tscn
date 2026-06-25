@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/items/default_items/default_add_to_inventory_item.tscn" id="1_pickable"]
+[ext_resource type="Resource" path="res://tiny_wizard/items/relic/relic.tres" id="2_item"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/placeholder_art/cirle_particle.png" id="3_texture"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_relic"]
+radius = 17.0
+
+[node name="Relic" instance=ExtResource("1_pickable")]
+item = ExtResource("2_item")
+
+[node name="CollisionShape2D" parent="RigidBody2D" index="0"]
+position = Vector2(1, -10)
+shape = SubResource("CircleShape2D_relic")
+
+[node name="Item" parent="RigidBody2D" index="1"]
+modulate = Color(1, 0.12, 0.08, 1)
+position = Vector2(2, -11)
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("3_texture")
+
+[node name="Shadow" parent="RigidBody2D" index="2"]
+position = Vector2(1, -1.17)
+scale = Vector2(0.5, 0.25)

@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource("1_item")
-name = "Protomatter Fragment"
-short_description = "从肃清样本中析出的原质，可用于渡鸦武器交易。"
+name = "Relic"
+short_description = "从高危样本体内回收的稳定原质遗物，暂时可交给渡鸦换取原质。"
 long_description = null
 stackable = true
 stack_size = null
-pickable_item_scene = "res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tscn"
+pickable_item_scene = "res://tiny_wizard/items/relic/relic.tscn"

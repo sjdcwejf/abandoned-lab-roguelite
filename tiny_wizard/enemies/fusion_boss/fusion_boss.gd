@@ -6,6 +6,7 @@ signal boss_defeated
 
 const DEFAULT_SUMMON_SCENE := preload("res://tiny_wizard/enemies/black_fly/black_fly.tscn")
 const POISON_PROJECTILE_SCENE := preload("res://tiny_wizard/enemies/fusion_boss/fusion_poison_projectile.tscn")
+const RELIC_ITEM := preload("res://tiny_wizard/items/relic/relic.tres")
 
 @export var boss_display_name := "失格者 A-03：破仓体"
 @export var far_distance := 270.0
@@ -34,6 +35,7 @@ const POISON_PROJECTILE_SCENE := preload("res://tiny_wizard/enemies/fusion_boss/
 @export var summon_scene: PackedScene
 @export_range(0, 12, 1) var death_burst_count := 6
 @export var death_burst_scale := 2.0
+@export var relic_drop_enabled := true
 
 var _base_max_speed := 70.0
 var _defeated := false
@@ -50,9 +52,7 @@ func _ready() -> void:
 	if _visual_node != null:
 		_visual_base_scale = _visual_node.scale
 		_visual_base_modulate = _visual_node.modulate
-	protomatter_drop_chance = 1.0
-	protomatter_min_drop = maxi(protomatter_min_drop, 5)
-	protomatter_max_drop = maxi(protomatter_max_drop, 8)
+	protomatter_drop_chance = 0.0
 	if physics_stats != null:
 		_base_max_speed = physics_stats.max_speed
 	if character_stats != null:
@@ -75,6 +75,7 @@ func die() -> void:
 
 	_defeated = true
 	_spawn_death_burst()
+	_drop_relic()
 	_emit_boss_stats_changed()
 	boss_defeated.emit()
 	super.die()
@@ -194,6 +195,26 @@ func _spawn_attack_pulse(color: Color, radius: float, duration: float) -> void:
 	tween.tween_property(pulse, "scale", Vector2(1.45, 1.45), maxf(0.08, duration))
 	tween.parallel().tween_property(pulse, "modulate", Color(color.r, color.g, color.b, 0.0), maxf(0.08, duration))
 	tween.tween_callback(pulse.queue_free)
+
+
+func _drop_relic() -> void:
+	if not relic_drop_enabled or RELIC_ITEM == null:
+		return
+
+	var drop_parent := _get_drop_parent()
+	if drop_parent == null:
+		return
+
+	var relic_node := RELIC_ITEM.create_pickable_item() as Node2D
+	if relic_node == null:
+		return
+
+	var drop_position := _get_safe_drop_position(drop_parent, global_position + Vector2(44.0, -10.0))
+	if drop_parent is Node2D:
+		relic_node.position = (drop_parent as Node2D).to_local(drop_position)
+	else:
+		relic_node.global_position = drop_position
+	drop_parent.call_deferred("add_child", relic_node)
 
 
 func request_poison_spit(target_position: Vector2) -> void:

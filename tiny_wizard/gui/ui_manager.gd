@@ -92,6 +92,8 @@ func bind_character_stats(new_stats: QuiverCharacterStats) -> void:
 
 func bind_inventory(new_inventory: QuiverInventory) -> void:
 	inventory = new_inventory
+	if _weapon_backpack_ui != null and _weapon_backpack_ui.has_method("bind_inventory"):
+		_weapon_backpack_ui.bind_inventory(inventory)
 	var inventory_ui := get_node_or_null("TopUI/TextureRect/MarginContainer/HBoxContainer/InventoryUI")
 	if inventory_ui == null:
 		return

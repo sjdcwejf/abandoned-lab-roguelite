@@ -3,7 +3,12 @@ extends Node2D
 
 
 const CURRENCY_NAME := "Protomatter Fragment"
-const CURRENCY_DISPLAY_NAME := "原质碎片"
+const CURRENCY_DISPLAY_NAME := "原质"
+const CURRENCY_ITEM := preload("res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tres")
+const RELIC_NAME := "Relic"
+const RELIC_DISPLAY_NAME := "遗物"
+const RELIC_ITEM := preload("res://tiny_wizard/items/relic/relic.tres")
+const RELIC_RECYCLE_VALUE := 5
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
@@ -17,6 +22,7 @@ const WEAPON_STOCK := [
 ]
 const OFFER_NONE := "none"
 const OFFER_WEAPON := "weapon"
+const OFFER_RELIC_RECYCLE := "relic_recycle"
 
 @export var merchant_title := "渡鸦检疫军械库"
 @export_multiline var merchant_message := "A-03 信号就在前方。补好神经接口，数清你的炸药。"
@@ -27,6 +33,8 @@ const OFFER_WEAPON := "weapon"
 var _candidate_character: Node2D
 var _dialog_open := false
 var _selected_offer_type := OFFER_NONE
+var _available_offers: Array[Dictionary] = []
+var _selected_offer_index := 0
 var _selected_weapon_scene: PackedScene
 var _selected_weapon_name := ""
 var _offer_preview_instance: Node2D
@@ -72,6 +80,8 @@ func _process(_delta: float) -> void:
 		var replacement_slot := _get_pressed_replacement_slot()
 		if replacement_slot >= 0:
 			_try_purchase(_candidate_character, replacement_slot)
+		return
+	if _dialog_open and _handle_offer_selection_input(_candidate_character):
 		return
 	if Input.is_action_just_pressed("interact"):
 		if _dialog_open:
@@ -135,52 +145,88 @@ func _set_dialog_open(open: bool) -> void:
 
 func _refresh_offer(character: Node2D) -> void:
 	_awaiting_weapon_replacement = false
-	_selected_weapon_scene = _pick_unowned_weapon(character)
-	if _selected_weapon_scene == null:
-		_show_no_weapon_stock(character)
+	_available_offers = _build_available_offers(character)
+	if _available_offers.is_empty():
+		_show_empty_stock(character)
 		return
 
-	_selected_offer_type = OFFER_WEAPON
-	_selected_weapon_name = _get_weapon_name(_selected_weapon_scene)
-	_build_offer_preview(_selected_weapon_scene)
+	_selected_offer_index = clampi(_selected_offer_index, 0, _available_offers.size() - 1)
+	_apply_selected_offer(character)
+
+
+func _apply_selected_offer(character: Node2D) -> void:
+	if _available_offers.is_empty():
+		_show_empty_stock(character)
+		return
+
+	var selected_offer := _available_offers[_selected_offer_index]
+	_selected_offer_type = str(selected_offer.get("type", OFFER_NONE))
+	_selected_weapon_scene = selected_offer.get("scene") as PackedScene
+	_selected_weapon_name = str(selected_offer.get("name", ""))
+
+	if _selected_offer_type == OFFER_WEAPON:
+		_build_offer_preview(_selected_weapon_scene)
+	else:
+		_clear_offer_preview()
+
+	stock_label.text = _build_stock_list_text()
 	var currency_count := _get_currency_count(character)
+	var relic_count := _get_relic_count(character)
+
+	if _selected_offer_type == OFFER_RELIC_RECYCLE:
+		var weapon_stock_note := ""
+		if not _has_weapon_offer_available():
+			weapon_stock_note = "\n当前无武器可供购买；原质可用于购买后续武器。"
+		status_label.text = "你持有 %d 个%s、%d 个%s。回收 1 个%s可换取 %d 个%s。" % [
+			currency_count,
+			CURRENCY_DISPLAY_NAME,
+			relic_count,
+			RELIC_DISPLAY_NAME,
+			RELIC_DISPLAY_NAME,
+			RELIC_RECYCLE_VALUE,
+			CURRENCY_DISPLAY_NAME,
+		] + weapon_stock_note
+		hint_label.text = "↑ / ↓ 选择项目，按 F 回收遗物。"
+		return
+
 	var quick_slots_full := _are_quick_slots_full(character)
 	var can_afford := weapon_cost <= 0 or currency_count >= weapon_cost
-	var replacement_note := "\n武器栏已满：按 1 / 2 / 3 / 4 选择替换槽位。" if quick_slots_full else "\n购买前会打开武器对比。"
-	if weapon_cost <= 0:
-		stock_label.text = "库存：%s\n价格：免费%s" % [_selected_weapon_name, replacement_note]
-		status_label.text = "不需要消耗%s。" % CURRENCY_DISPLAY_NAME
-	else:
-		stock_label.text = "库存：%s\n价格：%d 个%s%s" % [_selected_weapon_name, weapon_cost, CURRENCY_DISPLAY_NAME, replacement_note]
-		status_label.text = "你持有 %d 个%s。" % [currency_count, CURRENCY_DISPLAY_NAME]
-
+	var slot_note := "购买后需选择替换槽位。" if quick_slots_full else "购买前会打开武器对比。"
 	if not can_afford:
-		_awaiting_weapon_replacement = false
 		status_label.text = "原质不足：需要 %d 个%s，你现在有 %d 个。" % [
 			weapon_cost,
 			CURRENCY_DISPLAY_NAME,
 			currency_count,
 		]
-		hint_label.text = "清理样本获取原质碎片后再回来交易。"
-	elif quick_slots_full:
-		_enter_weapon_replacement_mode()
+		hint_label.text = "清理样本获取原质，或回收遗物后再交易。"
 	elif weapon_cost <= 0:
-		hint_label.text = "按 F 领取并装备。"
+		status_label.text = "当前选择：%s。免费领取。%s" % [_selected_weapon_name, slot_note]
+		hint_label.text = "↑ / ↓ 选择项目，按 F 领取。"
 	else:
-		hint_label.text = "按 F 购买并装备。"
+		status_label.text = "当前选择：%s。价格：%d 个%s。%s" % [
+			_selected_weapon_name,
+			weapon_cost,
+			CURRENCY_DISPLAY_NAME,
+			slot_note,
+		]
+		hint_label.text = "↑ / ↓ 选择项目，按 F 购买。列表前四项可按 1 / 2 / 3 / 4 快速选择。"
 
 
-func _show_no_weapon_stock(character: Node2D) -> void:
+func _show_empty_stock(character: Node2D) -> void:
 	_selected_offer_type = OFFER_NONE
 	_selected_weapon_scene = null
 	_selected_weapon_name = ""
+	_available_offers.clear()
 	_clear_offer_preview()
 
 	var currency_count := _get_currency_count(character)
+	var relic_count := _get_relic_count(character)
 	stock_label.text = "库存：当前无武器可供购买。"
-	status_label.text = "你持有 %d 个%s。%s可用于购买武器。" % [
+	status_label.text = "你持有 %d 个%s、%d 个%s。%s可用于购买武器。" % [
 		currency_count,
 		CURRENCY_DISPLAY_NAME,
+		relic_count,
+		RELIC_DISPLAY_NAME,
 		CURRENCY_DISPLAY_NAME,
 	]
 	hint_label.text = "本商人没有新的武器库存。离开商店，前往下一处渡鸦军械终端。"
@@ -193,6 +239,10 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 		INTERACTION_FEEDBACK.show_from(self, status_label.text, 1.4)
 		if bool(validation.get("refresh", false)):
 			_refresh_offer(character)
+		return
+
+	if _selected_offer_type == OFFER_RELIC_RECYCLE:
+		_complete_relic_recycle(character, validation)
 		return
 
 	if _selected_offer_type == OFFER_WEAPON and replacement_slot < 0 and _are_quick_slots_full(character):
@@ -208,13 +258,23 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 
 func _validate_purchase(character: Node2D) -> Dictionary:
 	if _selected_offer_type == OFFER_NONE:
-		return {"ok": false, "message": "当前无武器可供购买。原质碎片可用于购买武器。"}
-	if _selected_offer_type == OFFER_WEAPON and _selected_weapon_scene == null:
-		return {"ok": false, "message": "渡鸦暂时没有可售武器。"}
+		return {"ok": false, "message": "当前无武器可供购买。原质可用于购买武器。"}
 
 	var inventory := character.get("inventory") as QuiverInventory
 	if inventory == null:
 		return {"ok": false, "message": "未检测到背包连接。渡鸦拒绝交易。"}
+
+	if _selected_offer_type == OFFER_RELIC_RECYCLE:
+		var relic_count := int(inventory.get_item_amount(RELIC_NAME))
+		if relic_count <= 0:
+			return {"ok": false, "message": "你没有可回收的遗物。击败关卡 Boss 后再回来。"}
+		return {
+			"ok": true,
+			"inventory": inventory,
+		}
+
+	if _selected_offer_type == OFFER_WEAPON and _selected_weapon_scene == null:
+		return {"ok": false, "message": "渡鸦暂时没有可售武器。"}
 
 	var currency_count := int(inventory.get_item_amount(CURRENCY_NAME))
 	if currency_count < weapon_cost:
@@ -319,7 +379,7 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 		_retire_weapon_scene(weapon_holder, replaced_weapon_scene)
 
 	_refresh_offer(character)
-	var no_weapon_stock_after_purchase := _selected_offer_type == OFFER_NONE
+	var no_weapon_stock_after_purchase := not _has_weapon_offer_available()
 	if replaced_weapon_name != "":
 		status_label.text = "已获得 %s，替换了 %s，并装备到 %d 号位。" % [purchased_name, replaced_weapon_name, slot_index + 1]
 	elif weapon_cost <= 0:
@@ -328,14 +388,70 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 		status_label.text = "已购买 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
 	if no_weapon_stock_after_purchase:
 		status_label.text += "\n当前无武器可供购买。%s可用于购买武器。" % CURRENCY_DISPLAY_NAME
-		hint_label.text = "本商人没有新的武器库存。离开商店，前往下一处渡鸦军械终端。"
+		hint_label.text = "本商人没有新的武器库存。仍可回收遗物换取原质。"
 	INTERACTION_FEEDBACK.show_from(self, "交易完成：%s。" % purchased_name, 1.35)
+
+
+func _complete_relic_recycle(character: Node2D, validation: Dictionary) -> void:
+	var inventory := validation.get("inventory") as QuiverInventory
+	if inventory == null:
+		status_label.text = "回收失败：未检测到背包连接。"
+		return
+
+	if int(inventory.get_item_amount(RELIC_NAME)) <= 0:
+		status_label.text = "你没有可回收的遗物。"
+		return
+
+	inventory.remove_item(RELIC_NAME, 1)
+	var added := inventory.add_item(CURRENCY_ITEM, RELIC_RECYCLE_VALUE)
+	if not added:
+		if RELIC_ITEM != null:
+			inventory.add_item(RELIC_ITEM, 1)
+		status_label.text = "回收失败：背包无法接收原质。"
+		INTERACTION_FEEDBACK.show_from(self, status_label.text, 1.35)
+		return
+
+	_refresh_offer(character)
+	status_label.text = "已回收 1 个%s，获得 %d 个%s。" % [
+		RELIC_DISPLAY_NAME,
+		RELIC_RECYCLE_VALUE,
+		CURRENCY_DISPLAY_NAME,
+	]
+	INTERACTION_FEEDBACK.show_from(self, "回收完成：+%d %s。" % [RELIC_RECYCLE_VALUE, CURRENCY_DISPLAY_NAME], 1.35)
 
 
 func _enter_weapon_replacement_mode() -> void:
 	_awaiting_weapon_replacement = true
 	status_label.text = "武器栏已满：请选择要替换的槽位。确认前不会扣除%s。" % CURRENCY_DISPLAY_NAME
 	hint_label.text = "按 1 / 2 / 3 / 4 替换对应武器并购买。"
+
+
+func _handle_offer_selection_input(character: Node2D) -> bool:
+	if _available_offers.is_empty():
+		return false
+
+	if InputMap.has_action("ui_up") and Input.is_action_just_pressed("ui_up"):
+		_select_offer_index(_selected_offer_index - 1, character)
+		return true
+	if InputMap.has_action("ui_down") and Input.is_action_just_pressed("ui_down"):
+		_select_offer_index(_selected_offer_index + 1, character)
+		return true
+
+	var max_direct_slots := mini(4, _available_offers.size())
+	for offer_index in range(max_direct_slots):
+		var action_name := "weapon_slot_%d" % (offer_index + 1)
+		if InputMap.has_action(action_name) and Input.is_action_just_pressed(action_name):
+			_select_offer_index(offer_index, character)
+			return true
+	return false
+
+
+func _select_offer_index(next_index: int, character: Node2D) -> void:
+	if _available_offers.is_empty():
+		return
+	_selected_offer_index = wrapi(next_index, 0, _available_offers.size())
+	_awaiting_weapon_replacement = false
+	_apply_selected_offer(character)
 
 
 func _has_active_choice_overlay() -> bool:
@@ -370,10 +486,26 @@ func _are_quick_slots_full(character: Node2D) -> bool:
 	return not bool(weapon_holder.call("has_free_quick_slot"))
 
 
-func _pick_unowned_weapon(character: Node2D) -> PackedScene:
+func _build_available_offers(character: Node2D) -> Array[Dictionary]:
+	var offers: Array[Dictionary] = []
+	for weapon_scene in _get_available_weapon_scenes(character):
+		offers.append({
+			"type": OFFER_WEAPON,
+			"scene": weapon_scene,
+			"name": _get_weapon_name(weapon_scene),
+		})
+	offers.append({
+		"type": OFFER_RELIC_RECYCLE,
+		"name": "回收%s" % RELIC_DISPLAY_NAME,
+	})
+	return offers
+
+
+func _get_available_weapon_scenes(character: Node2D) -> Array[PackedScene]:
+	var available: Array[PackedScene] = []
 	var weapon_holder := character.get_node_or_null("Visual/WeaponHolder")
 	if weapon_holder == null:
-		return null
+		return available
 
 	var owned := {}
 	if weapon_holder.has_method("get_owned_weapon_scene_keys"):
@@ -390,9 +522,42 @@ func _pick_unowned_weapon(character: Node2D) -> PackedScene:
 		if _retired_weapon_keys.has(weapon_key):
 			continue
 		if not owned.has(weapon_key):
-			return weapon_scene
+			available.append(weapon_scene)
 
-	return null
+	return available
+
+
+func _build_stock_list_text() -> String:
+	var lines := ["库存："]
+	for index in range(_available_offers.size()):
+		var offer := _available_offers[index]
+		var marker := ">" if index == _selected_offer_index else " "
+		var direct_key := "%d" % (index + 1) if index < 4 else "-"
+		var offer_type := str(offer.get("type", OFFER_NONE))
+		if offer_type == OFFER_WEAPON:
+			var price := "免费" if weapon_cost <= 0 else "%d %s" % [weapon_cost, CURRENCY_DISPLAY_NAME]
+			lines.append("%s [%s] %s  /  %s" % [
+				marker,
+				direct_key,
+				str(offer.get("name", "未知武器")),
+				price,
+			])
+		elif offer_type == OFFER_RELIC_RECYCLE:
+			lines.append("%s [%s] 回收%s  /  +%d %s" % [
+				marker,
+				direct_key,
+				RELIC_DISPLAY_NAME,
+				RELIC_RECYCLE_VALUE,
+				CURRENCY_DISPLAY_NAME,
+			])
+	return "\n".join(lines)
+
+
+func _has_weapon_offer_available() -> bool:
+	for offer in _available_offers:
+		if str(offer.get("type", OFFER_NONE)) == OFFER_WEAPON:
+			return true
+	return false
 
 
 func _get_weapon_scene_at_slot(weapon_holder: Node, slot_index: int) -> PackedScene:
@@ -417,6 +582,13 @@ func _get_currency_count(character: Node2D) -> int:
 	if inventory == null:
 		return 0
 	return int(inventory.get_item_amount(CURRENCY_NAME))
+
+
+func _get_relic_count(character: Node2D) -> int:
+	var inventory := character.get("inventory") as QuiverInventory
+	if inventory == null:
+		return 0
+	return int(inventory.get_item_amount(RELIC_NAME))
 
 
 func _get_weapon_name(weapon_scene: PackedScene) -> String:
