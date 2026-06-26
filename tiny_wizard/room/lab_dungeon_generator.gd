@@ -17,6 +17,7 @@ const RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/l
 const CHAPTER_BASE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_chapter_base_room.tscn")
 const BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_boss_room.tscn")
 const GREENHOUSE_COMBAT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_combat_room.tscn")
+const GREENHOUSE_SPORE_EVENT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_spore_event_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
@@ -211,9 +212,10 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"main_path_room_count": 7,
 				"reward_room_count": 2,
 				"layout_radius": 4,
-				"main_room_types": ["combat", "combat", "combat", "weapon"],
+				"main_room_types": ["combat", "combat", "pollution", "weapon"],
 				"start_label": "温室检疫入口",
 				"combat_label_prefix": "孢子培养廊",
+				"pollution_label": "孢子囊隔离室",
 				"reward_label_prefix": "温室样本库",
 				"weapon_label": "渡鸦温室军械缓存",
 				"merchant_label": "渡鸦温室补给站",
@@ -221,6 +223,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"boss_objective": "压制温室守望者，记录孢子与虫巢反应。",
 				"completion_destination": "后续章节：下一版本开放",
 				"combat_room_scenes": GREENHOUSE_COMBAT_ROOM_SCENES,
+				"pollution_room_scenes": [GREENHOUSE_SPORE_EVENT_ROOM_SCENE],
 				"reward_room_scenes": REWARD_ROOM_SCENES,
 				"weapon_room_scenes": WEAPON_ROOM_SCENES,
 				"merchant_room_scenes": [RAVEN_SAFEHOUSE_ROOM_SCENE],
@@ -476,6 +479,7 @@ static func _has_isolated_pre_boss_room(main_path: Array, reward_coords: Array) 
 static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 	return {
 		"combat": (chapter_config.get("combat_room_scenes", COMBAT_ROOM_SCENES) as Array).duplicate(),
+		"pollution": (chapter_config.get("pollution_room_scenes", [COMBAT_ROOM_A_SCENE]) as Array).duplicate(),
 		"reward": (chapter_config.get("reward_room_scenes", REWARD_ROOM_SCENES) as Array).duplicate(),
 		"weapon": (chapter_config.get("weapon_room_scenes", WEAPON_ROOM_SCENES) as Array).duplicate(),
 		"merchant": (chapter_config.get("merchant_room_scenes", [RAVEN_SAFEHOUSE_ROOM_SCENE]) as Array).duplicate(),
@@ -497,6 +501,8 @@ static func _default_scene_pool(room_type: String) -> Array:
 	match room_type:
 		"combat":
 			return COMBAT_ROOM_SCENES
+		"pollution":
+			return [COMBAT_ROOM_A_SCENE]
 		"reward":
 			return REWARD_ROOM_SCENES
 		"weapon":
@@ -530,6 +536,8 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 	match room_type:
 		"combat":
 			return "%s %d" % [str(chapter_config.get("combat_label_prefix", "封存样本间")), count]
+		"pollution":
+			return str(chapter_config.get("pollution_label", "污染事件房"))
 		"reward":
 			return "%s %d" % [str(chapter_config.get("reward_label_prefix", "证物库")), count]
 		"weapon":

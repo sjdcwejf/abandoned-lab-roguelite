@@ -374,6 +374,8 @@ func _enter_base_room() -> void:
 
 
 func _install_formal_layer_events() -> void:
+	if _formal_chapter_id != CHAPTER_1_ID:
+		return
 	if _formal_layer_index != POLLUTION_EVENT_LAYER:
 		return
 
@@ -1137,6 +1139,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"combat":
 			return "怪物房"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "孢子事件房"
 			return "污染事件房"
 		"reward":
 			return "奖励房"
@@ -1158,6 +1162,8 @@ func _get_formal_room_objective(room_type: String) -> String:
 		"combat":
 			return "清除房内样本，解除门锁。"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "击碎 3 个孢子囊，并肃清房内样本。"
 			return "清除原质污染源，并肃清房内样本。"
 		"reward":
 			return "肃清守卫样本，回收补给箱。"

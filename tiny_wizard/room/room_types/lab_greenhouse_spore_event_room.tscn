@@ -1,0 +1,146 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/greenhouse_spore_event_room.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/spore_pod/spore_pod.tscn" id="3_spore_pod"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="4_floater"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="5_crawler"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_culture_pillar"]
+radius = 30.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vine_wall"]
+size = Vector2(104, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_rack"]
+size = Vector2(118, 38)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_liquid_warning"]
+size = Vector2(138, 28)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "pollution"
+lab_room_label = "孢子囊隔离室"
+
+[node name="GreenhouseFloorMist" type="Polygon2D" parent="." index="7"]
+z_index = -1
+color = Color(0.06, 0.3, 0.14, 0.28)
+polygon = PackedVector2Array(188, 142, 838, 140, 858, 458, 168, 466)
+
+[node name="GreenLiquidWarning" type="StaticBody2D" parent="." index="8"]
+position = Vector2(512, 356)
+collision_layer = 1
+collision_mask = 15
+
+[node name="Pool" type="Polygon2D" parent="GreenLiquidWarning"]
+z_index = -1
+color = Color(0.1, 0.72, 0.26, 0.36)
+polygon = PackedVector2Array(-80, -20, 72, -18, 86, 10, 34, 28, -48, 26, -92, 6)
+
+[node name="Rim" type="Line2D" parent="GreenLiquidWarning"]
+z_index = 1
+points = PackedVector2Array(-80, -20, 72, -18, 86, 10, 34, 28, -48, 26, -92, 6, -80, -20)
+width = 4.0
+default_color = Color(0.42, 1, 0.46, 0.58)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GreenLiquidWarning"]
+shape = SubResource("RectangleShape2D_liquid_warning")
+
+[node name="CultureRackNorth" type="StaticBody2D" parent="." index="9"]
+position = Vector2(512, 208)
+collision_layer = 1
+collision_mask = 15
+
+[node name="RackBody" type="Polygon2D" parent="CultureRackNorth"]
+z_index = 1
+color = Color(0.05, 0.18, 0.16, 0.95)
+polygon = PackedVector2Array(-68, -22, 68, -22, 58, 22, -58, 22)
+
+[node name="RackGlow" type="Line2D" parent="CultureRackNorth"]
+z_index = 2
+points = PackedVector2Array(-52, -4, -20, 6, 18, -2, 48, 8)
+width = 5.0
+default_color = Color(0.45, 1, 0.38, 0.82)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CultureRackNorth"]
+shape = SubResource("RectangleShape2D_culture_rack")
+
+[node name="VineWallWest" type="StaticBody2D" parent="." index="10"]
+position = Vector2(336, 330)
+rotation = -0.18
+collision_layer = 1
+collision_mask = 15
+
+[node name="VineMass" type="Polygon2D" parent="VineWallWest"]
+z_index = 1
+color = Color(0.08, 0.34, 0.16, 1)
+polygon = PackedVector2Array(-62, -20, 58, -18, 66, 4, 38, 24, -50, 20, -68, 0)
+
+[node name="VineGlow" type="Line2D" parent="VineWallWest"]
+z_index = 2
+points = PackedVector2Array(-52, -8, -20, 6, 14, -8, 50, 6)
+width = 5.0
+default_color = Color(0.4, 1, 0.36, 0.64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VineWallWest"]
+shape = SubResource("RectangleShape2D_vine_wall")
+
+[node name="VineWallEast" type="StaticBody2D" parent="." index="11"]
+position = Vector2(688, 286)
+rotation = 0.22
+collision_layer = 1
+collision_mask = 15
+
+[node name="VineMass" type="Polygon2D" parent="VineWallEast"]
+z_index = 1
+color = Color(0.08, 0.34, 0.16, 1)
+polygon = PackedVector2Array(-62, -20, 58, -18, 66, 4, 38, 24, -50, 20, -68, 0)
+
+[node name="VineGlow" type="Line2D" parent="VineWallEast"]
+z_index = 2
+points = PackedVector2Array(-52, -8, -20, 6, 14, -8, 50, 6)
+width = 5.0
+default_color = Color(0.4, 1, 0.36, 0.64)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VineWallEast"]
+shape = SubResource("RectangleShape2D_vine_wall")
+
+[node name="SporePods" type="Node2D" parent="." index="12"]
+
+[node name="SporePodA" parent="SporePods" instance=ExtResource("3_spore_pod")]
+position = Vector2(318, 234)
+
+[node name="SporePodB" parent="SporePods" instance=ExtResource("3_spore_pod")]
+position = Vector2(512, 292)
+
+[node name="SporePodC" parent="SporePods" instance=ExtResource("3_spore_pod")]
+position = Vector2(706, 406)
+
+[node name="CulturePillarSouth" type="StaticBody2D" parent="." index="13"]
+position = Vector2(472, 430)
+collision_layer = 1
+collision_mask = 15
+
+[node name="PillarGlow" type="Polygon2D" parent="CulturePillarSouth"]
+z_index = 1
+color = Color(0.14, 0.86, 0.4, 0.24)
+polygon = PackedVector2Array(0, -38, 28, -22, 30, 14, 8, 34, -26, 24, -32, -10)
+
+[node name="PillarFrame" type="Line2D" parent="CulturePillarSouth"]
+z_index = 2
+points = PackedVector2Array(0, -32, 24, -18, 26, 12, 6, 28, -22, 20, -26, -8, 0, -32)
+width = 5.0
+default_color = Color(0.24, 0.78, 0.66, 0.9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CulturePillarSouth"]
+shape = SubResource("CircleShape2D_culture_pillar")
+
+[node name="GreenhouseFloater" parent="Enemies" index="0" instance=ExtResource("4_floater")]
+position = Vector2(426, 250)
+
+[node name="GreenhouseCrawler" parent="Enemies" index="1" instance=ExtResource("5_crawler")]
+position = Vector2(622, 340)
+
+[node name="GreenhouseCrawler2" parent="Enemies" index="2" instance=ExtResource("5_crawler")]
+position = Vector2(748, 252)
