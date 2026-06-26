@@ -16,6 +16,7 @@ const WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/room_4.tsc
 const RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn")
 const CHAPTER_BASE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_chapter_base_room.tscn")
 const BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_boss_room.tscn")
+const GREENHOUSE_COMBAT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_combat_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
@@ -38,6 +39,14 @@ const COMBAT_ROOM_SCENES := [
 	preload("res://tiny_wizard/room/room_types/room_7.tscn"),
 	preload("res://tiny_wizard/room/room_types/room_8.tscn"),
 	preload("res://tiny_wizard/room/room_types/room_9.tscn"),
+]
+
+const GREENHOUSE_COMBAT_ROOM_SCENES := [
+	GREENHOUSE_COMBAT_ROOM_SCENE,
+	GREENHOUSE_COMBAT_ROOM_SCENE,
+	GREENHOUSE_COMBAT_ROOM_SCENE,
+	COMBAT_ROOM_A_SCENE,
+	COMBAT_ROOM_B_SCENE,
 ]
 
 const REWARD_ROOM_SCENES := [
@@ -211,7 +220,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"boss_label": "温室守望者培育舱",
 				"boss_objective": "压制温室守望者，记录孢子与虫巢反应。",
 				"completion_destination": "后续章节：下一版本开放",
-				"combat_room_scenes": COMBAT_ROOM_SCENES,
+				"combat_room_scenes": GREENHOUSE_COMBAT_ROOM_SCENES,
 				"reward_room_scenes": REWARD_ROOM_SCENES,
 				"weapon_room_scenes": WEAPON_ROOM_SCENES,
 				"merchant_room_scenes": [RAVEN_SAFEHOUSE_ROOM_SCENE],
