@@ -22,4 +22,4 @@ func _physics_process(_delta):
 
 	action.moving_direction = _get_moving_input()
 	action.aiming_direction = aiming
-	action.shoot = Input.is_action_pressed("fire") or keyboard_aiming.length() > 0
+	action.shoot = Input.is_action_pressed("fire")
