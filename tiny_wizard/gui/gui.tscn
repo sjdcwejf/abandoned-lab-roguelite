@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c45gqa1w6c20d"]
+[gd_scene load_steps=9 format=3 uid="uid://c45gqa1w6c20d"]
 
 [ext_resource type="Script" path="res://tiny_wizard/gui/ui_manager.gd" id="1_56tem"]
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/lab_ui_background.png" id="2_2gyvq"]
@@ -6,13 +6,9 @@
 [ext_resource type="PackedScene" path="res://tiny_wizard/gui/inventory_ui/inventory_ui.tscn" id="4_80vvw"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/gui/life_ui/hearts_ui.tscn" id="5_7glrf"]
 [ext_resource type="Resource" path="res://tiny_wizard/player/player_stats.tres" id="6_mshvq"]
-[ext_resource type="Texture2D" uid="uid://cuwusijx2588i" path="res://tiny_wizard/assets/art/arrow.png" id="7_8th4j"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/gui/relic_ui/relic_hud.tscn" id="7_relic_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fe4ma"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_sf2fl"]
-atlas = ExtResource("7_8th4j")
-region = Rect2(0, 0, 100, 100)
 
 [node name="GUI" type="CanvasLayer"]
 layer = 0
@@ -88,20 +84,4 @@ offset_bottom = 183.0
 size_flags_horizontal = 6
 player_stats = ExtResource("6_mshvq")
 
-[node name="CenterContainer" type="CenterContainer" parent="TopUI/TextureRect"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_bottom = -23.0
-
-[node name="ArrowUITexture" type="TextureRect" parent="TopUI/TextureRect/CenterContainer"]
-unique_name_in_owner = true
-offset_left = 462.0
-offset_top = 40.0
-offset_right = 562.0
-offset_bottom = 140.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_sf2fl")
-stretch_mode = 5
-metadata/_edit_layout_mode = 1
+[node name="RelicHUD" parent="." instance=ExtResource("7_relic_hud")]

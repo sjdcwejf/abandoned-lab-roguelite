@@ -49,11 +49,16 @@ var room_pos := Vector2i.ZERO
 var lab_room_type := "combat"
 var lab_room_label := "战斗房"
 var is_cleared := false
+var objective_initial_enemy_count := 0
+var pollution_source_total := 0
+var pollution_source_remaining := 0
 
 signal door_entered(direction)
 signal room_cleared(room: Room)
+signal objective_progress_changed(room: Room)
 
 func _ready():
+	objective_initial_enemy_count = get_remaining_enemy_count()
 	if get_tree().current_scene != self:
 		_set_enemies_active(false)
 	_update_room_chest_locks()
@@ -100,14 +105,19 @@ func get_spawning_point(direction):
 
 func enter_room():
 	var enemies = $Enemies.get_children()
-	if enemies.size() > 0 and not is_cleared:
+	objective_initial_enemy_count = maxi(objective_initial_enemy_count, enemies.size())
+	objective_progress_changed.emit(self)
+	if not is_cleared and (enemies.size() > 0 or has_pending_room_event_objectives()):
 		# Wake up Enemies
-		_set_enemies_active(true, true)
+		if enemies.size() > 0:
+			_set_enemies_active(true, true)
 		_update_room_chest_locks()
 		
 		# Close doors
 		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
 			close_door(d)
+		if enemies.size() == 0:
+			call_deferred("_try_finish_room_clear")
 	elif enemies.size() == 0:
 		_mark_room_cleared()
 
@@ -136,11 +146,8 @@ func open_door(direction:Direction):
 
 
 func _on_enemies_child_exiting_tree(node):
-	# If it is the last enemy (see godotengine/godot #59210)
-	if $Enemies.get_child_count() == 1:
-		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
-			open_door(d)
-		_mark_room_cleared()
+	call_deferred("_emit_objective_progress_changed")
+	call_deferred("_try_finish_room_clear")
 
 
 func _mark_room_cleared() -> void:
@@ -149,11 +156,85 @@ func _mark_room_cleared() -> void:
 	is_cleared = true
 	_update_room_chest_locks()
 	_on_room_cleared()
+	objective_progress_changed.emit(self)
+	RelicCombatEventBus.notify_room_cleared(self)
 	room_cleared.emit(self)
 
 
 func _on_room_cleared() -> void:
 	pass
+
+
+func register_pollution_source(source: Node) -> void:
+	if source == null:
+		return
+
+	pollution_source_total += 1
+	pollution_source_remaining += 1
+	lab_room_type = "pollution" if lab_room_type == "combat" else lab_room_type
+
+	var destroyed_callable := Callable(self, "_on_pollution_source_destroyed")
+	if source.has_signal("pollution_source_destroyed") and not source.is_connected("pollution_source_destroyed", destroyed_callable):
+		source.connect("pollution_source_destroyed", destroyed_callable)
+	objective_progress_changed.emit(self)
+
+
+func has_pending_room_event_objectives() -> bool:
+	return pollution_source_remaining > 0
+
+
+func has_pollution_source_objective() -> bool:
+	return pollution_source_total > 0
+
+
+func get_pollution_source_total() -> int:
+	return pollution_source_total
+
+
+func get_pollution_source_remaining() -> int:
+	if is_cleared:
+		return 0
+	return pollution_source_remaining
+
+
+func get_remaining_enemy_count() -> int:
+	if is_cleared or not has_node("Enemies"):
+		return 0
+	return $Enemies.get_child_count()
+
+
+func get_objective_initial_enemy_count() -> int:
+	return objective_initial_enemy_count
+
+
+func has_enemy_clear_objective() -> bool:
+	if lab_room_type in ["combat", "pollution", "reward", "boss"]:
+		return objective_initial_enemy_count > 0 or get_remaining_enemy_count() > 0
+	return false
+
+
+func _on_pollution_source_destroyed(_source: Node) -> void:
+	pollution_source_remaining = maxi(0, pollution_source_remaining - 1)
+	objective_progress_changed.emit(self)
+	call_deferred("_try_finish_room_clear")
+
+
+func _try_finish_room_clear() -> void:
+	if is_cleared:
+		return
+	if get_remaining_enemy_count() > 0:
+		return
+	if has_pending_room_event_objectives():
+		return
+
+	for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
+		open_door(d)
+	_mark_room_cleared()
+
+
+func _emit_objective_progress_changed() -> void:
+	if is_inside_tree():
+		objective_progress_changed.emit(self)
 
 
 func _set_enemies_active(active: bool, deferred := false) -> void:
@@ -176,7 +257,7 @@ func _update_room_chest_locks() -> void:
 		_set_chests_locked_recursive(self, false)
 		return
 
-	var should_lock := not is_cleared and $Enemies.get_child_count() > 0
+	var should_lock := not is_cleared and ($Enemies.get_child_count() > 0 or has_pending_room_event_objectives())
 	_set_chests_locked_recursive(self, should_lock)
 
 

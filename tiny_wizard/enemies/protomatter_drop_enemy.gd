@@ -4,20 +4,24 @@ extends QuiverCharacter
 
 const PROTOMATTER_FRAGMENT_ITEM := preload("res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tres")
 const GREEN_BLOOD_SPLATTER_SCRIPT := preload("res://tiny_wizard/effects/green_blood_splatter.gd")
-const BUILD_ITEM_PICKUP_SCENE := preload("res://tiny_wizard/build/build_item_pickup.tscn")
-const TEST_BUILD_CATALOG := preload("res://tiny_wizard/build/test_data/test_build_catalog.tres")
+const SAFE_DROP_LOCAL_MIN := Vector2(96.0, 126.0)
+const SAFE_DROP_LOCAL_MAX := Vector2(928.0, 462.0)
+const BOTTOM_DOOR_CENTER_X := 512.0
+const BOTTOM_DOOR_SAFE_HALF_WIDTH := 128.0
+const BOTTOM_DOOR_SAFE_Y := 420.0
 
 @export_range(0.0, 1.0, 0.01) var protomatter_drop_chance := 0.45
 @export_range(0, 8, 1) var protomatter_min_drop := 1
 @export_range(0, 8, 1) var protomatter_max_drop := 1
 @export var protomatter_drop_spread := 22.0
+@export_range(0.0, 1.0, 0.01) var relic_drop_chance := 0.06
+@export var relic_pool_tag: StringName = &""
 @export var green_blood_splatter_enabled := true
 @export var green_blood_spawn_offset := Vector2(0.0, -28.0)
 @export_range(0.2, 4.0, 0.1) var green_blood_splatter_scale := 1.0
-@export var build_item_drop_enabled := false
-@export_range(0.0, 1.0, 0.01) var build_item_drop_chance := 0.08
 
 var _protomatter_dropped := false
+var _relic_dropped := false
 
 
 func hit(damage := 1, from := Vector2.ZERO) -> void:
@@ -28,28 +32,9 @@ func hit(damage := 1, from := Vector2.ZERO) -> void:
 
 func die() -> void:
 	_drop_protomatter_fragments()
-	_try_drop_build_item()
+	_drop_relic_from_pool()
+	RelicCombatEventBus.notify_enemy_killed(self)
 	super.die()
-
-
-func _try_drop_build_item() -> void:
-	if not build_item_drop_enabled or randf() > build_item_drop_chance:
-		return
-	var scene_root := get_tree().current_scene
-	var character := BuildPoolResolver.find_tiemu_character(scene_root)
-	var definition := BuildPoolResolver.pick_candidate(character, TEST_BUILD_CATALOG, [&"enemy"])
-	if definition == null:
-		return
-	var drop_parent := _get_drop_parent()
-	if drop_parent == null:
-		return
-	var pickup := BUILD_ITEM_PICKUP_SCENE.instantiate() as BuildItemPickup
-	pickup.setup(definition)
-	if drop_parent is Node2D:
-		pickup.position = (drop_parent as Node2D).to_local(global_position)
-	else:
-		pickup.global_position = global_position
-	drop_parent.call_deferred("add_child", pickup)
 
 
 func _drop_protomatter_fragments() -> void:
@@ -76,12 +61,34 @@ func _drop_protomatter_fragments() -> void:
 
 		var angle := randf() * TAU
 		var distance := randf_range(0.0, protomatter_drop_spread)
-		var drop_position := global_position + Vector2.from_angle(angle) * distance
+		var drop_position := _get_safe_drop_position(drop_parent, global_position + Vector2.from_angle(angle) * distance)
 		if drop_parent is Node2D:
 			item_node.position = (drop_parent as Node2D).to_local(drop_position)
 		else:
 			item_node.global_position = drop_position
 		drop_parent.call_deferred("add_child", item_node)
+
+
+func _drop_relic_from_pool() -> bool:
+	if _relic_dropped:
+		return false
+	_relic_dropped = true
+
+	if relic_drop_chance <= 0.0 or randf() > relic_drop_chance:
+		return false
+
+	var drop_parent := _get_drop_parent()
+	if drop_parent == null:
+		return false
+
+	var relic_controller := _find_active_relic_controller()
+	if relic_controller == null:
+		return false
+
+	var drop_position := _get_safe_drop_position(drop_parent, global_position + Vector2(16.0, -8.0))
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	return RelicDropService.try_drop_relic_from_pool(drop_parent, relic_controller, drop_position, relic_pool_tag, rng)
 
 
 func _get_drop_parent() -> Node:
@@ -91,6 +98,32 @@ func _get_drop_parent() -> Node:
 	if parent.name == "Enemies" and parent.get_parent() != null:
 		return parent.get_parent()
 	return parent
+
+
+func _find_active_relic_controller() -> RelicController:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return null
+	return RelicDropService.find_relic_controller(scene)
+
+
+func _get_safe_drop_position(drop_parent: Node, desired_global_position: Vector2) -> Vector2:
+	if not drop_parent is Room:
+		return desired_global_position
+
+	var room := drop_parent as Room
+	var local_position := desired_global_position - room.get_room_global_position()
+	local_position.x = clampf(local_position.x, SAFE_DROP_LOCAL_MIN.x, SAFE_DROP_LOCAL_MAX.x)
+	local_position.y = clampf(local_position.y, SAFE_DROP_LOCAL_MIN.y, SAFE_DROP_LOCAL_MAX.y)
+
+	var is_near_bottom_door := (
+		local_position.y > BOTTOM_DOOR_SAFE_Y
+		and absf(local_position.x - BOTTOM_DOOR_CENTER_X) < BOTTOM_DOOR_SAFE_HALF_WIDTH
+	)
+	if is_near_bottom_door:
+		local_position.y = BOTTOM_DOOR_SAFE_Y
+
+	return room.get_room_global_position() + local_position
 
 
 func _spawn_green_blood_splatter(hit_from: Vector2) -> void:

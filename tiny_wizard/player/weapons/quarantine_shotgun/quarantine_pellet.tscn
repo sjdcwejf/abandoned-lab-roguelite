@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/projectiles/lab_projectile.gd" id="1_pellet"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pellet"]
+radius = 3.5
+
+[node name="QuarantinePellet" type="Area2D"]
+collision_layer = 0
+collision_mask = 73
+script = ExtResource("1_pellet")
+speed = 650.0
+damage = 1
+lifetime = 0.48
+knockback_multiplier = 1.65
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_pellet")
+
+[node name="Core" type="Polygon2D" parent="."]
+z_index = 20
+color = Color(0.72, 1, 0.58, 1)
+polygon = PackedVector2Array(-7, -2, 4, -2, 8, 0, 4, 2, -7, 2)
+
+[node name="Glow" type="Polygon2D" parent="."]
+z_index = 19
+color = Color(0.36, 0.95, 0.42, 0.35)
+polygon = PackedVector2Array(-9, -4, 5, -4, 11, 0, 5, 4, -9, 4)

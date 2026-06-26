@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BuildSynergyDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_synergy_definition.gd" id="1_syn"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_tag_requirement.gd" id="2_req"]
+
+[sub_resource type="Resource" id="Resource_protomatter_req"]
+script = ExtResource("2_req")
+tag = &"protomatter"
+min_count = 2
+max_count = -1
+
+[resource]
+script = ExtResource("1_syn")
+synergy_id = &"tiemu_spine_growth"
+display_name = "脊盾增生"
+enabled = true
+synergy_scope = 1
+owner_character_id = &"tiemu"
+exclusive_group = &"tiemu_growth_fusion"
+tier = 2
+priority = 20
+placeholder_text = "铁幕专属混合协同。暂时只显示激活，不执行战斗效果。"
+required_item_ids = Array[StringName]([&"split_embryo_core", &"tiemu_spine_shield_fragment"])
+required_tag_counts = Array[BuildTagRequirement]([SubResource("Resource_protomatter_req")])

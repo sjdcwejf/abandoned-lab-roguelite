@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_fungal"]
+
+[resource]
+script = ExtResource("1_fungal")
+item_id = &"fungal_memory_cap"
+display_name = "菌忆伞盖"
+enabled = true
+item_type = 1
+relic_scope = 1
+placeholder_text = "暂时只做显示，不执行战斗效果。"
+pool_tags = Array[StringName]([&"neutral_relic", &"test"])
+tags = Array[StringName]([&"plant", &"spore", &"memory"])
+max_stacks = 3

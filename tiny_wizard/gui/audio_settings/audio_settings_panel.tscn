@@ -1,0 +1,215 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/gui/audio_settings/audio_settings_panel.gd" id="1_settings"]
+
+[sub_resource type="StyleBoxFlat" id="StylePanel"]
+bg_color = Color(0.025, 0.045, 0.052, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.21, 0.72, 0.76, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleButton"]
+bg_color = Color(0.1, 0.18, 0.2, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.72, 0.76, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="AudioSettingsPanel" type="PanelContainer"]
+visible = false
+process_mode = 3
+custom_minimum_size = Vector2(500, 500)
+theme_override_styles/panel = SubResource("StylePanel")
+script = ExtResource("1_settings")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SettingsTitle" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 25
+text = "设置"
+horizontal_alignment = 1
+
+[node name="Divider" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="AudioSectionLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "音量"
+
+[node name="MasterRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MasterNameLabel" type="Label" parent="Margin/Layout/MasterRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "主音量"
+
+[node name="MasterSlider" type="HSlider" parent="Margin/Layout/MasterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 80.0
+
+[node name="MasterValue" type="Label" parent="Margin/Layout/MasterRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "80%"
+horizontal_alignment = 2
+
+[node name="MusicRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MusicNameLabel" type="Label" parent="Margin/Layout/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "音乐"
+
+[node name="MusicSlider" type="HSlider" parent="Margin/Layout/MusicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 70.0
+
+[node name="MusicValue" type="Label" parent="Margin/Layout/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "70%"
+horizontal_alignment = 2
+
+[node name="SFXRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SFXNameLabel" type="Label" parent="Margin/Layout/SFXRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "音效"
+
+[node name="SFXSlider" type="HSlider" parent="Margin/Layout/SFXRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 85.0
+
+[node name="SFXValue" type="Label" parent="Margin/Layout/SFXRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "85%"
+horizontal_alignment = 2
+
+[node name="DisplayDivider" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="DisplaySectionLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "显示"
+
+[node name="DisplayModeRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DisplayModeLabel" type="Label" parent="Margin/Layout/DisplayModeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "显示模式"
+
+[node name="DisplayModeOption" type="OptionButton" parent="Margin/Layout/DisplayModeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LanguageDivider" type="HSeparator" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="LanguageSectionLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.88, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "语言"
+
+[node name="LanguageRow" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LanguageLabel" type="Label" parent="Margin/Layout/LanguageRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "语言"
+
+[node name="LanguageOption" type="OptionButton" parent="Margin/Layout/LanguageRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Spacer" type="Control" parent="Margin/Layout"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="RestoreButton" type="Button" parent="Margin/Layout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleButton")
+text = "恢复默认"
+
+[node name="BackButton" type="Button" parent="Margin/Layout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleButton")
+text = "返回"

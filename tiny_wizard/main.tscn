@@ -1,14 +1,13 @@
-[gd_scene load_steps=10 format=3 uid="uid://cxl7rbtvsb5nc"]
+[gd_scene load_steps=9 format=3 uid="uid://cxl7rbtvsb5nc"]
 
 [ext_resource type="Script" path="res://tiny_wizard/tiny_wizard_main.gd" id="1_5rjdy"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/player/tiemu_character.tscn" id="2_5wjcq"]
+[ext_resource type="PackedScene" uid="uid://bnuih6qfwgu2p" path="res://tiny_wizard/player/player_character.tscn" id="2_5wjcq"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/player/liuying_character.tscn" id="3_liuying"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/player/fengqun_character.tscn" id="4_fengqun"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/player/shitong_character.tscn" id="5_shitong"]
 [ext_resource type="PackedScene" uid="uid://c45gqa1w6c20d" path="res://tiny_wizard/gui/gui.tscn" id="13_ucw2f"]
 [ext_resource type="Resource" uid="uid://bpvgw7v25bbsx" path="res://tiny_wizard/player/inventory/inventory.tres" id="14_ui8tp"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/gui/character_select/character_select.tscn" id="15_select"]
-[ext_resource type="Script" path="res://tiny_wizard/build/combat_resolver.gd" id="16_combat_resolver"]
 
 [node name="BioProtocolEntropyZonePrototype" type="Node2D"]
 y_sort_enabled = true
@@ -19,9 +18,6 @@ fengqun_character_scene = ExtResource("4_fengqun")
 shitong_character_scene = ExtResource("5_shitong")
 character_select_scene = ExtResource("15_select")
 metadata/_edit_vertical_guides_ = [0.0]
-
-[node name="CombatResolver" type="Node" parent="."]
-script = ExtResource("16_combat_resolver")
 
 [node name="Rooms" type="Node2D" parent="."]
 y_sort_enabled = true

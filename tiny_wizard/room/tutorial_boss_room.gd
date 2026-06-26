@@ -94,17 +94,23 @@ func _complete_boss_defeat(node: Node) -> void:
 
 
 func _choose_exit_black_hole_position(avoid_global_position: Variant) -> Vector2:
-	if not avoid_global_position is Vector2:
+	var avoid_positions: Array[Vector2] = []
+	if avoid_global_position is Vector2:
+		avoid_positions.append(avoid_global_position as Vector2)
+	if _reward_drop_origin != Vector2.ZERO:
+		avoid_positions.append(_reward_drop_origin)
+	if avoid_positions.is_empty():
 		return get_room_global_position() + Vector2(812, 420)
 
-	var avoid_position := avoid_global_position as Vector2
 	var best_position := get_room_global_position() + EXIT_BLACK_HOLE_CANDIDATES[0]
-	var best_distance := -1.0
+	var best_score := -1.0
 	for candidate_local: Vector2 in EXIT_BLACK_HOLE_CANDIDATES:
 		var candidate_global := get_room_global_position() + candidate_local
-		var distance := candidate_global.distance_squared_to(avoid_position)
-		if distance > best_distance:
-			best_distance = distance
+		var candidate_score := INF
+		for avoid_position: Vector2 in avoid_positions:
+			candidate_score = minf(candidate_score, candidate_global.distance_squared_to(avoid_position))
+		if candidate_score > best_score:
+			best_score = candidate_score
 			best_position = candidate_global
 
 	return best_position

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/placeholder_art/cirle_particle.png" id="3_texture"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fragment"]
-radius = 8.0
+radius = 16.0
 
 [node name="ProtomatterFragment" instance=ExtResource("1_pickable")]
 item = ExtResource("2_item")

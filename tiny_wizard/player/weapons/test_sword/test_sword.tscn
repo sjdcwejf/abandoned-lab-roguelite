@@ -14,10 +14,18 @@ inventory_color = Color(0.78, 0.72, 0.48, 1)
 damage = 2
 cooldown = 0.32
 active_time = 0.12
+knockback_multiplier = 1.05
 swing_start_angle = -0.5
 swing_end_angle = 0.42
 swing_recover_time = 0.09
 swing_scale_peak = Vector2(1.1, 1.04)
+rarity_name = "制式"
+combat_role = "近战训练"
+weapon_description = "渡鸦留下的检疫刃，结构简单，适合熟悉近战节奏。"
+stat_damage_text = "2 / 斩"
+stat_rate_text = "快"
+stat_range_text = "近"
+special_text = "挥动时可打消敌方弹幕，命中会造成轻度击退。"
 
 [node name="Handle" type="Polygon2D" parent="."]
 z_index = 7

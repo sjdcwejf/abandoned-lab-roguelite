@@ -15,6 +15,13 @@ damage = 1
 projectile_speed = 690.0
 cooldown = 0.13
 collision_mask = 73
+rarity_name = "制式"
+combat_role = "高速远程"
+weapon_description = "便携封控钉枪，射速很快，单发伤害较低，适合压制移动目标。"
+stat_damage_text = "1 / 发"
+stat_rate_text = "极快"
+stat_range_text = "远"
+special_text = "连续命中可以稳定触发武器命中效果。"
 
 [node name="WeaponSprite" type="Sprite2D" parent="."]
 position = Vector2(0, -12)

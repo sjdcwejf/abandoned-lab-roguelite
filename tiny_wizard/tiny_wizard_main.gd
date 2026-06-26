@@ -2,15 +2,27 @@ extends Node2D
 
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
+const MINIMAP_UI_SCRIPT := preload("res://tiny_wizard/gui/minimap_ui/minimap_ui.gd")
+const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn")
+const MAIN_MENU_SCENE := "res://tiny_wizard/gui/main_menu/main_menu.tscn"
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
+const MAX_FORMAL_LAYER_COUNT := 2
+const POLLUTION_EVENT_LAYER := 2
+const POLLUTION_EVENT_SOURCE_COUNT := 3
+const POLLUTION_EVENT_SOURCE_POSITIONS := [
+	Vector2(386, 226),
+	Vector2(512, 326),
+	Vector2(638, 226),
+]
 
 @export var use_generated_lab_dungeon := true
 @export var play_tutorial := true
 @export var dungeon_seed := 0
 @export var start_room_coord := Vector2i.ZERO
-@export var tiemu_character_scene: PackedScene = preload("res://tiny_wizard/player/tiemu_character.tscn")
+@export var tiemu_character_scene: PackedScene
 @export var liuying_character_scene: PackedScene
 @export var fengqun_character_scene: PackedScene
 @export var shitong_character_scene: PackedScene
@@ -27,20 +39,47 @@ var _tutorial_reward_pickups_remaining := 0
 var _tutorial_hint_panel: PanelContainer
 var _tutorial_hint_label: Label
 var _layer_clear_root: Control
+var _layer_clear_title_label: Label
+var _layer_clear_summary_label: Label
 var _layer_clear_weapons_label: Label
 var _layer_clear_inventory_label: Label
+var _death_prompt_root: Control
+var _death_prompt_status_label: Label
+var _death_prompt_title_label: Label
+var _death_prompt_description_label: Label
+var _death_prompt_respawn_button: Button
+var _death_prompt_main_menu_button: Button
+var _room_objective_ui: Node
+var _minimap_ui: LabMinimapUI
+var _formal_layer_index := 0
 
 var rooms := {}
 
 
 func _ready():
+	get_tree().paused = false
 	CHINESE_FONT_BOOTSTRAP.install()
 	_current_room = start_room_coord
 	$Camera2D.position = _room_camera_position(_current_room)
 	_setup_tutorial_hint()
+	_setup_room_objective_ui()
+	_setup_minimap_ui()
 	_setup_layer_clear_screen()
+	_setup_death_prompt_screen()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_show_character_select()
+
+
+func can_pause_game() -> bool:
+	if _character_select_screen != null and is_instance_valid(_character_select_screen):
+		return false
+	if _layer_clear_root != null and _layer_clear_root.visible:
+		return false
+	if _death_prompt_root != null and _death_prompt_root.visible:
+		return false
+	if _run_state == RUN_STATE_LAYER_COMPLETE:
+		return false
+	return _character != null and is_instance_valid(_character)
 
 
 func _collect_existing_rooms() -> Dictionary:
@@ -215,6 +254,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 
 	_selected_character_id = character_id
 	_hide_layer_clear_screen()
+	_hide_death_prompt(false)
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
 
@@ -222,10 +262,11 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_character.name = "Character"
 	add_child(_character)
 	_character.set("gui_path", NodePath("../Camera2D/GUI"))
+	_initialize_character_relic_controller()
 	_reset_character_inventory()
 	_bind_character_weapon_ui()
 	if _character.has_signal("respawn_requested"):
-		_character.connect("respawn_requested", Callable(self, "_respawn_character_at_start"))
+		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
 
 	if play_tutorial:
 		_configure_character_for_tutorial()
@@ -254,6 +295,7 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_tutorial_rewards_dropped = false
 	_tutorial_rewards_granted = false
 	_tutorial_reward_pickups_remaining = 0
+	_reset_minimap()
 	_current_room = start_room_coord
 	rooms = LabDungeonGenerator.generate_tutorial($Rooms)
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
@@ -262,19 +304,74 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_enter_start_room(wake_character_id)
 
 
-func _start_formal_run() -> void:
+func _start_formal_run(layer_index := 1) -> void:
 	_run_state = RUN_STATE_FORMAL
+	_formal_layer_index = clampi(layer_index, 1, MAX_FORMAL_LAYER_COUNT)
 	_hide_tutorial_hint()
+	_hide_room_objective()
+	_hide_minimap()
+	_hide_layer_clear_screen()
+	_set_character_control_enabled(true)
 	_current_room = start_room_coord
 	if use_generated_lab_dungeon:
-		rooms = LabDungeonGenerator.generate($Rooms, dungeon_seed)
+		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index))
 	else:
 		rooms = _collect_existing_rooms()
 
+	_install_formal_layer_events()
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
 	_register_rooms()
 	_update_room_doors()
+	_set_minimap_rooms()
 	_enter_start_room()
+
+
+func _install_formal_layer_events() -> void:
+	if _formal_layer_index != POLLUTION_EVENT_LAYER:
+		return
+
+	var pollution_room := _pick_pollution_event_room()
+	if pollution_room == null:
+		push_warning("第二层没有找到可安装原质污染源事件的怪物房。")
+		return
+
+	_install_pollution_source_event(pollution_room)
+
+
+func _pick_pollution_event_room() -> Room:
+	var candidates: Array[Room] = []
+	for room_pos in rooms:
+		var room := rooms[room_pos] as Room
+		if room == null:
+			continue
+		if room.lab_room_type == "combat":
+			candidates.append(room)
+
+	if candidates.is_empty():
+		return null
+
+	candidates.sort_custom(func(a: Room, b: Room) -> bool:
+		return a.room_pos.length_squared() < b.room_pos.length_squared()
+	)
+	return candidates[0]
+
+
+func _install_pollution_source_event(room: Room) -> void:
+	var container := Node2D.new()
+	container.name = "PollutionSources"
+	room.add_child(container)
+
+	for index in range(POLLUTION_EVENT_SOURCE_COUNT):
+		var source := POLLUTION_SOURCE_SCENE.instantiate()
+		if source == null:
+			continue
+		source.name = "ProtomatterPollutionSource%d" % (index + 1)
+		source.position = POLLUTION_EVENT_SOURCE_POSITIONS[index % POLLUTION_EVENT_SOURCE_POSITIONS.size()]
+		container.add_child(source)
+		if room.has_method("register_pollution_source"):
+			room.call("register_pollution_source", source)
+
+	room.lab_room_label = "%s｜污染源" % room.lab_room_label
 
 
 func _get_weapon_holder() -> Node:
@@ -301,6 +398,12 @@ func _get_ability_controller() -> LabPlayerAbilityController:
 	return _character.get_node_or_null("AbilityController") as LabPlayerAbilityController
 
 
+func _get_relic_controller() -> RelicController:
+	if _character == null:
+		return null
+	return _character.get_node_or_null("RelicController") as RelicController
+
+
 func _reset_character_inventory() -> void:
 	var inventory := _get_character_inventory()
 	if inventory == null:
@@ -308,6 +411,14 @@ func _reset_character_inventory() -> void:
 
 	inventory.inventory.clear()
 	inventory.item_counts.clear()
+
+
+func _initialize_character_relic_controller() -> void:
+	var relic_controller := _get_relic_controller()
+	if relic_controller == null:
+		return
+	relic_controller.character_id = StringName(_selected_character_id)
+	relic_controller.initialize(_character, null)
 
 
 func _bind_character_weapon_ui() -> void:
@@ -323,6 +434,8 @@ func _bind_character_weapon_ui() -> void:
 		gui.bind_weapon_holder(_get_weapon_holder())
 	if gui.has_method("bind_ability_controller"):
 		gui.bind_ability_controller(_get_ability_controller())
+	if gui.has_method("bind_relic_controller"):
+		gui.bind_relic_controller(_get_relic_controller())
 
 
 func _respawn_character_at_start() -> void:
@@ -340,9 +453,21 @@ func _respawn_character_at_start() -> void:
 	var character_stats := _character.get("character_stats") as QuiverCharacterStats
 	if character_stats != null:
 		character_stats.set_life_to_max()
+	_character.set("can_grab_items", true)
+	_set_character_control_enabled(true)
 	start_room.enter_room()
 	_update_room_feedback_for_room(start_room)
 	print("Subject respawned in Sealing Airlock.")
+
+
+func _on_character_death_requested() -> void:
+	if _death_prompt_root != null and _death_prompt_root.visible:
+		return
+
+	_set_character_control_enabled(false)
+	if _character != null and is_instance_valid(_character):
+		_character.set("can_grab_items", false)
+	_show_death_prompt()
 
 
 func _on_tutorial_boss_defeated() -> void:
@@ -374,9 +499,26 @@ func _on_black_hole_entered(body: Node2D) -> void:
 			if not _tutorial_rewards_granted:
 				return
 			print("Sealing wake sequence complete. Entering the sealed sector.")
-			call_deferred("_start_formal_run")
+			call_deferred("_start_formal_run", 1)
 		RUN_STATE_FORMAL:
-			call_deferred("_complete_formal_layer")
+			if _formal_layer_index < MAX_FORMAL_LAYER_COUNT:
+				call_deferred("_start_next_formal_layer")
+			else:
+				call_deferred("_complete_formal_layer")
+
+
+func _start_next_formal_layer() -> void:
+	if _run_state != RUN_STATE_FORMAL:
+		return
+	var next_layer := mini(_formal_layer_index + 1, MAX_FORMAL_LAYER_COUNT)
+	print("Entering Sealing Protocol layer %d." % next_layer)
+	_start_formal_run(next_layer)
+
+
+func _get_formal_layer_seed(layer_index: int) -> int:
+	if dungeon_seed == 0:
+		return 0
+	return dungeon_seed + maxi(0, layer_index - 1)
 
 
 func _complete_formal_layer() -> void:
@@ -385,9 +527,11 @@ func _complete_formal_layer() -> void:
 
 	_run_state = RUN_STATE_LAYER_COMPLETE
 	_hide_tutorial_hint()
+	_hide_room_objective()
+	_hide_minimap()
 	_set_character_control_enabled(false)
 	_show_layer_clear_screen()
-	print("Formal layer complete.")
+	print("Formal layer %d complete." % _formal_layer_index)
 
 
 func _set_character_control_enabled(enabled: bool) -> void:
@@ -440,19 +584,19 @@ func _setup_layer_clear_screen() -> void:
 	layout.add_theme_constant_override("separation", 14)
 	margin.add_child(layout)
 
-	var title := Label.new()
-	title.text = "封存协议完成"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
-	layout.add_child(title)
+	_layer_clear_title_label = Label.new()
+	_layer_clear_title_label.text = "封存协议完成"
+	_layer_clear_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_layer_clear_title_label.add_theme_font_size_override("font_size", 26)
+	_layer_clear_title_label.add_theme_color_override("font_color", Color(0.92, 0.98, 1.0, 1.0))
+	layout.add_child(_layer_clear_title_label)
 
-	var summary := Label.new()
-	summary.text = "失格者 A-03 已肃清。当前构筑快照："
-	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	summary.add_theme_font_size_override("font_size", 14)
-	summary.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
-	layout.add_child(summary)
+	_layer_clear_summary_label = Label.new()
+	_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
+	_layer_clear_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_layer_clear_summary_label.add_theme_font_size_override("font_size", 14)
+	_layer_clear_summary_label.add_theme_color_override("font_color", Color(0.65, 0.82, 0.88, 1.0))
+	layout.add_child(_layer_clear_summary_label)
 
 	layout.add_child(_make_layer_clear_section_title("武器构筑"))
 
@@ -551,6 +695,10 @@ func _hide_layer_clear_screen() -> void:
 
 
 func _refresh_layer_clear_screen() -> void:
+	if _layer_clear_title_label != null:
+		_layer_clear_title_label.text = "第 %d 层封存协议完成" % _formal_layer_index
+	if _layer_clear_summary_label != null:
+		_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
 	if _layer_clear_weapons_label != null:
 		_layer_clear_weapons_label.text = _get_layer_clear_weapon_text()
 	if _layer_clear_inventory_label != null:
@@ -585,10 +733,11 @@ func _get_layer_clear_weapon_text() -> String:
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "原质碎片：0    生物识别钥：0    破障炸药：0"
+		return "原质：0    遗物：0    生物识别钥：0    破障炸药：0"
 
-	return "原质碎片：%d    生物识别钥：%d    破障炸药：%d" % [
+	return "原质：%d    遗物：%d    生物识别钥：%d    破障炸药：%d" % [
 		inventory.get_item_amount("Protomatter Fragment"),
+		inventory.get_item_amount("Relic"),
 		inventory.get_item_amount("Biometric Key"),
 		inventory.get_item_amount("Breach Charge")
 	]
@@ -600,8 +749,182 @@ func _restart_run_from_layer_clear() -> void:
 		character_id = CharacterSelectScreen.TIEMU_ID
 
 	_hide_layer_clear_screen()
+	_formal_layer_index = 0
 	_set_character_control_enabled(true)
 	_start_run_with_character(_get_selected_character_scene(), character_id)
+
+
+func _setup_death_prompt_screen() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "DeathPromptLayer"
+	layer.layer = 80
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+
+	_death_prompt_root = Control.new()
+	_death_prompt_root.name = "DeathPromptRoot"
+	_death_prompt_root.process_mode = Node.PROCESS_MODE_ALWAYS
+	_death_prompt_root.visible = false
+	_death_prompt_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_death_prompt_root)
+
+	var dimmer := ColorRect.new()
+	dimmer.name = "Dimmer"
+	dimmer.color = Color(0.0, 0.0, 0.0, 0.76)
+	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+	dimmer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_death_prompt_root.add_child(dimmer)
+
+	var center := CenterContainer.new()
+	center.name = "Center"
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_death_prompt_root.add_child(center)
+
+	var panel := PanelContainer.new()
+	panel.name = "Panel"
+	panel.custom_minimum_size = Vector2(500, 300)
+	panel.add_theme_stylebox_override("panel", _make_death_prompt_panel_style())
+	center.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 30)
+	margin.add_theme_constant_override("margin_top", 28)
+	margin.add_theme_constant_override("margin_right", 30)
+	margin.add_theme_constant_override("margin_bottom", 26)
+	panel.add_child(margin)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 16)
+	margin.add_child(layout)
+
+	_death_prompt_status_label = Label.new()
+	_death_prompt_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_death_prompt_status_label.add_theme_font_size_override("font_size", 13)
+	_death_prompt_status_label.add_theme_color_override("font_color", Color(0.35, 0.86, 0.9, 1.0))
+	layout.add_child(_death_prompt_status_label)
+
+	_death_prompt_title_label = Label.new()
+	_death_prompt_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_death_prompt_title_label.add_theme_font_size_override("font_size", 28)
+	_death_prompt_title_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.58, 1.0))
+	layout.add_child(_death_prompt_title_label)
+
+	_death_prompt_description_label = Label.new()
+	_death_prompt_description_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_death_prompt_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_death_prompt_description_label.add_theme_font_size_override("font_size", 14)
+	_death_prompt_description_label.add_theme_color_override("font_color", Color(0.82, 0.89, 0.91, 1.0))
+	layout.add_child(_death_prompt_description_label)
+
+	var buttons := HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 12)
+	layout.add_child(buttons)
+
+	_death_prompt_respawn_button = Button.new()
+	_death_prompt_respawn_button.custom_minimum_size = Vector2(175, 46)
+	_death_prompt_respawn_button.add_theme_stylebox_override("normal", _make_death_prompt_button_style())
+	_death_prompt_respawn_button.add_theme_stylebox_override("hover", _make_death_prompt_button_hover_style())
+	_death_prompt_respawn_button.pressed.connect(_confirm_death_respawn)
+	buttons.add_child(_death_prompt_respawn_button)
+
+	_death_prompt_main_menu_button = Button.new()
+	_death_prompt_main_menu_button.custom_minimum_size = Vector2(175, 46)
+	_death_prompt_main_menu_button.add_theme_stylebox_override("normal", _make_death_prompt_danger_button_style())
+	_death_prompt_main_menu_button.add_theme_stylebox_override("hover", _make_death_prompt_button_hover_style())
+	_death_prompt_main_menu_button.pressed.connect(_return_to_main_menu_from_death)
+	buttons.add_child(_death_prompt_main_menu_button)
+
+	_refresh_death_prompt_text()
+
+
+func _make_death_prompt_panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.025, 0.045, 0.052, 0.98)
+	style.border_color = Color(0.24, 0.72, 0.76, 0.9)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	return style
+
+
+func _make_death_prompt_button_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.16, 0.18, 0.96)
+	style.border_color = Color(0.24, 0.7, 0.74, 0.82)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	return style
+
+
+func _make_death_prompt_button_hover_style() -> StyleBoxFlat:
+	var style := _make_death_prompt_button_style()
+	style.bg_color = Color(0.1, 0.29, 0.31, 1.0)
+	style.border_color = Color(0.45, 0.95, 0.92, 1.0)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	return style
+
+
+func _make_death_prompt_danger_button_style() -> StyleBoxFlat:
+	var style := _make_death_prompt_button_style()
+	style.bg_color = Color(0.24, 0.075, 0.06, 0.98)
+	style.border_color = Color(0.92, 0.39, 0.27, 0.92)
+	return style
+
+
+func _show_death_prompt() -> void:
+	if _death_prompt_root == null:
+		return
+	_refresh_death_prompt_text()
+	_death_prompt_root.visible = true
+	get_tree().paused = true
+	if _death_prompt_respawn_button != null:
+		_death_prompt_respawn_button.grab_focus()
+
+
+func _hide_death_prompt(resume_world := true) -> void:
+	if _death_prompt_root != null:
+		_death_prompt_root.visible = false
+	if resume_world:
+		get_tree().paused = false
+
+
+func _refresh_death_prompt_text() -> void:
+	if _death_prompt_status_label != null:
+		_death_prompt_status_label.text = GameSettings.tr_ui("death_status")
+	if _death_prompt_title_label != null:
+		_death_prompt_title_label.text = GameSettings.tr_ui("death_title")
+	if _death_prompt_description_label != null:
+		_death_prompt_description_label.text = GameSettings.tr_ui("death_desc")
+	if _death_prompt_respawn_button != null:
+		_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn")
+	if _death_prompt_main_menu_button != null:
+		_death_prompt_main_menu_button.text = GameSettings.tr_ui("death_main_menu")
+
+
+func _confirm_death_respawn() -> void:
+	_hide_death_prompt()
+	_respawn_character_at_start()
+
+
+func _return_to_main_menu_from_death() -> void:
+	GameSettings.save_settings()
+	_hide_death_prompt()
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
 func _get_selected_character_scene() -> PackedScene:
@@ -660,14 +983,35 @@ func _setup_tutorial_hint() -> void:
 	_tutorial_hint_panel.add_child(_tutorial_hint_label)
 
 
+func _setup_room_objective_ui() -> void:
+	_room_objective_ui = ROOM_OBJECTIVE_UI_SCRIPT.new()
+	if _room_objective_ui == null:
+		return
+	_room_objective_ui.name = "RoomObjectiveUI"
+	add_child(_room_objective_ui)
+
+
+func _setup_minimap_ui() -> void:
+	_minimap_ui = MINIMAP_UI_SCRIPT.new()
+	if _minimap_ui == null:
+		return
+	_minimap_ui.name = "MinimapUI"
+	add_child(_minimap_ui)
+
+
 func _update_room_feedback_for_room(room: Room) -> void:
 	if _run_state == RUN_STATE_TUTORIAL:
+		_hide_room_objective()
+		_hide_minimap()
 		_update_tutorial_hint_for_room(room)
 		return
 	if _run_state == RUN_STATE_FORMAL:
+		_hide_tutorial_hint()
 		_update_formal_room_feedback(room)
 		return
+	_hide_room_objective()
 	_hide_tutorial_hint()
+	_hide_minimap()
 
 
 func _update_tutorial_hint_for_room(room: Room) -> void:
@@ -701,11 +1045,13 @@ func _update_formal_room_feedback(room: Room) -> void:
 	var room_label := room.lab_room_label
 	if room_label == "":
 		room_label = type_label
+		room.lab_room_label = room_label
 
-	if objective == "":
-		_show_tutorial_hint("%s | %s" % [room_label, type_label])
-	else:
-		_show_tutorial_hint("%s | %s\n目标：%s" % [room_label, type_label, objective])
+	if _room_objective_ui == null:
+		_update_minimap_current_room()
+		return
+	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective)
+	_update_minimap_current_room()
 
 
 func _get_formal_room_type_label(room_type: String) -> String:
@@ -714,6 +1060,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "起点房"
 		"combat":
 			return "怪物房"
+		"pollution":
+			return "污染事件房"
 		"reward":
 			return "奖励房"
 		"weapon":
@@ -731,6 +1079,8 @@ func _get_formal_room_objective(room_type: String) -> String:
 			return "确认装备状态，进入封存区。"
 		"combat":
 			return "清除房内样本，解除门锁。"
+		"pollution":
+			return "清除原质污染源，并肃清房内样本。"
 		"reward":
 			return "肃清守卫样本，回收补给箱。"
 		"weapon":
@@ -753,6 +1103,39 @@ func _hide_tutorial_hint() -> void:
 	if _tutorial_hint_panel == null:
 		return
 	_tutorial_hint_panel.visible = false
+
+
+func _hide_room_objective() -> void:
+	if _room_objective_ui == null:
+		return
+	_room_objective_ui.hide_objective()
+
+
+func _set_minimap_rooms() -> void:
+	if _minimap_ui == null:
+		return
+	_minimap_ui.set_rooms(rooms, _formal_layer_index)
+
+
+func _update_minimap_current_room() -> void:
+	if _minimap_ui == null:
+		return
+	if _run_state != RUN_STATE_FORMAL:
+		_minimap_ui.hide_map()
+		return
+	_minimap_ui.update_current_room(_current_room)
+
+
+func _hide_minimap() -> void:
+	if _minimap_ui == null:
+		return
+	_minimap_ui.hide_map()
+
+
+func _reset_minimap() -> void:
+	if _minimap_ui == null:
+		return
+	_minimap_ui.reset_map()
 
 
 func _print_dungeon_summary() -> void:

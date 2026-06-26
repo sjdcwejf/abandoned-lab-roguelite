@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildSynergyDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_synergy_definition.gd" id="1_syn"]
+
+[resource]
+script = ExtResource("1_syn")
+synergy_id = &"tiemu_living_spine"
+display_name = "活甲脊盾"
+enabled = true
+synergy_scope = 1
+owner_character_id = &"tiemu"
+exclusive_group = &"tiemu_armor_fusion"
+tier = 2
+priority = 30
+placeholder_text = "铁幕专属遗物协同。暂时只显示激活，不执行战斗效果。"
+required_item_ids = Array[StringName]([&"tiemu_spine_shield_fragment", &"tiemu_living_armor_plate"])

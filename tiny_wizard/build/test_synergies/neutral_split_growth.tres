@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BuildSynergyDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_synergy_definition.gd" id="1_syn"]
+
+[resource]
+script = ExtResource("1_syn")
+synergy_id = &"neutral_split_growth"
+display_name = "裂殖增生"
+enabled = true
+synergy_scope = 0
+exclusive_group = &"growth_fusion"
+tier = 1
+priority = 10
+placeholder_text = "中立遗物协同。暂时只显示激活，不执行战斗效果。"
+required_item_ids = Array[StringName]([&"split_embryo_core", &"fungal_memory_cap"])

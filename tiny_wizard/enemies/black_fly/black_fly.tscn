@@ -57,7 +57,6 @@ y_sort_enabled = true
 scale = Vector2(0.6, 0.6)
 collision_layer = 8
 script = ExtResource("8_dropper")
-build_item_drop_enabled = true
 character_stats = SubResource("Resource_xpmbt")
 physics_stats = SubResource("Resource_a0bdi")
 

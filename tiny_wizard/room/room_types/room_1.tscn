@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://d01c1dqufo578"]
+[gd_scene load_steps=13 format=3 uid="uid://d01c1dqufo578"]
 
 [ext_resource type="PackedScene" uid="uid://de3l1l1odllgl" path="res://tiny_wizard/room/room.tscn" id="1_o627n"]
 [ext_resource type="PackedScene" uid="uid://cnoc26x8qgyyw" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="2_htb2l"]
 [ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="3_opten"]
 [ext_resource type="PackedScene" uid="uid://8gachgsj3jdx" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="4_5fybu"]
 [ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_knq7s"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/quarantine_spitter/quarantine_spitter.tscn" id="5_spitter"]
 
 [sub_resource type="Resource" id="Resource_pm8y8"]
 resource_local_to_scene = true
@@ -51,7 +52,7 @@ position = Vector2(680, 232)
 character_stats = SubResource("Resource_pm8y8")
 physics_stats = SubResource("Resource_mh6ji")
 
-[node name="BlackFly2" parent="Enemies" index="1" instance=ExtResource("2_htb2l")]
+[node name="QuarantineSpitter" parent="Enemies" index="1" instance=ExtResource("5_spitter")]
 position = Vector2(736, 296)
 character_stats = SubResource("Resource_i5vyh")
 physics_stats = SubResource("Resource_76yfb")

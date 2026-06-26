@@ -2,10 +2,21 @@ class_name LabWeapon
 extends Node2D
 
 
+const ENEMY_PROJECTILE_GROUP := &"enemy_projectiles"
+
+
 @export var display_name := ""
 @export var weapon_id := ""
 @export var inventory_size := Vector2i(2, 1)
 @export var inventory_color := Color(0.26, 0.62, 0.9, 1.0)
+@export var rarity_name := "制式"
+@export var combat_role := "通用"
+@export_multiline var weapon_description := ""
+@export var stat_damage_text := ""
+@export var stat_rate_text := ""
+@export var stat_energy_text := "无消耗"
+@export var stat_range_text := ""
+@export var special_text := ""
 
 var owner_character: Node2D
 var aim_direction := Vector2.RIGHT
@@ -33,6 +44,23 @@ func get_inventory_size() -> Vector2i:
 
 func get_inventory_color() -> Color:
 	return inventory_color
+
+
+func get_weapon_compare_info() -> Dictionary:
+	return {
+		"name": get_inventory_display_name(),
+		"id": get_weapon_id(),
+		"rarity": rarity_name,
+		"role": combat_role,
+		"description": _resolve_weapon_description(),
+		"damage": _resolve_damage_text(),
+		"rate": _resolve_rate_text(),
+		"energy": _resolve_energy_text(),
+		"range": _resolve_range_text(),
+		"special": _resolve_special_text(),
+		"size": get_inventory_size(),
+		"color": get_inventory_color(),
+	}
 
 
 func equip(new_owner: Node2D) -> void:
@@ -125,6 +153,21 @@ func apply_damage_to_target(target: Object, amount: int, hit_from := Vector2.ZER
 	return true
 
 
+func try_destroy_enemy_projectile(target: Object, deflect_direction := Vector2.ZERO) -> bool:
+	if not target is Node:
+		return false
+
+	var projectile := target as Node
+	if not projectile.is_in_group(ENEMY_PROJECTILE_GROUP):
+		return false
+
+	if projectile.has_method("deflect_by_melee"):
+		projectile.call("deflect_by_melee", deflect_direction)
+	else:
+		projectile.queue_free()
+	return true
+
+
 func _notify_owner_weapon_hit(damage_target: Object, amount: int) -> void:
 	if owner_character == null:
 		return
@@ -132,3 +175,71 @@ func _notify_owner_weapon_hit(damage_target: Object, amount: int) -> void:
 	if ability_controller == null:
 		return
 	ability_controller.notify_weapon_hit(damage_target, amount)
+
+
+func _resolve_weapon_description() -> String:
+	if weapon_description != "":
+		return weapon_description
+	return "该武器尚未录入完整说明。"
+
+
+func _resolve_damage_text() -> String:
+	if stat_damage_text != "":
+		return stat_damage_text
+	if _has_weapon_property("damage"):
+		return str(get("damage"))
+	return "特殊"
+
+
+func _resolve_rate_text() -> String:
+	if stat_rate_text != "":
+		return stat_rate_text
+	if not _has_weapon_property("cooldown"):
+		return "持续"
+
+	var cooldown_value := float(get("cooldown"))
+	if cooldown_value <= 0.16:
+		return "极快"
+	if cooldown_value <= 0.3:
+		return "快"
+	if cooldown_value <= 0.48:
+		return "中"
+	return "慢"
+
+
+func _resolve_energy_text() -> String:
+	if stat_energy_text != "":
+		return stat_energy_text
+	return "无消耗"
+
+
+func _resolve_range_text() -> String:
+	if stat_range_text != "":
+		return stat_range_text
+	if _has_weapon_property("range"):
+		return "远程"
+	if _has_weapon_property("active_time"):
+		return "近战"
+	return "中程"
+
+
+func _resolve_special_text() -> String:
+	if special_text != "":
+		return special_text
+	var notes := []
+	if _has_weapon_property("can_destroy_enemy_projectiles") and bool(get("can_destroy_enemy_projectiles")):
+		notes.append("挥击可打消敌方弹幕")
+	if _has_weapon_property("pellet_count") and int(get("pellet_count")) > 1:
+		notes.append("扇形多弹丸")
+	if _has_weapon_property("knockback_multiplier") or _has_weapon_property("punch_knockback_multiplier"):
+		notes.append("命中造成击退")
+	if notes.is_empty():
+		return "无特殊词条"
+	return "；".join(notes)
+
+
+func _has_weapon_property(property_name: String) -> bool:
+	for property_info in get_property_list():
+		if str(property_info.get("name", "")) == property_name:
+			return true
+	return false

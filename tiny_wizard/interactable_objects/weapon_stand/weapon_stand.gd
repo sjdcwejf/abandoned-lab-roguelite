@@ -3,6 +3,9 @@ extends Node2D
 
 signal weapon_picked_up(slot_index: int)
 
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
+
 @export var weapon_scene: PackedScene
 @export var weapon_label := "检疫刃"
 @export var equip_on_pickup := false
@@ -11,6 +14,7 @@ signal weapon_picked_up(slot_index: int)
 var _candidate_character: Node2D
 var _picked_up := false
 var _drop_tween: Tween
+var _awaiting_slot_selection := false
 
 @onready var pickup_area: Area2D = $PickupArea
 @onready var prompt: CanvasItem = $Prompt
@@ -19,6 +23,7 @@ var _drop_tween: Tween
 
 
 func _ready() -> void:
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	prompt.visible = false
 	pickup_area.body_entered.connect(_on_pickup_area_body_entered)
 	pickup_area.body_exited.connect(_on_pickup_area_body_exited)
@@ -27,11 +32,16 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _picked_up or _candidate_character == null:
 		return
+	if _awaiting_slot_selection:
+		var replacement_slot := _get_pressed_replacement_slot()
+		if replacement_slot >= 0:
+			_pick_up(_candidate_character, replacement_slot)
+		return
 	if Input.is_action_just_pressed("interact"):
 		_pick_up(_candidate_character)
 
 
-func _pick_up(character: Node2D) -> void:
+func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 	if weapon_scene == null:
 		return
 
@@ -42,16 +52,28 @@ func _pick_up(character: Node2D) -> void:
 	var slot_index := -1
 	if target_slot_number > 0 and weapon_holder.has_method("add_weapon_scene_to_slot"):
 		slot_index = int(weapon_holder.add_weapon_scene_to_slot(weapon_scene, target_slot_number - 1, equip_on_pickup))
+	elif weapon_holder.has_method("has_free_quick_slot") and not bool(weapon_holder.call("has_free_quick_slot")):
+		if replacement_slot < 0:
+			_awaiting_slot_selection = true
+			if prompt is Label:
+				(prompt as Label).text = "按 1 / 2 / 3 / 4 选择替换"
+			return
+		if not weapon_holder.has_method("replace_weapon_scene_in_slot"):
+			return
+		slot_index = int(weapon_holder.call("replace_weapon_scene_in_slot", weapon_scene, replacement_slot))
 	else:
 		slot_index = int(weapon_holder.add_weapon_scene(weapon_scene, equip_on_pickup))
 	if slot_index < 0:
+		INTERACTION_FEEDBACK.show_from(self, "武器拾取失败。", 1.2)
 		return
 
 	_picked_up = true
+	_awaiting_slot_selection = false
 	prompt.visible = false
 	weapon_preview.visible = false
 	stand_light.visible = false
 	pickup_area.set_deferred("monitoring", false)
+	INTERACTION_FEEDBACK.show_from(self, "已获得 %s，装备到 %d 号位。" % [weapon_label, slot_index + 1], 1.4)
 	print("%s added to weapon slot %d." % [weapon_label, slot_index + 1])
 	weapon_picked_up.emit(slot_index)
 
@@ -60,6 +82,9 @@ func _on_pickup_area_body_entered(body: Node2D) -> void:
 	if _picked_up or not body.has_node("Visual/WeaponHolder"):
 		return
 	_candidate_character = body
+	_awaiting_slot_selection = false
+	if prompt is Label:
+		(prompt as Label).text = "按 F 拾取"
 	prompt.visible = true
 
 
@@ -67,7 +92,16 @@ func _on_pickup_area_body_exited(body: Node2D) -> void:
 	if body != _candidate_character:
 		return
 	_candidate_character = null
+	_awaiting_slot_selection = false
 	prompt.visible = false
+
+
+func _get_pressed_replacement_slot() -> int:
+	for slot_index in range(4):
+		var action_name := "weapon_slot_%d" % (slot_index + 1)
+		if InputMap.has_action(action_name) and Input.is_action_just_pressed(action_name):
+			return slot_index
+	return -1
 
 
 func play_drop_animation(start_global_position: Vector2, end_global_position: Vector2) -> void:

@@ -3,8 +3,9 @@ extends QuiverInteractableObject
 
 @export var items := []
 @export var physics_body_path := NodePath("RigidBody2D")
-@export var build_reward_enabled := false
-@export var build_catalog: BuildCatalog
+@export var relic_reward_enabled := false
+@export_range(0.0, 1.0, 0.01) var relic_reward_chance := 1.0
+@export var relic_pool_tag: StringName = &""
 
 var _room_locked := false
 var _opened := false
@@ -39,17 +40,24 @@ func is_opened() -> bool:
 	return _opened
 
 
-func spawn_build_reward(character: Node) -> void:
-	if not build_reward_enabled or build_catalog == null:
-		return
-	var definition := BuildPoolResolver.pick_candidate(character, build_catalog, [&"reward"])
-	if definition == null:
-		return
-	var pickup_scene := load("res://tiny_wizard/build/build_item_pickup.tscn") as PackedScene
-	var pickup := pickup_scene.instantiate() as BuildItemPickup
-	pickup.setup(definition)
-	pickup.position = position + Vector2(48, -12)
-	call_deferred("add_sibling", pickup)
+func get_interaction_prompt(character: QuiverCharacter) -> String:
+	if _opened:
+		return ""
+	if _room_locked:
+		return "清理样本后解锁"
+	if _is_key_locked() and not _character_has_key(character):
+		return "需要生物识别钥"
+	return "按 F 打开补给箱"
+
+
+func get_interaction_block_message(character: QuiverCharacter) -> String:
+	if _opened:
+		return "补给箱已经打开。"
+	if _room_locked:
+		return "清理当前房间目标后，补给箱才会解锁。"
+	if _is_key_locked() and not _character_has_key(character):
+		return "需要生物识别钥才能打开。"
+	return ""
 
 
 func _apply_room_lock() -> void:
@@ -57,6 +65,18 @@ func _apply_room_lock() -> void:
 		action.active = not _room_locked and not _opened
 
 	modulate = Color(0.45, 0.5, 0.54, 0.88) if _room_locked and not _opened else Color.WHITE
+
+
+func _is_key_locked() -> bool:
+	if action == null:
+		return false
+	return bool(action.get("locked"))
+
+
+func _character_has_key(character: QuiverCharacter) -> bool:
+	if character == null or character.inventory == null:
+		return false
+	return int((character.inventory as QuiverInventory).get_item_amount("Biometric Key")) > 0
 
 
 func _freeze_physics_body() -> void:

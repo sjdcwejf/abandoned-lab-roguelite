@@ -1,49 +1,84 @@
 class_name BuildPoolResolver
 extends RefCounted
 
+const DEFAULT_RELIC_DEFINITIONS: Array[BuildItemDefinition] = [
+	preload("res://tiny_wizard/build/test_relics/split_embryo_core.tres"),
+	preload("res://tiny_wizard/build/test_relics/fungal_memory_cap.tres"),
+	preload("res://tiny_wizard/build/test_relics/hollow_tail_segment.tres"),
+	preload("res://tiny_wizard/build/test_relics/tiemu_spine_shield_fragment.tres"),
+	preload("res://tiny_wizard/build/test_relics/tiemu_living_armor_plate.tres"),
+]
 
-static func get_candidates(character: Node, catalog: Variant, required_pool_tags: Array[StringName] = []) -> Array[BuildItemDefinition]:
-	var candidates: Array[BuildItemDefinition] = []
-	if character == null:
-		return candidates
-	var controller := character.get_node_or_null("TiemuBuildController") as TiemuBuildController
-	if controller == null:
-		return candidates
-	var definitions: Array = catalog.items if catalog is BuildCatalog else catalog if catalog is Array else []
-	for value in definitions:
-		var definition := value as BuildItemDefinition
-		if definition == null or not definition.enabled:
+
+static func get_available_relics(
+	catalog: BuildCatalog,
+	relic_controller: RelicController,
+	pool_tag: StringName = &""
+) -> Array[BuildItemDefinition]:
+	var result: Array[BuildItemDefinition] = []
+	if catalog == null:
+		return result
+
+	var candidates: Array[BuildItemDefinition]
+	if pool_tag == &"":
+		candidates = catalog.items
+	else:
+		candidates = catalog.get_items_by_pool_tag(pool_tag)
+
+	for item in candidates:
+		if item == null:
 			continue
-		if not _has_all_pool_tags(definition, required_pool_tags):
+		if item.item_type != BuildItemDefinition.ItemType.RELIC:
 			continue
-		if controller.can_install(definition).is_success():
-			candidates.append(definition)
-	return candidates
+		if relic_controller != null:
+			var install_result := relic_controller.can_add_relic(item)
+			if not install_result.success:
+				continue
+		elif item.relic_scope == BuildItemDefinition.RelicScope.NONE:
+			continue
+		result.append(item)
+
+	return result
 
 
-static func pick_candidate(character: Node, catalog: Variant, required_pool_tags: Array[StringName] = [], rng: RandomNumberGenerator = null) -> BuildItemDefinition:
-	var candidates := get_candidates(character, catalog, required_pool_tags)
+static func get_available_relics_from_items(
+	items: Array[BuildItemDefinition],
+	relic_controller: RelicController,
+	pool_tag: StringName = &""
+) -> Array[BuildItemDefinition]:
+	var result: Array[BuildItemDefinition] = []
+	for item in items:
+		if item == null:
+			continue
+		if pool_tag != &"" and not item.pool_tags.has(pool_tag):
+			continue
+		if item.item_type != BuildItemDefinition.ItemType.RELIC:
+			continue
+		if relic_controller != null:
+			var install_result := relic_controller.can_add_relic(item)
+			if not install_result.success:
+				continue
+		elif item.relic_scope == BuildItemDefinition.RelicScope.NONE:
+			continue
+		result.append(item)
+	return result
+
+
+static func get_default_available_relics(
+	relic_controller: RelicController,
+	pool_tag: StringName = &""
+) -> Array[BuildItemDefinition]:
+	return get_available_relics_from_items(DEFAULT_RELIC_DEFINITIONS, relic_controller, pool_tag)
+
+
+static func pick_random_relic(
+	relic_controller: RelicController,
+	rng: RandomNumberGenerator,
+	pool_tag: StringName = &""
+) -> BuildItemDefinition:
+	var candidates := get_default_available_relics(relic_controller, pool_tag)
 	if candidates.is_empty():
 		return null
 	if rng == null:
 		return candidates.pick_random()
 	return candidates[rng.randi_range(0, candidates.size() - 1)]
-
-
-static func find_tiemu_character(root: Node) -> Node:
-	if root == null:
-		return null
-	if root.get_node_or_null("TiemuBuildController") is TiemuBuildController:
-		return root
-	for child in root.get_children():
-		var found := find_tiemu_character(child)
-		if found != null:
-			return found
-	return null
-
-
-static func _has_all_pool_tags(definition: BuildItemDefinition, required_pool_tags: Array[StringName]) -> bool:
-	for tag in required_pool_tags:
-		if not definition.pool_tags.has(tag):
-			return false
-	return true

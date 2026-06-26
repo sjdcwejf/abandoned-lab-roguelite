@@ -1,31 +1,36 @@
 class_name BuildInstallResult
 extends Resource
 
-enum Status {
-	SUCCESS,
-	INVALID_ITEM,
-	DUPLICATE_ITEM,
-	NO_CAPACITY,
-	INCOMPATIBLE,
-	ITEM_DISABLED,
-	INVALID_ITEM_TYPE,
-	INVALID_SLOT,
-	MAX_STACKS,
-	UNIQUE_CONFLICT,
-	MISSING_REQUIREMENT,
-	EXCLUDED_CONFLICT,
+enum Reason {
+	OK,
+	NULL_DEFINITION,
+	DISABLED,
+	WRONG_ITEM_TYPE,
+	WRONG_RELIC_SCOPE,
+	MAX_STACKS_REACHED,
+	UNIQUE_GROUP_BLOCKED,
+	REQUIRED_ITEM_MISSING,
+	EXCLUDED_ITEM_OWNED,
+	CHARACTER_SCOPE_MISMATCH,
+	UNKNOWN
 }
 
-@export var status: Status = Status.SUCCESS
-@export var item: BuildItemDefinition
-@export var message: String
-@export var slot_index: int = -1
-@export var stack_count: int = 0
+@export var success := false
+@export_enum("OK", "NULL_DEFINITION", "DISABLED", "WRONG_ITEM_TYPE", "WRONG_RELIC_SCOPE", "MAX_STACKS_REACHED", "UNIQUE_GROUP_BLOCKED", "REQUIRED_ITEM_MISSING", "EXCLUDED_ITEM_OWNED", "CHARACTER_SCOPE_MISMATCH", "UNKNOWN") var reason: int = Reason.UNKNOWN
+@export var message := ""
 
 
-func is_success() -> bool:
-	return status == Status.SUCCESS
+static func ok(message_text := "") -> BuildInstallResult:
+	var result := BuildInstallResult.new()
+	result.success = true
+	result.reason = Reason.OK
+	result.message = message_text
+	return result
 
 
-func is_valid() -> bool:
-	return item != null and (status != Status.SUCCESS or item.is_valid())
+static func fail(reason_value: Reason, message_text := "") -> BuildInstallResult:
+	var result := BuildInstallResult.new()
+	result.success = false
+	result.reason = reason_value
+	result.message = message_text
+	return result

@@ -44,8 +44,9 @@ z_index = 10
 
 [node name="Prompt" type="Label" parent="."]
 visible = false
-position = Vector2(-12, -58)
+position = Vector2(-110, -64)
 z_index = 20
+custom_minimum_size = Vector2(220, 26)
 text = "F"
 horizontal_alignment = 1
 vertical_alignment = 1

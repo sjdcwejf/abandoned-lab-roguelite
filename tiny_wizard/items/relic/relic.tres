@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="QuiverItem" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://top-down-shooter-core/items/item.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+name = "Relic"
+short_description = "从高危样本体内回收的稳定原质遗物，暂时可交给渡鸦换取原质。"
+long_description = null
+stackable = true
+stack_size = null
+pickable_item_scene = "res://tiny_wizard/items/relic/relic.tscn"

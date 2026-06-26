@@ -1,0 +1,74 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.gd" id="1_shotgun"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_pellet.tscn" id="2_pellet"]
+
+[node name="QuarantineShotgun" type="Node2D"]
+script = ExtResource("1_shotgun")
+display_name = "检疫霰弹枪"
+weapon_id = "quarantine_shotgun"
+inventory_size = Vector2i(3, 2)
+inventory_color = Color(0.45, 0.82, 0.38, 1)
+projectile_scene = ExtResource("2_pellet")
+damage = 1
+projectile_speed = 650.0
+cooldown = 0.68
+collision_mask = 73
+pellet_count = 5
+spread_degrees = 30.0
+rarity_name = "异常"
+combat_role = "近距爆发"
+weapon_description = "以原质弹丸形成扇形覆盖，近距离命中越多，爆发越高。"
+stat_damage_text = "5 x 1"
+stat_rate_text = "慢"
+stat_range_text = "近 / 中"
+special_text = "扇形霰弹，适合贴脸爆发和清理小群敌人。"
+
+[node name="WeaponVisual" type="Node2D" parent="."]
+
+[node name="Stock" type="Polygon2D" parent="WeaponVisual"]
+position = Vector2(-8, 0)
+z_index = 5
+color = Color(0.12, 0.16, 0.17, 1)
+polygon = PackedVector2Array(-20, -7, -2, -9, 10, -5, 10, 5, -2, 9, -20, 7, -26, 0)
+
+[node name="Receiver" type="Polygon2D" parent="WeaponVisual"]
+position = Vector2(12, 0)
+z_index = 6
+color = Color(0.26, 0.34, 0.3, 1)
+polygon = PackedVector2Array(-14, -9, 18, -9, 25, -5, 25, 5, 18, 9, -14, 9, -19, 0)
+
+[node name="ContainmentStripe" type="Polygon2D" parent="WeaponVisual"]
+position = Vector2(10, 0)
+z_index = 7
+color = Color(0.64, 0.95, 0.34, 1)
+polygon = PackedVector2Array(-4, -9, 3, -9, 10, 9, 3, 9)
+
+[node name="Barrel" type="Polygon2D" parent="WeaponVisual"]
+position = Vector2(38, 0)
+z_index = 5
+color = Color(0.1, 0.13, 0.14, 1)
+polygon = PackedVector2Array(-14, -7, 14, -7, 19, -4, 19, 4, 14, 7, -14, 7)
+
+[node name="BarrelVent" type="Line2D" parent="WeaponVisual"]
+position = Vector2(32, 0)
+z_index = 7
+points = PackedVector2Array(-5, -4, 8, -4, 11, 0, 8, 4, -5, 4)
+width = 2.0
+default_color = Color(0.45, 0.98, 0.65, 0.9)
+
+[node name="Grip" type="Polygon2D" parent="WeaponVisual"]
+position = Vector2(8, 9)
+z_index = 5
+color = Color(0.15, 0.18, 0.18, 1)
+polygon = PackedVector2Array(-6, -3, 7, -3, 4, 15, -7, 15)
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(58, 0)
+
+[node name="MuzzleFlash" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(63, 0)
+z_index = 10
+color = Color(0.68, 1, 0.4, 0.95)
+polygon = PackedVector2Array(-4, 0, 5, -6, 3, -2, 16, -9, 10, 0, 16, 9, 3, 2, 5, 6)

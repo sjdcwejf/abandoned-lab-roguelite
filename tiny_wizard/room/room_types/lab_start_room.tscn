@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/sleep_pod/sleep_pod.tscn" id="3_sleep_pod"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/relic_pickup/relic_pickup.tscn" id="4_relic_pickup"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_relics/tiemu_spine_shield_fragment.tres" id="5_tiemu_spine"]
 
 [node name="Room" instance=ExtResource("1_base_room")]
 lab_room_type = "start"
@@ -158,3 +160,10 @@ position = Vector2(860, 194)
 character_id = "shitong"
 pod_label = "蚀瞳"
 accent_color = Color(0.48, 1, 0.34, 1)
+
+[node name="SplitEmbryoCorePickup" parent="." index="12" instance=ExtResource("4_relic_pickup")]
+position = Vector2(512, 386)
+
+[node name="TiemuSpineShieldFragmentPickup" parent="." index="13" instance=ExtResource("4_relic_pickup")]
+position = Vector2(612, 386)
+relic_definition = ExtResource("5_tiemu_spine")

@@ -1,0 +1,88 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="2_stats"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/leaking_floater_sheet.png" id="3_texture"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/black_fly/Visual.gd" id="4_visual"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/placeholder_art/shadow.png" id="5_shadow"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="6_physics"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/quarantine_spitter/quarantine_spitter_behavior.gd" id="7_behavior"]
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="8_detector"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/quarantine_spitter/quarantine_spitter.gd" id="9_enemy"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+resource_local_to_scene = true
+script = ExtResource("2_stats")
+max_life = 4
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("6_physics")
+max_speed = 68.0
+acceleration = 0.35
+friction = 0.12
+impulse_force = 420.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a"]
+atlas = ExtResource("3_texture")
+region = Rect2(0, 0, 60, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b"]
+atlas = ExtResource("3_texture")
+region = Rect2(60, 0, 60, 60)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_spitter"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detector"]
+radius = 370.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 17.0
+
+[node name="QuarantineSpitter" instance=ExtResource("1_character")]
+process_mode = 4
+y_sort_enabled = true
+scale = Vector2(0.62, 0.62)
+collision_layer = 8
+script = ExtResource("9_enemy")
+character_stats = SubResource("Resource_stats")
+physics_stats = SubResource("Resource_physics")
+protomatter_drop_chance = 0.55
+
+[node name="Visual" parent="." index="0"]
+script = ExtResource("4_visual")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual" index="0"]
+modulate = Color(0.72, 1, 0.48, 1)
+position = Vector2(0, -52)
+sprite_frames = SubResource("SpriteFrames_spitter")
+autoplay = "default"
+
+[node name="Shadow" type="Sprite2D" parent="Visual" index="1"]
+modulate = Color(1, 1, 1, 0.36)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("5_shadow")
+
+[node name="Behavior" parent="." index="1"]
+script = ExtResource("7_behavior")
+
+[node name="PlayerDetector" parent="Behavior" index="0" instance=ExtResource("8_detector")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Behavior/PlayerDetector" index="0"]
+shape = SubResource("CircleShape2D_detector")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(0, -52)
+shape = SubResource("CircleShape2D_body")

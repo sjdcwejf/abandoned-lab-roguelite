@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_item")
 name = "Protomatter Fragment"
-short_description = "Unstable protomatter shard split from a neutralized specimen."
+short_description = "从肃清样本中析出的原质，可用于渡鸦武器交易。"
 long_description = null
 stackable = true
 stack_size = null

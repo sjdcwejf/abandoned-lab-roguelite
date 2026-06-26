@@ -67,6 +67,15 @@ static func _apply_to_control(control: Control) -> void:
 	control.add_theme_font_override("italics_font", _ui_font)
 	control.add_theme_font_override("bold_italics_font", _ui_font)
 	control.add_theme_font_override("mono_font", _ui_font)
+	if control is OptionButton:
+		var popup := (control as OptionButton).get_popup()
+		if popup != null:
+			_apply_to_popup_menu(popup)
+
+
+static func _apply_to_popup_menu(popup: PopupMenu) -> void:
+	popup.add_theme_font_override("font", _ui_font)
+	popup.add_theme_font_size_override("font_size", 14)
 
 
 static func _load_first_available_font() -> FontFile:

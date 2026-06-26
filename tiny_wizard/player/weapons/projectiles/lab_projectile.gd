@@ -5,10 +5,10 @@ extends Area2D
 @export var speed := 560.0
 @export_range(1, 10, 1) var damage := 1
 @export var lifetime := 1.25
+@export_range(0.0, 4.0, 0.05) var knockback_multiplier := 1.0
 
 var direction := Vector2.RIGHT
 var owner_character: Node2D
-var weapon_id: StringName
 
 
 func _ready() -> void:
@@ -17,11 +17,10 @@ func _ready() -> void:
 		body_entered.connect(_on_body_entered)
 
 
-func launch(new_direction: Vector2, new_owner: Node2D, new_damage := -1, new_speed := -1.0, new_collision_mask := -1, new_weapon_id: StringName = &"") -> void:
+func launch(new_direction: Vector2, new_owner: Node2D, new_damage := -1, new_speed := -1.0, new_collision_mask := -1) -> void:
 	if new_direction.length() > 0.0:
 		direction = new_direction.normalized()
 	owner_character = new_owner
-	weapon_id = new_weapon_id
 	if new_damage > 0:
 		damage = new_damage
 	if new_speed > 0.0:
@@ -59,19 +58,9 @@ func _hit_collider(target: Object) -> void:
 	if damage_target != null:
 		var hit_from := Vector2.ZERO
 		if damage_target is Node2D:
-			hit_from = ((damage_target as Node2D).global_position - global_position).normalized()
-		var event := CombatEvent.new()
-		event.attacker = owner_character
-		event.target = damage_target
-		event.source = self
-		event.weapon_id = weapon_id
-		event.damage_type = CombatEvent.DamageType.PHYSICAL
-		event.base_amount = damage
-		event.final_amount = damage
-		event.hit_position = global_position
-		event.tags = [&"projectile", &"weapon"]
-		if CombatResolver.resolve_damage(event, hit_from):
-			_notify_owner_weapon_hit(damage_target)
+			hit_from = ((damage_target as Node2D).global_position - global_position).normalized() * knockback_multiplier
+		damage_target.hit(damage, hit_from)
+		_notify_owner_weapon_hit(damage_target)
 	queue_free()
 
 
