@@ -13,6 +13,7 @@ const RELIC_NAME := "Relic"
 
 var weapon_holder: Node
 var inventory: QuiverInventory
+var relic_controller: RelicController
 var _item_layer: Control
 var _currency_label: Label
 var _relic_label: Label
@@ -54,6 +55,13 @@ func bind_inventory(new_inventory: QuiverInventory) -> void:
 	_disconnect_inventory()
 	inventory = new_inventory
 	_connect_inventory()
+	_refresh_resource_summary()
+
+
+func bind_relic_controller(new_relic_controller: RelicController) -> void:
+	_disconnect_relic_controller()
+	relic_controller = new_relic_controller
+	_connect_relic_controller()
 	_refresh_resource_summary()
 
 
@@ -213,7 +221,27 @@ func _disconnect_inventory() -> void:
 		inventory.item_changed.disconnect(changed_callable)
 
 
+func _connect_relic_controller() -> void:
+	if relic_controller == null or not is_instance_valid(relic_controller):
+		return
+	var changed_callable := Callable(self, "_on_relics_changed")
+	if not relic_controller.relics_changed.is_connected(changed_callable):
+		relic_controller.relics_changed.connect(changed_callable)
+
+
+func _disconnect_relic_controller() -> void:
+	if relic_controller == null or not is_instance_valid(relic_controller):
+		return
+	var changed_callable := Callable(self, "_on_relics_changed")
+	if relic_controller.relics_changed.is_connected(changed_callable):
+		relic_controller.relics_changed.disconnect(changed_callable)
+
+
 func _on_inventory_item_changed(_item: QuiverItem) -> void:
+	_refresh_resource_summary()
+
+
+func _on_relics_changed() -> void:
 	_refresh_resource_summary()
 
 
@@ -226,6 +254,8 @@ func _refresh_resource_summary() -> void:
 	if inventory != null:
 		currency_count = int(inventory.get_item_amount(CURRENCY_NAME))
 		relic_count = int(inventory.get_item_amount(RELIC_NAME))
+	if relic_controller != null and is_instance_valid(relic_controller):
+		relic_count += int(relic_controller.get_total_relic_count())
 	_currency_label.text = "原质：%d" % currency_count
 	_relic_label.text = "遗物：%d" % relic_count
 

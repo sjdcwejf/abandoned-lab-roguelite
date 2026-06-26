@@ -8,6 +8,7 @@ const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedbac
 # The path to the body of the object (should be a RigidBody2D)
 @export var object_body_path : NodePath
 @export var overlap_query_interval := 0.08
+@export var overlap_query_margin := 10.0
 @export var repeat_interact_cooldown := 0.28
 @export var require_interact_input := false
 @export var prompt_text := "按 F 交互"
@@ -95,6 +96,7 @@ func _query_overlapping_character() -> void:
 		var query := PhysicsShapeQueryParameters2D.new()
 		query.shape = collision_shape.shape
 		query.transform = collision_shape.global_transform
+		query.margin = overlap_query_margin
 		query.collision_mask = _object_body.collision_mask
 		query.exclude = [_object_body.get_rid()]
 		query.collide_with_bodies = true

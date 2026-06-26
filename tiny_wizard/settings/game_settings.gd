@@ -49,8 +49,8 @@ const UI_TEXT := {
 		"en": "Quit Game",
 	},
 	"version": {
-		"zh": "原型构建 0.1.70",
-		"en": "Prototype Build 0.1.70",
+		"zh": "原型构建 0.1.71",
+		"en": "Prototype Build 0.1.71",
 	},
 	"settings_title": {
 		"zh": "设置",

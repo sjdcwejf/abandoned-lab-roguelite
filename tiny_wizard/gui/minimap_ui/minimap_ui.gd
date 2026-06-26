@@ -109,7 +109,7 @@ func _build_ui() -> void:
 	layout.add_child(_map_area)
 
 	var legend := Label.new()
-	legend.text = "亮：已探索  青：当前  B：Boss  商 / 奖 / 武"
+	legend.text = "我：当前位置  始：起点  王：Boss  商：渡鸦  奖：奖励  武：武器"
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	legend.add_theme_font_size_override("font_size", 10)
@@ -152,6 +152,7 @@ func _refresh() -> void:
 			(room_coord.y - min_coord.y) * (TILE_SIZE.y + TILE_GAP)
 		)
 		_map_area.add_child(tile)
+		CHINESE_FONT_BOOTSTRAP.apply_to_tree(tile)
 
 
 func _get_bounds() -> Array:
@@ -189,12 +190,12 @@ func _make_room_tile(room_coord: Vector2i, room: Room) -> PanelContainer:
 
 func _get_room_symbol(room_type: String, is_current: bool) -> String:
 	if is_current:
-		return "●"
+		return "我"
 	match room_type:
 		"start":
 			return "始"
 		"boss":
-			return "B"
+			return "王"
 		"merchant":
 			return "商"
 		"reward":

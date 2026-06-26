@@ -14,11 +14,14 @@ const BOTTOM_DOOR_SAFE_Y := 420.0
 @export_range(0, 8, 1) var protomatter_min_drop := 1
 @export_range(0, 8, 1) var protomatter_max_drop := 1
 @export var protomatter_drop_spread := 22.0
+@export_range(0.0, 1.0, 0.01) var relic_drop_chance := 0.0
+@export var relic_pool_tag: StringName = &""
 @export var green_blood_splatter_enabled := true
 @export var green_blood_spawn_offset := Vector2(0.0, -28.0)
 @export_range(0.2, 4.0, 0.1) var green_blood_splatter_scale := 1.0
 
 var _protomatter_dropped := false
+var _relic_dropped := false
 
 
 func hit(damage := 1, from := Vector2.ZERO) -> void:
@@ -29,6 +32,8 @@ func hit(damage := 1, from := Vector2.ZERO) -> void:
 
 func die() -> void:
 	_drop_protomatter_fragments()
+	_drop_relic_from_pool()
+	RelicCombatEventBus.notify_enemy_killed(self)
 	super.die()
 
 
@@ -64,6 +69,28 @@ func _drop_protomatter_fragments() -> void:
 		drop_parent.call_deferred("add_child", item_node)
 
 
+func _drop_relic_from_pool() -> bool:
+	if _relic_dropped:
+		return false
+	_relic_dropped = true
+
+	if relic_drop_chance <= 0.0 or randf() > relic_drop_chance:
+		return false
+
+	var drop_parent := _get_drop_parent()
+	if drop_parent == null:
+		return false
+
+	var relic_controller := _find_active_relic_controller()
+	if relic_controller == null:
+		return false
+
+	var drop_position := _get_safe_drop_position(drop_parent, global_position + Vector2(16.0, -8.0))
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	return RelicDropService.try_drop_relic_from_pool(drop_parent, relic_controller, drop_position, relic_pool_tag, rng)
+
+
 func _get_drop_parent() -> Node:
 	var parent := get_parent()
 	if parent == null:
@@ -71,6 +98,13 @@ func _get_drop_parent() -> Node:
 	if parent.name == "Enemies" and parent.get_parent() != null:
 		return parent.get_parent()
 	return parent
+
+
+func _find_active_relic_controller() -> RelicController:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return null
+	return RelicDropService.find_relic_controller(scene)
 
 
 func _get_safe_drop_position(drop_parent: Node, desired_global_position: Vector2) -> Vector2:

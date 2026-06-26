@@ -266,6 +266,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_character.name = "Character"
 	add_child(_character)
 	_character.set("gui_path", NodePath("../Camera2D/GUI"))
+	_initialize_character_relic_controller()
 	_reset_character_inventory()
 	_bind_character_weapon_ui()
 	if _character.has_signal("respawn_requested"):
@@ -404,6 +405,12 @@ func _get_ability_controller() -> LabPlayerAbilityController:
 	return _character.get_node_or_null("AbilityController") as LabPlayerAbilityController
 
 
+func _get_relic_controller() -> RelicController:
+	if _character == null:
+		return null
+	return _character.get_node_or_null("RelicController") as RelicController
+
+
 func _reset_character_inventory() -> void:
 	var inventory := _get_character_inventory()
 	if inventory == null:
@@ -411,6 +418,14 @@ func _reset_character_inventory() -> void:
 
 	inventory.inventory.clear()
 	inventory.item_counts.clear()
+
+
+func _initialize_character_relic_controller() -> void:
+	var relic_controller := _get_relic_controller()
+	if relic_controller == null:
+		return
+	relic_controller.character_id = StringName(_selected_character_id)
+	relic_controller.initialize(_character, null)
 
 
 func _bind_character_weapon_ui() -> void:
@@ -426,6 +441,8 @@ func _bind_character_weapon_ui() -> void:
 		gui.bind_weapon_holder(_get_weapon_holder())
 	if gui.has_method("bind_ability_controller"):
 		gui.bind_ability_controller(_get_ability_controller())
+	if gui.has_method("bind_relic_controller"):
+		gui.bind_relic_controller(_get_relic_controller())
 
 
 func _respawn_character_at_start() -> void:

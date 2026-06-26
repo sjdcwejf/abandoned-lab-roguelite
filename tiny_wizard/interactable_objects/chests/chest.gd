@@ -3,6 +3,9 @@ extends QuiverInteractableObject
 
 @export var items := []
 @export var physics_body_path := NodePath("RigidBody2D")
+@export var relic_reward_enabled := false
+@export_range(0.0, 1.0, 0.01) var relic_reward_chance := 1.0
+@export var relic_pool_tag: StringName = &""
 
 var _room_locked := false
 var _opened := false

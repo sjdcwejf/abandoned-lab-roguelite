@@ -104,6 +104,12 @@ func get_spawning_point(direction):
 	return spawn_points[dir]
 
 func enter_room():
+	if is_cleared:
+		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
+			open_door(d)
+		_update_room_chest_locks()
+		return
+
 	var enemies = $Enemies.get_children()
 	objective_initial_enemy_count = maxi(objective_initial_enemy_count, enemies.size())
 	objective_progress_changed.emit(self)
@@ -119,6 +125,8 @@ func enter_room():
 		if enemies.size() == 0:
 			call_deferred("_try_finish_room_clear")
 	elif enemies.size() == 0:
+		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
+			open_door(d)
 		_mark_room_cleared()
 
 func enter_door(_body, door_direction):
@@ -157,6 +165,7 @@ func _mark_room_cleared() -> void:
 	_update_room_chest_locks()
 	_on_room_cleared()
 	objective_progress_changed.emit(self)
+	RelicCombatEventBus.notify_room_cleared(self)
 	room_cleared.emit(self)
 
 

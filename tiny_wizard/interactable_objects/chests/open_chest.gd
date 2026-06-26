@@ -43,7 +43,37 @@ func trigger(object: QuiverInteractableObject, character: QuiverCharacter):
 					var item_node = item.create_pickable_item()
 					item_node.position = object.position + chest.get_parent().position
 					object.call_deferred("add_sibling", item_node)
+			_try_spawn_relic_reward(object, character)
 	
 	if next_action is QuiverInteractableObjectAction:
 		# Trigger next action
 		next_action.trigger(object, character)
+
+
+func _try_spawn_relic_reward(object: QuiverInteractableObject, character: QuiverCharacter) -> void:
+	if object == null or character == null:
+		return
+	if not bool(object.get("relic_reward_enabled")):
+		return
+
+	var chance := float(object.get("relic_reward_chance"))
+	if chance <= 0.0 or randf() > chance:
+		return
+
+	var relic_controller := character.get_node_or_null("RelicController") as RelicController
+	if relic_controller == null:
+		return
+
+	var drop_parent := object.get_parent()
+	if drop_parent == null:
+		drop_parent = object
+	var drop_position := object.global_position
+	if chest != null:
+		drop_position = chest.global_position
+
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var pool_tag := object.get("relic_pool_tag") as StringName
+	var dropped := RelicDropService.try_drop_relic_from_pool(drop_parent, relic_controller, drop_position, pool_tag, rng)
+	if not dropped:
+		print("Chest relic reward skipped: no legal relic candidate.")

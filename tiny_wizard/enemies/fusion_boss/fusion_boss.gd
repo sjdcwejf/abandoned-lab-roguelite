@@ -6,7 +6,6 @@ signal boss_defeated
 
 const DEFAULT_SUMMON_SCENE := preload("res://tiny_wizard/enemies/black_fly/black_fly.tscn")
 const POISON_PROJECTILE_SCENE := preload("res://tiny_wizard/enemies/fusion_boss/fusion_poison_projectile.tscn")
-const RELIC_ITEM := preload("res://tiny_wizard/items/relic/relic.tres")
 
 @export var boss_display_name := "失格者 A-03：破仓体"
 @export var far_distance := 270.0
@@ -53,6 +52,7 @@ func _ready() -> void:
 		_visual_base_scale = _visual_node.scale
 		_visual_base_modulate = _visual_node.modulate
 	protomatter_drop_chance = 0.0
+	relic_drop_chance = 0.0
 	if physics_stats != null:
 		_base_max_speed = physics_stats.max_speed
 	if character_stats != null:
@@ -198,23 +198,24 @@ func _spawn_attack_pulse(color: Color, radius: float, duration: float) -> void:
 
 
 func _drop_relic() -> void:
-	if not relic_drop_enabled or RELIC_ITEM == null:
+	if not relic_drop_enabled or _relic_dropped:
 		return
+	_relic_dropped = true
 
 	var drop_parent := _get_drop_parent()
 	if drop_parent == null:
 		return
 
-	var relic_node := RELIC_ITEM.create_pickable_item() as Node2D
-	if relic_node == null:
+	var relic_controller := _find_active_relic_controller()
+	if relic_controller == null:
 		return
 
 	var drop_position := _get_safe_drop_position(drop_parent, global_position + Vector2(44.0, -10.0))
-	if drop_parent is Node2D:
-		relic_node.position = (drop_parent as Node2D).to_local(drop_position)
-	else:
-		relic_node.global_position = drop_position
-	drop_parent.call_deferred("add_child", relic_node)
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var dropped := RelicDropService.try_drop_relic_from_pool(drop_parent, relic_controller, drop_position, &"", rng)
+	if not dropped:
+		print("Boss relic reward skipped: no legal relic candidate.")
 
 
 func request_poison_spit(target_position: Vector2) -> void:

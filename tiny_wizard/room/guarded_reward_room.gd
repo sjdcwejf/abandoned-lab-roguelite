@@ -3,6 +3,7 @@ extends Room
 
 func _ready() -> void:
 	super._ready()
+	_configure_reward_chests()
 	if not is_cleared and $Enemies.get_child_count() > 0:
 		_set_reward_chests_locked(true)
 
@@ -21,3 +22,17 @@ func _set_chests_locked_recursive(root: Node, locked: bool) -> void:
 
 	for child in root.get_children():
 		_set_chests_locked_recursive(child, locked)
+
+
+func _configure_reward_chests() -> void:
+	_configure_reward_chests_recursive(self)
+
+
+func _configure_reward_chests_recursive(root: Node) -> void:
+	if root is LabChest:
+		var chest := root as LabChest
+		chest.relic_reward_enabled = true
+		chest.relic_reward_chance = 0.45
+
+	for child in root.get_children():
+		_configure_reward_chests_recursive(child)

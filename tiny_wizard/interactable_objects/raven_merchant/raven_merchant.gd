@@ -258,9 +258,11 @@ func _validate_purchase(character: Node2D) -> Dictionary:
 		return {"ok": false, "message": "未检测到背包连接。渡鸦拒绝交易。"}
 
 	if _selected_offer_type == OFFER_RELIC_RECYCLE:
-		var relic_count := int(inventory.get_item_amount(RELIC_NAME))
+		var relic_count := _get_relic_count(character)
 		if relic_count <= 0:
 			return {"ok": false, "message": "你没有可回收的遗物。击败关卡 Boss 后再回来。"}
+		if not _can_receive_currency(inventory):
+			return {"ok": false, "message": "背包没有空间接收原质。"}
 		return {
 			"ok": true,
 			"inventory": inventory,
@@ -391,14 +393,19 @@ func _complete_relic_recycle(character: Node2D, validation: Dictionary) -> void:
 		status_label.text = "回收失败：未检测到背包连接。"
 		return
 
-	if int(inventory.get_item_amount(RELIC_NAME)) <= 0:
+	if _get_relic_count(character) <= 0:
 		status_label.text = "你没有可回收的遗物。"
 		return
 
-	inventory.remove_item(RELIC_NAME, 1)
+	var recycled := _remove_one_relic(character, inventory)
+	if not recycled:
+		status_label.text = "回收失败：遗物状态已变化。"
+		_refresh_offer(character)
+		return
+
 	var added := inventory.add_item(CURRENCY_ITEM, RELIC_RECYCLE_VALUE)
 	if not added:
-		if RELIC_ITEM != null:
+		if RELIC_ITEM != null and _get_relic_controller(character) == null:
 			inventory.add_item(RELIC_ITEM, 1)
 		status_label.text = "回收失败：背包无法接收原质。"
 		INTERACTION_FEEDBACK.show_from(self, status_label.text, 1.35)
@@ -577,9 +584,38 @@ func _get_currency_count(character: Node2D) -> int:
 
 func _get_relic_count(character: Node2D) -> int:
 	var inventory := character.get("inventory") as QuiverInventory
-	if inventory == null:
-		return 0
-	return int(inventory.get_item_amount(RELIC_NAME))
+	var relic_count := 0
+	if inventory != null:
+		relic_count += int(inventory.get_item_amount(RELIC_NAME))
+	var relic_controller := _get_relic_controller(character)
+	if relic_controller != null:
+		relic_count += int(relic_controller.get_total_relic_count())
+	return relic_count
+
+
+func _get_relic_controller(character: Node2D) -> RelicController:
+	if character == null:
+		return null
+	return character.get_node_or_null("RelicController") as RelicController
+
+
+func _remove_one_relic(character: Node2D, inventory: QuiverInventory) -> bool:
+	var relic_controller := _get_relic_controller(character)
+	if relic_controller != null:
+		var relic_id := relic_controller.get_first_relic_id()
+		if relic_id != &"":
+			return relic_controller.remove_one_relic(relic_id)
+	if inventory != null and int(inventory.get_item_amount(RELIC_NAME)) > 0:
+		inventory.remove_item(RELIC_NAME, 1)
+		return true
+	return false
+
+
+func _can_receive_currency(inventory: QuiverInventory) -> bool:
+	if inventory == null or CURRENCY_ITEM == null:
+		return false
+	var room_left := int(inventory.call("_room_left_for_item", CURRENCY_ITEM))
+	return room_left == -1 or room_left >= RELIC_RECYCLE_VALUE
 
 
 func _get_weapon_name(weapon_scene: PackedScene) -> String:

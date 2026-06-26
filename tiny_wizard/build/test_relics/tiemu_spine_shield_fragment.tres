@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_spine"]
+
+[resource]
+script = ExtResource("1_spine")
+item_id = &"tiemu_spine_shield_fragment"
+display_name = "脊盾残片"
+enabled = true
+item_type = 1
+relic_scope = 2
+owner_character_id = &"tiemu"
+placeholder_text = "铁幕专属遗物。暂时只做显示，不执行战斗效果。"
+pool_tags = Array[StringName]([&"tiemu_relic", &"test"])
+tags = Array[StringName]([&"shield", &"counter", &"tiemu"])
+max_stacks = 3

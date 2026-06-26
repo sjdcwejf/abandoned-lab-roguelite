@@ -82,6 +82,14 @@ func bind_ability_controller(ability_controller: Node) -> void:
 	_ability_ui.bind_ability_controller(ability_controller)
 
 
+func bind_relic_controller(relic_controller: RelicController) -> void:
+	var relic_hud := get_node_or_null("RelicHUD") as RelicHUD
+	if relic_hud != null:
+		relic_hud.bind_relic_controller(relic_controller)
+	if _weapon_backpack_ui != null and _weapon_backpack_ui.has_method("bind_relic_controller"):
+		_weapon_backpack_ui.bind_relic_controller(relic_controller)
+
+
 func bind_character_stats(new_stats: QuiverCharacterStats) -> void:
 	var hearts_ui := get_node_or_null("TopUI/TextureRect/MarginContainer/HBoxContainer/HeartsUI")
 	if hearts_ui == null:
