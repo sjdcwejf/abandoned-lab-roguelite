@@ -14,6 +14,7 @@ const REWARD_ROOM_A_SCENE := preload("res://tiny_wizard/room/room_types/lab_rewa
 const REWARD_ROOM_B_SCENE := preload("res://tiny_wizard/room/room_types/lab_reward_guarded_room.tscn")
 const WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/room_4.tscn")
 const RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn")
+const CHAPTER_BASE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_chapter_base_room.tscn")
 const BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_boss_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
@@ -166,19 +167,50 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 		1:
 			return {
 				"id": 1,
-				"title": "第一章：封存协议",
-				"sector": "封存区",
-				"planned_minutes": "4-5",
+				"title": "第一章：极渊前哨基地",
+				"sector": "极渊前哨基地",
+				"planned_minutes": "6-8",
+				"formal_layer_count": 2,
 				"main_path_room_count": 6,
 				"reward_room_count": 2,
 				"layout_radius": 3,
 				"main_room_types": ["combat", "combat", "weapon"],
-				"start_label": "封存气闸",
-				"combat_label_prefix": "封存样本间",
-				"reward_label_prefix": "证物库",
-				"weapon_label": "渡鸦军械缓存",
-				"merchant_label": "渡鸦检疫商店",
-				"boss_label": "A-03 回收室",
+				"start_label": "前哨气闸",
+				"combat_label_prefix": "前哨样本间",
+				"reward_label_prefix": "前哨证物库",
+				"weapon_label": "渡鸦前哨军械缓存",
+				"merchant_label": "渡鸦前哨补给站",
+				"boss_label": "前哨回收室",
+				"boss_objective": "击败前哨失格样本，稳定下行裂隙。",
+				"completion_destination": "临时安全屋 / 渡鸦据点",
+				"next_chapter_id": 2,
+				"next_chapter_title": "第二章：生态温室",
+				"chapter_boss_layer": 2,
+				"combat_room_scenes": COMBAT_ROOM_SCENES,
+				"reward_room_scenes": REWARD_ROOM_SCENES,
+				"weapon_room_scenes": WEAPON_ROOM_SCENES,
+				"merchant_room_scenes": [RAVEN_SAFEHOUSE_ROOM_SCENE],
+				"boss_room_scenes": BOSS_ROOM_SCENES,
+			}
+		2:
+			return {
+				"id": 2,
+				"title": "第二章：生态温室",
+				"sector": "生态温室",
+				"planned_minutes": "7-10",
+				"formal_layer_count": 1,
+				"main_path_room_count": 7,
+				"reward_room_count": 2,
+				"layout_radius": 4,
+				"main_room_types": ["combat", "combat", "combat", "weapon"],
+				"start_label": "温室检疫入口",
+				"combat_label_prefix": "孢子培养廊",
+				"reward_label_prefix": "温室样本库",
+				"weapon_label": "渡鸦温室军械缓存",
+				"merchant_label": "渡鸦温室补给站",
+				"boss_label": "温室守望者培育舱",
+				"boss_objective": "压制温室守望者，记录孢子与虫巢反应。",
+				"completion_destination": "后续章节：下一版本开放",
 				"combat_room_scenes": COMBAT_ROOM_SCENES,
 				"reward_room_scenes": REWARD_ROOM_SCENES,
 				"weapon_room_scenes": WEAPON_ROOM_SCENES,
@@ -200,6 +232,22 @@ static func get_chapter_planned_minutes(chapter_id: int) -> String:
 	return str(get_chapter_config(chapter_id).get("planned_minutes", "4-5"))
 
 
+static func get_chapter_layer_count(chapter_id: int) -> int:
+	return maxi(1, int(get_chapter_config(chapter_id).get("formal_layer_count", 1)))
+
+
+static func get_chapter_boss_objective(chapter_id: int) -> String:
+	return str(get_chapter_config(chapter_id).get("boss_objective", "击败当前章节 Boss，稳定下行裂隙。"))
+
+
+static func get_chapter_completion_destination(chapter_id: int) -> String:
+	return str(get_chapter_config(chapter_id).get("completion_destination", "后续章节：下一版本开放"))
+
+
+static func get_next_chapter_id(chapter_id: int) -> int:
+	return int(get_chapter_config(chapter_id).get("next_chapter_id", 0))
+
+
 static func generate_tutorial(rooms_parent: Node2D) -> Dictionary:
 	_clear_existing_rooms(rooms_parent)
 
@@ -210,6 +258,33 @@ static func generate_tutorial(rooms_parent: Node2D) -> Dictionary:
 		generated_rooms[room.room_pos] = room
 
 	return generated_rooms
+
+
+static func generate_chapter_base(rooms_parent: Node2D, completed_chapter_id := DEFAULT_CHAPTER_ID) -> Dictionary:
+	_clear_existing_rooms(rooms_parent)
+
+	var completed_config := get_chapter_config(completed_chapter_id)
+	var next_chapter_id := get_next_chapter_id(completed_chapter_id)
+	var next_chapter_title := get_chapter_title(next_chapter_id) if next_chapter_id > 0 else "后续章节"
+	var spec := {
+		"coord": Vector2i.ZERO,
+		"type": "base",
+		"label": "临时安全屋 / 渡鸦据点",
+		"scene": CHAPTER_BASE_ROOM_SCENE,
+		"chapter_id": 0,
+		"chapter_title": "临时安全屋 / 渡鸦据点",
+		"chapter_sector": "章节间基地",
+		"planned_minutes": "2-3",
+		"completed_chapter_title": str(completed_config.get("title", "")),
+		"next_chapter_title": next_chapter_title,
+	}
+	var room := _instantiate_room(spec)
+	room.set_meta("completed_chapter_title", str(spec.get("completed_chapter_title", "")))
+	room.set_meta("next_chapter_title", next_chapter_title)
+	rooms_parent.add_child(room)
+	return {
+		room.room_pos: room,
+	}
 
 
 static func _clear_existing_rooms(rooms_parent: Node2D) -> void:

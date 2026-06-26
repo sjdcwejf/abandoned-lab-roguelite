@@ -1,0 +1,70 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_base_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/chapter_base_room.gd" id="2_base_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/raven_merchant/raven_merchant.tscn" id="3_raven"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/black_hole/black_hole.tscn" id="4_black_hole"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/relic_pickup/relic_pickup.tscn" id="5_relic_pickup"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_relics/split_embryo_core.tres" id="6_split"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_relics/fungal_memory_cap.tres" id="7_fungal"]
+[ext_resource type="Resource" path="res://tiny_wizard/build/test_relics/hollow_tail_segment.tres" id="8_tail"]
+
+[node name="Room" instance=ExtResource("1_base_room")]
+script = ExtResource("2_base_script")
+lab_room_type = "base"
+lab_room_label = "临时安全屋 / 渡鸦据点"
+lock_chests_until_cleared = false
+
+[node name="ChapterLabel" type="Label" parent="." index="8"]
+position = Vector2(286, 150)
+z_index = 50
+custom_minimum_size = Vector2(452, 58)
+theme_override_font_sizes/font_size = 18
+text = "第一章：极渊前哨基地 已完成
+临时安全屋 / 渡鸦据点已解锁"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ArchiveLabel" type="Label" parent="." index="9"]
+position = Vector2(242, 210)
+z_index = 50
+custom_minimum_size = Vector2(540, 58)
+theme_override_font_sizes/font_size = 13
+text = "档案终端：前哨记录已归档。
+渡鸦备注：进入第二章前，选择一个遗物作为下一章构筑起点。"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="StatusLabel" type="Label" parent="." index="10"]
+position = Vector2(192, 472)
+z_index = 50
+custom_minimum_size = Vector2(640, 34)
+theme_override_font_sizes/font_size = 13
+text = "请选择 1 个遗物，随后开启生态温室入口。"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RavenMerchant" parent="." index="11" instance=ExtResource("3_raven")]
+position = Vector2(512, 300)
+merchant_title = "渡鸦据点补给终端"
+merchant_message = "第一章记录已封存。回收遗物、购买武器，然后选择一个构筑核心进入生态温室。"
+
+[node name="RelicChoices" type="Node2D" parent="." index="12"]
+
+[node name="SplitEmbryoChoice" parent="RelicChoices" instance=ExtResource("5_relic_pickup")]
+position = Vector2(288, 388)
+relic_definition = ExtResource("6_split")
+
+[node name="FungalMemoryChoice" parent="RelicChoices" instance=ExtResource("5_relic_pickup")]
+position = Vector2(512, 388)
+relic_definition = ExtResource("7_fungal")
+
+[node name="HollowTailChoice" parent="RelicChoices" instance=ExtResource("5_relic_pickup")]
+position = Vector2(736, 388)
+relic_definition = ExtResource("8_tail")
+
+[node name="ExitBlackHole" parent="." index="13" instance=ExtResource("4_black_hole")]
+position = Vector2(888, 306)
+enter_prompt_text = "按 F 进入第二章：生态温室"
+stabilizing_text = "温室入口稳定中。"

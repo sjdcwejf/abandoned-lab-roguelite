@@ -8,9 +8,11 @@ const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/
 const MAIN_MENU_SCENE := "res://tiny_wizard/gui/main_menu/main_menu.tscn"
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
+const RUN_STATE_BASE := "base"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
-const MAX_FORMAL_LAYER_COUNT := 2
 const FORMAL_CHAPTER_ID := 1
+const CHAPTER_1_ID := 1
+const CHAPTER_2_ID := 2
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -56,6 +58,8 @@ var _formal_chapter_id := FORMAL_CHAPTER_ID
 var _formal_chapter_title := ""
 var _formal_chapter_sector := ""
 var _formal_layer_index := 0
+var _base_completed_chapter_id := 0
+var _base_next_chapter_id := 0
 
 var rooms := {}
 
@@ -108,6 +112,8 @@ func _register_rooms() -> void:
 
 		if room.has_method("set_weapon_holder"):
 			room.call("set_weapon_holder", _get_weapon_holder())
+		if room.has_method("set_relic_controller"):
+			room.call("set_relic_controller", _get_relic_controller())
 
 		_connect_black_holes(room)
 
@@ -308,12 +314,14 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_enter_start_room(wake_character_id)
 
 
-func _start_formal_run(layer_index := 1) -> void:
+func _start_formal_run(layer_index := 1, chapter_id := FORMAL_CHAPTER_ID) -> void:
 	_run_state = RUN_STATE_FORMAL
-	_formal_layer_index = clampi(layer_index, 1, MAX_FORMAL_LAYER_COUNT)
-	_formal_chapter_id = FORMAL_CHAPTER_ID
+	_formal_chapter_id = chapter_id
+	_formal_layer_index = clampi(layer_index, 1, _get_formal_layer_count())
 	_formal_chapter_title = LabDungeonGenerator.get_chapter_title(_formal_chapter_id)
 	_formal_chapter_sector = LabDungeonGenerator.get_chapter_sector_label(_formal_chapter_id)
+	_base_completed_chapter_id = 0
+	_base_next_chapter_id = 0
 	_hide_tutorial_hint()
 	_hide_room_objective()
 	_hide_minimap()
@@ -331,6 +339,38 @@ func _start_formal_run(layer_index := 1) -> void:
 	_update_room_doors()
 	_set_minimap_rooms()
 	_enter_start_room()
+
+
+func _start_chapter_base(completed_chapter_id: int) -> void:
+	_run_state = RUN_STATE_BASE
+	_base_completed_chapter_id = completed_chapter_id
+	_base_next_chapter_id = LabDungeonGenerator.get_next_chapter_id(completed_chapter_id)
+	_hide_tutorial_hint()
+	_hide_room_objective()
+	_hide_minimap()
+	_hide_layer_clear_screen()
+	_set_character_control_enabled(true)
+	_current_room = start_room_coord
+	rooms = LabDungeonGenerator.generate_chapter_base($Rooms, completed_chapter_id)
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
+	_register_rooms()
+	_update_room_doors()
+	_enter_base_room()
+
+
+func _enter_base_room() -> void:
+	var base_room = get_current_room()
+	if base_room == null:
+		push_error("Base room %s was not generated." % start_room_coord)
+		return
+
+	$Camera2D.position = _room_camera_position(_current_room)
+	if _character != null:
+		_character.global_position = base_room.get_room_global_position() + Vector2(512, 468)
+		_character.set("velocity", Vector2.ZERO)
+	base_room.enter_room()
+	_print_dungeon_summary()
+	_update_room_feedback_for_room(base_room)
 
 
 func _install_formal_layer_events() -> void:
@@ -508,8 +548,15 @@ func _on_black_hole_entered(body: Node2D) -> void:
 			print("Sealing wake sequence complete. Entering the sealed sector.")
 			call_deferred("_start_formal_run", 1)
 		RUN_STATE_FORMAL:
-			if _formal_layer_index < MAX_FORMAL_LAYER_COUNT:
+			if _formal_layer_index < _get_formal_layer_count():
 				call_deferred("_start_next_formal_layer")
+			elif _formal_chapter_id == CHAPTER_1_ID:
+				call_deferred("_start_chapter_base", _formal_chapter_id)
+			else:
+				call_deferred("_complete_formal_layer")
+		RUN_STATE_BASE:
+			if _base_next_chapter_id > 0:
+				call_deferred("_start_formal_run", 1, _base_next_chapter_id)
 			else:
 				call_deferred("_complete_formal_layer")
 
@@ -517,15 +564,19 @@ func _on_black_hole_entered(body: Node2D) -> void:
 func _start_next_formal_layer() -> void:
 	if _run_state != RUN_STATE_FORMAL:
 		return
-	var next_layer := mini(_formal_layer_index + 1, MAX_FORMAL_LAYER_COUNT)
+	var next_layer := mini(_formal_layer_index + 1, _get_formal_layer_count())
 	print("Entering %s layer %d." % [_formal_chapter_title, next_layer])
-	_start_formal_run(next_layer)
+	_start_formal_run(next_layer, _formal_chapter_id)
 
 
 func _get_formal_layer_seed(layer_index: int) -> int:
 	if dungeon_seed == 0:
 		return 0
-	return dungeon_seed + maxi(0, layer_index - 1)
+	return dungeon_seed + maxi(0, _formal_chapter_id - 1) * 1000 + maxi(0, layer_index - 1)
+
+
+func _get_formal_layer_count() -> int:
+	return LabDungeonGenerator.get_chapter_layer_count(_formal_chapter_id)
 
 
 func _complete_formal_layer() -> void:
@@ -538,7 +589,7 @@ func _complete_formal_layer() -> void:
 	_hide_minimap()
 	_set_character_control_enabled(false)
 	_show_layer_clear_screen()
-	print("Formal layer %d complete." % _formal_layer_index)
+	print("%s layer %d complete." % [_formal_chapter_title, _formal_layer_index])
 
 
 func _set_character_control_enabled(enabled: bool) -> void:
@@ -1016,6 +1067,10 @@ func _update_room_feedback_for_room(room: Room) -> void:
 		_hide_tutorial_hint()
 		_update_formal_room_feedback(room)
 		return
+	if _run_state == RUN_STATE_BASE:
+		_hide_tutorial_hint()
+		_update_base_room_feedback(room)
+		return
 	_hide_room_objective()
 	_hide_tutorial_hint()
 	_hide_minimap()
@@ -1061,6 +1116,20 @@ func _update_formal_room_feedback(room: Room) -> void:
 	_update_minimap_current_room()
 
 
+func _update_base_room_feedback(room: Room) -> void:
+	_hide_minimap()
+	if _room_objective_ui == null:
+		return
+	var next_title := LabDungeonGenerator.get_chapter_title(_base_next_chapter_id) if _base_next_chapter_id > 0 else "后续章节"
+	_room_objective_ui.show_room(
+		room,
+		0,
+		"临时安全屋",
+		"延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title,
+		"渡鸦据点"
+	)
+
+
 func _get_formal_room_type_label(room_type: String) -> String:
 	match room_type:
 		"start":
@@ -1083,7 +1152,9 @@ func _get_formal_room_type_label(room_type: String) -> String:
 func _get_formal_room_objective(room_type: String) -> String:
 	match room_type:
 		"start":
-			return "确认装备状态，进入封存区。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "确认前哨构筑，进入生态温室。"
+			return "确认装备状态，进入极渊前哨基地。"
 		"combat":
 			return "清除房内样本，解除门锁。"
 		"pollution":
@@ -1095,7 +1166,7 @@ func _get_formal_room_objective(room_type: String) -> String:
 		"merchant":
 			return "与渡鸦交易，补充装备后前往下一房间。"
 		"boss":
-			return "击败失格者 A-03，稳定下行裂隙。"
+			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
 	return ""
 
 
@@ -1152,6 +1223,8 @@ func _print_dungeon_summary() -> void:
 	var chapter_text := ""
 	if _run_state == RUN_STATE_FORMAL:
 		chapter_text = " %s / %s" % [_formal_chapter_title, _formal_chapter_sector]
+	elif _run_state == RUN_STATE_BASE:
+		chapter_text = " 临时安全屋 / 渡鸦据点"
 	print("Generated %d-room %s%s sector%s:" % [rooms.size(), _run_state, chapter_text, seed_text])
 	for room_pos in rooms:
 		var room = rooms[room_pos]
