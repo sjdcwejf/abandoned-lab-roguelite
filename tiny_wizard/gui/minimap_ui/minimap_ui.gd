@@ -109,7 +109,7 @@ func _build_ui() -> void:
 	layout.add_child(_map_area)
 
 	var legend := Label.new()
-	legend.text = "我：当前位置  始：起点  王：Boss  商：渡鸦  奖：奖励  武：武器"
+	legend.text = "我：当前位置  始：起点  王：Boss  商：渡鸦  奖：奖励  武：武器  事：事件"
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	legend.add_theme_font_size_override("font_size", 10)
@@ -203,7 +203,7 @@ func _get_room_symbol(room_type: String, is_current: bool) -> String:
 		"weapon":
 			return "武"
 		"pollution":
-			return "污"
+			return "事"
 	return ""
 
 

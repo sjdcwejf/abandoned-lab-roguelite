@@ -215,7 +215,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"main_room_types": ["combat", "combat", "pollution", "weapon"],
 				"start_label": "温室检疫入口",
 				"combat_label_prefix": "孢子培养廊",
-				"pollution_label": "孢子囊隔离室",
+				"pollution_label": "虫巢样本间",
 				"reward_label_prefix": "温室样本库",
 				"weapon_label": "渡鸦温室军械缓存",
 				"merchant_label": "渡鸦温室补给站",

@@ -21,7 +21,7 @@ size = Vector2(138, 28)
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("2_script")
 lab_room_type = "pollution"
-lab_room_label = "孢子囊隔离室"
+lab_room_label = "虫巢样本间"
 
 [node name="GreenhouseFloorMist" type="Polygon2D" parent="." index="7"]
 z_index = -1

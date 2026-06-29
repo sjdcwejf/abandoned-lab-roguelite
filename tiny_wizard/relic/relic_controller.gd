@@ -24,6 +24,17 @@ const SPLIT_EXTRA_FRAGMENT_CHANCE := 0.18
 const SPINE_COUNTER_CHANCE := 0.35
 const SPINE_COUNTER_RADIUS := 92.0
 const SPINE_COUNTER_DAMAGE := 1
+const CHARACTER_STATIC_STAT_IDS: Array[StringName] = [
+	&"max_life",
+	&"max_energy",
+	&"energy_regen_per_second",
+]
+const PHYSICS_STATIC_STAT_IDS: Array[StringName] = [
+	&"max_speed",
+	&"acceleration",
+	&"friction",
+	&"impulse_force",
+]
 
 var character: Node
 var item_catalog: BuildCatalog
@@ -34,6 +45,8 @@ var _relics: Dictionary = {}
 var _tag_counts: Dictionary = {}
 var _unique_groups: Dictionary = {}
 var _active_synergies: Dictionary = {}
+var _base_character_stats: Dictionary = {}
+var _base_physics_stats: Dictionary = {}
 
 
 func initialize(owner_character: Node, catalog: BuildCatalog) -> void:
@@ -41,6 +54,8 @@ func initialize(owner_character: Node, catalog: BuildCatalog) -> void:
 	item_catalog = catalog
 	if character_id == &"":
 		character_id = _resolve_character_id(owner_character)
+	_capture_static_stat_baseline()
+	_apply_static_stat_modifiers()
 
 
 func can_add_relic(definition: BuildItemDefinition) -> BuildInstallResult:
@@ -104,6 +119,7 @@ func add_relic(definition: BuildItemDefinition) -> BuildInstallResult:
 		_tag_counts[tag] = int(_tag_counts.get(tag, 0)) + 1
 
 	_refresh_synergies()
+	_apply_static_stat_modifiers()
 	relic_added.emit(relic_id, int(entry["stack_count"]))
 	relics_changed.emit()
 	return result
@@ -128,6 +144,7 @@ func remove_relic(relic_id: StringName) -> bool:
 				_tag_counts.erase(tag)
 
 	_refresh_synergies()
+	_apply_static_stat_modifiers()
 	relic_removed.emit(relic_id)
 	relics_changed.emit()
 	return true
@@ -155,6 +172,7 @@ func remove_one_relic(relic_id: StringName) -> bool:
 			_unique_groups.erase(definition.unique_group)
 
 	_refresh_synergies()
+	_apply_static_stat_modifiers()
 	relic_removed.emit(relic_id)
 	relics_changed.emit()
 	return true
@@ -219,6 +237,7 @@ func reset_run() -> void:
 	_tag_counts.clear()
 	_unique_groups.clear()
 	_refresh_synergies()
+	_apply_static_stat_modifiers()
 	relics_changed.emit()
 
 
@@ -255,6 +274,139 @@ func _build_stack_snapshot() -> Dictionary:
 	for relic_id in _relics.keys():
 		stacks[relic_id] = int(_relics[relic_id].get("stack_count", 0))
 	return stacks
+
+
+func _capture_static_stat_baseline() -> void:
+	_base_character_stats.clear()
+	_base_physics_stats.clear()
+
+	var stats := _get_character_stats()
+	if stats != null:
+		for stat_id in CHARACTER_STATIC_STAT_IDS:
+			if str(stat_id) in stats:
+				_base_character_stats[stat_id] = float(stats.get(str(stat_id)))
+
+	var physics_stats := _get_physics_stats()
+	if physics_stats != null:
+		for stat_id in PHYSICS_STATIC_STAT_IDS:
+			if str(stat_id) in physics_stats:
+				_base_physics_stats[stat_id] = float(physics_stats.get(str(stat_id)))
+
+
+func _apply_static_stat_modifiers() -> void:
+	var stats := _get_character_stats()
+	var physics_stats := _get_physics_stats()
+	if stats == null and physics_stats == null:
+		return
+
+	var next_character_stats := _base_character_stats.duplicate()
+	var next_physics_stats := _base_physics_stats.duplicate()
+	for modifier in _get_active_static_modifiers():
+		_apply_modifier_to_tables(modifier, next_character_stats, next_physics_stats)
+
+	var old_max_life := _get_float_stat(stats, "max_life", 0.0)
+	var old_current_life := _get_float_stat(stats, "current_life", 0.0)
+	var old_max_energy := _get_float_stat(stats, "max_energy", 0.0)
+	var old_current_energy := _get_float_stat(stats, "current_energy", 0.0)
+
+	if stats != null:
+		for stat_id in next_character_stats.keys():
+			_set_static_stat(stats, StringName(stat_id), float(next_character_stats[stat_id]))
+
+		var next_max_life := _get_float_stat(stats, "max_life", old_max_life)
+		if "current_life" in stats:
+			var next_current_life := old_current_life
+			if next_max_life > old_max_life:
+				next_current_life += next_max_life - old_max_life
+			stats.set("current_life", mini(int(round(next_max_life)), int(round(next_current_life))))
+
+		var next_max_energy := _get_float_stat(stats, "max_energy", old_max_energy)
+		if "current_energy" in stats:
+			var next_current_energy := old_current_energy
+			if next_max_energy > old_max_energy:
+				next_current_energy += next_max_energy - old_max_energy
+			stats.set("current_energy", minf(next_max_energy, next_current_energy))
+
+	if physics_stats != null:
+		for stat_id in next_physics_stats.keys():
+			_set_static_stat(physics_stats, StringName(stat_id), float(next_physics_stats[stat_id]))
+		_notify_runtime_speed_changed(float(next_physics_stats.get(&"max_speed", _get_float_stat(physics_stats, "max_speed", 0.0))))
+
+
+func _get_active_static_modifiers() -> Array[BuildStatModifier]:
+	var modifiers: Array[BuildStatModifier] = []
+	for relic_id in _relics.keys():
+		var entry: Dictionary = _relics[relic_id]
+		var definition: BuildItemDefinition = entry.get("definition", null)
+		if definition == null:
+			continue
+		var stack_count := maxi(1, int(entry.get("stack_count", 1)))
+		for _stack_index in range(stack_count):
+			for modifier in definition.stat_modifiers:
+				if modifier != null:
+					modifiers.append(modifier)
+
+	for synergy_id in _active_synergies.keys():
+		var synergy: BuildSynergyDefinition = _active_synergies[synergy_id]
+		if synergy == null:
+			continue
+		for modifier in synergy.stat_modifiers:
+			if modifier != null:
+				modifiers.append(modifier)
+	return modifiers
+
+
+func _apply_modifier_to_tables(modifier: BuildStatModifier, character_values: Dictionary, physics_values: Dictionary) -> void:
+	if modifier == null or modifier.stat_id == &"":
+		return
+	var stat_id := modifier.stat_id
+	if character_values.has(stat_id):
+		character_values[stat_id] = _apply_modifier_value(float(character_values[stat_id]), modifier)
+	elif physics_values.has(stat_id):
+		physics_values[stat_id] = _apply_modifier_value(float(physics_values[stat_id]), modifier)
+
+
+func _apply_modifier_value(current_value: float, modifier: BuildStatModifier) -> float:
+	match modifier.operation:
+		BuildStatModifier.Operation.ADD:
+			return current_value + modifier.value
+		BuildStatModifier.Operation.MULTIPLY:
+			return current_value * modifier.value
+		BuildStatModifier.Operation.SET:
+			return modifier.value
+	return current_value
+
+
+func _set_static_stat(target: Object, stat_id: StringName, value: float) -> void:
+	if target == null:
+		return
+	var property_name := str(stat_id)
+	if not (property_name in target):
+		return
+	if stat_id == &"max_life":
+		target.set(property_name, maxi(1, int(round(value))))
+	else:
+		target.set(property_name, value)
+
+
+func _get_float_stat(target: Object, property_name: String, fallback: float) -> float:
+	if target == null or not (property_name in target):
+		return fallback
+	return float(target.get(property_name))
+
+
+func _get_physics_stats() -> Resource:
+	if character == null:
+		return null
+	return character.get("physics_stats") as Resource
+
+
+func _notify_runtime_speed_changed(new_base_speed: float) -> void:
+	if character == null:
+		return
+	var ability_controller := character.get_node_or_null("AbilityController")
+	if ability_controller != null and ability_controller.has_method("refresh_runtime_base_speed"):
+		ability_controller.call("refresh_runtime_base_speed", new_base_speed)
 
 
 func _decrement_definition_tags(definition: BuildItemDefinition, amount: int) -> void:

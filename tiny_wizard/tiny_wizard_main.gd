@@ -270,6 +270,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 
 	_character = character_scene.instantiate() as Node2D
 	_character.name = "Character"
+	_make_character_runtime_resources_unique(_character)
 	add_child(_character)
 	_character.set("gui_path", NodePath("../Camera2D/GUI"))
 	_initialize_character_relic_controller()
@@ -468,6 +469,19 @@ func _initialize_character_relic_controller() -> void:
 		return
 	relic_controller.character_id = StringName(_selected_character_id)
 	relic_controller.initialize(_character, null)
+
+
+func _make_character_runtime_resources_unique(character: Node2D) -> void:
+	if character == null:
+		return
+
+	var character_stats := character.get("character_stats") as Resource
+	if character_stats != null:
+		character.set("character_stats", character_stats.duplicate(true))
+
+	var physics_stats := character.get("physics_stats") as Resource
+	if physics_stats != null:
+		character.set("physics_stats", physics_stats.duplicate(true))
 
 
 func _bind_character_weapon_ui() -> void:
@@ -1140,7 +1154,7 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "怪物房"
 		"pollution":
 			if _formal_chapter_id == CHAPTER_2_ID:
-				return "孢子事件房"
+				return "虫巢事件房"
 			return "污染事件房"
 		"reward":
 			return "奖励房"
@@ -1160,16 +1174,24 @@ func _get_formal_room_objective(room_type: String) -> String:
 				return "确认前哨构筑，进入生态温室。"
 			return "确认装备状态，进入极渊前哨基地。"
 		"combat":
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "清除孢子培养廊内的失控样本。"
 			return "清除房内样本，解除门锁。"
 		"pollution":
 			if _formal_chapter_id == CHAPTER_2_ID:
-				return "击碎 3 个孢子囊，并肃清房内样本。"
+				return "清理虫巢样本，击碎孢子囊，解除温室封锁。"
 			return "清除原质污染源，并肃清房内样本。"
 		"reward":
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "肃清温室样本库守卫，回收补给箱。"
 			return "肃清守卫样本，回收补给箱。"
 		"weapon":
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "回收渡鸦温室军械，整理当前构筑。"
 			return "回收随机军械，整理当前构筑。"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "在渡鸦温室补给站交易，准备进入培育舱。"
 			return "与渡鸦交易，补充装备后前往下一房间。"
 		"boss":
 			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
