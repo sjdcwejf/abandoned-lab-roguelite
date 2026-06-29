@@ -19,8 +19,16 @@ const ROOMS := [
 		"output": "res://docs/previews/greenhouse_reward_room_actual.png",
 	},
 	{
+		"scene": "res://tiny_wizard/room/room_types/lab_greenhouse_weapon_room.tscn",
+		"output": "res://docs/previews/greenhouse_weapon_cache_room_actual.png",
+	},
+	{
 		"scene": "res://tiny_wizard/room/room_types/lab_greenhouse_merchant_room.tscn",
 		"output": "res://docs/previews/greenhouse_boss_antechamber_actual.png",
+	},
+	{
+		"scene": "res://tiny_wizard/room/room_types/lab_greenhouse_boss_room.tscn",
+		"output": "res://docs/previews/greenhouse_boss_nursery_room_actual.png",
 	},
 ]
 

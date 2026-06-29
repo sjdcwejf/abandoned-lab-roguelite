@@ -8,6 +8,7 @@ __MACOSX/
 export.cfg
 export_presets.cfg
 .godot/
+.godot_user/
 
 # Mono-specific ignores
 .mono/

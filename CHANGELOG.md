@@ -4,6 +4,31 @@
 
 自 2026-06-22 起，个人开发分支产生的更新在标题末尾使用 `｜姓名` 标注负责人，便于合并 `xiankai-test`、`haitian-test` 与 `playtest` 时确认来源。先凯负责的更新统一标注为 `｜先凯`。
 
+## v0.1.79 - 第二章温室武器房与 Boss 房视觉补齐｜先凯
+
+日期：2026-06-29
+
+### 新增
+
+- 新增 `greenhouse_weapon_cache_room.png`，用于第二章“渡鸦温室军械缓存”。
+- 新增 `greenhouse_boss_nursery_room.png`，用于第二章“温室守望者培育舱”。
+- `tools/build_greenhouse_room_art.py` 增加武器房和 Boss 房合成逻辑，继续使用 Void Arts 实验室地砖、Maru 温室组件和 Land of Pixels 实验设备。
+
+### 调整
+
+- `lab_greenhouse_weapon_room.tscn` 改为使用新的温室军械缓存底图，并为边缘培养架、上方终端和侧边托盘补充碰撞体。
+- `lab_greenhouse_boss_room.tscn` 改为使用新的温室守望者培育舱底图，并为边缘培养舱、上方控制台和培养管补充碰撞体。
+- 中央武器拾取点、Boss 战斗区域和下行裂隙候选区域保持可通行，避免新增美术装饰压住核心玩法点。
+- 更新 `tools/render_greenhouse_room_actuals.gd`，实装截图导出范围从 5 个温室房间扩展到 7 个温室房间。
+- 更新 README、任务看板、第二章美术组合文档和素材署名文件，说明第二章七类房间均已接入本地 tileset 合成视觉。
+- `.gitignore` 新增 `.godot_user/`，避免提交本地 Godot 验证日志目录。
+
+### 验证
+
+- 已使用 bundled Python 运行 `tools/build_greenhouse_room_art.py`，确认七张生态温室房间 PNG 均可生成。
+- 已执行资源引用检查，确认新增 PNG 路径存在，场景文件没有引用缺失的资源。
+- 已使用 Godot 4.6.3 headless 运行 `tools/check_greenhouse_scenes.gd`，确认第二章温室场景可加载并实例化。
+
 ## v0.1.78 - 第二三章第三方素材库整理｜先凯
 
 日期：2026-06-29

@@ -1,11 +1,81 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/room_4.tscn" id="1_base"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/room/visuals/greenhouse_room_overlay.tscn" id="2_overlay"]
+[ext_resource type="Script" path="res://tiny_wizard/room/formal_weapon_room.gd" id="2_weapon_room"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/greenhouse_weapon_cache_room.png" id="3_room_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_rack"]
+size = Vector2(142, 250)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_terminal"]
+size = Vector2(312, 74)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_tray"]
+size = Vector2(116, 48)
 
 [node name="Room" instance=ExtResource("1_base")]
+script = ExtResource("2_weapon_room")
 lab_room_type = "weapon"
 lab_room_label = "渡鸦温室军械缓存"
 
-[node name="GreenhouseRoomOverlay" parent="." instance=ExtResource("2_overlay")]
+[node name="GreenhouseWeaponCacheRoomArt" type="Sprite2D" parent="."]
+z_index = -2
+texture_filter = 1
+texture = ExtResource("3_room_art")
+centered = false
 
+[node name="NorthTerminalBlocker" type="StaticBody2D" parent="."]
+position = Vector2(512, 172)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthTerminalBlocker"]
+shape = SubResource("RectangleShape2D_north_terminal")
+
+[node name="NorthWestCultureRackBlocker" type="StaticBody2D" parent="."]
+position = Vector2(166, 254)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestCultureRackBlocker"]
+shape = SubResource("RectangleShape2D_culture_rack")
+
+[node name="SouthWestCultureRackBlocker" type="StaticBody2D" parent="."]
+position = Vector2(170, 436)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthWestCultureRackBlocker"]
+shape = SubResource("RectangleShape2D_culture_rack")
+
+[node name="NorthEastCultureRackBlocker" type="StaticBody2D" parent="."]
+position = Vector2(858, 250)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastCultureRackBlocker"]
+shape = SubResource("RectangleShape2D_culture_rack")
+
+[node name="SouthEastCultureRackBlocker" type="StaticBody2D" parent="."]
+position = Vector2(846, 434)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEastCultureRackBlocker"]
+shape = SubResource("RectangleShape2D_culture_rack")
+
+[node name="WestTrayBlocker" type="StaticBody2D" parent="."]
+position = Vector2(384, 398)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WestTrayBlocker"]
+shape = SubResource("RectangleShape2D_side_tray")
+
+[node name="EastTrayBlocker" type="StaticBody2D" parent="."]
+position = Vector2(640, 398)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastTrayBlocker"]
+shape = SubResource("RectangleShape2D_side_tray")

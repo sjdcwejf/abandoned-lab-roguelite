@@ -364,12 +364,80 @@ def greenhouse_boss_antechamber() -> Image.Image:
     return img
 
 
+def greenhouse_weapon_cache_room() -> Image.Image:
+    rng = random.Random(2106)
+    img = draw_room_shell(rng)
+    draw = ImageDraw.Draw(img, "RGBA")
+
+    # Keep the center clear: the weapon pickup lands at roughly (512, 322).
+    draw.rounded_rectangle((360, 136, 664, 208), radius=5, fill=(15, 24, 24, 235), outline=(83, 104, 101, 255), width=3)
+    paste_equipment(img, LOP_CONSOLE.resize((92, 52), Image.Resampling.NEAREST), (512, 172))
+    paste_equipment(img, MARU_SCREEN, (620, 172))
+    alpha_paste(img, LOP_PIPE_STRIP.resize((248, 38), Image.Resampling.NEAREST), (388, 216))
+
+    for pos in [(166, 254), (858, 250), (170, 436), (846, 434)]:
+        draw_culture_bay(img, pos, rng, pos[0] > 512, rng.random() < 0.45)
+
+    for pos in [(384, 398), (640, 398)]:
+        draw.rounded_rectangle((pos[0] - 54, pos[1] - 22, pos[0] + 54, pos[1] + 22), radius=4, fill=(22, 32, 30, 220), outline=(80, 111, 92, 180), width=2)
+        alpha_paste(img, MARU_PLANT_TRAY.resize((92, 38), Image.Resampling.NEAREST), (pos[0] - 46, pos[1] - 17))
+
+    draw.rounded_rectangle((438, 278, 586, 352), radius=5, fill=(14, 22, 22, 190), outline=(120, 91, 41, 210), width=2)
+    draw.line((456, 324, 568, 324), fill=(52, 196, 178, 120), width=3)
+    draw.line((464, 334, 560, 334), fill=(172, 117, 46, 150), width=2)
+    stain(img, (176, 510), 32, rng)
+    stain(img, (850, 102), 30, rng)
+    vines(img, (100, 116), 12, rng, 1)
+    vines(img, (922, 488), 12, rng, -1)
+    return img
+
+
+def greenhouse_boss_nursery_room() -> Image.Image:
+    rng = random.Random(2107)
+    img = draw_room_shell(rng)
+    draw = ImageDraw.Draw(img, "RGBA")
+
+    # Boss arena: strong greenhouse identity at the edges, open combat space in the center.
+    draw.rounded_rectangle((336, 118, 688, 196), radius=6, fill=(12, 24, 23, 238), outline=(76, 101, 96, 255), width=3)
+    paste_equipment(img, LOP_WALL_SCREEN.resize((250, 46), Image.Resampling.NEAREST), (512, 154))
+    paste_equipment(img, LOP_CONSOLE.resize((78, 48), Image.Resampling.NEAREST), (650, 156))
+
+    for pos in [(172, 180), (852, 182), (164, 438), (860, 436)]:
+        draw_culture_bay(img, pos, rng, pos[0] > 512, True)
+
+    for pos in [(328, 250), (696, 250), (326, 438), (698, 438)]:
+        paste_equipment(img, LOP_GREEN_TUBE.resize((44, 104), Image.Resampling.NEAREST), pos)
+
+    # Faint containment floor ring, visual only; the boss still owns the center.
+    layer = Image.new("RGBA", ROOM_SIZE, (0, 0, 0, 0))
+    ring = ImageDraw.Draw(layer, "RGBA")
+    ring.ellipse((392, 220, 632, 460), outline=(65, 128, 99, 80), width=5)
+    ring.ellipse((432, 260, 592, 420), outline=(45, 88, 77, 56), width=2)
+    for angle in range(0, 360, 45):
+        px = 512 + math.cos(math.radians(angle)) * 120
+        py = 340 + math.sin(math.radians(angle)) * 120
+        ring.rectangle((px - 6, py - 6, px + 6, py + 6), fill=(70, 155, 113, 72))
+    layer = layer.filter(ImageFilter.GaussianBlur(0.5))
+    img.alpha_composite(layer)
+
+    stain(img, (512, 438), 46, rng, True)
+    stain(img, (210, 90), 30, rng)
+    stain(img, (814, 510), 30, rng)
+    vines(img, (88, 96), 18, rng, 1)
+    vines(img, (936, 96), 18, rng, -1)
+    vines(img, (116, 514), 13, rng, 1)
+    vines(img, (906, 510), 13, rng, -1)
+    return img
+
+
 ROOM_BUILDERS = {
     "greenhouse_entry_room.png": greenhouse_entry_room,
     "spore_contamination_room.png": spore_contamination_room,
     "cultivation_chamber_room.png": cultivation_chamber_room,
     "greenhouse_reward_room.png": greenhouse_reward_room,
     "greenhouse_boss_antechamber.png": greenhouse_boss_antechamber,
+    "greenhouse_weapon_cache_room.png": greenhouse_weapon_cache_room,
+    "greenhouse_boss_nursery_room.png": greenhouse_boss_nursery_room,
 }
 
 
