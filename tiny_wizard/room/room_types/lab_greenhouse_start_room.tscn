@@ -1,0 +1,63 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_formal_start_room.tscn" id="1_base"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/greenhouse_entry_room.png" id="2_room_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay"]
+size = Vector2(142, 212)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_console"]
+size = Vector2(70, 56)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_corner_debris"]
+size = Vector2(126, 42)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "start"
+lab_room_label = "温室检疫入口"
+
+[node name="GreenhouseEntryRoomArt" type="Sprite2D" parent="." index="7"]
+z_index = -2
+texture_filter = 1
+texture = ExtResource("2_room_art")
+centered = false
+
+[node name="LeftCultureBayBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(184, 306)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="RightCultureBayBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(840, 326)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="QuarantineConsoleBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(300, 190)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="QuarantineConsoleBlocker"]
+shape = SubResource("RectangleShape2D_console")
+
+[node name="NorthWestDebrisBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(162, 104)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestDebrisBlocker"]
+shape = SubResource("RectangleShape2D_corner_debris")
+
+[node name="NorthEastDebrisBlocker" type="StaticBody2D" parent="." index="12"]
+position = Vector2(862, 128)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastDebrisBlocker"]
+shape = SubResource("RectangleShape2D_corner_debris")

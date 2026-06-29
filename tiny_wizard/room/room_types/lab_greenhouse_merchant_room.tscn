@@ -1,0 +1,79 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn" id="1_base"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/greenhouse_boss_antechamber.png" id="2_room_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay"]
+size = Vector2(142, 204)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_counter"]
+size = Vector2(318, 82)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_tubes"]
+size = Vector2(112, 120)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "merchant"
+lab_room_label = "渡鸦温室补给站"
+
+[node name="GreenhouseBossAntechamberRoomArt" type="Sprite2D" parent="." index="7"]
+z_index = -2
+texture_filter = 1
+texture = ExtResource("2_room_art")
+centered = false
+
+[node name="NorthCounterBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(512, 188)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthCounterBlocker"]
+shape = SubResource("RectangleShape2D_north_counter")
+
+[node name="NorthWestCultureBayBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(166, 210)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="SouthWestCultureBayBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(184, 426)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthWestCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="NorthEastCultureBayBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(858, 212)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="SouthEastCultureBayBlocker" type="StaticBody2D" parent="." index="12"]
+position = Vector2(840, 418)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEastCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="WestTubeBlocker" type="StaticBody2D" parent="." index="13"]
+position = Vector2(352, 374)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WestTubeBlocker"]
+shape = SubResource("RectangleShape2D_side_tubes")
+
+[node name="EastTubeBlocker" type="StaticBody2D" parent="." index="14"]
+position = Vector2(672, 374)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastTubeBlocker"]
+shape = SubResource("RectangleShape2D_side_tubes")

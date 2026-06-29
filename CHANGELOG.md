@@ -4,6 +4,80 @@
 
 自 2026-06-22 起，个人开发分支产生的更新在标题末尾使用 `｜姓名` 标注负责人，便于合并 `xiankai-test`、`haitian-test` 与 `playtest` 时确认来源。先凯负责的更新统一标注为 `｜先凯`。
 
+## v0.1.78 - 第二三章第三方素材库整理｜先凯
+
+日期：2026-06-29
+
+### 新增
+
+- 新增规范化第三方素材目录 `tiny_wizard/assets/third_party/void_lab_tileset/`、`mars_greenhouse/`、`sci_fi_facility/`、`land_of_pixels_lab/` 和 `warped_top_down_lab/`。
+- 新增第二章生态温室素材配置 `tiny_wizard/assets/rooms/chapter2_greenhouse/greenhouse_assets.json`。
+- 新增第三章低温封存区素材配置 `tiny_wizard/assets/rooms/chapter3_cryogenic/cryogenic_assets.json`。
+- 新增第二章和第三章 tileset manifest，作为后续房间美术和 TileSet 配置入口。
+- 新增 `tiny_wizard/assets/third_party/README_ASSETS.md`，记录每个本地素材包的用途、目录、原始 zip 和章节分配。
+- 为 Mars Greenhouse 生成 nearest-neighbor 放大的 `tilesets_32x32.png`，便于后续 32x32 tile 工作流使用。
+
+### 调整
+
+- `tools/build_greenhouse_room_art.py` 优先读取新的规范化素材目录，并保留旧素材目录作为回退，避免破坏现有第二章房间生成流程。
+- `.gitignore` 增加 `__MACOSX/`、`._*` 和 `_incoming_assets/*.zip`，避免提交 Mac 临时文件和原始素材 zip。
+- 更新 `ASSET_CREDITS.md`，记录五套本地素材包的作者、用途、目录和授权状态。
+
+### 备注
+
+- Void Arts 和 Maru 两个素材包的 zip 内没有独立许可证文件，当前标记为“需要用户确认购买 / 下载页面授权”。
+- 本次只整理资源和配置入口，不重写现有关卡、角色、敌人或战斗逻辑。
+
+## v0.1.77 - 第二章生态温室本地素材重构｜先凯
+
+日期：2026-06-29
+
+### 新增
+
+- 解压并接入三套本地素材包到 `tiny_wizard/assets/third_party/`：Maru 的 Mars Greenhouse、Void Arts 的 Laboratory Tileset、marceles 的 Land of Pixels Laboratory。
+- 新增 `tools/build_greenhouse_room_art.py`，从本地素材包裁切、nearest neighbor 缩放、统一压暗降饱和并生成 32x32 对齐的生态温室房间资源。
+- 新增五张第二章房间美术资源：温室检疫入口、孢子污染房、培养房、温室样本库和 Boss 前渡鸦补给前室。
+- 新增 `docs/第二章生态温室房间美术资源组合.md`，记录每个房间使用的地板/墙体、温室装饰、实验设备、污染层和配置改动。
+- 新增 `tools/render_greenhouse_room_actuals.gd`，用于在 Godot 中渲染五个第二章房间的实际截图。
+
+### 调整
+
+- `lab_greenhouse_start_room.tscn` 改为使用 `greenhouse_entry_room.png`，并补充两侧培养区和检疫终端碰撞。
+- `lab_greenhouse_combat_room.tscn` 改为使用 `cultivation_chamber_room.png`，保留中央战斗空间并将大型培养区移到两侧。
+- `lab_greenhouse_spore_event_room.tscn` 改为使用 `spore_contamination_room.png`，保留孢子囊事件、怪物和清房流程。
+- `lab_greenhouse_reward_room.tscn` 改为使用 `greenhouse_reward_room.png`，保留守卫宝箱逻辑。
+- `lab_greenhouse_merchant_room.tscn` 改为使用 `greenhouse_boss_antechamber.png`，保留渡鸦商人逻辑。
+- 更新 `ASSET_CREDITS.md`，记录本地第三方素材来源、路径和授权状态。
+
+### 验证
+
+- 已运行 Godot 资源导入，确认五张新 PNG 已导入为 Texture2D。
+- 已运行温室场景加载检查，确认第二章温室场景可实例化。
+- 由于当前环境的图形驱动提权额度限制，实际截图渲染脚本已准备好，但本轮未能在 Codex 内完成 macOS 显示驱动截图导出。
+
+## v0.1.76 - 第二章生态温室美术资源接入｜先凯
+
+日期：2026-06-29
+
+### 新增
+
+- 新增第二章生态温室像素资源：温室地砖覆盖层、培养舱、破损培养舱、藤蔓团、绿色污染液、管道碎片、玻璃碎片和墙角藤蔓。
+- 新增可复用温室视觉层 `greenhouse_room_overlay.tscn`，用于统一第二章房间的地面破损、孢子污染、墙角藤蔓和设备残骸表现。
+- 新增第二章专用入口房、奖励房、武器房、渡鸦补给房和 Boss 房包装场景。
+- 新增 `ASSET_CREDITS.md`，记录本次导入资源与已核验的可商用外部候选素材。
+
+### 调整
+
+- 第二章普通怪物房“孢子培养廊”改为像素贴图装饰和明确碰撞边界，不再使用大面积几何色块。
+- 第二章事件房“虫巢样本间”改为生态温室视觉包装，同时保留击碎 3 个孢子囊并清理样本的玩法逻辑。
+- 第二章地图生成配置改为使用温室专属起点、奖励房、武器房、渡鸦补给房和 Boss 房。
+- 第二章普通怪物房池不再混入第一章旧实验室房，避免章节视觉身份混乱。
+
+### 备注
+
+- 本次实际导入的是项目内原创像素资产；Kenney 的 CC0 素材包已核验为可商用候选，但未直接下载或嵌入项目。
+- 当前受环境限制，自动创建分支、提交和 PR 的 git 提权操作未能执行，需要后续手动完成。
+
 ## v0.1.75 - 第二章地图身份与遗物实效化｜先凯
 
 日期：2026-06-29

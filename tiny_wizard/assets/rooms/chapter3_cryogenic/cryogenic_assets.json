@@ -1,0 +1,26 @@
+{
+  "chapterName": "低温封存区",
+  "theme": "cryogenic_lab",
+  "tileSize": 32,
+  "baseTileset": "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png",
+  "decorationTilesets": [
+    "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory floor_ walls_ and borders tileset-4.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/tileset.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png"
+  ],
+  "hazardTilesets": [],
+  "propSprites": [
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/button_large_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/crates_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/portal_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/spriteSheet_tiledLiquids_32x32.png"
+  ],
+  "sourceTileSizes": {
+    "warped_top_down_lab": 16,
+    "void_lab_tileset": 32,
+    "sci_fi_facility": 16,
+    "land_of_pixels_lab": 32
+  },
+  "notes": "Third chapter assets are prepared as a cryogenic lab material pool only. No existing room logic is changed in this update. Cold blue overlays, frost decals and final chapter-specific tilemaps can be added later."
+}

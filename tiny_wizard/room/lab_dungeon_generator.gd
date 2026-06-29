@@ -16,8 +16,13 @@ const WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/room_4.tsc
 const RAVEN_SAFEHOUSE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn")
 const CHAPTER_BASE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_chapter_base_room.tscn")
 const BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_boss_room.tscn")
+const GREENHOUSE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_start_room.tscn")
 const GREENHOUSE_COMBAT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_combat_room.tscn")
 const GREENHOUSE_SPORE_EVENT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_spore_event_room.tscn")
+const GREENHOUSE_REWARD_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_reward_room.tscn")
+const GREENHOUSE_WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_weapon_room.tscn")
+const GREENHOUSE_MERCHANT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_merchant_room.tscn")
+const GREENHOUSE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_boss_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
@@ -46,8 +51,8 @@ const GREENHOUSE_COMBAT_ROOM_SCENES := [
 	GREENHOUSE_COMBAT_ROOM_SCENE,
 	GREENHOUSE_COMBAT_ROOM_SCENE,
 	GREENHOUSE_COMBAT_ROOM_SCENE,
-	COMBAT_ROOM_A_SCENE,
-	COMBAT_ROOM_B_SCENE,
+	GREENHOUSE_COMBAT_ROOM_SCENE,
+	GREENHOUSE_COMBAT_ROOM_SCENE,
 ]
 
 const REWARD_ROOM_SCENES := [
@@ -222,12 +227,13 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"boss_label": "温室守望者培育舱",
 				"boss_objective": "压制温室守望者，记录孢子与虫巢反应。",
 				"completion_destination": "后续章节：下一版本开放",
+				"start_room_scene": GREENHOUSE_START_ROOM_SCENE,
 				"combat_room_scenes": GREENHOUSE_COMBAT_ROOM_SCENES,
 				"pollution_room_scenes": [GREENHOUSE_SPORE_EVENT_ROOM_SCENE],
-				"reward_room_scenes": REWARD_ROOM_SCENES,
-				"weapon_room_scenes": WEAPON_ROOM_SCENES,
-				"merchant_room_scenes": [RAVEN_SAFEHOUSE_ROOM_SCENE],
-				"boss_room_scenes": BOSS_ROOM_SCENES,
+				"reward_room_scenes": [GREENHOUSE_REWARD_ROOM_SCENE, GREENHOUSE_REWARD_ROOM_SCENE],
+				"weapon_room_scenes": [GREENHOUSE_WEAPON_ROOM_SCENE],
+				"merchant_room_scenes": [GREENHOUSE_MERCHANT_ROOM_SCENE],
+				"boss_room_scenes": [GREENHOUSE_BOSS_ROOM_SCENE],
 			}
 	return get_chapter_config(DEFAULT_CHAPTER_ID)
 
@@ -429,7 +435,7 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 		Vector2i.ZERO,
 		"start",
 		str(chapter_config.get("start_label", "封存气闸")),
-		START_ROOM_SCENE,
+		chapter_config.get("start_room_scene", START_ROOM_SCENE) as PackedScene,
 		0,
 		chapter_config,
 		layer_index
