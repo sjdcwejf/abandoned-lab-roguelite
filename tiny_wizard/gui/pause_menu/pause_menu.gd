@@ -36,7 +36,7 @@ func _ready() -> void:
 	audio_settings.back_requested.connect(_show_pause_actions)
 	confirm_return_button.pressed.connect(_return_to_main_menu)
 	cancel_return_button.pressed.connect(_show_pause_actions)
-	confirm_restart_button.pressed.connect(_restart_current_run)
+	confirm_restart_button.pressed.connect(_abandon_current_run)
 	cancel_restart_button.pressed.connect(_show_pause_actions)
 	GameSettings.language_changed.connect(_on_language_changed)
 	_refresh_texts()
@@ -110,10 +110,14 @@ func _return_to_main_menu() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
-func _restart_current_run() -> void:
+func _abandon_current_run() -> void:
 	GameSettings.save_settings()
 	visible = false
 	get_tree().paused = false
+	var current_scene := get_tree().current_scene
+	if current_scene != null and current_scene.has_method("abandon_current_run_to_chapter_one_start"):
+		current_scene.call("abandon_current_run_to_chapter_one_start")
+		return
 	get_tree().reload_current_scene()
 
 

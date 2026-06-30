@@ -145,7 +145,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleButton")
 theme_override_styles/hover = SubResource("StyleButtonHover")
-text = "重新开始本局"
+text = "放弃本次游戏"
 
 [node name="MainMenuButton" type="Button" parent="Center/PausePanel/Margin/Layout"]
 unique_name_in_owner = true
@@ -243,14 +243,14 @@ theme_override_constants/separation = 18
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.73, 0.56, 1)
 theme_override_font_sizes/font_size = 23
-text = "重新开始本局？"
+text = "放弃本次游戏？"
 horizontal_alignment = 1
 
 [node name="Description" type="Label" parent="Center/RestartConfirmation/Margin/Layout"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.88, 0.89, 1)
 theme_override_font_sizes/font_size = 14
-text = "当前流程进度将丢失，并从角色选择重新开始。"
+text = "当前存档与构筑将作废，仅保留所选实验体，并回到第一章正式关卡入口。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -265,7 +265,7 @@ custom_minimum_size = Vector2(170, 46)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleDanger")
 theme_override_styles/hover = SubResource("StyleButtonHover")
-text = "确认重开"
+text = "确认放弃"
 
 [node name="CancelRestartButton" type="Button" parent="Center/RestartConfirmation/Margin/Layout/Buttons"]
 unique_name_in_owner = true

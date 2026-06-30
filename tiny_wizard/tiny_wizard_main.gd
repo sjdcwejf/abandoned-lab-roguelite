@@ -282,13 +282,13 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
 
 	if play_tutorial:
-		_configure_character_for_tutorial()
+		_configure_character_for_starting_loadout()
 		_start_tutorial_run(_selected_character_id)
 	else:
 		_start_formal_run()
 
 
-func _configure_character_for_tutorial() -> void:
+func _configure_character_for_starting_loadout() -> void:
 	var weapon_holder := _get_weapon_holder()
 	if weapon_holder == null or not weapon_holder.has_method("set_weapon_loadout"):
 		return
@@ -301,6 +301,57 @@ func _configure_character_for_tutorial() -> void:
 
 	if starting_weapon != null:
 		weapon_holder.set_weapon_loadout([starting_weapon], 0)
+
+
+func _rebuild_selected_character_for_checkpoint() -> bool:
+	var character_id := _selected_character_id
+	if character_id == "":
+		character_id = CharacterSelectScreen.TIEMU_ID
+
+	_selected_character_id = character_id
+	var character_scene := _get_selected_character_scene()
+	if character_scene == null:
+		push_error("Cannot rebuild checkpoint character because no character scene was assigned.")
+		return false
+
+	_hide_layer_clear_screen()
+	_hide_death_prompt(false)
+	get_tree().paused = false
+	if _character != null and is_instance_valid(_character):
+		_character.queue_free()
+
+	_character = character_scene.instantiate() as Node2D
+	_character.name = "Character"
+	_make_character_runtime_resources_unique(_character)
+	add_child(_character)
+	_character.set("gui_path", NodePath("../Camera2D/GUI"))
+	_initialize_character_relic_controller()
+	_reset_character_inventory()
+	_bind_character_weapon_ui()
+	if _character.has_signal("respawn_requested"):
+		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
+
+	_configure_character_for_starting_loadout()
+	var character_stats := _get_character_stats()
+	if character_stats != null:
+		character_stats.set_life_to_max()
+	_character.set("can_grab_items", true)
+	_set_character_control_enabled(true)
+	return true
+
+
+func return_to_chapter_one_base_after_death() -> void:
+	if not _rebuild_selected_character_for_checkpoint():
+		return
+	_start_chapter_base(CHAPTER_1_ID)
+	print("Subject rollback complete. Returning to Chapter 1 Raven Outpost.")
+
+
+func abandon_current_run_to_chapter_one_start() -> void:
+	if not _rebuild_selected_character_for_checkpoint():
+		return
+	_start_formal_run(1, CHAPTER_1_ID)
+	print("Run abandoned. Returning to Chapter 1 formal entry checkpoint.")
 
 
 func _start_tutorial_run(wake_character_id: String) -> void:
@@ -1002,16 +1053,24 @@ func _refresh_death_prompt_text() -> void:
 	if _death_prompt_title_label != null:
 		_death_prompt_title_label.text = GameSettings.tr_ui("death_title")
 	if _death_prompt_description_label != null:
-		_death_prompt_description_label.text = GameSettings.tr_ui("death_desc")
+		if _run_state == RUN_STATE_TUTORIAL:
+			_death_prompt_description_label.text = GameSettings.tr_ui("death_desc_tutorial")
+		else:
+			_death_prompt_description_label.text = GameSettings.tr_ui("death_desc")
 	if _death_prompt_respawn_button != null:
-		_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn")
+		if _run_state == RUN_STATE_TUTORIAL:
+			_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn_tutorial")
+		else:
+			_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn")
 	if _death_prompt_main_menu_button != null:
 		_death_prompt_main_menu_button.text = GameSettings.tr_ui("death_main_menu")
 
 
 func _confirm_death_respawn() -> void:
-	_hide_death_prompt()
-	_respawn_character_at_start()
+	if _run_state == RUN_STATE_TUTORIAL:
+		abandon_current_run_to_chapter_one_start()
+	else:
+		return_to_chapter_one_base_after_death()
 
 
 func _return_to_main_menu_from_death() -> void:
