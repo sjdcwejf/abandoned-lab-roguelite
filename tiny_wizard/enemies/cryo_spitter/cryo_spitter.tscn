@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/quarantine_spitter/quarantine_spitter.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/cryo_spitter/cryo_spitter.gd" id="2_script"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="3_physics"]
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("3_physics")
+max_speed = 58.0
+acceleration = 0.32
+friction = 0.13
+impulse_force = 420.0
+
+[node name="CryoSpitter" instance=ExtResource("1_base")]
+modulate = Color(0.72, 0.92, 1, 1)
+script = ExtResource("2_script")
+physics_stats = SubResource("Resource_physics")
+protomatter_drop_chance = 0.6
+
+[node name="Visual" parent="." index="0"]
+modulate = Color(0.58, 0.9, 1, 1)
+
+[node name="AnimatedSprite2D" parent="Visual" index="0"]
+modulate = Color(0.62, 0.9, 1, 1)
+

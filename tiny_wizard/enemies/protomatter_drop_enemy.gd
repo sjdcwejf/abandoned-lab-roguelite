@@ -27,6 +27,9 @@ var _relic_dropped := false
 func hit(damage := 1, from := Vector2.ZERO) -> void:
 	if green_blood_splatter_enabled and int(damage) > 0 and character_stats != null and character_stats.current_life > 0:
 		_spawn_green_blood_splatter(from)
+	var relic_controller := _find_active_relic_controller()
+	if relic_controller != null:
+		relic_controller.try_apply_condensation_to_target(self)
 	super.hit(damage, from)
 
 

@@ -109,7 +109,7 @@ func _build_ui() -> void:
 	layout.add_child(_map_area)
 
 	var legend := Label.new()
-	legend.text = "我：当前位置  始：起点  王：Boss  商：渡鸦  奖：奖励  武：武器  事：事件"
+	legend.text = "我：当前位置  始：起点  王：Boss  商：前厅/渡鸦  奖：奖励  武：武器  事：事件  舱：冷冻舱  冷：低温喷口  精：精英"
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	legend.add_theme_font_size_override("font_size", 10)
@@ -204,6 +204,12 @@ func _get_room_symbol(room_type: String, is_current: bool) -> String:
 			return "武"
 		"pollution":
 			return "事"
+		"cryo_pod":
+			return "舱"
+		"cryo_vent":
+			return "冷"
+		"elite":
+			return "精"
 	return ""
 
 
@@ -227,6 +233,12 @@ func _get_symbol_color(room_type: String, is_current: bool, is_explored: bool) -
 			return Color(0.78, 0.7, 1.0, 1.0)
 		"pollution":
 			return Color(0.5, 1.0, 0.42, 1.0)
+		"cryo_pod":
+			return Color(0.5, 0.86, 1.0, 1.0)
+		"cryo_vent":
+			return Color(0.34, 0.74, 1.0, 1.0)
+		"elite":
+			return Color(0.96, 0.62, 1.0, 1.0)
 		"start":
 			return Color(0.66, 0.95, 0.78, 1.0)
 	return Color(0.74, 0.9, 0.92, 0.95)
@@ -270,11 +282,17 @@ func _get_type_color(room_type: String) -> Color:
 			return Color(0.25, 0.18, 0.48, 0.92)
 		"pollution":
 			return Color(0.12, 0.42, 0.18, 0.92)
+		"cryo_pod":
+			return Color(0.08, 0.32, 0.52, 0.92)
+		"cryo_vent":
+			return Color(0.05, 0.24, 0.46, 0.92)
+		"elite":
+			return Color(0.32, 0.16, 0.52, 0.92)
 	return Color(0.12, 0.22, 0.25, 0.85)
 
 
 func _is_special_room(room_type: String) -> bool:
-	return room_type in ["start", "boss", "merchant", "reward", "weapon", "pollution"]
+	return room_type in ["start", "boss", "merchant", "reward", "weapon", "pollution", "cryo_pod", "cryo_vent", "elite"]
 
 
 func _make_panel_style() -> StyleBoxFlat:

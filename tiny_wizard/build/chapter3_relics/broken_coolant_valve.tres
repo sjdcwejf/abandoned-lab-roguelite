@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"broken_coolant_valve"
+display_name = "破损冷却阀"
+enabled = true
+item_type = 1
+relic_scope = 1
+placeholder_text = "低温样本死亡时会留下短暂冷雾区，减速敌我双方。"
+pool_tags = Array[StringName]([&"neutral_relic", &"cryo_relic", &"test"])
+tags = Array[StringName]([&"cryo", &"hazard", &"equipment"])
+max_stacks = 1
+

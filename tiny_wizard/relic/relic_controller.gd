@@ -14,13 +14,20 @@ const DEFAULT_SYNERGY_DEFINITIONS: Array[BuildSynergyDefinition] = [
 	preload("res://tiny_wizard/build/test_synergies/tiemu_living_spine.tres"),
 ]
 const PROTOMATTER_FRAGMENT_ITEM := preload("res://tiny_wizard/items/protomatter_fragment/protomatter_fragment.tres")
+const CRYO_ZONE_SCENE := preload("res://tiny_wizard/interactable_objects/cryo_zone/cryo_zone.tscn")
 
 const RELIC_SPLIT_EMBRYO_CORE := &"split_embryo_core"
 const RELIC_FUNGAL_MEMORY_CAP := &"fungal_memory_cap"
 const RELIC_TIEMU_SPINE_SHIELD_FRAGMENT := &"tiemu_spine_shield_fragment"
 const RELIC_TIEMU_LIVING_ARMOR_PLATE := &"tiemu_living_armor_plate"
+const RELIC_CONDENSATION_PROTOCOL := &"condensation_protocol"
+const RELIC_STASIS_PROTOCOL := &"stasis_protocol"
+const RELIC_THERMAL_LINING := &"thermal_lining"
+const RELIC_BROKEN_COOLANT_VALVE := &"broken_coolant_valve"
+const RELIC_STASIS_TAG := &"stasis_tag"
 
 const SPLIT_EXTRA_FRAGMENT_CHANCE := 0.18
+const CONDENSATION_SLOW_CHANCE := 0.2
 const SPINE_COUNTER_CHANCE := 0.35
 const SPINE_COUNTER_RADIUS := 92.0
 const SPINE_COUNTER_DAMAGE := 1
@@ -47,6 +54,7 @@ var _unique_groups: Dictionary = {}
 var _active_synergies: Dictionary = {}
 var _base_character_stats: Dictionary = {}
 var _base_physics_stats: Dictionary = {}
+var _stasis_protocol_used := false
 
 
 func initialize(owner_character: Node, catalog: BuildCatalog) -> void:
@@ -236,6 +244,7 @@ func reset_run() -> void:
 	_relics.clear()
 	_tag_counts.clear()
 	_unique_groups.clear()
+	_stasis_protocol_used = false
 	_refresh_synergies()
 	_apply_static_stat_modifiers()
 	relics_changed.emit()
@@ -248,7 +257,47 @@ func modify_incoming_damage(amount: int, context := {}) -> int:
 	if has_relic(RELIC_TIEMU_LIVING_ARMOR_PLATE) and character_id == &"tiemu" and _character_has_shield():
 		final_amount = maxi(0, final_amount - 1)
 		print("活体甲片触发：护盾减伤。")
+	if _can_trigger_stasis_protocol(final_amount):
+		_stasis_protocol_used = true
+		call_deferred("_run_stasis_protocol_recovery")
+		print("静滞协议触发：致命伤被封存。")
+		return 0
 	return final_amount
+
+
+func try_apply_condensation_to_target(target: Object) -> void:
+	if not has_relic(RELIC_CONDENSATION_PROTOCOL):
+		return
+	if randf() > CONDENSATION_SLOW_CHANCE:
+		return
+	LabStatusEffectController.apply_slow(target, 1.6, 0.58)
+
+
+func try_spawn_coolant_zone_from_enemy(enemy: Node) -> void:
+	if not has_relic(RELIC_BROKEN_COOLANT_VALVE):
+		return
+	if enemy == null or not is_instance_valid(enemy):
+		return
+	if not bool(enemy.get_meta("cryo_enemy", false)):
+		return
+
+	var drop_parent := enemy.get_parent()
+	if drop_parent != null and drop_parent.name == "Enemies" and drop_parent.get_parent() != null:
+		drop_parent = drop_parent.get_parent()
+	if drop_parent == null:
+		return
+
+	var zone := CRYO_ZONE_SCENE.instantiate() as LabCryoZone
+	if zone == null:
+		return
+	zone.radius = 88.0
+	zone.duration = 3.2
+	zone.show_player_feedback = false
+	if drop_parent is Node2D and enemy is Node2D:
+		zone.position = (drop_parent as Node2D).to_local((enemy as Node2D).global_position)
+	elif enemy is Node2D:
+		zone.global_position = (enemy as Node2D).global_position
+	drop_parent.call_deferred("add_child", zone)
 
 
 func handle_combat_event(event_id: StringName, payload: Dictionary) -> void:
@@ -434,12 +483,14 @@ func _resolve_character_id(owner_character: Node) -> StringName:
 
 
 func _handle_enemy_killed(payload: Dictionary) -> void:
+	var enemy := payload.get("enemy", null) as Node
+	if enemy != null:
+		try_spawn_coolant_zone_from_enemy(enemy)
 	if not has_relic(RELIC_SPLIT_EMBRYO_CORE):
 		return
 	if randf() > SPLIT_EXTRA_FRAGMENT_CHANCE:
 		return
 
-	var enemy := payload.get("enemy", null) as Node
 	var drop_parent := enemy.get_parent() if enemy != null else null
 	if drop_parent != null and drop_parent.name == "Enemies" and drop_parent.get_parent() != null:
 		drop_parent = drop_parent.get_parent()
@@ -461,18 +512,12 @@ func _handle_enemy_killed(payload: Dictionary) -> void:
 
 
 func _handle_room_cleared(_payload: Dictionary) -> void:
+	var room := _payload.get("room", null) as Room
+	if has_relic(RELIC_STASIS_TAG) and room != null and room.lab_room_type == "elite":
+		_grant_shield_or_life(1, "静滞标签触发：精英封存室净化，获得 1 点护盾。")
 	if not has_relic(RELIC_FUNGAL_MEMORY_CAP):
 		return
-	var stats := _get_character_stats()
-	if stats == null:
-		return
-	if "current_shield" in stats:
-		stats.set("current_shield", int(stats.get("current_shield")) + 1)
-		print("菌忆伞盖触发：获得短暂护盾。")
-		return
-	if "current_life" in stats and "max_life" in stats:
-		stats.set("current_life", mini(int(stats.get("max_life")), int(stats.get("current_life")) + 1))
-		print("菌忆伞盖触发：恢复生命。")
+	_grant_shield_or_life(1, "菌忆伞盖触发：恢复防护。")
 
 
 func _handle_character_damaged(payload: Dictionary) -> void:
@@ -535,6 +580,48 @@ func _get_character_stats() -> Resource:
 func _character_has_shield() -> bool:
 	var stats := _get_character_stats()
 	return stats != null and "current_shield" in stats and int(stats.get("current_shield")) > 0
+
+
+func _can_trigger_stasis_protocol(final_amount: int) -> bool:
+	if _stasis_protocol_used or final_amount <= 0 or not has_relic(RELIC_STASIS_PROTOCOL):
+		return false
+	var stats := _get_character_stats()
+	if stats == null or not "current_life" in stats:
+		return false
+	return int(stats.get("current_life")) - final_amount <= 0
+
+
+func _run_stasis_protocol_recovery() -> void:
+	var stats := _get_character_stats()
+	var physics_stats := _get_physics_stats()
+	var original_speed := 0.0
+	if physics_stats != null and "max_speed" in physics_stats:
+		original_speed = float(physics_stats.get("max_speed"))
+		physics_stats.set("max_speed", 0.0)
+	if character is Node2D:
+		(character as Node2D).modulate = Color(0.62, 0.92, 1.0, 0.82)
+	if stats != null and "current_life" in stats:
+		stats.set("current_life", 1)
+	await get_tree().create_timer(1.35, false).timeout
+	if physics_stats != null and "max_speed" in physics_stats:
+		physics_stats.set("max_speed", original_speed)
+	if character is Node2D:
+		(character as Node2D).modulate = Color.WHITE
+	if stats != null and "current_life" in stats and "max_life" in stats:
+		stats.set("current_life", mini(int(stats.get("max_life")), int(stats.get("current_life")) + 2))
+
+
+func _grant_shield_or_life(amount: int, message: String) -> void:
+	var stats := _get_character_stats()
+	if stats == null:
+		return
+	if "current_shield" in stats:
+		stats.set("current_shield", int(stats.get("current_shield")) + amount)
+		print(message)
+		return
+	if "current_life" in stats and "max_life" in stats:
+		stats.set("current_life", mini(int(stats.get("max_life")), int(stats.get("current_life")) + amount))
+		print(message)
 
 
 func _payload_tags(payload: Dictionary) -> Array[StringName]:

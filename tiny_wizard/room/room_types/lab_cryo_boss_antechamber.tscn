@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_console"]
+size = Vector2(250, 58)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank"]
+size = Vector2(96, 230)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "merchant"
+lab_room_label = "低温封存前厅"
+
+[node name="CryoRoomOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "boss"
+
+[node name="ConsoleBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(512, 160)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ConsoleBlocker"]
+shape = SubResource("RectangleShape2D_console")
+
+[node name="LeftStasisBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(170, 318)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftStasisBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="RightStasisBankBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(854, 318)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightStasisBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+

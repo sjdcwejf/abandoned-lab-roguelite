@@ -1,0 +1,103 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/subject_zero_cryo/subject_zero_cryo.gd" id="2_script"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="3_stats"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_physics"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/fusion_boss/fusion_boss_behavior.gd" id="5_behavior"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/fusion_07f_boss_sheet.png" id="6_sheet"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/placeholder_art/shadow.png" id="7_shadow"]
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="8_detector"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/stasis_crawler/stasis_crawler.tscn" id="9_summon"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+resource_local_to_scene = true
+script = ExtResource("3_stats")
+max_life = 68
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("4_physics")
+max_speed = 58.0
+acceleration = 0.28
+friction = 0.12
+impulse_force = 250.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detector"]
+radius = 540.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 30.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cryo_a"]
+atlas = ExtResource("6_sheet")
+region = Rect2(0, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cryo_b"]
+atlas = ExtResource("6_sheet")
+region = Rect2(96, 0, 96, 96)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_subject_zero"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cryo_a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cryo_b")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[node name="SubjectZeroCryo" instance=ExtResource("1_character")]
+process_mode = 4
+y_sort_enabled = true
+scale = Vector2(1.35, 1.35)
+collision_layer = 8
+script = ExtResource("2_script")
+character_stats = SubResource("Resource_stats")
+physics_stats = SubResource("Resource_physics")
+boss_display_name = "零号封存体"
+far_distance = 300.0
+mid_distance = 136.0
+chase_speed_multiplier = 0.9
+charge_cooldown = 4.4
+spit_cooldown = 2.4
+spit_projectile_count = 7
+spit_spread_degrees = 58.0
+low_health_threshold = 0.4
+low_health_speed_multiplier = 1.22
+low_health_summon_cooldown = 7.2
+low_health_max_summons = 3
+summon_scene = ExtResource("9_summon")
+death_burst_count = 8
+death_burst_scale = 2.2
+
+[node name="Visual" parent="." index="0"]
+modulate = Color(0.7, 0.9, 1, 1)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual" index="0"]
+modulate = Color(0.62, 0.88, 1, 1)
+position = Vector2(0, -56)
+sprite_frames = SubResource("SpriteFrames_subject_zero")
+autoplay = "default"
+
+[node name="Shadow" type="Sprite2D" parent="Visual" index="1"]
+modulate = Color(0.62, 0.82, 1, 0.32)
+scale = Vector2(0.46, 0.42)
+texture = ExtResource("7_shadow")
+
+[node name="Behavior" parent="." index="1"]
+script = ExtResource("5_behavior")
+
+[node name="PlayerDetector" parent="Behavior" index="0" instance=ExtResource("8_detector")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Behavior/PlayerDetector" index="0"]
+shape = SubResource("CircleShape2D_detector")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(0, -56)
+shape = SubResource("CircleShape2D_body")
+

@@ -216,7 +216,7 @@ func get_objective_initial_enemy_count() -> int:
 
 
 func has_enemy_clear_objective() -> bool:
-	if lab_room_type in ["combat", "pollution", "reward", "boss"]:
+	if lab_room_type in ["combat", "pollution", "reward", "boss", "cryo_pod", "cryo_vent", "elite"]:
 		return objective_initial_enemy_count > 0 or get_remaining_enemy_count() > 0
 	return false
 

@@ -23,6 +23,14 @@ const GREENHOUSE_REWARD_ROOM_SCENE := preload("res://tiny_wizard/room/room_types
 const GREENHOUSE_WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_weapon_room.tscn")
 const GREENHOUSE_MERCHANT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_merchant_room.tscn")
 const GREENHOUSE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_greenhouse_boss_room.tscn")
+const CRYO_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_start_room.tscn")
+const CRYO_COMBAT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_combat_room.tscn")
+const CRYO_POD_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_pod_room.tscn")
+const CRYO_VENT_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_vent_room.tscn")
+const CRYO_REWARD_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_reward_room.tscn")
+const CRYO_ELITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_elite_room.tscn")
+const CRYO_BOSS_ANTECHAMBER_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_boss_antechamber.tscn")
+const CRYO_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_boss_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
@@ -53,6 +61,12 @@ const GREENHOUSE_COMBAT_ROOM_SCENES := [
 	GREENHOUSE_COMBAT_ROOM_SCENE,
 	GREENHOUSE_COMBAT_ROOM_SCENE,
 	GREENHOUSE_COMBAT_ROOM_SCENE,
+]
+
+const CRYO_COMBAT_ROOM_SCENES := [
+	CRYO_COMBAT_ROOM_SCENE,
+	CRYO_COMBAT_ROOM_SCENE,
+	CRYO_VENT_ROOM_SCENE,
 ]
 
 const REWARD_ROOM_SCENES := [
@@ -169,7 +183,7 @@ static func generate(rooms_parent: Node2D, requested_seed := 0, chapter_id := DE
 	var generated_rooms := {}
 	for spec in room_layout:
 		var room := _instantiate_room(spec)
-		if spec["type"] == "combat":
+		if str(spec["type"]) in ["combat", "cryo_vent"]:
 			FORMAL_ENCOUNTER_GENERATOR.populate(room, rng, int(spec.get("depth", 1)))
 		rooms_parent.add_child(room)
 		generated_rooms[room.room_pos] = room
@@ -226,7 +240,9 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"merchant_label": "渡鸦温室补给站",
 				"boss_label": "温室守望者培育舱",
 				"boss_objective": "压制温室守望者，记录孢子与虫巢反应。",
-				"completion_destination": "后续章节：下一版本开放",
+				"completion_destination": "临时安全屋 / 渡鸦据点",
+				"next_chapter_id": 3,
+				"next_chapter_title": "第三章：低温封存区",
 				"start_room_scene": GREENHOUSE_START_ROOM_SCENE,
 				"combat_room_scenes": GREENHOUSE_COMBAT_ROOM_SCENES,
 				"pollution_room_scenes": [GREENHOUSE_SPORE_EVENT_ROOM_SCENE],
@@ -234,6 +250,36 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"weapon_room_scenes": [GREENHOUSE_WEAPON_ROOM_SCENE],
 				"merchant_room_scenes": [GREENHOUSE_MERCHANT_ROOM_SCENE],
 				"boss_room_scenes": [GREENHOUSE_BOSS_ROOM_SCENE],
+			}
+		3:
+			return {
+				"id": 3,
+				"title": "第三章：低温封存区",
+				"sector": "低温封存区",
+				"planned_minutes": "8-12",
+				"formal_layer_count": 1,
+				"main_path_room_count": 8,
+				"reward_room_count": 2,
+				"layout_radius": 4,
+				"main_room_types": ["combat", "cryo_pod", "cryo_vent", "elite", "combat"],
+				"start_label": "低温检疫闸",
+				"combat_label_prefix": "冷雾处理间",
+				"cryo_pod_label": "冷冻舱列阵",
+				"cryo_vent_label": "冷却通风廊",
+				"elite_label": "冰核守卫间",
+				"reward_label_prefix": "封存样本库",
+				"merchant_label": "低温封存前厅",
+				"boss_label": "零号封存室",
+				"boss_objective": "击败零号封存体，解除低温封存区的失控协议。",
+				"completion_destination": "后续章节：下一版本开放",
+				"start_room_scene": CRYO_START_ROOM_SCENE,
+				"combat_room_scenes": CRYO_COMBAT_ROOM_SCENES,
+				"cryo_pod_room_scenes": [CRYO_POD_ROOM_SCENE],
+				"cryo_vent_room_scenes": [CRYO_VENT_ROOM_SCENE],
+				"elite_room_scenes": [CRYO_ELITE_ROOM_SCENE],
+				"reward_room_scenes": [CRYO_REWARD_ROOM_SCENE, CRYO_REWARD_ROOM_SCENE],
+				"merchant_room_scenes": [CRYO_BOSS_ANTECHAMBER_SCENE],
+				"boss_room_scenes": [CRYO_BOSS_ROOM_SCENE],
 			}
 	return get_chapter_config(DEFAULT_CHAPTER_ID)
 
@@ -486,6 +532,9 @@ static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 	return {
 		"combat": (chapter_config.get("combat_room_scenes", COMBAT_ROOM_SCENES) as Array).duplicate(),
 		"pollution": (chapter_config.get("pollution_room_scenes", [COMBAT_ROOM_A_SCENE]) as Array).duplicate(),
+		"cryo_pod": (chapter_config.get("cryo_pod_room_scenes", [CRYO_POD_ROOM_SCENE]) as Array).duplicate(),
+		"cryo_vent": (chapter_config.get("cryo_vent_room_scenes", [CRYO_VENT_ROOM_SCENE]) as Array).duplicate(),
+		"elite": (chapter_config.get("elite_room_scenes", [CRYO_ELITE_ROOM_SCENE]) as Array).duplicate(),
 		"reward": (chapter_config.get("reward_room_scenes", REWARD_ROOM_SCENES) as Array).duplicate(),
 		"weapon": (chapter_config.get("weapon_room_scenes", WEAPON_ROOM_SCENES) as Array).duplicate(),
 		"merchant": (chapter_config.get("merchant_room_scenes", [RAVEN_SAFEHOUSE_ROOM_SCENE]) as Array).duplicate(),
@@ -509,6 +558,12 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return COMBAT_ROOM_SCENES
 		"pollution":
 			return [COMBAT_ROOM_A_SCENE]
+		"cryo_pod":
+			return [CRYO_POD_ROOM_SCENE]
+		"cryo_vent":
+			return [CRYO_VENT_ROOM_SCENE]
+		"elite":
+			return [CRYO_ELITE_ROOM_SCENE]
 		"reward":
 			return REWARD_ROOM_SCENES
 		"weapon":
@@ -544,6 +599,12 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 			return "%s %d" % [str(chapter_config.get("combat_label_prefix", "封存样本间")), count]
 		"pollution":
 			return str(chapter_config.get("pollution_label", "污染事件房"))
+		"cryo_pod":
+			return str(chapter_config.get("cryo_pod_label", "冷冻舱列阵"))
+		"cryo_vent":
+			return str(chapter_config.get("cryo_vent_label", "冷却通风廊"))
+		"elite":
+			return str(chapter_config.get("elite_label", "精英封存室"))
 		"reward":
 			return "%s %d" % [str(chapter_config.get("reward_label_prefix", "证物库")), count]
 		"weapon":

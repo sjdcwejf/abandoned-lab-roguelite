@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/ice_core_guardian/ice_core_guardian.tscn" id="3_elite"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
+size = Vector2(118, 82)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_stasis_bank"]
+size = Vector2(104, 230)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "elite"
+lab_room_label = "冰核守卫间"
+
+[node name="CryoRoomOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "elite"
+
+[node name="WestTerminalBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(174, 190)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WestTerminalBlocker"]
+shape = SubResource("RectangleShape2D_terminal")
+
+[node name="EastStasisBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(850, 360)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastStasisBankBlocker"]
+shape = SubResource("RectangleShape2D_stasis_bank")
+
+[node name="IceCoreGuardian" parent="Enemies" index="0" instance=ExtResource("3_elite")]
+position = Vector2(512, 306)
+

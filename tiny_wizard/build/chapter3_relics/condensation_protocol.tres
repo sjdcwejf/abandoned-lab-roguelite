@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"condensation_protocol"
+display_name = "冷凝协议"
+enabled = true
+item_type = 1
+relic_scope = 1
+placeholder_text = "命中样本时，有概率让目标短暂减速。"
+pool_tags = Array[StringName]([&"neutral_relic", &"cryo_relic", &"test"])
+tags = Array[StringName]([&"cryo", &"control", &"protocol"])
+max_stacks = 2
+

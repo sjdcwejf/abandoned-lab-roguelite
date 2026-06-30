@@ -13,6 +13,7 @@ const RUN_STATE_LAYER_COMPLETE := "layer_complete"
 const FORMAL_CHAPTER_ID := 1
 const CHAPTER_1_ID := 1
 const CHAPTER_2_ID := 2
+const CHAPTER_3_ID := 3
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -566,7 +567,7 @@ func _on_black_hole_entered(body: Node2D) -> void:
 		RUN_STATE_FORMAL:
 			if _formal_layer_index < _get_formal_layer_count():
 				call_deferred("_start_next_formal_layer")
-			elif _formal_chapter_id == CHAPTER_1_ID:
+			elif LabDungeonGenerator.get_next_chapter_id(_formal_chapter_id) > 0:
 				call_deferred("_start_chapter_base", _formal_chapter_id)
 			else:
 				call_deferred("_complete_formal_layer")
@@ -1156,6 +1157,12 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "虫巢事件房"
 			return "污染事件房"
+		"cryo_pod":
+			return "冷冻舱事件房"
+		"cryo_vent":
+			return "低温喷口房"
+		"elite":
+			return "精英房"
 		"reward":
 			return "奖励房"
 		"weapon":
@@ -1170,10 +1177,14 @@ func _get_formal_room_type_label(room_type: String) -> String:
 func _get_formal_room_objective(room_type: String) -> String:
 	match room_type:
 		"start":
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "确认当前构筑，进入低温封存区。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "确认前哨构筑，进入生态温室。"
 			return "确认装备状态，进入极渊前哨基地。"
 		"combat":
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "清除冷雾处理间内的冻伤样本。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "清除孢子培养廊内的失控样本。"
 			return "清除房内样本，解除门锁。"
@@ -1182,6 +1193,8 @@ func _get_formal_room_objective(room_type: String) -> String:
 				return "清理虫巢样本，击碎孢子囊，解除温室封锁。"
 			return "清除原质污染源，并肃清房内样本。"
 		"reward":
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "肃清封存样本库守卫，回收补给箱。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "肃清温室样本库守卫，回收补给箱。"
 			return "肃清守卫样本，回收补给箱。"
@@ -1190,9 +1203,17 @@ func _get_formal_room_objective(room_type: String) -> String:
 				return "回收渡鸦温室军械，整理当前构筑。"
 			return "回收随机军械，整理当前构筑。"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "确认低温封存舱状态，进入零号封存室。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "在渡鸦温室补给站交易，准备进入培育舱。"
 			return "与渡鸦交易，补充装备后前往下一房间。"
+		"cryo_pod":
+			return "检查 3 个冷冻舱，清除释放出的封存样本。"
+		"cryo_vent":
+			return "避开周期冷气喷口，清除房内冻伤样本。"
+		"elite":
+			return "击败冰核守卫，回收低温封存遗物。"
 		"boss":
 			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
 	return ""

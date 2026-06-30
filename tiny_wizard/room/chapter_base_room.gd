@@ -5,6 +5,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 
 var _choice_made := false
 var _relic_controller: RelicController
+var _next_chapter_title := "下一章"
 
 @onready var exit_black_hole: LabBlackHole = get_node_or_null("ExitBlackHole") as LabBlackHole
 @onready var relic_choices: Node = get_node_or_null("RelicChoices")
@@ -20,8 +21,8 @@ func _ready() -> void:
 	_configure_text()
 	_connect_relic_choices()
 	if exit_black_hole != null:
-		exit_black_hole.enter_prompt_text = "按 F 进入第二章：生态温室"
-		exit_black_hole.stabilizing_text = "温室入口稳定中。"
+		exit_black_hole.enter_prompt_text = "按 F 进入%s" % _next_chapter_title
+		exit_black_hole.stabilizing_text = "下一区域入口稳定中。"
 		exit_black_hole.set_active(false)
 
 
@@ -38,6 +39,7 @@ func enter_room() -> void:
 func _configure_text() -> void:
 	var completed_chapter := str(get_meta("completed_chapter_title", "第一章：极渊前哨基地"))
 	var next_chapter := str(get_meta("next_chapter_title", "第二章：生态温室"))
+	_next_chapter_title = next_chapter
 	if chapter_label != null:
 		chapter_label.text = "%s 已完成\n临时安全屋 / 渡鸦据点已解锁" % completed_chapter
 	if archive_label != null:
@@ -66,7 +68,7 @@ func _on_relic_choice_picked(definition: BuildItemDefinition) -> void:
 	_remove_unpicked_relic_choices(definition)
 	if exit_black_hole != null:
 		exit_black_hole.set_active(true)
-	_update_status("已选择遗物：%s。渡鸦据点补给完成，第二章入口已稳定。" % relic_name)
+	_update_status("已选择遗物：%s。渡鸦据点补给完成，%s 入口已稳定。" % [relic_name, _next_chapter_title])
 
 
 func _remove_unpicked_relic_choices(picked_definition: BuildItemDefinition) -> void:
@@ -89,13 +91,13 @@ func _update_status(override_text := "") -> void:
 		status_label.text = override_text
 		return
 	if _choice_made:
-		status_label.text = "第二章入口已稳定。整理补给后，进入生态温室。"
+		status_label.text = "%s 入口已稳定。整理补给后，进入下一章。" % _next_chapter_title
 		return
 
 	var relic_count := 0
 	if _relic_controller != null:
 		relic_count = _relic_controller.get_total_relic_count()
-	status_label.text = "当前遗物：%d。请选择 1 个遗物，随后开启生态温室入口。" % relic_count
+	status_label.text = "当前遗物：%d。请选择 1 个遗物，随后开启%s入口。" % [relic_count, _next_chapter_title]
 
 
 func _get_relic_name(definition: BuildItemDefinition) -> String:
