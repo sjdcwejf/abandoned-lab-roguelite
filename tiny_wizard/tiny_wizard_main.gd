@@ -47,6 +47,7 @@ var _layer_clear_title_label: Label
 var _layer_clear_summary_label: Label
 var _layer_clear_weapons_label: Label
 var _layer_clear_inventory_label: Label
+var _layer_clear_next_button: Button
 var _death_prompt_root: Control
 var _death_prompt_status_label: Label
 var _death_prompt_title_label: Label
@@ -701,10 +702,11 @@ func _setup_layer_clear_screen() -> void:
 	buttons.add_child(restart_button)
 
 	var next_layer_button := Button.new()
-	next_layer_button.text = "更深封存区：下一版本开放"
+	next_layer_button.text = "后续章节：下一版本开放"
 	next_layer_button.disabled = true
 	next_layer_button.custom_minimum_size = Vector2(190, 42)
 	buttons.add_child(next_layer_button)
+	_layer_clear_next_button = next_layer_button
 
 
 func _make_layer_clear_panel_style() -> StyleBoxFlat:
@@ -773,11 +775,27 @@ func _refresh_layer_clear_screen() -> void:
 	if _layer_clear_title_label != null:
 		_layer_clear_title_label.text = "%s｜第 %d 层完成" % [_formal_chapter_title, _formal_layer_index]
 	if _layer_clear_summary_label != null:
-		_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
+		_layer_clear_summary_label.text = _get_layer_clear_summary_text()
 	if _layer_clear_weapons_label != null:
 		_layer_clear_weapons_label.text = _get_layer_clear_weapon_text()
 	if _layer_clear_inventory_label != null:
 		_layer_clear_inventory_label.text = _get_layer_clear_inventory_text()
+	if _layer_clear_next_button != null:
+		_layer_clear_next_button.text = _get_layer_clear_next_button_text()
+
+
+func _get_layer_clear_summary_text() -> String:
+	if _formal_chapter_id == CHAPTER_3_ID:
+		return "零号封存体已压制。已回收封存区黑匣子碎片，兵器工厂访问权限待解锁。当前构筑快照："
+	if _formal_chapter_id == CHAPTER_2_ID:
+		return "温室守望者反应已记录。当前构筑快照："
+	return "失格者 A-03 已肃清。当前构筑快照："
+
+
+func _get_layer_clear_next_button_text() -> String:
+	if _formal_chapter_id == CHAPTER_3_ID:
+		return "%s：下一版本开放" % LabDungeonGenerator.get_chapter_completion_destination(_formal_chapter_id)
+	return "后续章节：下一版本开放"
 
 
 func _get_layer_clear_weapon_text() -> String:
