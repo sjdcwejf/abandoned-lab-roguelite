@@ -19,3 +19,6 @@ data_*/
 
 # Local source asset zips
 _incoming_assets/*.zip
+
+# Local generated previews
+docs/previews/
