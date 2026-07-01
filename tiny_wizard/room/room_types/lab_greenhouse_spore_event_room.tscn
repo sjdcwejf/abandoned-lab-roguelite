@@ -1,0 +1,82 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/greenhouse_spore_event_room.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/spore_pod/spore_pod.tscn" id="3_spore_pod"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="4_floater"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="5_crawler"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/spore_contamination_room.png" id="6_room_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank"]
+size = Vector2(178, 400)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_center_contamination"]
+size = Vector2(188, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_top_tube"]
+size = Vector2(54, 100)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "pollution"
+lab_room_label = "虫巢样本间"
+
+[node name="SporeContaminationRoomArt" type="Sprite2D" parent="." index="7"]
+z_index = -2
+texture_filter = 1
+texture = ExtResource("6_room_art")
+centered = false
+
+[node name="LeftCultureBankBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(216, 320)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="RightCultureBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(808, 320)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="ContaminationBeltBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 390)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ContaminationBeltBlocker"]
+shape = SubResource("RectangleShape2D_center_contamination")
+disabled = true
+
+[node name="TopTubeBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(520, 198)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopTubeBlocker"]
+shape = SubResource("RectangleShape2D_top_tube")
+disabled = true
+
+[node name="SporePods" type="Node2D" parent="." index="12"]
+
+[node name="SporePodA" parent="SporePods" instance=ExtResource("3_spore_pod")]
+position = Vector2(378, 230)
+
+[node name="SporePodB" parent="SporePods" instance=ExtResource("3_spore_pod")]
+position = Vector2(516, 306)
+
+[node name="SporePodC" parent="SporePods" instance=ExtResource("3_spore_pod")]
+position = Vector2(650, 412)
+
+[node name="GreenhouseFloater" parent="Enemies" index="0" instance=ExtResource("4_floater")]
+position = Vector2(430, 242)
+
+[node name="GreenhouseCrawler" parent="Enemies" index="1" instance=ExtResource("5_crawler")]
+position = Vector2(622, 326)
+
+[node name="GreenhouseCrawler2" parent="Enemies" index="2" instance=ExtResource("5_crawler")]
+position = Vector2(754, 262)

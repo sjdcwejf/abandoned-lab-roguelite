@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_event_room.gd" id="2_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_target"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="5_terminal"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="7_red"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
+size = Vector2(120, 84)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "pollution"
+lab_room_label = "卫星伪装系统"
+event_objective_text = "关闭 3 个伪装节点，并清理房内异常单位。"
+event_target_label = "伪装节点"
+event_completion_text = "封锁解除：伪装节点已关闭。"
+event_target_success_message = "伪装节点已关闭"
+
+[node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "satellite"
+
+[node name="LeftSignalBankBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(214, 212)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftSignalBankBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="RightSignalBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(810, 388)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightSignalBankBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="SatelliteNodes" type="Node2D" parent="." index="10"]
+
+[node name="DisguiseNodeA" parent="SatelliteNodes" instance=ExtResource("4_target")]
+position = Vector2(356, 384)
+max_health = 5
+display_name = "伪装节点"
+destroyed_display_name = "节点关闭"
+
+[node name="DisguiseNodeB" parent="SatelliteNodes" instance=ExtResource("4_target")]
+position = Vector2(512, 302)
+max_health = 5
+display_name = "伪装节点"
+destroyed_display_name = "节点关闭"
+
+[node name="DisguiseNodeC" parent="SatelliteNodes" instance=ExtResource("4_target")]
+position = Vector2(668, 220)
+max_health = 5
+display_name = "伪装节点"
+destroyed_display_name = "节点关闭"
+
+[node name="SatelliteArchiveTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
+position = Vector2(512, 454)
+archive_id = "satellite_disguise_log"
+archive_title = "卫星伪装系统运行记录"
+archive_content = "卫星伪装系统已连续运行 219 小时。\n外部热源图像、通讯记录和地表异常均已被替换为正常值。\n\n对外状态：设施维护中。\n内部状态：生态温室失控；低温封存区失效；兵器工厂进入自动清理模式。\n\n备注：禁止向外部发送真实事故画面。"
+success_message = "伪装节点已关闭"
+clue_id = "company_coverup_record"
+
+[node name="SignalFloater" parent="Enemies" index="0" instance=ExtResource("6_black")]
+position = Vector2(422, 344)
+
+[node name="SignalCrawler" parent="Enemies" index="1" instance=ExtResource("7_red")]
+position = Vector2(612, 246)

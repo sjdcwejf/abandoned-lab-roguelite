@@ -49,8 +49,8 @@ const UI_TEXT := {
 		"en": "Quit Game",
 	},
 	"version": {
-		"zh": "原型构建 0.1.67",
-		"en": "Prototype Build 0.1.67",
+		"zh": "原型构建 0.1.75",
+		"en": "Prototype Build 0.1.75",
 	},
 	"settings_title": {
 		"zh": "设置",
@@ -125,8 +125,8 @@ const UI_TEXT := {
 		"en": "Resume",
 	},
 	"restart_run": {
-		"zh": "重新开始本局",
-		"en": "Restart Run",
+		"zh": "放弃本次游戏",
+		"en": "Abandon Run",
 	},
 	"return_main_menu": {
 		"zh": "返回主菜单",
@@ -137,16 +137,16 @@ const UI_TEXT := {
 		"en": "Press Esc to resume",
 	},
 	"restart_confirm_title": {
-		"zh": "重新开始本局？",
-		"en": "Restart this run?",
+		"zh": "放弃本次游戏？",
+		"en": "Abandon this run?",
 	},
 	"restart_confirm_desc": {
-		"zh": "当前流程进度将丢失，并从角色选择重新开始。",
-		"en": "Current progress will be lost and the run will restart from character selection.",
+		"zh": "当前存档与构筑将作废，仅保留所选实验体，并回到第一章正式关卡入口。",
+		"en": "Current run progress and build will be discarded. The selected subject remains and returns to the Chapter 1 entry.",
 	},
 	"confirm_restart": {
-		"zh": "确认重开",
-		"en": "Restart",
+		"zh": "确认放弃",
+		"en": "Abandon",
 	},
 	"return_confirm_title": {
 		"zh": "终止本次封存行动？",
@@ -173,12 +173,20 @@ const UI_TEXT := {
 		"en": "Subject Unresponsive",
 	},
 	"death_desc": {
-		"zh": "安全屋可执行一次重构唤醒。确认后将回到当前流程的出生房，并恢复生命值。",
-		"en": "The safehouse can trigger a reconstruction wake. Confirm to return to this run's starting room with restored health.",
+		"zh": "渡鸦将撤回实验体身份记录。确认后仅保留所选角色，当前探索构筑与物资作废，并退回第一章末尾的临时安全屋。",
+		"en": "Raven will recover the subject identity record. Confirm to keep only the selected character, discard the current build and supplies, and return to the Chapter 1 safehouse.",
+	},
+	"death_desc_tutorial": {
+		"zh": "教学段生命体征中断。确认后保留所选角色，跳过已完成的教学校验，回到第一章正式关卡入口。",
+		"en": "Vitals failed during training. Confirm to keep the selected character, skip completed calibration, and return to the Chapter 1 entry.",
 	},
 	"death_respawn": {
-		"zh": "执行重生",
-		"en": "Reconstruct",
+		"zh": "撤回渡鸦据点",
+		"en": "Return to Outpost",
+	},
+	"death_respawn_tutorial": {
+		"zh": "撤回前哨入口",
+		"en": "Return to Entry",
 	},
 	"death_main_menu": {
 		"zh": "返回主菜单",

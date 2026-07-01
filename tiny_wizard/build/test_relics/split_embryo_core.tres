@@ -1,6 +1,13 @@
-[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_split"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_stat_modifier.gd" id="2_mod"]
+
+[sub_resource type="Resource" id="Resource_max_life"]
+script = ExtResource("2_mod")
+stat_id = &"max_life"
+operation = 0
+value = 1.0
 
 [resource]
 script = ExtResource("1_split")
@@ -9,7 +16,8 @@ display_name = "裂殖胚核"
 enabled = true
 item_type = 1
 relic_scope = 1
-placeholder_text = "暂时只做显示，不执行战斗效果。"
+placeholder_text = "最大生命 +1；击杀样本时有概率额外析出 1 个原质。"
 pool_tags = Array[StringName]([&"neutral_relic", &"test"])
 tags = Array[StringName]([&"protomatter", &"split", &"growth"])
 max_stacks = 3
+stat_modifiers = Array[BuildStatModifier]([SubResource("Resource_max_life")])

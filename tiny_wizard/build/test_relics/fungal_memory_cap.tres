@@ -1,6 +1,19 @@
-[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_fungal"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_stat_modifier.gd" id="2_mod"]
+
+[sub_resource type="Resource" id="Resource_max_energy"]
+script = ExtResource("2_mod")
+stat_id = &"max_energy"
+operation = 0
+value = 10.0
+
+[sub_resource type="Resource" id="Resource_energy_regen"]
+script = ExtResource("2_mod")
+stat_id = &"energy_regen_per_second"
+operation = 0
+value = 1.0
 
 [resource]
 script = ExtResource("1_fungal")
@@ -9,7 +22,8 @@ display_name = "菌忆伞盖"
 enabled = true
 item_type = 1
 relic_scope = 1
-placeholder_text = "暂时只做显示，不执行战斗效果。"
+placeholder_text = "最大能量 +10，能量回复 +1/秒；清理房间后获得 1 点护盾或生命回复。"
 pool_tags = Array[StringName]([&"neutral_relic", &"test"])
 tags = Array[StringName]([&"plant", &"spore", &"memory"])
 max_stacks = 3
+stat_modifiers = Array[BuildStatModifier]([SubResource("Resource_max_energy"), SubResource("Resource_energy_regen")])

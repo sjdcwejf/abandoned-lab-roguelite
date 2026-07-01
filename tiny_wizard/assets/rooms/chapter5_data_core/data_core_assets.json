@@ -1,0 +1,70 @@
+{
+  "chapterName": "第五章：数据中枢",
+  "theme": "data_core",
+  "tileSize": 32,
+  "plannedMinutes": "约 6",
+  "baseTileset": "reuse_current_lab_floor_and_wall_assets",
+  "decorationTilesets": [
+    "reuse_current_data_core_procedural_overlay",
+    "reuse_current_lab_terminal_props"
+  ],
+  "roomScenes": {
+    "start": "res://tiny_wizard/room/room_types/lab_data_core_start_room.tscn",
+    "server": "res://tiny_wizard/room/room_types/lab_data_core_server_room.tscn",
+    "communication": "res://tiny_wizard/room/room_types/lab_data_core_comm_room.tscn",
+    "satellite": "res://tiny_wizard/room/room_types/lab_data_core_satellite_room.tscn",
+    "archive": "res://tiny_wizard/room/room_types/lab_data_core_archive_room.tscn",
+    "merchant": "res://tiny_wizard/room/room_types/lab_data_core_supply_station_room.tscn",
+    "boss": "res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn"
+  },
+  "archives": [
+    {
+      "id": "raven_access_key_residue",
+      "title": "渡鸦访问密钥残留",
+      "room": "服务器机房",
+      "clueId": "raven_old_key",
+      "effect": "raven_secret_fragments +1"
+    },
+    {
+      "id": "initial_signal_black_box",
+      "title": "黑匣子记录：事故初始信号",
+      "room": "通讯塔控制室",
+      "clueId": "leak_source_record",
+      "effect": "black_box_recorded; raven_secret_fragments +1"
+    },
+    {
+      "id": "satellite_disguise_log",
+      "title": "卫星伪装系统运行记录",
+      "room": "卫星伪装系统",
+      "clueId": "company_coverup_record",
+      "effect": "company_coverup_recorded"
+    },
+    {
+      "id": "mother_bait_hypothesis",
+      "title": "母体诱饵假说",
+      "room": "公司黑匣子档案库",
+      "clueId": "mother_bait_signal",
+      "effect": "ending_hints_unlocked; raven_secret_fragments +1"
+    }
+  ],
+  "endingHints": [
+    "与遗物融合越深，母体信号越容易定位你。",
+    "未被遗物深度绑定的个体，仍可能绕过召回协议。",
+    "在极端削弱状态下击杀母体，可能切断既定协议。"
+  ],
+  "ravenHiddenQuest": {
+    "requiredFragments": 3,
+    "fragments": [
+      "raven_old_key",
+      "leak_source_record",
+      "mother_bait_signal"
+    ],
+    "unlockMessage": "渡鸦隐藏任务线已开启",
+    "safehouseDialogue": [
+      "渡鸦：你看到了那些记录？",
+      "渡鸦：那不是完整真相。",
+      "渡鸦：我确实打开过门，但我不是第一个发出信号的人。"
+    ]
+  },
+  "notes": "Fifth chapter MVP reuses current lab visuals and procedural data-core overlay. Full server-room, communication-tower and black-box archive tileset art remains TODO."
+}

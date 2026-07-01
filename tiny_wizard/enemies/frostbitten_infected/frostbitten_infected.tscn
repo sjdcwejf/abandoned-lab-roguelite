@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.gd" id="2_script"]
+
+[node name="FrostbittenInfected" instance=ExtResource("1_base")]
+modulate = Color(0.74, 0.9, 1, 1)
+script = ExtResource("2_script")
+protomatter_drop_chance = 0.6
+
+[node name="Visual" parent="." index="0"]
+modulate = Color(0.7, 0.92, 1, 1)
+

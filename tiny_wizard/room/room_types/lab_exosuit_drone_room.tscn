@@ -1,0 +1,53 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_drone_rack"]
+size = Vector2(124, 86)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_conveyor"]
+size = Vector2(300, 42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_parts_bin"]
+size = Vector2(102, 74)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "combat"
+lab_room_label = "无人机装配线"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "drone"
+
+[node name="NorthDroneRackBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(206, 220)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthDroneRackBlocker"]
+shape = SubResource("RectangleShape2D_drone_rack")
+
+[node name="SouthDroneRackBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(818, 396)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthDroneRackBlocker"]
+shape = SubResource("RectangleShape2D_drone_rack")
+
+[node name="NorthAssemblyConveyorBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 128)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthAssemblyConveyorBlocker"]
+shape = SubResource("RectangleShape2D_conveyor")
+
+[node name="SouthPartsBinBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(512, 472)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthPartsBinBlocker"]
+shape = SubResource("RectangleShape2D_parts_bin")

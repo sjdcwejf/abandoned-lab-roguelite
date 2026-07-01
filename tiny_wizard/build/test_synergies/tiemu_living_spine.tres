@@ -1,6 +1,13 @@
-[gd_resource type="Resource" script_class="BuildSynergyDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BuildSynergyDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/build/build_synergy_definition.gd" id="1_syn"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_stat_modifier.gd" id="2_mod"]
+
+[sub_resource type="Resource" id="Resource_energy_regen"]
+script = ExtResource("2_mod")
+stat_id = &"energy_regen_per_second"
+operation = 0
+value = 1.0
 
 [resource]
 script = ExtResource("1_syn")
@@ -12,5 +19,6 @@ owner_character_id = &"tiemu"
 exclusive_group = &"tiemu_armor_fusion"
 tier = 2
 priority = 30
-placeholder_text = "铁幕专属遗物协同。暂时只显示激活，不执行战斗效果。"
+placeholder_text = "活体甲片沿脊盾闭合，能量回复额外 +1/秒。"
 required_item_ids = Array[StringName]([&"tiemu_spine_shield_fragment", &"tiemu_living_armor_plate"])
+stat_modifiers = Array[BuildStatModifier]([SubResource("Resource_energy_regen")])

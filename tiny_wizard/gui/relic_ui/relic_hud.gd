@@ -1,6 +1,7 @@
 class_name RelicHUD
 extends Control
 
+const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const ENTRY_SCENE := preload("res://tiny_wizard/gui/relic_ui/relic_hud_entry.tscn")
 
 var _relic_controller: RelicController
@@ -9,6 +10,7 @@ var _relic_controller: RelicController
 
 
 func _ready() -> void:
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree(self)
 	_refresh()
 
 
@@ -45,6 +47,7 @@ func _refresh() -> void:
 		if entry == null:
 			continue
 		list.add_child(entry)
+		CHINESE_FONT_BOOTSTRAP.apply_to_tree(entry)
 		entry.set_relic_data(relic_data)
 
 	var synergies := snapshot.get("synergies", []) as Array
@@ -53,4 +56,5 @@ func _refresh() -> void:
 		if entry == null:
 			continue
 		list.add_child(entry)
+		CHINESE_FONT_BOOTSTRAP.apply_to_tree(entry)
 		entry.set_synergy_data(synergy_data)

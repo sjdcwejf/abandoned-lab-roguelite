@@ -1,0 +1,61 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/cold_vent_room.gd" id="2_room_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.tscn" id="4_frost"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/cryo_spitter/cryo_spitter.tscn" id="5_spitter"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pipe"]
+size = Vector2(238, 42)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_room_script")
+lab_room_type = "cryo_vent"
+lab_room_label = "冷却通风廊"
+
+[node name="CryoRoomOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "vent"
+
+[node name="NorthPipeBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(512, 128)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthPipeBlocker"]
+shape = SubResource("RectangleShape2D_pipe")
+
+[node name="SouthPipeBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(512, 474)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthPipeBlocker"]
+shape = SubResource("RectangleShape2D_pipe")
+
+[node name="Vents" type="Node2D" parent="." index="10"]
+
+[node name="VentA" type="Node2D" parent="Vents" groups=["cryo_vents"]]
+position = Vector2(340, 250)
+
+[node name="Marker" type="Line2D" parent="Vents/VentA"]
+width = 3.0
+default_color = Color(0.46, 0.86, 1, 0.72)
+closed = true
+points = PackedVector2Array(-18, -18, 18, -18, 18, 18, -18, 18)
+
+[node name="VentB" type="Node2D" parent="Vents" groups=["cryo_vents"]]
+position = Vector2(680, 356)
+
+[node name="Marker" type="Line2D" parent="Vents/VentB"]
+width = 3.0
+default_color = Color(0.46, 0.86, 1, 0.72)
+closed = true
+points = PackedVector2Array(-18, -18, 18, -18, 18, 18, -18, 18)
+
+[node name="FrostbittenInfected" parent="Enemies" index="0" instance=ExtResource("4_frost")]
+position = Vector2(390, 312)
+
+[node name="CryoSpitter" parent="Enemies" index="1" instance=ExtResource("5_spitter")]
+position = Vector2(642, 232)

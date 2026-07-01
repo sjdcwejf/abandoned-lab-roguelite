@@ -1,0 +1,52 @@
+{
+  "chapterName": "低温封存区",
+  "theme": "cryogenic_lab",
+  "tileSize": 32,
+  "baseTileset": "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png",
+  "decorationTilesets": [
+    "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory floor_ walls_ and borders tileset-4.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/tileset.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png"
+  ],
+  "hazardTilesets": [
+    "res://tiny_wizard/interactable_objects/cryo_zone/cryo_zone.tscn"
+  ],
+  "propSprites": [
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/button_large_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/crates_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/portal_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/spriteSheet_tiledLiquids_32x32.png"
+  ],
+  "playableRoomScenes": {
+    "start": "res://tiny_wizard/room/room_types/lab_cryo_start_room.tscn",
+    "combat": "res://tiny_wizard/room/room_types/lab_cryo_combat_room.tscn",
+    "cryoPod": "res://tiny_wizard/room/room_types/lab_cryo_pod_room.tscn",
+    "coldVent": "res://tiny_wizard/room/room_types/lab_cryo_vent_room.tscn",
+    "reward": "res://tiny_wizard/room/room_types/lab_cryo_reward_room.tscn",
+    "elite": "res://tiny_wizard/room/room_types/lab_cryo_elite_room.tscn",
+    "bossAntechamber": "res://tiny_wizard/room/room_types/lab_cryo_boss_antechamber.tscn",
+    "boss": "res://tiny_wizard/room/room_types/lab_cryo_boss_room.tscn"
+  },
+  "enemyScenes": {
+    "frostbittenInfected": "res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.tscn",
+    "cryoSpitter": "res://tiny_wizard/enemies/cryo_spitter/cryo_spitter.tscn",
+    "stasisCrawler": "res://tiny_wizard/enemies/stasis_crawler/stasis_crawler.tscn",
+    "iceCoreGuardian": "res://tiny_wizard/enemies/ice_core_guardian/ice_core_guardian.tscn",
+    "subjectZeroCryo": "res://tiny_wizard/enemies/subject_zero_cryo/subject_zero_cryo.tscn"
+  },
+  "relics": [
+    "res://tiny_wizard/build/chapter3_relics/condensation_protocol.tres",
+    "res://tiny_wizard/build/chapter3_relics/stasis_protocol.tres",
+    "res://tiny_wizard/build/chapter3_relics/thermal_lining.tres",
+    "res://tiny_wizard/build/chapter3_relics/broken_coolant_valve.tres",
+    "res://tiny_wizard/build/chapter3_relics/stasis_tag.tres"
+  ],
+  "sourceTileSizes": {
+    "warped_top_down_lab": 16,
+    "void_lab_tileset": 32,
+    "sci_fi_facility": 16,
+    "land_of_pixels_lab": 32
+  },
+  "notes": "Third chapter first playable pass is connected through reusable room scenes, procedural cryogenic overlays and CryoZone hazards. Imported tilesets remain the preferred art source for future final room art."
+}

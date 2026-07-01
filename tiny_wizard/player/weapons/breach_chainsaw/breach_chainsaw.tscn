@@ -1,0 +1,89 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/breach_chainsaw/breach_chainsaw.gd" id="1_chainsaw"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chainsaw"]
+size = Vector2(82, 42)
+
+[node name="BreachChainsaw" type="Node2D"]
+script = ExtResource("1_chainsaw")
+display_name = "破门电锯"
+weapon_id = "breach_chainsaw"
+inventory_size = Vector2i(3, 1)
+inventory_color = Color(0.95, 0.74, 0.24, 1)
+damage = 1
+cooldown = 0.11
+active_time = 0.085
+knockback_multiplier = 0.72
+can_destroy_enemy_projectiles = true
+swing_start_angle = -0.08
+swing_end_angle = 0.08
+swing_recover_time = 0.04
+swing_scale_peak = Vector2(1.04, 1.03)
+rarity_name = "工业改造"
+combat_role = "近战持续压制"
+weapon_description = "封存区破门设备改造的链刃武器，按住攻击键可持续切割前方目标。"
+stat_damage_text = "1 / 高频切割"
+stat_rate_text = "极快"
+stat_range_text = "近"
+special_text = "持续按住可多段切割，并能打消敌方弹幕。"
+
+[node name="MotorBody" type="Polygon2D" parent="."]
+z_index = 7
+color = Color(0.12, 0.14, 0.16, 1)
+polygon = PackedVector2Array(-12, -13, 22, -15, 34, -7, 34, 8, 20, 15, -12, 12, -17, 2, -17, -7)
+
+[node name="Grip" type="Polygon2D" parent="."]
+position = Vector2(-11, 12)
+z_index = 8
+color = Color(0.06, 0.07, 0.08, 1)
+polygon = PackedVector2Array(-10, -5, 11, -5, 14, 2, 8, 12, -8, 12, -14, 2)
+
+[node name="WarningStripe" type="Line2D" parent="."]
+z_index = 9
+points = PackedVector2Array(-4, -12, 27, -10)
+width = 3.0
+default_color = Color(1, 0.67, 0.16, 1)
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="ChainBar" type="Polygon2D" parent="."]
+z_index = 8
+color = Color(0.18, 0.2, 0.21, 1)
+polygon = PackedVector2Array(28, -9, 82, -7, 92, 0, 82, 7, 28, 9)
+
+[node name="ChainGlow" type="Polygon2D" parent="."]
+visible = false
+z_index = 10
+color = Color(0.45, 1, 0.86, 0.34)
+polygon = PackedVector2Array(30, -13, 88, -10, 98, 0, 88, 10, 30, 13, 42, 0)
+
+[node name="ChainTeeth" type="Line2D" parent="."]
+z_index = 11
+points = PackedVector2Array(34, -6, 46, 6, 58, -6, 70, 6, 82, -6, 92, 0)
+width = 3.0
+default_color = Color(0.92, 1, 0.9, 0.9)
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SlashVisual" type="Polygon2D" parent="."]
+visible = false
+z_index = 12
+color = Color(0.65, 1, 0.82, 0.22)
+polygon = PackedVector2Array(22, -24, 91, -15, 106, 0, 91, 15, 22, 24, 38, 0)
+
+[node name="HitFlash" type="Polygon2D" parent="."]
+visible = false
+position = Vector2(91, 0)
+z_index = 13
+color = Color(0.9, 1, 0.76, 0.95)
+polygon = PackedVector2Array(-8, 0, -3, -3, 0, -11, 3, -3, 10, 0, 3, 3, 0, 11, -3, 3)
+
+[node name="HitArea" type="Area2D" parent="."]
+position = Vector2(57, 0)
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea"]
+shape = SubResource("RectangleShape2D_chainsaw")
+disabled = true

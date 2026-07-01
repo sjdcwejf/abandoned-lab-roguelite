@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_event_room.gd" id="2_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_target"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="5_terminal"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="7_red"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_relay"]
+size = Vector2(112, 110)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "pollution"
+lab_room_label = "通讯塔控制室"
+event_objective_text = "重启 3 个通讯终端，并清理房内异常单位。"
+event_target_label = "通讯终端"
+event_completion_text = "封锁解除：通讯终端已重启。"
+event_target_success_message = "通讯终端已重启"
+
+[node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "comm"
+
+[node name="LeftRelayBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(252, 222)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftRelayBlocker"]
+shape = SubResource("RectangleShape2D_relay")
+
+[node name="RightRelayBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(772, 382)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightRelayBlocker"]
+shape = SubResource("RectangleShape2D_relay")
+
+[node name="CommTargets" type="Node2D" parent="." index="10"]
+
+[node name="CommTerminalA" parent="CommTargets" instance=ExtResource("4_target")]
+position = Vector2(372, 216)
+max_health = 4
+display_name = "通讯终端"
+destroyed_display_name = "终端重启"
+
+[node name="CommTerminalB" parent="CommTargets" instance=ExtResource("4_target")]
+position = Vector2(512, 304)
+max_health = 4
+display_name = "通讯终端"
+destroyed_display_name = "终端重启"
+
+[node name="CommTerminalC" parent="CommTargets" instance=ExtResource("4_target")]
+position = Vector2(652, 392)
+max_health = 4
+display_name = "通讯终端"
+destroyed_display_name = "终端重启"
+
+[node name="BlackBoxSignalTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
+position = Vector2(512, 142)
+archive_id = "initial_signal_black_box"
+archive_title = "黑匣子记录：事故初始信号"
+archive_content = "事故前 00:17:42，数据中枢接收到一段加密信息。\n该信息随后被伪装成外部泄露数据，并进入公开网络。\n\n初步标记：外部入侵。\n复核结果：信号源无法确认。\n\n异常点：信息结构与设施内部母体信号存在相似波形。"
+success_message = "黑匣子档案已记录"
+clue_id = "leak_source_record"
+
+[node name="DataFloater" parent="Enemies" index="0" instance=ExtResource("6_black")]
+position = Vector2(430, 260)
+
+[node name="DataCrawler" parent="Enemies" index="1" instance=ExtResource("7_red")]
+position = Vector2(612, 350)

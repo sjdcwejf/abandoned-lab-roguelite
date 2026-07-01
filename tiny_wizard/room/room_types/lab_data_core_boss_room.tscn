@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_boss_room.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
+size = Vector2(100, 270)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_core"]
+size = Vector2(220, 170)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "boss"
+lab_room_label = "清理协议AI核心室"
+
+[node name="DataCoreOverlay" type="Node2D" parent="." index="8"]
+script = ExtResource("2_overlay")
+variant = "boss"
+
+[node name="PrototypeBoss" parent="Enemies" index="0"]
+boss_display_name = "清理协议AI（占位）"
+
+[node name="LeftCoreServerBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(188, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCoreServerBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="RightCoreServerBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(836, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightCoreServerBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="CentralCoreBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(512, 300)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CentralCoreBlocker"]
+shape = SubResource("RectangleShape2D_core")

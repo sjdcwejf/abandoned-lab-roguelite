@@ -1,0 +1,72 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="3_terminal"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_counter"]
+size = Vector2(330, 72)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
+size = Vector2(118, 150)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
+size = Vector2(76, 48)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "merchant"
+lab_room_label = "渡鸦数据补给站"
+
+[node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "merchant"
+
+[node name="NorthDataCounterBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(512, 224)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthDataCounterBlocker"]
+shape = SubResource("RectangleShape2D_counter")
+
+[node name="LeftServerRackBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(210, 386)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftServerRackBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="RightServerRackBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(814, 386)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightServerRackBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="EndingHintTerminal" parent="." index="12" instance=ExtResource("3_terminal")]
+position = Vector2(392, 354)
+archive_id = "ending_hint_terminal"
+archive_title = "结局条件提示"
+archive_content = "1. 母体召回风险：与遗物融合越深，母体信号越容易定位你。\n\n2. 纯净路线提示：未被遗物深度绑定的个体，仍可能绕过召回协议。\n\n3. 逆命路线提示：在极端削弱状态下击杀母体，可能切断既定协议。"
+success_message = "结局条件提示已记录"
+requires_ending_hints = true
+prompt_text = "按 F 查看结局条件提示"
+
+[node name="EndingHintTerminalBlocker" type="StaticBody2D" parent="." index="13"]
+position = Vector2(392, 354)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EndingHintTerminalBlocker"]
+shape = SubResource("RectangleShape2D_terminal")
+
+[node name="RavenMerchant" parent="." index="8"]
+merchant_title = "渡鸦数据补给站"
+merchant_message = "黑匣子索引已经松动。补给可以谈，但别把所有记录都当成我的债。"
+max_weapon_offers = 2
+affix_roll_chance = 0.7
+max_affix_count = 1
+allow_stock_refresh = true
+stock_refresh_cost = 1

@@ -8,6 +8,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 
 @export var max_health := 6
 @export var display_name := "原质污染源"
+@export var destroyed_display_name := "污染源清除"
 
 var _health := 0
 var _destroyed := false
@@ -53,7 +54,7 @@ func _destroy() -> void:
 	if collision_shape != null:
 		collision_shape.set_deferred("disabled", true)
 	if label != null:
-		label.text = "污染源清除"
+		label.text = destroyed_display_name
 
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)

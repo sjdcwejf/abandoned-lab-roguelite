@@ -1,0 +1,74 @@
+{
+  "chapterId": 4,
+  "chapterName": "第四章：外骨骼兵器工厂",
+  "areaName": "外骨骼兵器工厂",
+  "theme": "exosuit_weapon_factory",
+  "targetDurationMinutes": 5,
+  "tileSize": 32,
+  "baseRoomScene": "res://tiny_wizard/room/room.tscn",
+  "visualOverlay": "res://tiny_wizard/room/exosuit_factory_overlay.gd",
+  "roomPool": {
+    "start": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_start_room.tscn"
+    ],
+    "combat": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_assembly_room.tscn",
+      "res://tiny_wizard/room/room_types/lab_exosuit_drone_room.tscn"
+    ],
+    "event": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_test_room.tscn"
+    ],
+    "reward": [
+      "res://tiny_wizard/room/room_types/lab_reward_bomb_room.tscn",
+      "res://tiny_wizard/room/room_types/lab_reward_guarded_room.tscn"
+    ],
+    "weapon": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_weapon_room.tscn"
+    ],
+    "elite": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_elite_room.tscn"
+    ],
+    "merchant": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_armory_station_room.tscn"
+    ],
+    "boss": [
+      "res://tiny_wizard/room/room_types/lab_exosuit_boss_room.tscn"
+    ]
+  },
+  "fixedRules": [
+    "Every layer has a start room.",
+    "Every layer has a boss room.",
+    "The room before boss is always the Raven Armory Station.",
+    "Raven Armory Station contains only Raven merchant and armory terminal; no enemies, chests, or event target.",
+    "Boss remains placeholder in this MVP."
+  ],
+  "weaponAffixMvp": {
+    "weaponRoomChance": 0.5,
+    "ravenStationChance": 0.7,
+    "maxAffixCount": 1,
+    "implementedAffixes": [
+      "稳定",
+      "速射",
+      "源质充能"
+    ],
+    "todoAffixes": [
+      "扩容",
+      "精准"
+    ]
+  },
+  "archives": [
+    {
+      "title": "低温样本转运批次记录",
+      "summary": "低温封存区的部分源质样本已转入外骨骼兵器工厂，用于动力核心与武器适配测试。"
+    },
+    {
+      "title": "源质动力外骨骼稳定性报告",
+      "summary": "直接生物适配风险过高，机械外骨骼作为源质承载平台表现更稳定。"
+    },
+    {
+      "title": "重装清理机测试日志",
+      "summary": "弥赛亚重装清理机原本用于清理失控实验区，但其火力配置已经接近军用量产标准。"
+    }
+  ],
+  "notes": "First playable MVP for chapter 4. Uses procedural overlay and existing enemies/assets; no new external assets imported."
+}

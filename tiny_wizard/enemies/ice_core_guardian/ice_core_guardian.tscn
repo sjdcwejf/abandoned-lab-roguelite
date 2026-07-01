@@ -1,0 +1,42 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/ice_core_guardian/ice_core_guardian.gd" id="2_script"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="3_stats"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_physics"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+resource_local_to_scene = true
+script = ExtResource("3_stats")
+max_life = 18
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("4_physics")
+max_speed = 50.0
+acceleration = 0.28
+friction = 0.14
+impulse_force = 620.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_elite_body"]
+radius = 24.0
+
+[node name="IceCoreGuardian" instance=ExtResource("1_base")]
+modulate = Color(0.72, 0.88, 1, 1)
+scale = Vector2(1.02, 1.02)
+script = ExtResource("2_script")
+character_stats = SubResource("Resource_stats")
+physics_stats = SubResource("Resource_physics")
+protomatter_drop_chance = 1.0
+protomatter_min_drop = 3
+protomatter_max_drop = 5
+relic_drop_chance = 1.0
+relic_pool_tag = &"cryo_relic"
+green_blood_splatter_scale = 1.35
+
+[node name="Visual" parent="." index="0"]
+modulate = Color(0.66, 0.9, 1, 1)
+
+[node name="CollisionShape2D" parent="." index="2"]
+shape = SubResource("CircleShape2D_elite_body")
+

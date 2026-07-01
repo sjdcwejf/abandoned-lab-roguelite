@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BuildItemDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/build/build_item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://tiny_wizard/build/build_stat_modifier.gd" id="2_mod"]
+
+[sub_resource type="Resource" id="Resource_energy"]
+script = ExtResource("2_mod")
+stat_id = &"max_energy"
+operation = 0
+value = 5.0
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"thermal_lining"
+display_name = "热衬内胆"
+enabled = true
+item_type = 1
+relic_scope = 1
+placeholder_text = "低温区域对你的减速效果减半；最大能量 +5。"
+pool_tags = Array[StringName]([&"neutral_relic", &"cryo_relic", &"test"])
+tags = Array[StringName]([&"cryo", &"defense", &"equipment"])
+max_stacks = 1
+stat_modifiers = Array[BuildStatModifier]([SubResource("Resource_energy")])
+

@@ -1,0 +1,27 @@
+{
+  "chapterName": "低温封存区",
+  "tileSize": 32,
+  "materials": [
+    {
+      "role": "cryogenic_lab_base_floor_wall",
+      "source": "Warped Top-Down Tech Lab / Top Down Lab files",
+      "path": "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png"
+    },
+    {
+      "role": "supplemental_lab_floor_wall",
+      "source": "Top Down Laboratory Tileset - Pixel Art 32x32 by Void Arts",
+      "path": "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory floor_ walls_ and borders tileset-4.png"
+    },
+    {
+      "role": "sci_fi_consoles_buttons_devices",
+      "source": "Sci-Fi Facility Asset Pack",
+      "path": "res://tiny_wizard/assets/third_party/sci_fi_facility/tileset.png"
+    },
+    {
+      "role": "containment_tubes_liquids_bio_details",
+      "source": "Land of Pixels Laboratory Tileset by marceles",
+      "path": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png"
+    }
+  ],
+  "notes": "This manifest prepares Chapter 3 material selection. It does not alter current maps yet."
+}

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/interactable_objects/cryo_zone/cryo_zone.gd" id="1_cryo_zone"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cryo"]
+size = Vector2(128, 82)
+
+[node name="CryoZone" type="Area2D"]
+collision_layer = 0
+collision_mask = 10
+script = ExtResource("1_cryo_zone")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_cryo")

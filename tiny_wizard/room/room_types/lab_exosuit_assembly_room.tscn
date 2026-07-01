@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_rack"]
+size = Vector2(100, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_conveyor"]
+size = Vector2(280, 42)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "combat"
+lab_room_label = "自动化装配线"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "combat"
+
+[node name="LeftWeaponRackBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(184, 306)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWeaponRackBlocker"]
+shape = SubResource("RectangleShape2D_side_rack")
+
+[node name="RightWeaponRackBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(840, 306)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWeaponRackBlocker"]
+shape = SubResource("RectangleShape2D_side_rack")
+
+[node name="NorthConveyorBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 128)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthConveyorBlocker"]
+shape = SubResource("RectangleShape2D_conveyor")

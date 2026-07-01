@@ -1,0 +1,57 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/cultivation_chamber_room.png" id="2_room_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_bank"]
+size = Vector2(270, 336)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_equipment"]
+size = Vector2(250, 54)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_south_equipment"]
+size = Vector2(250, 48)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "combat"
+lab_room_label = "孢子培养廊"
+
+[node name="CultivationChamberRoomArt" type="Sprite2D" parent="." index="7"]
+z_index = -2
+texture_filter = 1
+texture = ExtResource("2_room_art")
+centered = false
+
+[node name="LeftCultureBankBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(240, 318)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
+shape = SubResource("RectangleShape2D_culture_bank")
+
+[node name="RightCultureBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(784, 318)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
+shape = SubResource("RectangleShape2D_culture_bank")
+
+[node name="NorthEquipmentBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 116)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEquipmentBlocker"]
+shape = SubResource("RectangleShape2D_north_equipment")
+disabled = true
+
+[node name="SouthEquipmentBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(512, 488)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEquipmentBlocker"]
+shape = SubResource("RectangleShape2D_south_equipment")
+disabled = true

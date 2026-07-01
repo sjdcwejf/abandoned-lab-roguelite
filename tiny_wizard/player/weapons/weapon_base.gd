@@ -3,6 +3,7 @@ extends Node2D
 
 
 const ENEMY_PROJECTILE_GROUP := &"enemy_projectiles"
+const WEAPON_AFFIX_SERVICE := preload("res://tiny_wizard/player/weapons/weapon_affix_service.gd")
 
 
 @export var display_name := ""
@@ -20,14 +21,18 @@ const ENEMY_PROJECTILE_GROUP := &"enemy_projectiles"
 
 var owner_character: Node2D
 var aim_direction := Vector2.RIGHT
+var weapon_affixes: Array = []
 
 
 func get_inventory_display_name() -> String:
+	var base_name := ""
 	if display_name != "":
-		return display_name
-	if name != "":
-		return name
-	return "武器"
+		base_name = display_name
+	elif name != "":
+		base_name = name
+	else:
+		base_name = "武器"
+	return WEAPON_AFFIX_SERVICE.format_weapon_name(base_name, weapon_affixes)
 
 
 func get_weapon_id() -> String:
@@ -60,11 +65,20 @@ func get_weapon_compare_info() -> Dictionary:
 		"special": _resolve_special_text(),
 		"size": get_inventory_size(),
 		"color": get_inventory_color(),
+		"affixes": weapon_affixes.duplicate(),
 	}
 
 
 func equip(new_owner: Node2D) -> void:
 	owner_character = new_owner
+
+
+func set_weapon_affixes(affixes: Array) -> void:
+	weapon_affixes = WEAPON_AFFIX_SERVICE.normalize_affixes(affixes)
+
+
+func get_weapon_affixes() -> Array:
+	return weapon_affixes.duplicate()
 
 
 func unequip() -> void:
@@ -96,11 +110,20 @@ func secondary_released() -> void:
 
 
 func get_fire_cooldown_multiplier() -> float:
+	var multiplier := WEAPON_AFFIX_SERVICE.get_cooldown_multiplier(weapon_affixes)
 	if owner_character != null:
 		var ability_controller := owner_character.get_node_or_null("AbilityController") as LabPlayerAbilityController
 		if ability_controller != null:
-			return ability_controller.get_fire_cooldown_multiplier()
-	return 1.0
+			multiplier *= ability_controller.get_fire_cooldown_multiplier()
+	return multiplier
+
+
+func get_scaled_damage(amount: int) -> int:
+	return maxi(1, int(ceil(float(amount) * WEAPON_AFFIX_SERVICE.get_damage_multiplier(weapon_affixes))))
+
+
+func get_modified_hit_damage(amount: int) -> int:
+	return get_scaled_damage(amount) + WEAPON_AFFIX_SERVICE.roll_extra_hit_damage(weapon_affixes)
 
 
 func get_fire_origin() -> Vector2:
@@ -148,8 +171,9 @@ func apply_damage_to_target(target: Object, amount: int, hit_from := Vector2.ZER
 	if final_hit_from == Vector2.ZERO and hit_origin != Vector2.ZERO and damage_target is Node2D:
 		final_hit_from = ((damage_target as Node2D).global_position - hit_origin).normalized()
 
-	damage_target.hit(amount, final_hit_from)
-	_notify_owner_weapon_hit(damage_target, amount)
+	var modified_amount := get_modified_hit_damage(amount)
+	damage_target.hit(modified_amount, final_hit_from)
+	_notify_owner_weapon_hit(damage_target, modified_amount)
 	return true
 
 
@@ -184,27 +208,29 @@ func _resolve_weapon_description() -> String:
 
 
 func _resolve_damage_text() -> String:
+	var suffix := _affix_stat_suffix()
 	if stat_damage_text != "":
-		return stat_damage_text
+		return stat_damage_text + suffix
 	if _has_weapon_property("damage"):
-		return str(get("damage"))
-	return "特殊"
+		return str(get_scaled_damage(int(get("damage")))) + suffix
+	return "特殊" + suffix
 
 
 func _resolve_rate_text() -> String:
+	var suffix := " +速射" if WEAPON_AFFIX_SERVICE.normalize_affixes(weapon_affixes).has(WEAPON_AFFIX_SERVICE.AFFIX_RAPID) else ""
 	if stat_rate_text != "":
-		return stat_rate_text
+		return stat_rate_text + suffix
 	if not _has_weapon_property("cooldown"):
-		return "持续"
+		return "持续" + suffix
 
 	var cooldown_value := float(get("cooldown"))
 	if cooldown_value <= 0.16:
-		return "极快"
+		return "极快" + suffix
 	if cooldown_value <= 0.3:
-		return "快"
+		return "快" + suffix
 	if cooldown_value <= 0.48:
-		return "中"
-	return "慢"
+		return "中" + suffix
+	return "慢" + suffix
 
 
 func _resolve_energy_text() -> String:
@@ -224,9 +250,13 @@ func _resolve_range_text() -> String:
 
 
 func _resolve_special_text() -> String:
-	if special_text != "":
-		return special_text
 	var notes := []
+	var affix_line := WEAPON_AFFIX_SERVICE.format_affix_line(weapon_affixes)
+	if affix_line != "":
+		notes.append(affix_line)
+	if special_text != "":
+		notes.append(special_text)
+		return "；".join(notes)
 	if _has_weapon_property("can_destroy_enemy_projectiles") and bool(get("can_destroy_enemy_projectiles")):
 		notes.append("挥击可打消敌方弹幕")
 	if _has_weapon_property("pellet_count") and int(get("pellet_count")) > 1:
@@ -236,6 +266,12 @@ func _resolve_special_text() -> String:
 	if notes.is_empty():
 		return "无特殊词条"
 	return "；".join(notes)
+
+
+func _affix_stat_suffix() -> String:
+	if WEAPON_AFFIX_SERVICE.has_visible_affixes(weapon_affixes):
+		return "（词条）"
+	return ""
 
 
 func _has_weapon_property(property_name: String) -> bool:

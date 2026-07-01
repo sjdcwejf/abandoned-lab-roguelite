@@ -40,8 +40,8 @@ class ItemStack:
 			if !item.stackable:
 				stack_size = 1
 			if quantity > stack_size:
-				quantity = item.stack_size
-				amount_left = quantity - item.stack_size
+				amount_left = quantity - stack_size
+				quantity = stack_size
 		
 		return amount_left 
 	func remove(amount)->int:
@@ -133,6 +133,8 @@ func remove_item(item, amount:=1):
 		amount = max_amount
 	if amount == -1:
 		amount = max_amount
+	if amount <= 0:
+		return
 	
 	var item_stacks = search_item_stacks(item)
 	
@@ -144,6 +146,8 @@ func remove_item(item, amount:=1):
 	while amount > 0:
 		var stack = item_stacks.pop_back()
 		amount = stack.remove(amount)
+		if stack.quantity <= 0:
+			inventory.erase(stack)
 	
 	item_changed.emit(item)
 
@@ -157,6 +161,8 @@ func use_item(user: QuiverCharacter, item, amount:=1):
 		amount = max_amount
 	if amount == -1:
 		amount = max_amount
+	if amount <= 0:
+		return
 	
 	
 	var item_stacks = search_item_stacks(item)
@@ -175,6 +181,8 @@ func use_item(user: QuiverCharacter, item, amount:=1):
 	while amount > 0:
 		var stack = item_stacks.pop_back()
 		amount = stack.remove(amount)
+		if stack.quantity <= 0:
+			inventory.erase(stack)
 	
 	
 	item_changed.emit(item)

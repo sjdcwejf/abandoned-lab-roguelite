@@ -1,0 +1,79 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_reward_guarded_room.tscn" id="1_base"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/greenhouse_reward_room.png" id="2_room_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay"]
+size = Vector2(142, 204)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_tray"]
+size = Vector2(108, 42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
+size = Vector2(72, 52)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "reward"
+lab_room_label = "温室样本库"
+
+[node name="GreenhouseRewardRoomArt" type="Sprite2D" parent="." index="7"]
+z_index = -2
+texture_filter = 1
+texture = ExtResource("2_room_art")
+centered = false
+
+[node name="NorthWestCultureBayBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(176, 176)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="SouthWestCultureBayBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(172, 430)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthWestCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="NorthEastCultureBayBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(844, 184)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="SouthEastCultureBayBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(836, 422)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEastCultureBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="WestTrayBlocker" type="StaticBody2D" parent="." index="12"]
+position = Vector2(352, 184)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WestTrayBlocker"]
+shape = SubResource("RectangleShape2D_side_tray")
+
+[node name="EastTrayBlocker" type="StaticBody2D" parent="." index="13"]
+position = Vector2(704, 176)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastTrayBlocker"]
+shape = SubResource("RectangleShape2D_side_tray")
+
+[node name="TerminalBlocker" type="StaticBody2D" parent="." index="14"]
+position = Vector2(610, 234)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TerminalBlocker"]
+shape = SubResource("RectangleShape2D_terminal")

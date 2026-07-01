@@ -5,6 +5,9 @@ extends RefCounted
 const CRAWLER_SCENE := preload("res://tiny_wizard/enemies/red_fly/red_fly.tscn")
 const FLOATER_SCENE := preload("res://tiny_wizard/enemies/black_fly/black_fly.tscn")
 const SPITTER_SCENE := preload("res://tiny_wizard/enemies/quarantine_spitter/quarantine_spitter.tscn")
+const FROSTBITTEN_SCENE := preload("res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.tscn")
+const STASIS_CRAWLER_SCENE := preload("res://tiny_wizard/enemies/stasis_crawler/stasis_crawler.tscn")
+const CRYO_SPITTER_SCENE := preload("res://tiny_wizard/enemies/cryo_spitter/cryo_spitter.tscn")
 
 const MAX_ENEMY_COUNT := 6
 const MAX_SPITTER_COUNT := 2
@@ -41,9 +44,30 @@ const ENEMY_DEFINITIONS := [
 	},
 ]
 
+const CRYO_ENEMY_DEFINITIONS := [
+	{
+		"id": "frostbitten_infected",
+		"scene": FROSTBITTEN_SCENE,
+		"cost": 1,
+		"weight": 5,
+	},
+	{
+		"id": "stasis_crawler",
+		"scene": STASIS_CRAWLER_SCENE,
+		"cost": 2,
+		"weight": 3,
+	},
+	{
+		"id": "cryo_spitter",
+		"scene": CRYO_SPITTER_SCENE,
+		"cost": 3,
+		"weight": 3,
+	},
+]
+
 
 static func populate(room: Room, rng: RandomNumberGenerator, path_depth: int) -> void:
-	if room == null or room.lab_room_type != "combat":
+	if room == null or not (room.lab_room_type in ["combat", "cryo_vent"]):
 		return
 	var enemies := room.get_node_or_null("Enemies")
 	if enemies == null:
@@ -52,7 +76,14 @@ static func populate(room: Room, rng: RandomNumberGenerator, path_depth: int) ->
 	_clear_authored_enemies(enemies)
 	var budget_index := clampi(path_depth - 1, 0, BUDGET_BY_DEPTH.size() - 1)
 	var budget := int(BUDGET_BY_DEPTH[budget_index])
-	var encounter := _build_encounter(rng, budget, path_depth)
+	if int(room.get_meta("chapter_id", 1)) == 3:
+		budget += 1
+	if int(room.get_meta("chapter_id", 1)) == 4:
+		budget += 2
+	if int(room.get_meta("chapter_id", 1)) == 5:
+		budget += 2
+	var definitions := _get_enemy_definitions(room)
+	var encounter := _build_encounter(rng, budget, path_depth, definitions)
 	var spawn_positions := _build_spawn_positions(room, encounter.size(), rng)
 	var spawned_ids := []
 
@@ -81,28 +112,34 @@ static func _clear_authored_enemies(enemies: Node) -> void:
 		child.free()
 
 
-static func _build_encounter(rng: RandomNumberGenerator, budget: int, path_depth: int) -> Array:
+static func _get_enemy_definitions(room: Room) -> Array:
+	if room != null and int(room.get_meta("chapter_id", 1)) == 3:
+		return CRYO_ENEMY_DEFINITIONS
+	return ENEMY_DEFINITIONS
+
+
+static func _build_encounter(rng: RandomNumberGenerator, budget: int, path_depth: int, enemy_definitions := ENEMY_DEFINITIONS) -> Array:
 	var encounter := []
 	var remaining_budget := budget
 	var spitter_count := 0
 
-	var crawler := ENEMY_DEFINITIONS[0] as Dictionary
+	var crawler := enemy_definitions[0] as Dictionary
 	encounter.append(crawler)
 	remaining_budget -= int(crawler["cost"])
 
 	while remaining_budget > 0 and encounter.size() < MAX_ENEMY_COUNT:
 		var candidates := []
 		var total_weight := 0
-		for definition_value in ENEMY_DEFINITIONS:
+		for definition_value in enemy_definitions:
 			var definition := definition_value as Dictionary
 			var cost := int(definition["cost"])
 			if cost > remaining_budget:
 				continue
-			if definition["id"] == "quarantine_spitter" and spitter_count >= MAX_SPITTER_COUNT:
+			if str(definition["id"]) in ["quarantine_spitter", "cryo_spitter"] and spitter_count >= MAX_SPITTER_COUNT:
 				continue
 
 			var weight := int(definition["weight"])
-			if definition["id"] == "quarantine_spitter":
+			if str(definition["id"]) in ["quarantine_spitter", "cryo_spitter"]:
 				weight += maxi(0, path_depth - 1)
 			candidates.append({"definition": definition, "weight": weight})
 			total_weight += weight
@@ -121,7 +158,7 @@ static func _build_encounter(rng: RandomNumberGenerator, budget: int, path_depth
 
 		encounter.append(selected)
 		remaining_budget -= int(selected["cost"])
-		if selected["id"] == "quarantine_spitter":
+		if str(selected["id"]) in ["quarantine_spitter", "cryo_spitter"]:
 			spitter_count += 1
 
 	_shuffle_array(encounter, rng)

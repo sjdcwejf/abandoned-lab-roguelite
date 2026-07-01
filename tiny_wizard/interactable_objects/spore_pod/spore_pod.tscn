@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.gd" id="1_pollution"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_spore_pod"]
+radius = 30.0
+
+[node name="SporePod" type="StaticBody2D" groups=["room_event_targets"]]
+script = ExtResource("1_pollution")
+max_health = 5
+display_name = "孢子囊"
+destroyed_display_name = "孢子囊清除"
+
+[node name="Glow" type="Polygon2D" parent="."]
+color = Color(0.42, 1, 0.22, 0.34)
+polygon = PackedVector2Array(0, -40, 20, -30, 34, -8, 32, 18, 12, 38, -14, 34, -34, 12, -30, -18, -12, -34)
+
+[node name="OuterRing" type="Line2D" parent="."]
+points = PackedVector2Array(0, -32, 18, -26, 30, -8, 28, 16, 10, 30, -14, 28, -30, 10, -28, -16, -10, -30, 0, -32)
+width = 5.0
+default_color = Color(0.5, 1, 0.32, 0.95)
+
+[node name="BackPlate" type="Polygon2D" parent="."]
+color = Color(0.04, 0.13, 0.08, 1)
+polygon = PackedVector2Array(0, -26, 18, -18, 26, 4, 12, 24, -12, 22, -28, 2, -18, -20)
+
+[node name="Core" type="Polygon2D" parent="."]
+color = Color(0.5, 1, 0.28, 1)
+polygon = PackedVector2Array(0, -14, 12, -6, 12, 8, 0, 16, -12, 8, -12, -6)
+
+[node name="VeinA" type="Line2D" parent="."]
+points = PackedVector2Array(-18, -4, -6, 4, 4, -2, 18, 8)
+width = 3.0
+default_color = Color(0.12, 0.48, 0.16, 0.9)
+
+[node name="VeinB" type="Line2D" parent="."]
+points = PackedVector2Array(-10, -20, -2, -8, 8, -14, 18, -4)
+width = 3.0
+default_color = Color(0.18, 0.72, 0.24, 0.85)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -40.0
+offset_top = 38.0
+offset_right = 40.0
+offset_bottom = 56.0
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+text = "孢子囊"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_spore_pod")

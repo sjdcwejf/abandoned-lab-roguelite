@@ -10,6 +10,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 
 var weapon_holder: Node
 var new_weapon_scene: PackedScene
+var new_weapon_affixes: Array = []
 var title_text := "武器对比"
 var action_text := "拾取"
 var cost_text := ""
@@ -51,6 +52,8 @@ static func _resolve_overlay_parent(owner: Node) -> Node:
 func setup(params: Dictionary) -> void:
 	weapon_holder = params.get("weapon_holder") as Node
 	new_weapon_scene = params.get("weapon_scene") as PackedScene
+	var affixes = params.get("weapon_affixes", [])
+	new_weapon_affixes = affixes.duplicate() if affixes is Array else []
 	title_text = str(params.get("title", title_text))
 	action_text = str(params.get("action", action_text))
 	cost_text = str(params.get("cost", ""))
@@ -170,7 +173,7 @@ func _build_ui() -> void:
 
 
 func _make_new_weapon_card() -> Control:
-	var info := _get_weapon_scene_info(new_weapon_scene)
+	var info := _get_weapon_scene_info(new_weapon_scene, new_weapon_affixes)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(322, 276)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -324,7 +327,10 @@ func _get_slot_infos() -> Array:
 			slot_info["scene"] = weapon_scene
 			slot_info["equipped"] = bool(raw_info.get("equipped", false))
 			if weapon_scene != null:
-				var compare_info := _get_weapon_scene_info(weapon_scene)
+				var raw_affixes = raw_info.get("affixes", [])
+				var compare_info := _get_weapon_scene_info(weapon_scene, raw_affixes if raw_affixes is Array else [])
+				if raw_info.has("damage"):
+					compare_info.merge(raw_info, true)
 				slot_info["name"] = compare_info.get("name", raw_info.get("name", "武器"))
 				slot_info["damage"] = compare_info.get("damage", "-")
 				slot_info["rate"] = compare_info.get("rate", "-")
@@ -349,7 +355,7 @@ func _get_subtitle_text() -> String:
 	return "确认前不会改变当前构筑；可先查看新武器与现有武器栏。"
 
 
-func _get_weapon_scene_info(weapon_scene: PackedScene) -> Dictionary:
+func _get_weapon_scene_info(weapon_scene: PackedScene, affixes := []) -> Dictionary:
 	var info := {
 		"name": "未知武器",
 		"rarity": "制式",
@@ -367,6 +373,7 @@ func _get_weapon_scene_info(weapon_scene: PackedScene) -> Dictionary:
 
 	var weapon := weapon_scene.instantiate()
 	if weapon is LabWeapon:
+		(weapon as LabWeapon).set_weapon_affixes(affixes if affixes is Array else [])
 		info.merge((weapon as LabWeapon).get_weapon_compare_info(), true)
 	elif weapon != null and weapon_scene.resource_path != "":
 		info["name"] = weapon_scene.resource_path.get_file().get_basename().replace("_", " ")

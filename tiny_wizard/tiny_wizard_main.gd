@@ -5,11 +5,18 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
 const MINIMAP_UI_SCRIPT := preload("res://tiny_wizard/gui/minimap_ui/minimap_ui.gd")
 const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn")
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const MAIN_MENU_SCENE := "res://tiny_wizard/gui/main_menu/main_menu.tscn"
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
+const RUN_STATE_BASE := "base"
 const RUN_STATE_LAYER_COMPLETE := "layer_complete"
-const MAX_FORMAL_LAYER_COUNT := 2
+const FORMAL_CHAPTER_ID := 1
+const CHAPTER_1_ID := 1
+const CHAPTER_2_ID := 2
+const CHAPTER_3_ID := 3
+const CHAPTER_4_ID := 4
+const CHAPTER_5_ID := 5
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -43,6 +50,7 @@ var _layer_clear_title_label: Label
 var _layer_clear_summary_label: Label
 var _layer_clear_weapons_label: Label
 var _layer_clear_inventory_label: Label
+var _layer_clear_next_button: Button
 var _death_prompt_root: Control
 var _death_prompt_status_label: Label
 var _death_prompt_title_label: Label
@@ -51,7 +59,17 @@ var _death_prompt_respawn_button: Button
 var _death_prompt_main_menu_button: Button
 var _room_objective_ui: Node
 var _minimap_ui: LabMinimapUI
+var _formal_chapter_id := FORMAL_CHAPTER_ID
+var _formal_chapter_title := ""
+var _formal_chapter_sector := ""
 var _formal_layer_index := 0
+var _base_completed_chapter_id := 0
+var _base_next_chapter_id := 0
+var _data_archive_records := {}
+var _raven_secret_clues := {}
+var _raven_secret_fragments := 0
+var _raven_hidden_quest_unlocked := false
+var _ending_hints_unlocked := false
 
 var rooms := {}
 
@@ -104,6 +122,8 @@ func _register_rooms() -> void:
 
 		if room.has_method("set_weapon_holder"):
 			room.call("set_weapon_holder", _get_weapon_holder())
+		if room.has_method("set_relic_controller"):
+			room.call("set_relic_controller", _get_relic_controller())
 
 		_connect_black_holes(room)
 
@@ -260,6 +280,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 
 	_character = character_scene.instantiate() as Node2D
 	_character.name = "Character"
+	_make_character_runtime_resources_unique(_character)
 	add_child(_character)
 	_character.set("gui_path", NodePath("../Camera2D/GUI"))
 	_initialize_character_relic_controller()
@@ -269,13 +290,13 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
 
 	if play_tutorial:
-		_configure_character_for_tutorial()
+		_configure_character_for_starting_loadout()
 		_start_tutorial_run(_selected_character_id)
 	else:
 		_start_formal_run()
 
 
-func _configure_character_for_tutorial() -> void:
+func _configure_character_for_starting_loadout() -> void:
 	var weapon_holder := _get_weapon_holder()
 	if weapon_holder == null or not weapon_holder.has_method("set_weapon_loadout"):
 		return
@@ -288,6 +309,57 @@ func _configure_character_for_tutorial() -> void:
 
 	if starting_weapon != null:
 		weapon_holder.set_weapon_loadout([starting_weapon], 0)
+
+
+func _rebuild_selected_character_for_checkpoint() -> bool:
+	var character_id := _selected_character_id
+	if character_id == "":
+		character_id = CharacterSelectScreen.TIEMU_ID
+
+	_selected_character_id = character_id
+	var character_scene := _get_selected_character_scene()
+	if character_scene == null:
+		push_error("Cannot rebuild checkpoint character because no character scene was assigned.")
+		return false
+
+	_hide_layer_clear_screen()
+	_hide_death_prompt(false)
+	get_tree().paused = false
+	if _character != null and is_instance_valid(_character):
+		_character.queue_free()
+
+	_character = character_scene.instantiate() as Node2D
+	_character.name = "Character"
+	_make_character_runtime_resources_unique(_character)
+	add_child(_character)
+	_character.set("gui_path", NodePath("../Camera2D/GUI"))
+	_initialize_character_relic_controller()
+	_reset_character_inventory()
+	_bind_character_weapon_ui()
+	if _character.has_signal("respawn_requested"):
+		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
+
+	_configure_character_for_starting_loadout()
+	var character_stats := _get_character_stats()
+	if character_stats != null:
+		character_stats.set_life_to_max()
+	_character.set("can_grab_items", true)
+	_set_character_control_enabled(true)
+	return true
+
+
+func return_to_chapter_one_base_after_death() -> void:
+	if not _rebuild_selected_character_for_checkpoint():
+		return
+	_start_chapter_base(CHAPTER_1_ID)
+	print("Subject rollback complete. Returning to Chapter 1 Raven Outpost.")
+
+
+func abandon_current_run_to_chapter_one_start() -> void:
+	if not _rebuild_selected_character_for_checkpoint():
+		return
+	_start_formal_run(1, CHAPTER_1_ID)
+	print("Run abandoned. Returning to Chapter 1 formal entry checkpoint.")
 
 
 func _start_tutorial_run(wake_character_id: String) -> void:
@@ -304,9 +376,14 @@ func _start_tutorial_run(wake_character_id: String) -> void:
 	_enter_start_room(wake_character_id)
 
 
-func _start_formal_run(layer_index := 1) -> void:
+func _start_formal_run(layer_index := 1, chapter_id := FORMAL_CHAPTER_ID) -> void:
 	_run_state = RUN_STATE_FORMAL
-	_formal_layer_index = clampi(layer_index, 1, MAX_FORMAL_LAYER_COUNT)
+	_formal_chapter_id = chapter_id
+	_formal_layer_index = clampi(layer_index, 1, _get_formal_layer_count())
+	_formal_chapter_title = LabDungeonGenerator.get_chapter_title(_formal_chapter_id)
+	_formal_chapter_sector = LabDungeonGenerator.get_chapter_sector_label(_formal_chapter_id)
+	_base_completed_chapter_id = 0
+	_base_next_chapter_id = 0
 	_hide_tutorial_hint()
 	_hide_room_objective()
 	_hide_minimap()
@@ -314,7 +391,7 @@ func _start_formal_run(layer_index := 1) -> void:
 	_set_character_control_enabled(true)
 	_current_room = start_room_coord
 	if use_generated_lab_dungeon:
-		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index))
+		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index), _formal_chapter_id, _formal_layer_index)
 	else:
 		rooms = _collect_existing_rooms()
 
@@ -326,7 +403,118 @@ func _start_formal_run(layer_index := 1) -> void:
 	_enter_start_room()
 
 
+func _start_chapter_base(completed_chapter_id: int) -> void:
+	_run_state = RUN_STATE_BASE
+	_base_completed_chapter_id = completed_chapter_id
+	_base_next_chapter_id = LabDungeonGenerator.get_next_chapter_id(completed_chapter_id)
+	_hide_tutorial_hint()
+	_hide_room_objective()
+	_hide_minimap()
+	_hide_layer_clear_screen()
+	_set_character_control_enabled(true)
+	_current_room = start_room_coord
+	rooms = LabDungeonGenerator.generate_chapter_base($Rooms, completed_chapter_id)
+	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
+	_register_rooms()
+	_update_room_doors()
+	_apply_base_story_progress()
+	_enter_base_room()
+	if completed_chapter_id == CHAPTER_5_ID:
+		_show_story_feedback("数据中枢记录已完成，深层熵区入口将在后续版本开放。", 2.0)
+
+
+func _enter_base_room() -> void:
+	var base_room = get_current_room()
+	if base_room == null:
+		push_error("Base room %s was not generated." % start_room_coord)
+		return
+
+	$Camera2D.position = _room_camera_position(_current_room)
+	if _character != null:
+		_character.global_position = base_room.get_room_global_position() + Vector2(512, 468)
+		_character.set("velocity", Vector2.ZERO)
+	base_room.enter_room()
+	_print_dungeon_summary()
+	_update_room_feedback_for_room(base_room)
+
+
+func _apply_base_story_progress() -> void:
+	var base_room = get_room(start_room_coord)
+	if base_room == null:
+		return
+	base_room.set_meta("ending_hints_unlocked", _ending_hints_unlocked)
+	base_room.set_meta("raven_hidden_quest_unlocked", _raven_hidden_quest_unlocked)
+	base_room.set_meta("raven_secret_fragments", _raven_secret_fragments)
+	if base_room.has_method("refresh_story_progress"):
+		base_room.call("refresh_story_progress")
+
+
+func are_ending_hints_unlocked() -> bool:
+	return _ending_hints_unlocked
+
+
+func record_data_archive(payload: Dictionary) -> void:
+	var archive_id := str(payload.get("archive_id", ""))
+	if archive_id == "":
+		archive_id = str(payload.get("title", "data_archive")).to_snake_case()
+	var first_read := not _data_archive_records.has(archive_id)
+	_data_archive_records[archive_id] = {
+		"title": str(payload.get("title", "")),
+		"content": str(payload.get("content", "")),
+		"read": true,
+	}
+
+	var messages := PackedStringArray()
+	var success_message := str(payload.get("success_message", "数据档案已同步"))
+	if first_read and success_message != "":
+		_append_unique_story_message(messages, success_message)
+	if bool(payload.get("unlock_ending_hints", false)) and not _ending_hints_unlocked:
+		_ending_hints_unlocked = true
+		_append_unique_story_message(messages, "结局条件提示已解锁")
+
+	var clue_id := str(payload.get("clue_id", ""))
+	if first_read and _is_raven_hidden_clue(clue_id) and not _raven_secret_clues.has(clue_id):
+		_raven_secret_clues[clue_id] = true
+		_raven_secret_fragments = _raven_secret_clues.size()
+		_append_unique_story_message(messages, "渡鸦旧债线索 +1")
+		if _raven_secret_fragments >= 3 and not _raven_hidden_quest_unlocked:
+			_raven_hidden_quest_unlocked = true
+			_append_unique_story_message(messages, "渡鸦隐藏任务线已开启")
+
+	if messages.is_empty():
+		if first_read:
+			_append_unique_story_message(messages, success_message)
+		else:
+			_append_unique_story_message(messages, "该档案已同步。")
+
+	_show_story_feedback("\n".join(messages), 1.8)
+
+
+func _append_unique_story_message(messages: PackedStringArray, message: String) -> void:
+	if message == "":
+		return
+	if messages.has(message):
+		return
+	messages.append(message)
+
+
+func _is_raven_hidden_clue(clue_id: String) -> bool:
+	return clue_id in [
+		"raven_old_key",
+		"leak_source_record",
+		"mother_bait_signal",
+	]
+
+
+func _show_story_feedback(message: String, seconds := 1.6) -> void:
+	if message == "":
+		return
+	INTERACTION_FEEDBACK.show_from(self, message, seconds)
+
+
 func _install_formal_layer_events() -> void:
+	if _formal_chapter_id != CHAPTER_1_ID:
+		return
 	if _formal_layer_index != POLLUTION_EVENT_LAYER:
 		return
 
@@ -421,6 +609,19 @@ func _initialize_character_relic_controller() -> void:
 	relic_controller.initialize(_character, null)
 
 
+func _make_character_runtime_resources_unique(character: Node2D) -> void:
+	if character == null:
+		return
+
+	var character_stats := character.get("character_stats") as Resource
+	if character_stats != null:
+		character.set("character_stats", character_stats.duplicate(true))
+
+	var physics_stats := character.get("physics_stats") as Resource
+	if physics_stats != null:
+		character.set("physics_stats", physics_stats.duplicate(true))
+
+
 func _bind_character_weapon_ui() -> void:
 	var gui := $Camera2D/GUI
 	if gui == null:
@@ -501,8 +702,17 @@ func _on_black_hole_entered(body: Node2D) -> void:
 			print("Sealing wake sequence complete. Entering the sealed sector.")
 			call_deferred("_start_formal_run", 1)
 		RUN_STATE_FORMAL:
-			if _formal_layer_index < MAX_FORMAL_LAYER_COUNT:
+			if _formal_layer_index < _get_formal_layer_count():
 				call_deferred("_start_next_formal_layer")
+			elif LabDungeonGenerator.get_next_chapter_id(_formal_chapter_id) > 0:
+				call_deferred("_start_chapter_base", _formal_chapter_id)
+			elif _formal_chapter_id == CHAPTER_5_ID:
+				call_deferred("_start_chapter_base", _formal_chapter_id)
+			else:
+				call_deferred("_complete_formal_layer")
+		RUN_STATE_BASE:
+			if _base_next_chapter_id > 0:
+				call_deferred("_start_formal_run", 1, _base_next_chapter_id)
 			else:
 				call_deferred("_complete_formal_layer")
 
@@ -510,15 +720,19 @@ func _on_black_hole_entered(body: Node2D) -> void:
 func _start_next_formal_layer() -> void:
 	if _run_state != RUN_STATE_FORMAL:
 		return
-	var next_layer := mini(_formal_layer_index + 1, MAX_FORMAL_LAYER_COUNT)
-	print("Entering Sealing Protocol layer %d." % next_layer)
-	_start_formal_run(next_layer)
+	var next_layer := mini(_formal_layer_index + 1, _get_formal_layer_count())
+	print("Entering %s layer %d." % [_formal_chapter_title, next_layer])
+	_start_formal_run(next_layer, _formal_chapter_id)
 
 
 func _get_formal_layer_seed(layer_index: int) -> int:
 	if dungeon_seed == 0:
 		return 0
-	return dungeon_seed + maxi(0, layer_index - 1)
+	return dungeon_seed + maxi(0, _formal_chapter_id - 1) * 1000 + maxi(0, layer_index - 1)
+
+
+func _get_formal_layer_count() -> int:
+	return LabDungeonGenerator.get_chapter_layer_count(_formal_chapter_id)
 
 
 func _complete_formal_layer() -> void:
@@ -531,7 +745,7 @@ func _complete_formal_layer() -> void:
 	_hide_minimap()
 	_set_character_control_enabled(false)
 	_show_layer_clear_screen()
-	print("Formal layer %d complete." % _formal_layer_index)
+	print("%s layer %d complete." % [_formal_chapter_title, _formal_layer_index])
 
 
 func _set_character_control_enabled(enabled: bool) -> void:
@@ -626,10 +840,11 @@ func _setup_layer_clear_screen() -> void:
 	buttons.add_child(restart_button)
 
 	var next_layer_button := Button.new()
-	next_layer_button.text = "更深封存区：下一版本开放"
+	next_layer_button.text = "后续章节：下一版本开放"
 	next_layer_button.disabled = true
 	next_layer_button.custom_minimum_size = Vector2(190, 42)
 	buttons.add_child(next_layer_button)
+	_layer_clear_next_button = next_layer_button
 
 
 func _make_layer_clear_panel_style() -> StyleBoxFlat:
@@ -696,13 +911,37 @@ func _hide_layer_clear_screen() -> void:
 
 func _refresh_layer_clear_screen() -> void:
 	if _layer_clear_title_label != null:
-		_layer_clear_title_label.text = "第 %d 层封存协议完成" % _formal_layer_index
+		_layer_clear_title_label.text = "%s｜第 %d 层完成" % [_formal_chapter_title, _formal_layer_index]
 	if _layer_clear_summary_label != null:
-		_layer_clear_summary_label.text = "失格者 A-03 已肃清。当前构筑快照："
+		_layer_clear_summary_label.text = _get_layer_clear_summary_text()
 	if _layer_clear_weapons_label != null:
 		_layer_clear_weapons_label.text = _get_layer_clear_weapon_text()
 	if _layer_clear_inventory_label != null:
 		_layer_clear_inventory_label.text = _get_layer_clear_inventory_text()
+	if _layer_clear_next_button != null:
+		_layer_clear_next_button.text = _get_layer_clear_next_button_text()
+
+
+func _get_layer_clear_summary_text() -> String:
+	if _formal_chapter_id == CHAPTER_5_ID:
+		return "数据中枢记录已完成，深层熵区入口将在后续版本开放。当前构筑快照："
+	if _formal_chapter_id == CHAPTER_4_ID:
+		return "弥赛亚重装清理机停放库已记录。数据中枢访问权限已解锁。当前构筑快照："
+	if _formal_chapter_id == CHAPTER_3_ID:
+		return "零号封存体已压制。已回收封存区黑匣子碎片，兵器工厂访问权限待解锁。当前构筑快照："
+	if _formal_chapter_id == CHAPTER_2_ID:
+		return "温室守望者反应已记录。当前构筑快照："
+	return "失格者 A-03 已肃清。当前构筑快照："
+
+
+func _get_layer_clear_next_button_text() -> String:
+	if _formal_chapter_id == CHAPTER_5_ID:
+		return "第六章：深层熵区，后续版本开放"
+	if _formal_chapter_id == CHAPTER_4_ID:
+		return "进入临时安全屋，准备前往第五章"
+	if _formal_chapter_id == CHAPTER_3_ID:
+		return "%s：下一版本开放" % LabDungeonGenerator.get_chapter_completion_destination(_formal_chapter_id)
+	return "后续章节：下一版本开放"
 
 
 func _get_layer_clear_weapon_text() -> String:
@@ -909,16 +1148,24 @@ func _refresh_death_prompt_text() -> void:
 	if _death_prompt_title_label != null:
 		_death_prompt_title_label.text = GameSettings.tr_ui("death_title")
 	if _death_prompt_description_label != null:
-		_death_prompt_description_label.text = GameSettings.tr_ui("death_desc")
+		if _run_state == RUN_STATE_TUTORIAL:
+			_death_prompt_description_label.text = GameSettings.tr_ui("death_desc_tutorial")
+		else:
+			_death_prompt_description_label.text = GameSettings.tr_ui("death_desc")
 	if _death_prompt_respawn_button != null:
-		_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn")
+		if _run_state == RUN_STATE_TUTORIAL:
+			_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn_tutorial")
+		else:
+			_death_prompt_respawn_button.text = GameSettings.tr_ui("death_respawn")
 	if _death_prompt_main_menu_button != null:
 		_death_prompt_main_menu_button.text = GameSettings.tr_ui("death_main_menu")
 
 
 func _confirm_death_respawn() -> void:
-	_hide_death_prompt()
-	_respawn_character_at_start()
+	if _run_state == RUN_STATE_TUTORIAL:
+		abandon_current_run_to_chapter_one_start()
+	else:
+		return_to_chapter_one_base_after_death()
 
 
 func _return_to_main_menu_from_death() -> void:
@@ -1009,6 +1256,10 @@ func _update_room_feedback_for_room(room: Room) -> void:
 		_hide_tutorial_hint()
 		_update_formal_room_feedback(room)
 		return
+	if _run_state == RUN_STATE_BASE:
+		_hide_tutorial_hint()
+		_update_base_room_feedback(room)
+		return
 	_hide_room_objective()
 	_hide_tutorial_hint()
 	_hide_minimap()
@@ -1041,7 +1292,7 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 func _update_formal_room_feedback(room: Room) -> void:
 	var type_label := _get_formal_room_type_label(room.lab_room_type)
-	var objective := _get_formal_room_objective(room.lab_room_type)
+	var objective := _get_formal_room_objective(room.lab_room_type, room.lab_room_label)
 	var room_label := room.lab_room_label
 	if room_label == "":
 		room_label = type_label
@@ -1050,8 +1301,25 @@ func _update_formal_room_feedback(room: Room) -> void:
 	if _room_objective_ui == null:
 		_update_minimap_current_room()
 		return
-	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective)
+	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective, _formal_chapter_title)
 	_update_minimap_current_room()
+
+
+func _update_base_room_feedback(room: Room) -> void:
+	_hide_minimap()
+	if _room_objective_ui == null:
+		return
+	var next_title := LabDungeonGenerator.get_chapter_title(_base_next_chapter_id) if _base_next_chapter_id > 0 else "后续章节"
+	var objective := "延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title
+	if _base_completed_chapter_id == CHAPTER_5_ID:
+		objective = "数据中枢记录已完成。深层熵区入口将在后续版本开放。"
+	_room_objective_ui.show_room(
+		room,
+		0,
+		"临时安全屋",
+		objective,
+		"渡鸦据点"
+	)
 
 
 func _get_formal_room_type_label(room_type: String) -> String:
@@ -1061,34 +1329,114 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"combat":
 			return "怪物房"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "数据事件房"
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "测试场事件房"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "虫巢事件房"
 			return "污染事件房"
+		"data_comm":
+			return "数据事件房"
+		"data_satellite":
+			return "数据事件房"
+		"cryo_pod":
+			return "冷冻舱事件房"
+		"cryo_vent":
+			return "低温喷口房"
+		"elite":
+			return "精英房"
 		"reward":
 			return "奖励房"
 		"weapon":
 			return "武器房"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "数据补给站"
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "军械补给站"
 			return "安全屋"
+		"archive":
+			return "剧情档案库"
 		"boss":
 			return "Boss 房"
 	return "未知区域"
 
 
-func _get_formal_room_objective(room_type: String) -> String:
+func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 	match room_type:
 		"start":
-			return "确认装备状态，进入封存区。"
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "进入数据中枢。"
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "进入兵器工厂。"
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "确认当前构筑，进入低温封存区。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "确认前哨构筑，进入生态温室。"
+			return "确认装备状态，进入极渊前哨基地。"
 		"combat":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "清除所有异常单位。"
+			if _formal_chapter_id == CHAPTER_4_ID:
+				if room_label == "无人机装配线":
+					return "清理装配线异常单位。"
+				return "清除所有安保单位。"
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "清除冷雾处理间内的冻伤样本。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "清除孢子培养廊内的失控样本。"
 			return "清除房内样本，解除门锁。"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				if room_label == "通讯塔控制室":
+					return "重启通讯终端 0/3。"
+				if room_label == "卫星伪装系统":
+					return "关闭伪装节点 0/3。"
+				return "同步数据节点 0/3。"
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "摧毁外骨骼测试节点 0/3。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "清理虫巢样本，击碎孢子囊，解除温室封锁。"
 			return "清除原质污染源，并肃清房内样本。"
+		"data_comm":
+			return "重启通讯终端 0/3。"
+		"data_satellite":
+			return "关闭伪装节点 0/3。"
 		"reward":
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "肃清封存样本库守卫，回收补给箱。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "肃清温室样本库守卫，回收补给箱。"
 			return "肃清守卫样本，回收补给箱。"
 		"weapon":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "选择一件带有词条概率的武器。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "回收渡鸦温室军械，整理当前构筑。"
 			return "回收随机军械，整理当前构筑。"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "整备并检查数据档案。"
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "整备武器与补给。"
+			if _formal_chapter_id == CHAPTER_3_ID:
+				return "确认低温封存舱状态，进入零号封存室。"
+			if _formal_chapter_id == CHAPTER_2_ID:
+				return "在渡鸦温室补给站交易，准备进入培育舱。"
 			return "与渡鸦交易，补充装备后前往下一房间。"
+		"cryo_pod":
+			return "检查 3 个冷冻舱，清除释放出的封存样本。"
+		"cryo_vent":
+			return "避开周期冷气喷口，清除房内冻伤样本。"
+		"elite":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "击败仓库守卫。"
+			return "击败冰核守卫，回收低温封存遗物。"
+		"archive":
+			return "读取黑匣子档案。"
 		"boss":
-			return "击败失格者 A-03，稳定下行裂隙。"
+			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
 	return ""
 
 
@@ -1114,7 +1462,7 @@ func _hide_room_objective() -> void:
 func _set_minimap_rooms() -> void:
 	if _minimap_ui == null:
 		return
-	_minimap_ui.set_rooms(rooms, _formal_layer_index)
+	_minimap_ui.set_rooms(rooms, _formal_layer_index, _formal_chapter_title)
 
 
 func _update_minimap_current_room() -> void:
@@ -1142,7 +1490,12 @@ func _print_dungeon_summary() -> void:
 	var seed_text := ""
 	if _run_state == RUN_STATE_FORMAL and use_generated_lab_dungeon:
 		seed_text = " (seed %d)" % LabDungeonGenerator.last_seed
-	print("Generated %d-room %s Sealing Protocol sector%s:" % [rooms.size(), _run_state, seed_text])
+	var chapter_text := ""
+	if _run_state == RUN_STATE_FORMAL:
+		chapter_text = " %s / %s" % [_formal_chapter_title, _formal_chapter_sector]
+	elif _run_state == RUN_STATE_BASE:
+		chapter_text = " 临时安全屋 / 渡鸦据点"
+	print("Generated %d-room %s%s sector%s:" % [rooms.size(), _run_state, chapter_text, seed_text])
 	for room_pos in rooms:
 		var room = rooms[room_pos]
 		print(" - ", room.lab_room_label, " [", room.lab_room_type, "] at ", room_pos)

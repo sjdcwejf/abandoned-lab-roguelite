@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_formal_start_room.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pipe_bank"]
+size = Vector2(112, 236)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gate"]
+size = Vector2(260, 44)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "start"
+lab_room_label = "兵器工厂入口"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "start"
+
+[node name="LeftSourcePipelineBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(208, 300)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftSourcePipelineBlocker"]
+shape = SubResource("RectangleShape2D_pipe_bank")
+
+[node name="RightSourcePipelineBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(816, 300)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightSourcePipelineBlocker"]
+shape = SubResource("RectangleShape2D_pipe_bank")
+
+[node name="NorthSecurityGateBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 120)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthSecurityGateBlocker"]
+shape = SubResource("RectangleShape2D_gate")

@@ -8,6 +8,7 @@ const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedbac
 # The path to the body of the object (should be a RigidBody2D)
 @export var object_body_path : NodePath
 @export var overlap_query_interval := 0.08
+@export var overlap_query_margin := 10.0
 @export var repeat_interact_cooldown := 0.28
 @export var require_interact_input := false
 @export var prompt_text := "按 F 交互"
@@ -95,6 +96,7 @@ func _query_overlapping_character() -> void:
 		var query := PhysicsShapeQueryParameters2D.new()
 		query.shape = collision_shape.shape
 		query.transform = collision_shape.global_transform
+		query.margin = overlap_query_margin
 		query.collision_mask = _object_body.collision_mask
 		query.exclude = [_object_body.get_rid()]
 		query.collide_with_bodies = true
@@ -187,7 +189,7 @@ func _create_prompt_label() -> void:
 	_prompt_label.add_theme_constant_override("shadow_offset_x", 1)
 	_prompt_label.add_theme_constant_override("shadow_offset_y", 1)
 	_prompt_label.add_theme_font_size_override("font_size", 13)
-	prompt_parent.add_child(_prompt_label)
+	prompt_parent.call_deferred("add_child", _prompt_label)
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(_prompt_label)
 
 

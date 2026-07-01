@@ -7,6 +7,11 @@ const DEFAULT_RELIC_DEFINITIONS: Array[BuildItemDefinition] = [
 	preload("res://tiny_wizard/build/test_relics/hollow_tail_segment.tres"),
 	preload("res://tiny_wizard/build/test_relics/tiemu_spine_shield_fragment.tres"),
 	preload("res://tiny_wizard/build/test_relics/tiemu_living_armor_plate.tres"),
+	preload("res://tiny_wizard/build/chapter3_relics/condensation_protocol.tres"),
+	preload("res://tiny_wizard/build/chapter3_relics/stasis_protocol.tres"),
+	preload("res://tiny_wizard/build/chapter3_relics/thermal_lining.tres"),
+	preload("res://tiny_wizard/build/chapter3_relics/broken_coolant_valve.tres"),
+	preload("res://tiny_wizard/build/chapter3_relics/stasis_tag.tres"),
 ]
 
 

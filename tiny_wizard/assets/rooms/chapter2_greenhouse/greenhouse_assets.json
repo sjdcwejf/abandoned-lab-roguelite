@@ -1,0 +1,26 @@
+{
+  "chapterName": "生态温室",
+  "theme": "greenhouse",
+  "tileSize": 32,
+  "baseTileset": "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory floor_ walls_ and borders tileset-4.png",
+  "decorationTilesets": [
+    "res://tiny_wizard/assets/third_party/mars_greenhouse/tilesets_32x32.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png"
+  ],
+  "hazardTilesets": [
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/spriteSheet_tiledLiquids_32x32.png"
+  ],
+  "propSprites": [
+    "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory objects-1.png",
+    "res://tiny_wizard/assets/third_party/mars_greenhouse/tilesets.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesWalls.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/spriteSheet_lightBulbSmallAnimation_32x32.png"
+  ],
+  "sourceTileSizes": {
+    "void_lab_tileset": 32,
+    "mars_greenhouse_original": 16,
+    "mars_greenhouse_scaled": 32,
+    "land_of_pixels_lab": 32
+  },
+  "notes": "Lab tileset provides floors, walls, doors and base room structure. Mars greenhouse provides glass modules, hydroponic trays and plant culture props. LandOfPixels provides bio-lab devices, green liquid and equipment details. Existing Chapter 2 composite room PNGs remain under res://tiny_wizard/assets/art/greenhouse/rooms/."
+}

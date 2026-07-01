@@ -1,6 +1,8 @@
 class_name RelicPickup
 extends Node2D
 
+signal picked_up(relic_definition: BuildItemDefinition)
+
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 
 @export var relic_definition: BuildItemDefinition
@@ -47,6 +49,7 @@ func _try_pick_up(character: Node2D) -> void:
 
 	_picked_up = true
 	pickup_area.set_deferred("monitoring", false)
+	picked_up.emit(relic_definition)
 	queue_free()
 
 

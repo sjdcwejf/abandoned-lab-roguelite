@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/cryo_zone/cryo_zone.tscn" id="3_cryo_zone"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank"]
+size = Vector2(126, 250)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "combat"
+lab_room_label = "冷雾处理间"
+
+[node name="CryoRoomOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "combat"
+
+[node name="LeftStasisBankBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(168, 306)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftStasisBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="RightStasisBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(856, 306)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightStasisBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="LeftColdLeak" parent="." index="10" instance=ExtResource("3_cryo_zone")]
+position = Vector2(282, 218)
+radius = 74.0
+duration = 0.0
+show_player_feedback = false
+
+[node name="RightColdLeak" parent="." index="11" instance=ExtResource("3_cryo_zone")]
+position = Vector2(746, 398)
+radius = 78.0
+duration = 0.0
+show_player_feedback = false
+

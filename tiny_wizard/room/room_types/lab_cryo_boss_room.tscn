@@ -1,0 +1,54 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/formal_boss_room.gd" id="2_boss_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/subject_zero_cryo/subject_zero_cryo.tscn" id="4_boss"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/black_hole/black_hole.tscn" id="5_black_hole"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_pods"]
+size = Vector2(360, 70)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank"]
+size = Vector2(86, 250)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_boss_script")
+lab_room_type = "boss"
+lab_room_label = "零号封存室"
+
+[node name="CryoRoomOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "boss"
+
+[node name="NorthPodBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(512, 140)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthPodBlocker"]
+shape = SubResource("RectangleShape2D_north_pods")
+
+[node name="LeftBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(170, 320)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="RightBankBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(854, 320)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightBankBlocker"]
+shape = SubResource("RectangleShape2D_side_bank")
+
+[node name="SubjectZeroCryo" parent="Enemies" index="0" instance=ExtResource("4_boss")]
+position = Vector2(512, 310)
+
+[node name="ExitBlackHole" parent="." index="11" instance=ExtResource("5_black_hole")]
+position = Vector2(512, 420)
+monitoring = false
+

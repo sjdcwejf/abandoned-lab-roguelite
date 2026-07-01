@@ -14,7 +14,7 @@ const BOTTOM_DOOR_SAFE_Y := 420.0
 @export_range(0, 8, 1) var protomatter_min_drop := 1
 @export_range(0, 8, 1) var protomatter_max_drop := 1
 @export var protomatter_drop_spread := 22.0
-@export_range(0.0, 1.0, 0.01) var relic_drop_chance := 0.06
+@export_range(0.0, 1.0, 0.01) var relic_drop_chance := 0.0
 @export var relic_pool_tag: StringName = &""
 @export var green_blood_splatter_enabled := true
 @export var green_blood_spawn_offset := Vector2(0.0, -28.0)
@@ -27,6 +27,9 @@ var _relic_dropped := false
 func hit(damage := 1, from := Vector2.ZERO) -> void:
 	if green_blood_splatter_enabled and int(damage) > 0 and character_stats != null and character_stats.current_life > 0:
 		_spawn_green_blood_splatter(from)
+	var relic_controller := _find_active_relic_controller()
+	if relic_controller != null:
+		relic_controller.try_apply_condensation_to_target(self)
 	super.hit(damage, from)
 
 

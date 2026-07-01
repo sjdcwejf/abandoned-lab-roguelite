@@ -1,0 +1,57 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/interactable_objects/cryo_pod/cryo_pod.gd" id="1_cryo_pod"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(54, 86)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 72.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_glass"]
+size = Vector2(40, 68)
+
+[node name="CryoPod" type="StaticBody2D"]
+y_sort_enabled = true
+collision_layer = 9
+collision_mask = 15
+script = ExtResource("1_cryo_pod")
+
+[node name="Base" type="Polygon2D" parent="."]
+z_index = -1
+color = Color(0.12, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-34, -48, 34, -48, 34, 42, 24, 52, -24, 52, -34, 42)
+
+[node name="IntactVisual" type="Polygon2D" parent="."]
+color = Color(0.35, 0.78, 1, 0.52)
+polygon = PackedVector2Array(-22, -38, 22, -38, 22, 32, -22, 32)
+
+[node name="ColdCore" type="Polygon2D" parent="."]
+color = Color(0.72, 0.96, 1, 0.44)
+polygon = PackedVector2Array(-10, -22, 10, -22, 14, 10, 0, 24, -14, 10)
+
+[node name="CrackedGlass" type="Line2D" parent="."]
+visible = false
+z_index = 2
+width = 2.0
+default_color = Color(0.8, 0.96, 1, 0.78)
+points = PackedVector2Array(-16, -18, -4, -4, -12, 8, 6, 0, 16, 18)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape2D_interact")
+
+[node name="Label" type="Label" parent="."]
+visible = false
+offset_left = -44.0
+offset_top = 48.0
+offset_right = 44.0
+offset_bottom = 70.0
+horizontal_alignment = 1

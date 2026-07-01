@@ -1,4 +1,4 @@
-[gd_scene load_steps=67 format=3]
+[gd_scene load_steps=66 format=3]
 
 [ext_resource type="PackedScene" uid="uid://ckan5lwiqvq2a" path="res://top-down-shooter-core/character/character.tscn" id="1_4ld63"]
 [ext_resource type="Script" path="res://tiny_wizard/player/player_character.gd" id="2_q71sv"]

@@ -1,0 +1,28 @@
+{
+  "chapterName": "生态温室",
+  "tileSize": 32,
+  "materials": [
+    {
+      "role": "base_floor_wall_door",
+      "source": "Top Down Laboratory Tileset - Pixel Art 32x32 by Void Arts",
+      "path": "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory floor_ walls_ and borders tileset-4.png"
+    },
+    {
+      "role": "greenhouse_structure_hydroponics_plants",
+      "source": "Mars Colony - Greenhouse Module by Maru",
+      "path": "res://tiny_wizard/assets/third_party/mars_greenhouse/tilesets_32x32.png",
+      "originalPath": "res://tiny_wizard/assets/third_party/mars_greenhouse/tilesets.png"
+    },
+    {
+      "role": "bio_lab_props_liquids_terminals",
+      "source": "Land of Pixels Laboratory Tileset by marceles",
+      "path": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png"
+    },
+    {
+      "role": "spore_pollution_hazard_placeholder",
+      "source": "Land of Pixels Laboratory Tileset by marceles",
+      "path": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/spriteSheet_tiledLiquids_32x32.png"
+    }
+  ],
+  "notes": "This manifest lists available Chapter 2 source tilesets. Current playable rooms still use generated composite PNGs to avoid breaking scene logic."
+}

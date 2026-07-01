@@ -6,6 +6,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 
 var _current_room: Room
 var _floor_index := 1
+var _chapter_label := ""
 var _room_type_label := ""
 var _objective_text := ""
 
@@ -24,10 +25,11 @@ func _ready() -> void:
 	hide_objective()
 
 
-func show_room(room: Room, floor_index: int, room_type_label: String, objective_text: String) -> void:
+func show_room(room: Room, floor_index: int, room_type_label: String, objective_text: String, chapter_label := "") -> void:
 	_disconnect_room()
 	_current_room = room
 	_floor_index = floor_index
+	_chapter_label = chapter_label
 	_room_type_label = room_type_label
 	_objective_text = objective_text
 	_connect_room()
@@ -142,7 +144,10 @@ func _refresh() -> void:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return
 
-	_floor_label.text = "第 %d 层 / %s" % [_floor_index, _room_type_label]
+	if _chapter_label != "":
+		_floor_label.text = "%s｜第 %d 层 / %s" % [_chapter_label, _floor_index, _room_type_label]
+	else:
+		_floor_label.text = "第 %d 层 / %s" % [_floor_index, _room_type_label]
 	_room_label.text = _current_room.lab_room_label
 
 	var completion_text := _get_completion_text()
@@ -158,7 +163,11 @@ func _get_objective_text() -> String:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return _objective_text
 	if _has_pollution_objective():
+		if _current_room.has_meta("event_objective_text"):
+			return str(_current_room.get_meta("event_objective_text"))
 		return "清除原质污染源，并肃清房内样本。"
+	if _has_cryo_pod_objective():
+		return "检查冷冻舱，并清除释放的封存样本。"
 	return _objective_text
 
 
@@ -176,7 +185,15 @@ func _get_progress_text() -> String:
 		var pollution_total := int(_current_room.call("get_pollution_source_total"))
 		var pollution_remaining := int(_current_room.call("get_pollution_source_remaining"))
 		var pollution_cleared := maxi(0, pollution_total - pollution_remaining)
-		return "污染源：%d/%d    剩余样本：%d" % [pollution_cleared, pollution_total, remaining]
+		var target_label := "污染源"
+		if _current_room.has_meta("event_target_label"):
+			target_label = str(_current_room.get_meta("event_target_label"))
+		return "%s：%d/%d    剩余样本：%d" % [target_label, pollution_cleared, pollution_total, remaining]
+	if _has_cryo_pod_objective():
+		var pod_total := int(_current_room.call("get_cryo_pod_total"))
+		var pod_remaining := int(_current_room.call("get_cryo_pod_remaining"))
+		var pod_checked := maxi(0, pod_total - pod_remaining)
+		return "冷冻舱：%d/%d    剩余样本：%d" % [pod_checked, pod_total, remaining]
 	if not _current_room.has_method("has_enemy_clear_objective") or not bool(_current_room.call("has_enemy_clear_objective")):
 		return ""
 	if _current_room.lab_room_type == "boss":
@@ -192,7 +209,25 @@ func _get_completion_text() -> String:
 		"combat":
 			return "封锁解除：异常样本已清除。"
 		"pollution":
+			if _current_room.has_meta("event_completion_text"):
+				return str(_current_room.get_meta("event_completion_text"))
 			return "封锁解除：原质污染源已清除。"
+		"data_comm":
+			if _current_room.has_meta("event_completion_text"):
+				return str(_current_room.get_meta("event_completion_text"))
+			return "封锁解除：通讯终端已重启。"
+		"data_satellite":
+			if _current_room.has_meta("event_completion_text"):
+				return str(_current_room.get_meta("event_completion_text"))
+			return "封锁解除：伪装节点已关闭。"
+		"archive":
+			return "数据档案已同步：黑匣子记录可查看。"
+		"cryo_pod":
+			return "封锁解除：冷冻舱已检查。"
+		"cryo_vent":
+			return "封锁解除：低温喷口已稳定。"
+		"elite":
+			return "封锁解除：冰核守卫已清除。"
 		"reward":
 			return "奖励解锁：守卫样本已清除。"
 		"boss":
@@ -206,6 +241,14 @@ func _has_pollution_objective() -> bool:
 	if not _current_room.has_method("has_pollution_source_objective"):
 		return false
 	return bool(_current_room.call("has_pollution_source_objective"))
+
+
+func _has_cryo_pod_objective() -> bool:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return false
+	if not _current_room.has_method("has_cryo_pod_objective"):
+		return false
+	return bool(_current_room.call("has_cryo_pod_objective"))
 
 
 func _make_panel_style() -> StyleBoxFlat:

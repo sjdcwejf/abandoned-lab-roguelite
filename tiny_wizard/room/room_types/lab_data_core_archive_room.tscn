@@ -1,0 +1,52 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="3_terminal"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
+size = Vector2(110, 270)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_blackbox"]
+size = Vector2(220, 120)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "archive"
+lab_room_label = "公司黑匣子档案库"
+
+[node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "archive"
+
+[node name="LeftArchiveRackBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(208, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftArchiveRackBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="RightArchiveRackBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(816, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightArchiveRackBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="BlackBoxCoreBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BlackBoxCoreBlocker"]
+shape = SubResource("RectangleShape2D_blackbox")
+
+[node name="MotherBaitArchiveTerminal" parent="." index="11" instance=ExtResource("3_terminal")]
+position = Vector2(512, 430)
+archive_id = "mother_bait_hypothesis"
+archive_title = "母体诱饵假说"
+archive_content = "最初泄露的加密信息不应被视为单纯求救信号。\n\n它可能是一种筛选机制。\n\n母体通过公司通讯系统释放异常信号，吸引外部个体进入熵区。进入者会在遗物、源质和战斗压力下持续暴露适配倾向。\n\n结论：熵区不是单纯事故现场。它可能正在选择能够抵达母巢核心的个体。"
+success_message = "结局条件提示已解锁"
+clue_id = "mother_bait_signal"
+unlock_ending_hints = true

@@ -457,6 +457,16 @@ func _initialize_liuying_state() -> void:
 		_liuying_base_speed = _character.physics_stats.max_speed
 
 
+func refresh_runtime_base_speed(new_base_speed: float) -> void:
+	if ability_id != ABILITY_LIUYING:
+		return
+	_liuying_base_speed = maxf(1.0, new_base_speed)
+	if _character == null or _character.physics_stats == null:
+		return
+	if _liuying_momentum_active:
+		_character.physics_stats.max_speed = _liuying_base_speed * liuying_momentum_speed_multiplier
+
+
 func _get_liuying_max_charges() -> int:
 	return maxi(1, liuying_charge_count)
 
