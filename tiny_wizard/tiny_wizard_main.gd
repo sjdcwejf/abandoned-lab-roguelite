@@ -5,6 +5,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 const ROOM_OBJECTIVE_UI_SCRIPT := preload("res://tiny_wizard/gui/room_objective_ui/room_objective_ui.gd")
 const MINIMAP_UI_SCRIPT := preload("res://tiny_wizard/gui/minimap_ui/minimap_ui.gd")
 const POLLUTION_SOURCE_SCENE := preload("res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn")
+const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const MAIN_MENU_SCENE := "res://tiny_wizard/gui/main_menu/main_menu.tscn"
 const RUN_STATE_TUTORIAL := "tutorial"
 const RUN_STATE_FORMAL := "formal"
@@ -15,6 +16,7 @@ const CHAPTER_1_ID := 1
 const CHAPTER_2_ID := 2
 const CHAPTER_3_ID := 3
 const CHAPTER_4_ID := 4
+const CHAPTER_5_ID := 5
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -63,6 +65,11 @@ var _formal_chapter_sector := ""
 var _formal_layer_index := 0
 var _base_completed_chapter_id := 0
 var _base_next_chapter_id := 0
+var _data_archive_records := {}
+var _raven_secret_clues := {}
+var _raven_secret_fragments := 0
+var _raven_hidden_quest_unlocked := false
+var _ending_hints_unlocked := false
 
 var rooms := {}
 
@@ -410,7 +417,10 @@ func _start_chapter_base(completed_chapter_id: int) -> void:
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
 	_register_rooms()
 	_update_room_doors()
+	_apply_base_story_progress()
 	_enter_base_room()
+	if completed_chapter_id == CHAPTER_5_ID:
+		_show_story_feedback("数据中枢记录已完成，深层熵区入口将在后续版本开放。", 2.0)
 
 
 func _enter_base_room() -> void:
@@ -426,6 +436,80 @@ func _enter_base_room() -> void:
 	base_room.enter_room()
 	_print_dungeon_summary()
 	_update_room_feedback_for_room(base_room)
+
+
+func _apply_base_story_progress() -> void:
+	var base_room = get_room(start_room_coord)
+	if base_room == null:
+		return
+	base_room.set_meta("ending_hints_unlocked", _ending_hints_unlocked)
+	base_room.set_meta("raven_hidden_quest_unlocked", _raven_hidden_quest_unlocked)
+	base_room.set_meta("raven_secret_fragments", _raven_secret_fragments)
+	if base_room.has_method("refresh_story_progress"):
+		base_room.call("refresh_story_progress")
+
+
+func are_ending_hints_unlocked() -> bool:
+	return _ending_hints_unlocked
+
+
+func record_data_archive(payload: Dictionary) -> void:
+	var archive_id := str(payload.get("archive_id", ""))
+	if archive_id == "":
+		archive_id = str(payload.get("title", "data_archive")).to_snake_case()
+	var first_read := not _data_archive_records.has(archive_id)
+	_data_archive_records[archive_id] = {
+		"title": str(payload.get("title", "")),
+		"content": str(payload.get("content", "")),
+		"read": true,
+	}
+
+	var messages := PackedStringArray()
+	var success_message := str(payload.get("success_message", "数据档案已同步"))
+	if first_read and success_message != "":
+		_append_unique_story_message(messages, success_message)
+	if bool(payload.get("unlock_ending_hints", false)) and not _ending_hints_unlocked:
+		_ending_hints_unlocked = true
+		_append_unique_story_message(messages, "结局条件提示已解锁")
+
+	var clue_id := str(payload.get("clue_id", ""))
+	if first_read and _is_raven_hidden_clue(clue_id) and not _raven_secret_clues.has(clue_id):
+		_raven_secret_clues[clue_id] = true
+		_raven_secret_fragments = _raven_secret_clues.size()
+		_append_unique_story_message(messages, "渡鸦旧债线索 +1")
+		if _raven_secret_fragments >= 3 and not _raven_hidden_quest_unlocked:
+			_raven_hidden_quest_unlocked = true
+			_append_unique_story_message(messages, "渡鸦隐藏任务线已开启")
+
+	if messages.is_empty():
+		if first_read:
+			_append_unique_story_message(messages, success_message)
+		else:
+			_append_unique_story_message(messages, "该档案已同步。")
+
+	_show_story_feedback("\n".join(messages), 1.8)
+
+
+func _append_unique_story_message(messages: PackedStringArray, message: String) -> void:
+	if message == "":
+		return
+	if messages.has(message):
+		return
+	messages.append(message)
+
+
+func _is_raven_hidden_clue(clue_id: String) -> bool:
+	return clue_id in [
+		"raven_old_key",
+		"leak_source_record",
+		"mother_bait_signal",
+	]
+
+
+func _show_story_feedback(message: String, seconds := 1.6) -> void:
+	if message == "":
+		return
+	INTERACTION_FEEDBACK.show_from(self, message, seconds)
 
 
 func _install_formal_layer_events() -> void:
@@ -621,6 +705,8 @@ func _on_black_hole_entered(body: Node2D) -> void:
 			if _formal_layer_index < _get_formal_layer_count():
 				call_deferred("_start_next_formal_layer")
 			elif LabDungeonGenerator.get_next_chapter_id(_formal_chapter_id) > 0:
+				call_deferred("_start_chapter_base", _formal_chapter_id)
+			elif _formal_chapter_id == CHAPTER_5_ID:
 				call_deferred("_start_chapter_base", _formal_chapter_id)
 			else:
 				call_deferred("_complete_formal_layer")
@@ -837,8 +923,10 @@ func _refresh_layer_clear_screen() -> void:
 
 
 func _get_layer_clear_summary_text() -> String:
+	if _formal_chapter_id == CHAPTER_5_ID:
+		return "数据中枢记录已完成，深层熵区入口将在后续版本开放。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_4_ID:
-		return "弥赛亚重装清理机停放库已记录。数据中枢入口已记录，后续版本开放。当前构筑快照："
+		return "弥赛亚重装清理机停放库已记录。数据中枢访问权限已解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_3_ID:
 		return "零号封存体已压制。已回收封存区黑匣子碎片，兵器工厂访问权限待解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_2_ID:
@@ -847,8 +935,10 @@ func _get_layer_clear_summary_text() -> String:
 
 
 func _get_layer_clear_next_button_text() -> String:
+	if _formal_chapter_id == CHAPTER_5_ID:
+		return "第六章：深层熵区，后续版本开放"
 	if _formal_chapter_id == CHAPTER_4_ID:
-		return "数据中枢入口已记录，后续版本开放"
+		return "进入临时安全屋，准备前往第五章"
 	if _formal_chapter_id == CHAPTER_3_ID:
 		return "%s：下一版本开放" % LabDungeonGenerator.get_chapter_completion_destination(_formal_chapter_id)
 	return "后续章节：下一版本开放"
@@ -1220,11 +1310,14 @@ func _update_base_room_feedback(room: Room) -> void:
 	if _room_objective_ui == null:
 		return
 	var next_title := LabDungeonGenerator.get_chapter_title(_base_next_chapter_id) if _base_next_chapter_id > 0 else "后续章节"
+	var objective := "延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title
+	if _base_completed_chapter_id == CHAPTER_5_ID:
+		objective = "数据中枢记录已完成。深层熵区入口将在后续版本开放。"
 	_room_objective_ui.show_room(
 		room,
 		0,
 		"临时安全屋",
-		"延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title,
+		objective,
 		"渡鸦据点"
 	)
 
@@ -1236,11 +1329,17 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"combat":
 			return "怪物房"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "数据事件房"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "测试场事件房"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "虫巢事件房"
 			return "污染事件房"
+		"data_comm":
+			return "数据事件房"
+		"data_satellite":
+			return "数据事件房"
 		"cryo_pod":
 			return "冷冻舱事件房"
 		"cryo_vent":
@@ -1252,9 +1351,13 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"weapon":
 			return "武器房"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "数据补给站"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "军械补给站"
 			return "安全屋"
+		"archive":
+			return "剧情档案库"
 		"boss":
 			return "Boss 房"
 	return "未知区域"
@@ -1263,6 +1366,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 	match room_type:
 		"start":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "进入数据中枢。"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "进入兵器工厂。"
 			if _formal_chapter_id == CHAPTER_3_ID:
@@ -1271,6 +1376,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 				return "确认前哨构筑，进入生态温室。"
 			return "确认装备状态，进入极渊前哨基地。"
 		"combat":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "清除所有异常单位。"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				if room_label == "无人机装配线":
 					return "清理装配线异常单位。"
@@ -1281,11 +1388,21 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 				return "清除孢子培养廊内的失控样本。"
 			return "清除房内样本，解除门锁。"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				if room_label == "通讯塔控制室":
+					return "重启通讯终端 0/3。"
+				if room_label == "卫星伪装系统":
+					return "关闭伪装节点 0/3。"
+				return "同步数据节点 0/3。"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "摧毁外骨骼测试节点 0/3。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "清理虫巢样本，击碎孢子囊，解除温室封锁。"
 			return "清除原质污染源，并肃清房内样本。"
+		"data_comm":
+			return "重启通讯终端 0/3。"
+		"data_satellite":
+			return "关闭伪装节点 0/3。"
 		"reward":
 			if _formal_chapter_id == CHAPTER_3_ID:
 				return "肃清封存样本库守卫，回收补给箱。"
@@ -1299,6 +1416,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 				return "回收渡鸦温室军械，整理当前构筑。"
 			return "回收随机军械，整理当前构筑。"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_5_ID:
+				return "整备并检查数据档案。"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "整备武器与补给。"
 			if _formal_chapter_id == CHAPTER_3_ID:
@@ -1314,6 +1433,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "击败仓库守卫。"
 			return "击败冰核守卫，回收低温封存遗物。"
+		"archive":
+			return "读取黑匣子档案。"
 		"boss":
 			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
 	return ""

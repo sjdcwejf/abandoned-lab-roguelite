@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_formal_start_room.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
+size = Vector2(98, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gate"]
+size = Vector2(280, 46)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "start"
+lab_room_label = "数据中枢入口"
+
+[node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "start"
+
+[node name="LeftServerBankBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(190, 296)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftServerBankBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="RightServerBankBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(834, 296)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightServerBankBlocker"]
+shape = SubResource("RectangleShape2D_server")
+
+[node name="NorthSecurityGateBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 126)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthSecurityGateBlocker"]
+shape = SubResource("RectangleShape2D_gate")

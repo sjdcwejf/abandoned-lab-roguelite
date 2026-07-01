@@ -212,6 +212,16 @@ func _get_completion_text() -> String:
 			if _current_room.has_meta("event_completion_text"):
 				return str(_current_room.get_meta("event_completion_text"))
 			return "封锁解除：原质污染源已清除。"
+		"data_comm":
+			if _current_room.has_meta("event_completion_text"):
+				return str(_current_room.get_meta("event_completion_text"))
+			return "封锁解除：通讯终端已重启。"
+		"data_satellite":
+			if _current_room.has_meta("event_completion_text"):
+				return str(_current_room.get_meta("event_completion_text"))
+			return "封锁解除：伪装节点已关闭。"
+		"archive":
+			return "数据档案已同步：黑匣子记录可查看。"
 		"cryo_pod":
 			return "封锁解除：冷冻舱已检查。"
 		"cryo_vent":

@@ -39,6 +39,13 @@ const EXOSUIT_WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/la
 const EXOSUIT_ELITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_elite_room.tscn")
 const EXOSUIT_ARMORY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_armory_station_room.tscn")
 const EXOSUIT_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_boss_room.tscn")
+const DATA_CORE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_start_room.tscn")
+const DATA_CORE_SERVER_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_server_room.tscn")
+const DATA_CORE_COMM_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_comm_room.tscn")
+const DATA_CORE_SATELLITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_satellite_room.tscn")
+const DATA_CORE_ARCHIVE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_archive_room.tscn")
+const DATA_CORE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_supply_station_room.tscn")
+const DATA_CORE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
@@ -80,6 +87,16 @@ const CRYO_COMBAT_ROOM_SCENES := [
 const EXOSUIT_COMBAT_ROOM_SCENES := [
 	EXOSUIT_ASSEMBLY_ROOM_SCENE,
 	EXOSUIT_DRONE_ROOM_SCENE,
+]
+
+const DATA_CORE_COMBAT_ROOM_SCENES := [
+	DATA_CORE_SERVER_ROOM_SCENE,
+	DATA_CORE_SERVER_ROOM_SCENE,
+]
+
+const DATA_CORE_EVENT_ROOM_SCENES := [
+	DATA_CORE_COMM_ROOM_SCENE,
+	DATA_CORE_SATELLITE_ROOM_SCENE,
 ]
 
 const REWARD_ROOM_SCENES := [
@@ -316,7 +333,9 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"merchant_label": "渡鸦军械补给站",
 				"boss_label": "重装清理机停放库",
 				"boss_objective": "击败弥赛亚重装清理机。",
-				"completion_destination": "数据中枢入口已记录，后续版本开放",
+				"completion_destination": "数据中枢访问权限",
+				"next_chapter_id": 5,
+				"next_chapter_title": "第五章：数据中枢",
 				"start_room_scene": EXOSUIT_START_ROOM_SCENE,
 				"combat_room_scenes": EXOSUIT_COMBAT_ROOM_SCENES,
 				"pollution_room_scenes": [EXOSUIT_TEST_ROOM_SCENE],
@@ -325,6 +344,38 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"elite_room_scenes": [EXOSUIT_ELITE_ROOM_SCENE],
 				"merchant_room_scenes": [EXOSUIT_ARMORY_STATION_ROOM_SCENE],
 				"boss_room_scenes": [EXOSUIT_BOSS_ROOM_SCENE],
+			}
+		5:
+			return {
+				"id": 5,
+				"title": "第五章：数据中枢",
+				"sector": "数据中枢",
+				"planned_minutes": "约 6",
+				"formal_layer_count": 1,
+				"main_path_room_count": 7,
+				"reward_room_count": 0,
+				"layout_radius": 4,
+				"main_room_types": ["combat", "data_comm", "data_satellite", "archive"],
+				"start_label": "数据中枢入口",
+				"combat_label_prefix": "服务器机房",
+				"data_comm_label": "通讯塔控制室",
+				"data_satellite_label": "卫星伪装系统",
+				"archive_label": "公司黑匣子档案库",
+				"merchant_label": "渡鸦数据补给站",
+				"boss_label": "清理协议AI核心室",
+				"boss_objective": "击败清理协议AI。",
+				"completion_destination": "第六章：深层熵区，后续版本开放",
+				"next_chapter_id": 0,
+				"next_chapter_title": "第六章：深层熵区",
+				"start_room_scene": DATA_CORE_START_ROOM_SCENE,
+				"combat_room_scenes": DATA_CORE_COMBAT_ROOM_SCENES,
+				"data_comm_room_scenes": [DATA_CORE_COMM_ROOM_SCENE],
+				"data_satellite_room_scenes": [DATA_CORE_SATELLITE_ROOM_SCENE],
+				"archive_room_scenes": [DATA_CORE_ARCHIVE_ROOM_SCENE],
+				"reward_room_scenes": [],
+				"weapon_room_scenes": [],
+				"merchant_room_scenes": [DATA_CORE_SUPPLY_STATION_ROOM_SCENE],
+				"boss_room_scenes": [DATA_CORE_BOSS_ROOM_SCENE],
 			}
 	return get_chapter_config(DEFAULT_CHAPTER_ID)
 
@@ -384,10 +435,14 @@ static func generate_chapter_base(rooms_parent: Node2D, completed_chapter_id := 
 		"chapter_title": "临时安全屋 / 渡鸦据点",
 		"chapter_sector": "章节间基地",
 		"planned_minutes": "2-3",
+		"completed_chapter_id": completed_chapter_id,
+		"next_chapter_id": next_chapter_id,
 		"completed_chapter_title": str(completed_config.get("title", "")),
 		"next_chapter_title": next_chapter_title,
 	}
 	var room := _instantiate_room(spec)
+	room.set_meta("completed_chapter_id", completed_chapter_id)
+	room.set_meta("next_chapter_id", next_chapter_id)
 	room.set_meta("completed_chapter_title", str(spec.get("completed_chapter_title", "")))
 	room.set_meta("next_chapter_title", next_chapter_title)
 	rooms_parent.add_child(room)
@@ -577,9 +632,12 @@ static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 	return {
 		"combat": (chapter_config.get("combat_room_scenes", COMBAT_ROOM_SCENES) as Array).duplicate(),
 		"pollution": (chapter_config.get("pollution_room_scenes", [COMBAT_ROOM_A_SCENE]) as Array).duplicate(),
+		"data_comm": (chapter_config.get("data_comm_room_scenes", [DATA_CORE_COMM_ROOM_SCENE]) as Array).duplicate(),
+		"data_satellite": (chapter_config.get("data_satellite_room_scenes", [DATA_CORE_SATELLITE_ROOM_SCENE]) as Array).duplicate(),
 		"cryo_pod": (chapter_config.get("cryo_pod_room_scenes", [CRYO_POD_ROOM_SCENE]) as Array).duplicate(),
 		"cryo_vent": (chapter_config.get("cryo_vent_room_scenes", [CRYO_VENT_ROOM_SCENE]) as Array).duplicate(),
 		"elite": (chapter_config.get("elite_room_scenes", [CRYO_ELITE_ROOM_SCENE]) as Array).duplicate(),
+		"archive": (chapter_config.get("archive_room_scenes", [RAVEN_SAFEHOUSE_ROOM_SCENE]) as Array).duplicate(),
 		"reward": (chapter_config.get("reward_room_scenes", REWARD_ROOM_SCENES) as Array).duplicate(),
 		"weapon": (chapter_config.get("weapon_room_scenes", WEAPON_ROOM_SCENES) as Array).duplicate(),
 		"merchant": (chapter_config.get("merchant_room_scenes", [RAVEN_SAFEHOUSE_ROOM_SCENE]) as Array).duplicate(),
@@ -603,12 +661,18 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return COMBAT_ROOM_SCENES
 		"pollution":
 			return [COMBAT_ROOM_A_SCENE]
+		"data_comm":
+			return [DATA_CORE_COMM_ROOM_SCENE]
+		"data_satellite":
+			return [DATA_CORE_SATELLITE_ROOM_SCENE]
 		"cryo_pod":
 			return [CRYO_POD_ROOM_SCENE]
 		"cryo_vent":
 			return [CRYO_VENT_ROOM_SCENE]
 		"elite":
 			return [CRYO_ELITE_ROOM_SCENE]
+		"archive":
+			return [RAVEN_SAFEHOUSE_ROOM_SCENE]
 		"reward":
 			return REWARD_ROOM_SCENES
 		"weapon":
@@ -646,13 +710,22 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 				return str(combat_labels[(count - 1) % combat_labels.size()])
 			return "%s %d" % [str(chapter_config.get("combat_label_prefix", "封存样本间")), count]
 		"pollution":
+			var pollution_labels := chapter_config.get("pollution_labels", []) as Array
+			if not pollution_labels.is_empty():
+				return str(pollution_labels[(count - 1) % pollution_labels.size()])
 			return str(chapter_config.get("pollution_label", "污染事件房"))
+		"data_comm":
+			return str(chapter_config.get("data_comm_label", "通讯塔控制室"))
+		"data_satellite":
+			return str(chapter_config.get("data_satellite_label", "卫星伪装系统"))
 		"cryo_pod":
 			return str(chapter_config.get("cryo_pod_label", "冷冻舱列阵"))
 		"cryo_vent":
 			return str(chapter_config.get("cryo_vent_label", "冷却通风廊"))
 		"elite":
 			return str(chapter_config.get("elite_label", "精英封存室"))
+		"archive":
+			return str(chapter_config.get("archive_label", "档案库"))
 		"reward":
 			return "%s %d" % [str(chapter_config.get("reward_label_prefix", "证物库")), count]
 		"weapon":

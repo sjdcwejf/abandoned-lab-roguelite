@@ -188,7 +188,7 @@ func get_weapon_affixes_at_slot(slot_index: int) -> Array:
 	_ensure_affix_slots()
 	if slot_index >= weapon_affixes.size():
 		return []
-	var slot_affixes := weapon_affixes[slot_index]
+	var slot_affixes: Variant = weapon_affixes[slot_index]
 	if slot_affixes is Array:
 		return (slot_affixes as Array).duplicate()
 	return []
