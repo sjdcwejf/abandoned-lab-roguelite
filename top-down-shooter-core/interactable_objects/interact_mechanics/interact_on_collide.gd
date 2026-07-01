@@ -189,7 +189,7 @@ func _create_prompt_label() -> void:
 	_prompt_label.add_theme_constant_override("shadow_offset_x", 1)
 	_prompt_label.add_theme_constant_override("shadow_offset_y", 1)
 	_prompt_label.add_theme_font_size_override("font_size", 13)
-	prompt_parent.add_child(_prompt_label)
+	prompt_parent.call_deferred("add_child", _prompt_label)
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree(_prompt_label)
 
 

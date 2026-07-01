@@ -80,9 +80,9 @@ func _spawn_random_weapon() -> void:
 
 
 func _pick_unowned_weapon_scenes(rng: RandomNumberGenerator, weapon_pool: Array[PackedScene], count: int) -> Array[PackedScene]:
-	var candidates := []
-	var owned_weapon_keys := _get_owned_weapon_keys()
-	var weapon_holder := _get_active_weapon_holder()
+	var candidates: Array[PackedScene] = []
+	var owned_weapon_keys: Dictionary = _get_owned_weapon_keys()
+	var weapon_holder: Node = _get_active_weapon_holder()
 	for weapon_scene in weapon_pool:
 		var packed_scene := weapon_scene as PackedScene
 		if packed_scene == null:
@@ -94,9 +94,9 @@ func _pick_unowned_weapon_scenes(rng: RandomNumberGenerator, weapon_pool: Array[
 		candidates.append(packed_scene)
 
 	if candidates.is_empty():
-		return []
+		return candidates
 	_shuffle_array(candidates, rng)
-	var selected := []
+	var selected: Array[PackedScene] = []
 	for index in range(mini(count, candidates.size())):
 		selected.append(candidates[index])
 	print("Raven Armory Cache dropped %d weapon option(s) from %d unowned candidates." % [selected.size(), candidates.size()])
