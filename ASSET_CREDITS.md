@@ -1,5 +1,19 @@
 # Asset Credits
 
+## v0.1.86 素材授权审计｜先凯
+
+本节记录当前已经导入项目的 5 个第三方素材库。后续新增素材时，必须同时更新本文档和 `ASSET_IMPORT_PLAN.md`。授权不明确的素材不得被写成“已确认可商用”，也不得提交原始付费 zip。
+
+| 素材名称 | 作者 | 来源 | 许可证 | 使用位置 | 是否需要署名 | 备注 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Top Down Laboratory Tileset - Pixel Art 32x32 | Void Arts | 用户已提供本地 zip：`Lab tileset.zip` | 授权待确认（项目内未发现 license 文件） | 第二章、第三章实验室地板、墙体、门、边框和基础房间结构 | 待确认 | 公开仓库发布或继续分发前，必须回查购买页或下载页授权。 |
+| Mars Colony - Greenhouse Module | Maru | 用户已提供本地 zip：`Mars greenhouse tilesets.zip` | 授权待确认（项目内未发现 license 文件） | 第二章生态温室玻璃墙、水培槽、植物培养区和温室设备 | 待确认 | 项目内已有 nearest-neighbor 放大的 32x32 版本；授权仍需用户确认。 |
+| Land of Pixels Laboratory Tileset | marceles | 用户已提供本地 zip：`tiles_laboratory_LandOfPixels.zip` | 自定义授权：允许商业使用和修改，不允许转售素材包 | 第二章、第三章培养管、绿色液体、终端、管道、实验设备和特效 | 未强制要求，建议署名 | 以素材包内 `LICENSE.txt` 和 `README.txt` 为准。 |
+| Sci-Fi Facility Asset Pack | Murphy's Dad | 用户已提供本地 zip：`sci-fi-facility-asset-pack.zip` | CC0 | 第三章、第四章、第五章控制台、按钮、电脑、箱子和科幻设施补充物件 | 否，署名可选 | `README.txt` 写明 CC0，署名 Murphy's Dad 可选。 |
+| Warped Top-Down Tech Lab / Top Down Lab files | Luis Zuno / Ansimuz | 用户已提供本地 zip：`top_down_lab_files.zip` | 自定义公开授权：允许个人/商业使用、修改和再分发，署名可选 | 第三章低温封存区实验室地板、墙体、走廊和科技底板 | 否，署名可选 | 以 `public-license.txt` 为准，建议保留作者署名。 |
+
+本次 v0.1.86 没有导入新的运行期素材，没有移动或重命名现有资源路径，只补充素材扩充规划、授权检查字段和第三方素材目录规范。
+
 ## Canonical Third-Party Asset Library
 
 The following local asset packs were provided by the project owner and organized under `tiny_wizard/assets/third_party/` on 2026-06-29. The original zip files remain outside the repository and should not be committed unless their licenses explicitly allow redistribution.
