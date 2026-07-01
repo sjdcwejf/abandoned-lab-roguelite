@@ -52,6 +52,8 @@ var _relics: Dictionary = {}
 var _tag_counts: Dictionary = {}
 var _unique_groups: Dictionary = {}
 var _active_synergies: Dictionary = {}
+var active_fusions: Dictionary = {}
+var hidden_by_fusion: Dictionary = {}
 var _base_character_stats: Dictionary = {}
 var _base_physics_stats: Dictionary = {}
 var _stasis_protocol_used := false
@@ -82,9 +84,8 @@ func can_add_relic(definition: BuildItemDefinition) -> BuildInstallResult:
 			return BuildInstallResult.fail(BuildInstallResult.Reason.CHARACTER_SCOPE_MISMATCH, "Relic is exclusive to %s." % definition.owner_character_id)
 
 	var relic_id := definition.item_id
-	var current_stack := get_relic_stack(relic_id)
-	if current_stack >= max(1, definition.max_stacks):
-		return BuildInstallResult.fail(BuildInstallResult.Reason.MAX_STACKS_REACHED, "Relic stack limit reached.")
+	if has_relic(relic_id):
+		return BuildInstallResult.fail(BuildInstallResult.Reason.MAX_STACKS_REACHED, "Relic is already owned.")
 
 	if definition.unique_group != &"":
 		var blocking_relic_id: StringName = _unique_groups.get(definition.unique_group, &"")
@@ -112,12 +113,11 @@ func add_relic(definition: BuildItemDefinition) -> BuildInstallResult:
 		return result
 
 	var relic_id := definition.item_id
-	var entry: Dictionary = _relics.get(relic_id, {
+	var entry: Dictionary = {
 		"definition": definition,
-		"stack_count": 0,
-	})
+		"stack_count": 1,
+	}
 	entry["definition"] = definition
-	entry["stack_count"] = int(entry["stack_count"]) + 1
 	_relics[relic_id] = entry
 
 	if definition.unique_group != &"":
@@ -151,7 +151,7 @@ func remove_relic(relic_id: StringName) -> bool:
 			else:
 				_tag_counts.erase(tag)
 
-	_refresh_synergies()
+	recalculate_fusions()
 	_apply_static_stat_modifiers()
 	relic_removed.emit(relic_id)
 	relics_changed.emit()
@@ -179,7 +179,7 @@ func remove_one_relic(relic_id: StringName) -> bool:
 		if definition != null and definition.unique_group != &"" and _unique_groups.get(definition.unique_group, &"") == relic_id:
 			_unique_groups.erase(definition.unique_group)
 
-	_refresh_synergies()
+	recalculate_fusions()
 	_apply_static_stat_modifiers()
 	relic_removed.emit(relic_id)
 	relics_changed.emit()
@@ -208,6 +208,42 @@ func get_first_relic_id() -> StringName:
 		if int(_relics[relic_id].get("stack_count", 0)) > 0:
 			return relic_id
 	return &""
+
+
+func get_relic_definition(relic_id: StringName) -> BuildItemDefinition:
+	if not _relics.has(relic_id):
+		return null
+	var entry: Dictionary = _relics[relic_id]
+	return entry.get("definition", null) as BuildItemDefinition
+
+
+func get_sellable_relics() -> Array[Dictionary]:
+	var sellable: Array[Dictionary] = []
+	for relic_key in _relics.keys():
+		var relic_id := relic_key as StringName
+		var entry: Dictionary = _relics[relic_id]
+		var definition := entry.get("definition", null) as BuildItemDefinition
+		if definition == null:
+			continue
+		if int(entry.get("stack_count", 0)) <= 0:
+			continue
+		sellable.append({
+			"relic_id": relic_id,
+			"definition": definition,
+			"display_name": definition.display_name,
+			"placeholder_text": definition.placeholder_text,
+			"icon": definition.icon,
+			"base_price": definition.base_price,
+			"sell_price": _get_relic_sell_price(definition),
+		})
+	return sellable
+
+
+func get_relic_sell_price(relic_id: StringName) -> int:
+	var definition := get_relic_definition(relic_id)
+	if definition == null:
+		return 10
+	return _get_relic_sell_price(definition)
 
 
 func has_tag(tag: StringName) -> bool:
@@ -240,6 +276,35 @@ func get_relic_snapshot() -> Dictionary:
 	}
 
 
+func get_visible_relic_snapshot() -> Dictionary:
+	var relic_list: Array[Dictionary] = []
+	for relic_id in _relics.keys():
+		if hidden_by_fusion.has(relic_id):
+			continue
+		var entry: Dictionary = _relics[relic_id]
+		var definition: BuildItemDefinition = entry.get("definition", null)
+		relic_list.append({
+			"relic_id": relic_id,
+			"stack_count": int(entry.get("stack_count", 0)),
+			"display_name": definition.display_name if definition != null else "",
+			"placeholder_text": definition.placeholder_text if definition != null else "",
+			"icon": definition.icon if definition != null else null,
+			"tags": definition.tags.duplicate() if definition != null else [],
+			"entry_type": "relic",
+		})
+
+	for fusion_data in _build_visible_fusion_entries():
+		relic_list.append(fusion_data)
+
+	return {
+		"relics": relic_list,
+		"synergies": [],
+		"hidden_by_fusion": hidden_by_fusion.duplicate(),
+		"stacks": _build_stack_snapshot(),
+		"tag_counts": _tag_counts.duplicate(),
+	}
+
+
 func reset_run() -> void:
 	_relics.clear()
 	_tag_counts.clear()
@@ -248,6 +313,12 @@ func reset_run() -> void:
 	_refresh_synergies()
 	_apply_static_stat_modifiers()
 	relics_changed.emit()
+
+
+func _get_relic_sell_price(definition: BuildItemDefinition) -> int:
+	if definition == null or definition.base_price <= 0:
+		return 10
+	return maxi(1, int(floor(float(definition.base_price) * 0.5)))
 
 
 func modify_incoming_damage(amount: int, context := {}) -> int:
@@ -637,6 +708,10 @@ func _event_has_secondary_tag(context: Dictionary) -> bool:
 	return tags.has(RelicCombatEventBus.TAG_SECONDARY_EFFECT)
 
 
+func recalculate_fusions() -> void:
+	_refresh_synergies()
+
+
 func _refresh_synergies() -> void:
 	var next_synergies := _evaluate_synergies()
 
@@ -649,6 +724,8 @@ func _refresh_synergies() -> void:
 			synergy_activated.emit(synergy_id)
 
 	_active_synergies = next_synergies
+	active_fusions = _active_synergies.duplicate()
+	_rebuild_hidden_by_fusion()
 
 
 func _evaluate_synergies() -> Dictionary:
@@ -720,3 +797,67 @@ func _build_synergy_snapshot() -> Array[Dictionary]:
 			"exclusive_group": synergy.exclusive_group,
 		})
 	return synergy_list
+
+
+func _rebuild_hidden_by_fusion() -> void:
+	hidden_by_fusion.clear()
+	for synergy_id in _get_displayed_fusion_ids():
+		var synergy: BuildSynergyDefinition = _active_synergies.get(synergy_id, null)
+		if synergy == null or not synergy.hide_required_items_in_ui:
+			continue
+		for relic_id in synergy.required_item_ids:
+			if not hidden_by_fusion.has(relic_id):
+				hidden_by_fusion[relic_id] = synergy_id
+
+
+func _build_visible_fusion_entries() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for synergy_id in _get_displayed_fusion_ids():
+		var synergy: BuildSynergyDefinition = _active_synergies.get(synergy_id, null)
+		if synergy == null:
+			continue
+		result.append({
+			"relic_id": synergy_id,
+			"synergy_id": synergy_id,
+			"stack_count": 1,
+			"display_name": synergy.display_name,
+			"placeholder_text": synergy.placeholder_text,
+			"description": synergy.description,
+			"icon": synergy.icon,
+			"tags": [],
+			"entry_type": "fusion",
+			"tier": synergy.tier,
+			"priority": synergy.priority,
+			"exclusive_group": synergy.exclusive_group,
+		})
+	return result
+
+
+func _get_displayed_fusion_ids() -> Array[StringName]:
+	var displayed: Array[StringName] = []
+	var consumed_required_items := {}
+	var synergies: Array[BuildSynergyDefinition] = []
+	for synergy_id in _active_synergies.keys():
+		var synergy: BuildSynergyDefinition = _active_synergies[synergy_id]
+		if synergy != null and synergy.result_display_as_relic:
+			synergies.append(synergy)
+
+	synergies.sort_custom(func(a: BuildSynergyDefinition, b: BuildSynergyDefinition) -> bool:
+		if a.priority == b.priority:
+			return a.tier > b.tier
+		return a.priority > b.priority
+	)
+
+	for synergy in synergies:
+		var has_consumed_item := false
+		for relic_id in synergy.required_item_ids:
+			if consumed_required_items.has(relic_id):
+				has_consumed_item = true
+				break
+		if has_consumed_item:
+			continue
+		displayed.append(synergy.synergy_id)
+		if synergy.hide_required_items_in_ui:
+			for relic_id in synergy.required_item_ids:
+				consumed_required_items[relic_id] = true
+	return displayed

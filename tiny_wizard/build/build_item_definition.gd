@@ -26,6 +26,7 @@ enum RelicScope {
 @export var excluded_item_ids: Array[StringName] = []
 @export var unique_group: StringName
 @export_range(1, 999, 1) var max_stacks := 1
+@export_range(0, 999, 1) var base_price := 20
 @export var stat_modifiers: Array[BuildStatModifier] = []
 @export var event_effects: Array[BuildEventEffect] = []
 

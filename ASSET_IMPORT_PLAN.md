@@ -98,4 +98,3 @@
 6. 同步更新 `ASSET_CREDITS.md`，记录作者、来源、许可证、使用位置和署名要求。
 7. 如需缩放，使用 nearest-neighbor；保留处理脚本或处理说明。
 8. 运行 Godot headless，确认没有资源路径错误。
-

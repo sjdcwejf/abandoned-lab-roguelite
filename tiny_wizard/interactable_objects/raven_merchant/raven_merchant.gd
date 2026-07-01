@@ -12,6 +12,7 @@ const RELIC_RECYCLE_VALUE := 5
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
+const RELIC_SELL_DIALOG_SCENE := preload("res://tiny_wizard/gui/relic_ui/relic_sell_dialog.tscn")
 const WEAPON_CATALOG := preload("res://tiny_wizard/player/weapons/weapon_catalog.gd")
 const WEAPON_AFFIX_SERVICE := preload("res://tiny_wizard/player/weapons/weapon_affix_service.gd")
 const OFFER_NONE := "none"
@@ -29,6 +30,7 @@ const OFFER_STOCK_REFRESH := "stock_refresh"
 @export_range(0, 2, 1) var max_affix_count := 1
 @export var allow_stock_refresh := false
 @export_range(0, 99, 1) var stock_refresh_cost := 0
+@export_range(0, 99, 1) var potion_price := 20
 
 var _candidate_character: Node2D
 var _dialog_open := false
@@ -42,6 +44,7 @@ var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
 var _retired_weapon_keys := {}
 var _choice_overlay: LabWeaponChoiceOverlay
+var _relic_sell_dialog: RelicSellDialog
 var _visual_time := 0.0
 var _stock_refresh_used := false
 
@@ -139,6 +142,7 @@ func _set_dialog_open(open: bool) -> void:
 	if not _dialog_open:
 		_awaiting_weapon_replacement = false
 		_close_choice_overlay()
+		_close_relic_sell_dialog()
 	dialog_panel.visible = _dialog_open
 	if status_light is Polygon2D:
 		var light := status_light as Polygon2D
@@ -176,6 +180,21 @@ func _apply_selected_offer(character: Node2D) -> void:
 	stock_label.text = _build_stock_list_text()
 	var currency_count := _get_currency_count(character)
 	var relic_count := _get_relic_count(character)
+
+	if _selected_offer_type == OFFER_RELIC_RECYCLE:
+		var sellable_count := _get_sellable_relic_count(character)
+		status_label.text = "Sell relic service. You have %d %s, %d %s, and %d sellable %s. Potion price is %d %s, not charged now." % [
+			currency_count,
+			CURRENCY_DISPLAY_NAME,
+			relic_count,
+			RELIC_DISPLAY_NAME,
+			sellable_count,
+			RELIC_DISPLAY_NAME,
+			potion_price,
+			CURRENCY_DISPLAY_NAME,
+		]
+		hint_label.text = "Left / Right select, F opens relic sell dialog."
+		return
 
 	if _selected_offer_type == OFFER_RELIC_RECYCLE:
 		var weapon_stock_note := ""
@@ -254,7 +273,7 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 		return
 
 	if _selected_offer_type == OFFER_RELIC_RECYCLE:
-		_complete_relic_recycle(character, validation)
+		_open_relic_sell_dialog(character, validation)
 		return
 
 	if _selected_offer_type == OFFER_STOCK_REFRESH:
@@ -288,6 +307,17 @@ func _validate_purchase(character: Node2D) -> Dictionary:
 		var currency_count_for_refresh := int(inventory.get_item_amount(CURRENCY_NAME))
 		if stock_refresh_cost > 0 and currency_count_for_refresh < stock_refresh_cost:
 			return {"ok": false, "message": "刷新需要 %d 个%s，你现在有 %d 个。" % [stock_refresh_cost, CURRENCY_DISPLAY_NAME, currency_count_for_refresh]}
+		return {
+			"ok": true,
+			"inventory": inventory,
+		}
+
+	if _selected_offer_type == OFFER_RELIC_RECYCLE:
+		var sellable_count := _get_sellable_relic_count(character)
+		if sellable_count <= 0:
+			return {"ok": false, "message": "No sellable relics."}
+		if not _can_receive_currency_amount(inventory, 1):
+			return {"ok": false, "message": "No inventory room for protomatter."}
 		return {
 			"ok": true,
 			"inventory": inventory,
@@ -479,6 +509,97 @@ func _complete_relic_recycle(character: Node2D, validation: Dictionary) -> void:
 	INTERACTION_FEEDBACK.show_from(self, "回收完成：+%d %s。" % [RELIC_RECYCLE_VALUE, CURRENCY_DISPLAY_NAME], 1.35)
 
 
+func _open_relic_sell_dialog(character: Node2D, validation: Dictionary) -> void:
+	var inventory := validation.get("inventory") as QuiverInventory
+	var relic_controller := _get_relic_controller(character)
+	if inventory == null or relic_controller == null:
+		status_label.text = "Cannot sell relics: missing relic or inventory controller."
+		return
+
+	var sellable_relics := relic_controller.get_sellable_relics()
+	if sellable_relics.is_empty():
+		status_label.text = "No sellable relics."
+		return
+
+	_close_relic_sell_dialog()
+	_relic_sell_dialog = RELIC_SELL_DIALOG_SCENE.instantiate() as RelicSellDialog
+	if _relic_sell_dialog == null:
+		status_label.text = "Cannot open relic sell dialog."
+		return
+	add_child(_relic_sell_dialog)
+	_relic_sell_dialog.position = Vector2(172.0, -118.0)
+	_relic_sell_dialog.setup(sellable_relics)
+	_relic_sell_dialog.relic_selected.connect(_on_relic_sell_selected.bind(character, _relic_sell_dialog))
+	_relic_sell_dialog.cancelled.connect(_on_relic_sell_cancelled.bind(_relic_sell_dialog))
+	status_label.text = "Select one relic to sell. Potion price is %d %s and is not charged in this build." % [potion_price, CURRENCY_DISPLAY_NAME]
+
+
+func _on_relic_sell_selected(relic_id: StringName, character: Node2D, dialog: RelicSellDialog) -> void:
+	if not is_instance_valid(character):
+		_close_relic_sell_dialog()
+		return
+	_complete_relic_sell(character, relic_id)
+	if is_instance_valid(dialog):
+		dialog.queue_free()
+	if _relic_sell_dialog == dialog:
+		_relic_sell_dialog = null
+
+
+func _on_relic_sell_cancelled(dialog: RelicSellDialog) -> void:
+	if is_instance_valid(dialog):
+		dialog.queue_free()
+	if _relic_sell_dialog == dialog:
+		_relic_sell_dialog = null
+	status_label.text = "Relic sale cancelled. No cost paid."
+
+
+func _close_relic_sell_dialog() -> void:
+	if _relic_sell_dialog == null:
+		return
+	if is_instance_valid(_relic_sell_dialog):
+		_relic_sell_dialog.queue_free()
+	_relic_sell_dialog = null
+
+
+func _complete_relic_sell(character: Node2D, relic_id: StringName) -> void:
+	var inventory := character.get("inventory") as QuiverInventory
+	var relic_controller := _get_relic_controller(character)
+	if inventory == null or relic_controller == null:
+		status_label.text = "Relic sale failed: missing inventory or relic controller."
+		return
+
+	var definition := relic_controller.get_relic_definition(relic_id)
+	if definition == null or not relic_controller.has_relic(relic_id):
+		status_label.text = "Relic sale failed: relic state changed."
+		_refresh_offer(character)
+		return
+
+	var sell_value := relic_controller.get_relic_sell_price(relic_id)
+	if not _can_receive_currency_amount(inventory, sell_value):
+		status_label.text = "Relic sale failed: no inventory room for protomatter."
+		return
+
+	if not relic_controller.remove_relic(relic_id):
+		status_label.text = "Relic sale failed: cannot remove relic."
+		_refresh_offer(character)
+		return
+
+	var added := inventory.add_item(CURRENCY_ITEM, sell_value)
+	if not added:
+		relic_controller.add_relic(definition)
+		status_label.text = "Relic sale failed: cannot receive protomatter."
+		return
+
+	var relic_name := definition.display_name
+	if relic_name == "":
+		relic_name = definition.placeholder_text
+	if relic_name == "":
+		relic_name = str(relic_id)
+	_refresh_offer(character)
+	status_label.text = "Sold %s for %d %s." % [relic_name, sell_value, CURRENCY_DISPLAY_NAME]
+	INTERACTION_FEEDBACK.show_from(self, "Relic sold: +%d %s" % [sell_value, CURRENCY_DISPLAY_NAME], 1.35)
+
+
 func _enter_weapon_replacement_mode() -> void:
 	_awaiting_weapon_replacement = true
 	status_label.text = "武器栏已满：请选择要替换的槽位。确认前不会扣除%s。" % CURRENCY_DISPLAY_NAME
@@ -602,6 +723,13 @@ func _build_stock_list_text() -> String:
 		var marker := ">" if index == _selected_offer_index else " "
 		var direct_key := "%d" % (index + 1) if index < 4 else "-"
 		var offer_type := str(offer.get("type", OFFER_NONE))
+		if offer_type == OFFER_RELIC_RECYCLE:
+			lines.append("%s [%s] 出售%s  /  choose" % [
+				marker,
+				direct_key,
+				RELIC_DISPLAY_NAME,
+			])
+			continue
 		if offer_type == OFFER_WEAPON:
 			var price := "免费" if weapon_cost <= 0 else "%d %s" % [weapon_cost, CURRENCY_DISPLAY_NAME]
 			lines.append("%s [%s] %s  /  %s" % [
@@ -676,6 +804,13 @@ func _get_relic_controller(character: Node2D) -> RelicController:
 	return character.get_node_or_null("RelicController") as RelicController
 
 
+func _get_sellable_relic_count(character: Node2D) -> int:
+	var relic_controller := _get_relic_controller(character)
+	if relic_controller == null:
+		return 0
+	return relic_controller.get_sellable_relics().size()
+
+
 func _remove_one_relic(character: Node2D, inventory: QuiverInventory) -> bool:
 	var relic_controller := _get_relic_controller(character)
 	if relic_controller != null:
@@ -689,10 +824,14 @@ func _remove_one_relic(character: Node2D, inventory: QuiverInventory) -> bool:
 
 
 func _can_receive_currency(inventory: QuiverInventory) -> bool:
+	return _can_receive_currency_amount(inventory, RELIC_RECYCLE_VALUE)
+
+
+func _can_receive_currency_amount(inventory: QuiverInventory, amount: int) -> bool:
 	if inventory == null or CURRENCY_ITEM == null:
 		return false
 	var room_left := int(inventory.call("_room_left_for_item", CURRENCY_ITEM))
-	return room_left == -1 or room_left >= RELIC_RECYCLE_VALUE
+	return room_left == -1 or room_left >= amount
 
 
 func _get_weapon_name(weapon_scene: PackedScene) -> String:

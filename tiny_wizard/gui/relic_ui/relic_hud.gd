@@ -40,7 +40,7 @@ func _refresh() -> void:
 	if _relic_controller == null or not is_instance_valid(_relic_controller):
 		return
 
-	var snapshot := _relic_controller.get_relic_snapshot()
+	var snapshot := _relic_controller.get_visible_relic_snapshot()
 	var relics := snapshot.get("relics", []) as Array
 	for relic_data in relics:
 		var entry := ENTRY_SCENE.instantiate() as RelicHudEntry

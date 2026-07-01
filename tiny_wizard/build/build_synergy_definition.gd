@@ -8,6 +8,8 @@ enum SynergyScope {
 
 @export var synergy_id: StringName
 @export var display_name := ""
+@export_multiline var description := ""
+@export var icon: Texture2D
 @export var enabled := true
 @export_enum("NEUTRAL", "CHARACTER_EXCLUSIVE") var synergy_scope: int = SynergyScope.NEUTRAL
 @export var owner_character_id: StringName
@@ -18,6 +20,8 @@ enum SynergyScope {
 @export var required_tags: Array[BuildTagRequirement] = []
 @export var required_tag_counts: Array[BuildTagRequirement] = []
 @export var required_item_ids: Array[StringName] = []
+@export var result_display_as_relic := true
+@export var hide_required_items_in_ui := true
 @export var stat_modifiers: Array[BuildStatModifier] = []
 @export var event_effects: Array[BuildEventEffect] = []
 
