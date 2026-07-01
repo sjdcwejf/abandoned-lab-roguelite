@@ -163,6 +163,8 @@ func _get_objective_text() -> String:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return _objective_text
 	if _has_pollution_objective():
+		if _current_room.has_meta("event_objective_text"):
+			return str(_current_room.get_meta("event_objective_text"))
 		return "清除原质污染源，并肃清房内样本。"
 	if _has_cryo_pod_objective():
 		return "检查冷冻舱，并清除释放的封存样本。"
@@ -183,7 +185,10 @@ func _get_progress_text() -> String:
 		var pollution_total := int(_current_room.call("get_pollution_source_total"))
 		var pollution_remaining := int(_current_room.call("get_pollution_source_remaining"))
 		var pollution_cleared := maxi(0, pollution_total - pollution_remaining)
-		return "污染源：%d/%d    剩余样本：%d" % [pollution_cleared, pollution_total, remaining]
+		var target_label := "污染源"
+		if _current_room.has_meta("event_target_label"):
+			target_label = str(_current_room.get_meta("event_target_label"))
+		return "%s：%d/%d    剩余样本：%d" % [target_label, pollution_cleared, pollution_total, remaining]
 	if _has_cryo_pod_objective():
 		var pod_total := int(_current_room.call("get_cryo_pod_total"))
 		var pod_remaining := int(_current_room.call("get_cryo_pod_remaining"))
@@ -204,6 +209,8 @@ func _get_completion_text() -> String:
 		"combat":
 			return "封锁解除：异常样本已清除。"
 		"pollution":
+			if _current_room.has_meta("event_completion_text"):
+				return str(_current_room.get_meta("event_completion_text"))
 			return "封锁解除：原质污染源已清除。"
 		"cryo_pod":
 			return "封锁解除：冷冻舱已检查。"

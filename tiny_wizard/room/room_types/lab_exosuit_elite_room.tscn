@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/ice_core_guardian/ice_core_guardian.tscn" id="3_elite"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
+size = Vector2(130, 84)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_conveyor"]
+size = Vector2(310, 42)
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "elite"
+lab_room_label = "安保机甲仓库"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "elite"
+
+[node name="WestMechBayBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(188, 196)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WestMechBayBlocker"]
+shape = SubResource("RectangleShape2D_terminal")
+
+[node name="EastMechBayBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(836, 404)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastMechBayBlocker"]
+shape = SubResource("RectangleShape2D_terminal")
+
+[node name="NorthConveyorBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 120)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthConveyorBlocker"]
+shape = SubResource("RectangleShape2D_conveyor")
+
+[node name="SecurityMechPlaceholder" parent="Enemies" index="0" instance=ExtResource("3_elite")]
+position = Vector2(512, 306)

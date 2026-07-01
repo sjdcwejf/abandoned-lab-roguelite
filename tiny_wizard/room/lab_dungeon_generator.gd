@@ -31,6 +31,14 @@ const CRYO_REWARD_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_c
 const CRYO_ELITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_elite_room.tscn")
 const CRYO_BOSS_ANTECHAMBER_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_boss_antechamber.tscn")
 const CRYO_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cryo_boss_room.tscn")
+const EXOSUIT_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_start_room.tscn")
+const EXOSUIT_ASSEMBLY_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_assembly_room.tscn")
+const EXOSUIT_DRONE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_drone_room.tscn")
+const EXOSUIT_TEST_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_test_room.tscn")
+const EXOSUIT_WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_weapon_room.tscn")
+const EXOSUIT_ELITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_elite_room.tscn")
+const EXOSUIT_ARMORY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_armory_station_room.tscn")
+const EXOSUIT_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_boss_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
@@ -67,6 +75,11 @@ const CRYO_COMBAT_ROOM_SCENES := [
 	CRYO_COMBAT_ROOM_SCENE,
 	CRYO_COMBAT_ROOM_SCENE,
 	CRYO_VENT_ROOM_SCENE,
+]
+
+const EXOSUIT_COMBAT_ROOM_SCENES := [
+	EXOSUIT_ASSEMBLY_ROOM_SCENE,
+	EXOSUIT_DRONE_ROOM_SCENE,
 ]
 
 const REWARD_ROOM_SCENES := [
@@ -272,6 +285,8 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"boss_label": "零号封存室",
 				"boss_objective": "击败零号封存体，回收封存区黑匣子碎片。",
 				"completion_destination": "兵器工厂访问权限",
+				"next_chapter_id": 4,
+				"next_chapter_title": "第四章：外骨骼兵器工厂",
 				"start_room_scene": CRYO_START_ROOM_SCENE,
 				"combat_room_scenes": CRYO_COMBAT_ROOM_SCENES,
 				"cryo_pod_room_scenes": [CRYO_POD_ROOM_SCENE],
@@ -280,6 +295,36 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"reward_room_scenes": [CRYO_REWARD_ROOM_SCENE, CRYO_REWARD_ROOM_SCENE],
 				"merchant_room_scenes": [CRYO_BOSS_ANTECHAMBER_SCENE],
 				"boss_room_scenes": [CRYO_BOSS_ROOM_SCENE],
+			}
+		4:
+			return {
+				"id": 4,
+				"title": "第四章：外骨骼兵器工厂",
+				"sector": "外骨骼兵器工厂",
+				"planned_minutes": "约 5",
+				"formal_layer_count": 1,
+				"main_path_room_count": 8,
+				"reward_room_count": 1,
+				"layout_radius": 4,
+				"main_room_types": ["combat", "pollution", "combat", "weapon", "elite"],
+				"start_label": "兵器工厂入口",
+				"combat_labels": ["自动化装配线", "无人机装配线"],
+				"pollution_label": "外骨骼测试场",
+				"reward_label_prefix": "工厂补给缓存",
+				"weapon_label": "武器质检室",
+				"elite_label": "安保机甲仓库",
+				"merchant_label": "渡鸦军械补给站",
+				"boss_label": "重装清理机停放库",
+				"boss_objective": "击败弥赛亚重装清理机。",
+				"completion_destination": "数据中枢入口已记录，后续版本开放",
+				"start_room_scene": EXOSUIT_START_ROOM_SCENE,
+				"combat_room_scenes": EXOSUIT_COMBAT_ROOM_SCENES,
+				"pollution_room_scenes": [EXOSUIT_TEST_ROOM_SCENE],
+				"reward_room_scenes": [REWARD_ROOM_A_SCENE, REWARD_ROOM_B_SCENE],
+				"weapon_room_scenes": [EXOSUIT_WEAPON_ROOM_SCENE],
+				"elite_room_scenes": [EXOSUIT_ELITE_ROOM_SCENE],
+				"merchant_room_scenes": [EXOSUIT_ARMORY_STATION_ROOM_SCENE],
+				"boss_room_scenes": [EXOSUIT_BOSS_ROOM_SCENE],
 			}
 	return get_chapter_config(DEFAULT_CHAPTER_ID)
 
@@ -596,6 +641,9 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 
 	match room_type:
 		"combat":
+			var combat_labels := chapter_config.get("combat_labels", []) as Array
+			if not combat_labels.is_empty():
+				return str(combat_labels[(count - 1) % combat_labels.size()])
 			return "%s %d" % [str(chapter_config.get("combat_label_prefix", "封存样本间")), count]
 		"pollution":
 			return str(chapter_config.get("pollution_label", "污染事件房"))

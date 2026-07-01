@@ -7,9 +7,11 @@ signal weapon_picked_up(slot_index: int)
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
+const WEAPON_AFFIX_SERVICE := preload("res://tiny_wizard/player/weapons/weapon_affix_service.gd")
 
 @export var weapon_scene: PackedScene
 @export var weapon_label := "武器"
+@export var weapon_affixes: Array = []
 @export var equip_on_pickup := false
 @export_range(0, 8) var target_slot_number := 0
 @export var preview_rotation := -0.28
@@ -82,6 +84,7 @@ func _show_pickup_comparison(character: Node2D, weapon_holder: Node) -> void:
 	_choice_overlay = WEAPON_CHOICE_OVERLAY.present(self, {
 		"weapon_holder": weapon_holder,
 		"weapon_scene": weapon_scene,
+		"weapon_affixes": weapon_affixes,
 		"title": "武器拾取确认",
 		"action": "拾取",
 		"cost": "来源：封存武器缓存",
@@ -146,7 +149,10 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 
 	var slot_index := -1
 	if target_slot_number > 0 and weapon_holder.has_method("add_weapon_scene_to_slot"):
-		slot_index = int(weapon_holder.add_weapon_scene_to_slot(weapon_scene, target_slot_number - 1, equip_on_pickup))
+		if weapon_holder.has_method("add_weapon_scene_to_slot_with_affixes"):
+			slot_index = int(weapon_holder.call("add_weapon_scene_to_slot_with_affixes", weapon_scene, target_slot_number - 1, weapon_affixes, equip_on_pickup))
+		else:
+			slot_index = int(weapon_holder.add_weapon_scene_to_slot(weapon_scene, target_slot_number - 1, equip_on_pickup))
 	elif weapon_holder.has_method("has_free_quick_slot") and not bool(weapon_holder.call("has_free_quick_slot")):
 		if replacement_slot < 0:
 			_awaiting_slot_selection = true
@@ -155,9 +161,15 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 			return
 		if not weapon_holder.has_method("replace_weapon_scene_in_slot"):
 			return
-		slot_index = int(weapon_holder.call("replace_weapon_scene_in_slot", weapon_scene, replacement_slot))
+		if weapon_holder.has_method("replace_weapon_scene_in_slot_with_affixes"):
+			slot_index = int(weapon_holder.call("replace_weapon_scene_in_slot_with_affixes", weapon_scene, replacement_slot, weapon_affixes))
+		else:
+			slot_index = int(weapon_holder.call("replace_weapon_scene_in_slot", weapon_scene, replacement_slot))
 	else:
-		slot_index = int(weapon_holder.add_weapon_scene(weapon_scene, equip_on_pickup))
+		if weapon_holder.has_method("add_weapon_scene_with_affixes"):
+			slot_index = int(weapon_holder.call("add_weapon_scene_with_affixes", weapon_scene, weapon_affixes, equip_on_pickup))
+		else:
+			slot_index = int(weapon_holder.add_weapon_scene(weapon_scene, equip_on_pickup))
 	if slot_index < 0:
 		INTERACTION_FEEDBACK.show_from(self, "武器拾取失败。", 1.2)
 		return
@@ -168,8 +180,9 @@ func _pick_up(character: Node2D, replacement_slot := -1) -> void:
 	visible = false
 	pickup_area.set_deferred("monitoring", false)
 	weapon_picked_up.emit(slot_index)
-	INTERACTION_FEEDBACK.show_from(self, "已获得 %s，装备到 %d 号位。" % [weapon_label, slot_index + 1], 1.4)
-	print("%s added to weapon slot %d." % [weapon_label, slot_index + 1])
+	var display_label := _get_display_weapon_label()
+	INTERACTION_FEEDBACK.show_from(self, "已获得 %s，装备到 %d 号位。" % [display_label, slot_index + 1], 1.4)
+	print("%s added to weapon slot %d." % [display_label, slot_index + 1])
 
 
 func play_drop_animation(start_global_position: Vector2, end_global_position: Vector2) -> void:
@@ -203,7 +216,7 @@ func _on_pickup_area_body_entered(body: Node2D) -> void:
 	_candidate_character = body
 	_awaiting_slot_selection = false
 	if prompt is Label:
-		(prompt as Label).text = "按 F 拾取"
+		(prompt as Label).text = "按 F 拾取 %s" % _get_display_weapon_label()
 	prompt.visible = true
 
 
@@ -221,3 +234,7 @@ func _get_pressed_replacement_slot() -> int:
 		if InputMap.has_action(action_name) and Input.is_action_just_pressed(action_name):
 			return slot_index
 	return -1
+
+
+func _get_display_weapon_label() -> String:
+	return WEAPON_AFFIX_SERVICE.format_weapon_name(weapon_label, weapon_affixes)

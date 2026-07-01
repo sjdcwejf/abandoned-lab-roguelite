@@ -14,6 +14,7 @@ const FORMAL_CHAPTER_ID := 1
 const CHAPTER_1_ID := 1
 const CHAPTER_2_ID := 2
 const CHAPTER_3_ID := 3
+const CHAPTER_4_ID := 4
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -836,6 +837,8 @@ func _refresh_layer_clear_screen() -> void:
 
 
 func _get_layer_clear_summary_text() -> String:
+	if _formal_chapter_id == CHAPTER_4_ID:
+		return "弥赛亚重装清理机停放库已记录。数据中枢入口已记录，后续版本开放。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_3_ID:
 		return "零号封存体已压制。已回收封存区黑匣子碎片，兵器工厂访问权限待解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_2_ID:
@@ -844,6 +847,8 @@ func _get_layer_clear_summary_text() -> String:
 
 
 func _get_layer_clear_next_button_text() -> String:
+	if _formal_chapter_id == CHAPTER_4_ID:
+		return "数据中枢入口已记录，后续版本开放"
 	if _formal_chapter_id == CHAPTER_3_ID:
 		return "%s：下一版本开放" % LabDungeonGenerator.get_chapter_completion_destination(_formal_chapter_id)
 	return "后续章节：下一版本开放"
@@ -1197,7 +1202,7 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 
 func _update_formal_room_feedback(room: Room) -> void:
 	var type_label := _get_formal_room_type_label(room.lab_room_type)
-	var objective := _get_formal_room_objective(room.lab_room_type)
+	var objective := _get_formal_room_objective(room.lab_room_type, room.lab_room_label)
 	var room_label := room.lab_room_label
 	if room_label == "":
 		room_label = type_label
@@ -1231,6 +1236,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"combat":
 			return "怪物房"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "测试场事件房"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "虫巢事件房"
 			return "污染事件房"
@@ -1245,27 +1252,37 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"weapon":
 			return "武器房"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "军械补给站"
 			return "安全屋"
 		"boss":
 			return "Boss 房"
 	return "未知区域"
 
 
-func _get_formal_room_objective(room_type: String) -> String:
+func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 	match room_type:
 		"start":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "进入兵器工厂。"
 			if _formal_chapter_id == CHAPTER_3_ID:
 				return "确认当前构筑，进入低温封存区。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "确认前哨构筑，进入生态温室。"
 			return "确认装备状态，进入极渊前哨基地。"
 		"combat":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				if room_label == "无人机装配线":
+					return "清理装配线异常单位。"
+				return "清除所有安保单位。"
 			if _formal_chapter_id == CHAPTER_3_ID:
 				return "清除冷雾处理间内的冻伤样本。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "清除孢子培养廊内的失控样本。"
 			return "清除房内样本，解除门锁。"
 		"pollution":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "摧毁外骨骼测试节点 0/3。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "清理虫巢样本，击碎孢子囊，解除温室封锁。"
 			return "清除原质污染源，并肃清房内样本。"
@@ -1276,10 +1293,14 @@ func _get_formal_room_objective(room_type: String) -> String:
 				return "肃清温室样本库守卫，回收补给箱。"
 			return "肃清守卫样本，回收补给箱。"
 		"weapon":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "选择一件带有词条概率的武器。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "回收渡鸦温室军械，整理当前构筑。"
 			return "回收随机军械，整理当前构筑。"
 		"merchant":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "整备武器与补给。"
 			if _formal_chapter_id == CHAPTER_3_ID:
 				return "确认低温封存舱状态，进入零号封存室。"
 			if _formal_chapter_id == CHAPTER_2_ID:
@@ -1290,6 +1311,8 @@ func _get_formal_room_objective(room_type: String) -> String:
 		"cryo_vent":
 			return "避开周期冷气喷口，清除房内冻伤样本。"
 		"elite":
+			if _formal_chapter_id == CHAPTER_4_ID:
+				return "击败仓库守卫。"
 			return "击败冰核守卫，回收低温封存遗物。"
 		"boss":
 			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)

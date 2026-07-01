@@ -13,6 +13,7 @@ const MAX_QUICK_SLOTS := 4
 var current_weapon: LabWeapon
 var current_weapon_index := -1
 var aim_direction := Vector2.RIGHT
+var weapon_affixes: Array = []
 
 @onready var owner_character := get_node_or_null(owner_character_path) as Node2D
 
@@ -20,6 +21,7 @@ var aim_direction := Vector2.RIGHT
 func _ready() -> void:
 	if weapon_scenes.is_empty() and starting_weapon_scene != null:
 		weapon_scenes.append(starting_weapon_scene)
+	_ensure_affix_slots()
 	if starting_weapon_scene != null:
 		equip_weapon(starting_weapon_scene)
 	elif not weapon_scenes.is_empty():
@@ -54,6 +56,7 @@ func equip_weapon(weapon_scene: PackedScene) -> void:
 	if weapon is LabWeapon:
 		current_weapon = weapon
 		current_weapon_index = weapon_scenes.find(weapon_scene)
+		current_weapon.set_weapon_affixes(get_weapon_affixes_at_slot(current_weapon_index))
 		current_weapon.equip(owner_character)
 		current_weapon.set_aim_direction(aim_direction)
 		weapon_equipped.emit(current_weapon_index)
@@ -74,6 +77,10 @@ func equip_weapon_by_index(index: int) -> void:
 
 
 func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> int:
+	return add_weapon_scene_with_affixes(weapon_scene, [], equip_immediately)
+
+
+func add_weapon_scene_with_affixes(weapon_scene: PackedScene, affixes: Array, equip_immediately := false) -> int:
 	if weapon_scene == null:
 		return -1
 
@@ -91,6 +98,7 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 		new_index = weapon_scenes.size() - 1
 	else:
 		return -1
+	_set_weapon_affixes_at_slot(new_index, affixes)
 	if equip_immediately:
 		equip_weapon_by_index(new_index)
 	else:
@@ -99,6 +107,10 @@ func add_weapon_scene(weapon_scene: PackedScene, equip_immediately := false) -> 
 
 
 func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_immediately := false) -> int:
+	return add_weapon_scene_to_slot_with_affixes(weapon_scene, slot_index, [], equip_immediately)
+
+
+func add_weapon_scene_to_slot_with_affixes(weapon_scene: PackedScene, slot_index: int, affixes: Array, equip_immediately := false) -> int:
 	if weapon_scene == null or slot_index < 0 or slot_index >= MAX_QUICK_SLOTS:
 		return -1
 
@@ -110,8 +122,10 @@ func add_weapon_scene_to_slot(weapon_scene: PackedScene, slot_index: int, equip_
 
 	while weapon_scenes.size() <= slot_index:
 		weapon_scenes.append(null)
+		weapon_affixes.append([])
 
 	weapon_scenes[slot_index] = weapon_scene
+	_set_weapon_affixes_at_slot(slot_index, affixes)
 	if equip_immediately:
 		equip_weapon_by_index(slot_index)
 	else:
@@ -127,6 +141,10 @@ func replace_current_weapon_scene(weapon_scene: PackedScene) -> int:
 
 
 func replace_weapon_scene_in_slot(weapon_scene: PackedScene, slot_index: int) -> int:
+	return replace_weapon_scene_in_slot_with_affixes(weapon_scene, slot_index, [])
+
+
+func replace_weapon_scene_in_slot_with_affixes(weapon_scene: PackedScene, slot_index: int, affixes: Array) -> int:
 	if weapon_scene == null or slot_index < 0 or slot_index >= MAX_QUICK_SLOTS:
 		return -1
 
@@ -137,7 +155,9 @@ func replace_weapon_scene_in_slot(weapon_scene: PackedScene, slot_index: int) ->
 
 	while weapon_scenes.size() <= slot_index:
 		weapon_scenes.append(null)
+		weapon_affixes.append([])
 	weapon_scenes[slot_index] = weapon_scene
+	_set_weapon_affixes_at_slot(slot_index, affixes)
 	current_weapon_index = -1
 	equip_weapon_by_index(slot_index)
 	return slot_index
@@ -159,7 +179,19 @@ func get_weapon_display_name_at_slot(slot_index: int) -> String:
 	var weapon_scene := weapon_scenes[slot_index] as PackedScene
 	if weapon_scene == null:
 		return "当前武器"
-	return str(_get_weapon_scene_inventory_info(weapon_scene).get("name", "当前武器"))
+	return str(_get_weapon_scene_inventory_info(weapon_scene, get_weapon_affixes_at_slot(slot_index)).get("name", "当前武器"))
+
+
+func get_weapon_affixes_at_slot(slot_index: int) -> Array:
+	if slot_index < 0:
+		return []
+	_ensure_affix_slots()
+	if slot_index >= weapon_affixes.size():
+		return []
+	var slot_affixes := weapon_affixes[slot_index]
+	if slot_affixes is Array:
+		return (slot_affixes as Array).duplicate()
+	return []
 
 
 func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
@@ -169,9 +201,11 @@ func set_weapon_loadout(new_weapon_scenes: Array, equip_index := 0) -> void:
 		current_weapon = null
 
 	weapon_scenes.clear()
+	weapon_affixes.clear()
 	for weapon_scene in new_weapon_scenes:
 		if weapon_scene is PackedScene and weapon_scenes.size() < MAX_QUICK_SLOTS:
 			weapon_scenes.append(weapon_scene)
+			weapon_affixes.append([])
 
 	current_weapon_index = -1
 	starting_weapon_scene = weapon_scenes[0] if not weapon_scenes.is_empty() else null
@@ -198,7 +232,7 @@ func get_quick_weapon_slots(max_slots := MAX_QUICK_SLOTS) -> Array:
 		}
 
 		if weapon_scene != null:
-			slot_info.merge(_get_weapon_scene_inventory_info(weapon_scene), true)
+			slot_info.merge(_get_weapon_scene_inventory_info(weapon_scene, get_weapon_affixes_at_slot(index)), true)
 		slots.append(slot_info)
 	return slots
 
@@ -266,6 +300,7 @@ func _handle_weapon_switch() -> void:
 
 
 func _find_empty_weapon_slot() -> int:
+	_ensure_affix_slots()
 	for index in range(mini(weapon_scenes.size(), MAX_QUICK_SLOTS)):
 		if weapon_scenes[index] == null:
 			return index
@@ -294,20 +329,34 @@ func _get_weapon_scene_weapon_id(weapon_scene: PackedScene) -> String:
 	return key
 
 
-func _get_weapon_scene_inventory_info(weapon_scene: PackedScene) -> Dictionary:
+func _get_weapon_scene_inventory_info(weapon_scene: PackedScene, affixes := []) -> Dictionary:
 	var info := {
 		"name": _fallback_weapon_name(weapon_scene),
 		"size": Vector2i(2, 1),
 		"color": Color(0.26, 0.62, 0.9, 1.0),
+		"affixes": affixes.duplicate() if affixes is Array else [],
 	}
 
 	var weapon := weapon_scene.instantiate()
 	if weapon is LabWeapon:
-		info["name"] = weapon.get_inventory_display_name()
-		info["size"] = weapon.get_inventory_size()
-		info["color"] = weapon.get_inventory_color()
+		(weapon as LabWeapon).set_weapon_affixes(info["affixes"])
+		info.merge((weapon as LabWeapon).get_weapon_compare_info(), true)
 	weapon.free()
 	return info
+
+
+func _ensure_affix_slots() -> void:
+	while weapon_affixes.size() < weapon_scenes.size():
+		weapon_affixes.append([])
+	while weapon_affixes.size() > weapon_scenes.size():
+		weapon_affixes.pop_back()
+
+
+func _set_weapon_affixes_at_slot(slot_index: int, affixes: Array) -> void:
+	_ensure_affix_slots()
+	while weapon_affixes.size() <= slot_index:
+		weapon_affixes.append([])
+	weapon_affixes[slot_index] = affixes.duplicate()
 
 
 func _fallback_weapon_name(weapon_scene: PackedScene) -> String:

@@ -1,0 +1,62 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_test_room.gd" id="2_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_test_node"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="5_floater"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="6_crawler"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay"]
+size = Vector2(92, 240)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "pollution"
+lab_room_label = "外骨骼测试场"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "test"
+
+[node name="LeftTestBayBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(188, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftTestBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="RightTestBayBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(836, 302)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightTestBayBlocker"]
+shape = SubResource("RectangleShape2D_side_bay")
+
+[node name="TestNodes" type="Node2D" parent="." index="10"]
+
+[node name="TestNodeA" parent="TestNodes" instance=ExtResource("4_test_node")]
+position = Vector2(372, 220)
+max_health = 5
+display_name = "外骨骼测试节点"
+destroyed_display_name = "节点销毁"
+
+[node name="TestNodeB" parent="TestNodes" instance=ExtResource("4_test_node")]
+position = Vector2(512, 310)
+max_health = 5
+display_name = "外骨骼测试节点"
+destroyed_display_name = "节点销毁"
+
+[node name="TestNodeC" parent="TestNodes" instance=ExtResource("4_test_node")]
+position = Vector2(652, 400)
+max_health = 5
+display_name = "外骨骼测试节点"
+destroyed_display_name = "节点销毁"
+
+[node name="FactoryFloater" parent="Enemies" index="0" instance=ExtResource("5_floater")]
+position = Vector2(418, 258)
+
+[node name="FactoryCrawler" parent="Enemies" index="1" instance=ExtResource("6_crawler")]
+position = Vector2(616, 356)

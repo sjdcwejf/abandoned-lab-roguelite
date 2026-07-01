@@ -34,7 +34,9 @@ func fire_projectile() -> bool:
 		(projectile as Node2D).global_position = get_fire_origin()
 		(projectile as Node2D).global_rotation = aim_direction.angle()
 	if projectile.has_method("launch"):
-		projectile.launch(aim_direction, owner_character, damage, projectile_speed, collision_mask)
+		projectile.launch(aim_direction, owner_character, get_scaled_damage(damage), projectile_speed, collision_mask)
+	if projectile.has_method("set_weapon_affixes"):
+		projectile.call("set_weapon_affixes", weapon_affixes)
 
 	_cooldown_timer = cooldown * get_fire_cooldown_multiplier()
 	return true

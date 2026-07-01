@@ -78,6 +78,8 @@ static func populate(room: Room, rng: RandomNumberGenerator, path_depth: int) ->
 	var budget := int(BUDGET_BY_DEPTH[budget_index])
 	if int(room.get_meta("chapter_id", 1)) == 3:
 		budget += 1
+	if int(room.get_meta("chapter_id", 1)) == 4:
+		budget += 2
 	var definitions := _get_enemy_definitions(room)
 	var encounter := _build_encounter(rng, budget, path_depth, definitions)
 	var spawn_positions := _build_spawn_positions(room, encounter.size(), rng)

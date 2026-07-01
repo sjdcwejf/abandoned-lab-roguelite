@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_raven_safehouse_room.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_counter"]
+size = Vector2(320, 76)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rack"]
+size = Vector2(118, 140)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
+size = Vector2(112, 58)
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "merchant"
+lab_room_label = "渡鸦军械补给站"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "merchant"
+
+[node name="NorthArmoryCounterBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(512, 224)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthArmoryCounterBlocker"]
+shape = SubResource("RectangleShape2D_counter")
+
+[node name="LeftArmoryRackBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(216, 390)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftArmoryRackBlocker"]
+shape = SubResource("RectangleShape2D_rack")
+
+[node name="RightArmoryRackBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(808, 390)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightArmoryRackBlocker"]
+shape = SubResource("RectangleShape2D_rack")
+
+[node name="RavenMerchant" parent="." index="8"]
+merchant_title = "渡鸦军械补给站"
+merchant_message = "A-03 信号链路指向兵器工厂深处。军械终端只保留本次整备窗口。"
+max_weapon_offers = 3
+affix_roll_chance = 0.7
+max_affix_count = 1
+allow_stock_refresh = true
+stock_refresh_cost = 1
