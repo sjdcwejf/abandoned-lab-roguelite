@@ -57,7 +57,8 @@ func _spawn_random_weapon() -> void:
 		print("Weapon room has no unowned weapon to drop.")
 		return
 
-	var target_positions := _get_option_positions(weapon_scenes.size())
+	var target_positions: Array = _get_option_positions(weapon_scenes.size())
+	var room_position: Vector2 = get_room_global_position()
 	for index in range(weapon_scenes.size()):
 		var weapon_scene := weapon_scenes[index] as PackedScene
 		var weapon_pickup := WEAPON_PICKUP_SCENE.instantiate() as LabWeaponPickup
@@ -66,8 +67,9 @@ func _spawn_random_weapon() -> void:
 
 		var affixes := WEAPON_AFFIX_SERVICE.roll_affixes(rng, affix_roll_chance, max_affix_count)
 		var base_label := _get_weapon_label(weapon_scene)
-		var target_position := get_room_global_position() + target_positions[index]
-		var start_position := target_position + Vector2(0, -76)
+		var target_offset: Vector2 = target_positions[index] as Vector2
+		var target_position: Vector2 = room_position + target_offset
+		var start_position: Vector2 = target_position + Vector2(0, -76)
 		weapon_pickup.weapon_scene = weapon_scene
 		weapon_pickup.weapon_label = base_label
 		weapon_pickup.weapon_affixes = affixes
