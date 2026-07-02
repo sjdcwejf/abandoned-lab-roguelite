@@ -414,7 +414,7 @@ func _start_debug_formal_entry() -> void:
 		dungeon_seed = debug_override_seed
 	var chapter_id := clampi(debug_start_chapter, CHAPTER_1_ID, CHAPTER_5_ID)
 	_start_formal_run(1, chapter_id)
-	if debug_start_room_type != "":
+	if debug_start_room_type != "" and debug_start_room_type != "none":
 		call_deferred("_debug_move_to_room_type", debug_start_room_type)
 	print("Debug entry ready: chapter %d, target '%s', seed %d." % [chapter_id, debug_start_room_type, LabDungeonGenerator.last_seed])
 
