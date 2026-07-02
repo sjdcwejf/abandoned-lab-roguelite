@@ -76,6 +76,8 @@ func _spawn_random_weapon() -> void:
 		weapon_pickup.equip_on_pickup = false
 		weapon_pickup.preview_rotation = -0.22
 		add_child(weapon_pickup)
+		if not weapon_pickup.weapon_picked_up.is_connected(Callable(self, "_on_weapon_pickup_claimed")):
+			weapon_pickup.weapon_picked_up.connect(Callable(self, "_on_weapon_pickup_claimed"))
 		weapon_pickup.play_drop_animation(start_position, target_position)
 
 
@@ -218,6 +220,11 @@ func _on_refresh_area_body_exited(body: Node2D) -> void:
 	_refresh_candidate = null
 	if _refresh_prompt != null:
 		_refresh_prompt.visible = false
+
+
+func _on_weapon_pickup_claimed(_slot_index: int) -> void:
+	if has_method("mark_reward_claimed"):
+		mark_reward_claimed()
 
 
 func _shuffle_array(values: Array, rng: RandomNumberGenerator) -> void:

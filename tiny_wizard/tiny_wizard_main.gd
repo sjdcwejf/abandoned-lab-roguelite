@@ -28,6 +28,9 @@ const POLLUTION_EVENT_SOURCE_POSITIONS := [
 @export var use_generated_lab_dungeon := true
 @export var play_tutorial := true
 @export var dungeon_seed := 0
+@export_range(0, 5, 1) var debug_start_chapter := 0
+@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_satellite", "cryo_pod", "weapon", "archive", "boss") var debug_start_room_type := ""
+@export var debug_override_seed := 0
 @export var start_room_coord := Vector2i.ZERO
 @export var tiemu_character_scene: PackedScene
 @export var liuying_character_scene: PackedScene
@@ -38,8 +41,8 @@ const POLLUTION_EVENT_SOURCE_POSITIONS := [
 var _current_room := Vector2i.ZERO
 var _character: Node2D
 var _character_select_screen: CharacterSelectScreen
-var _selected_character_id := ""
-var _run_state := ""
+var _selected_character_id := "none"
+var _run_state := "none"
 var _tutorial_rewards_dropped := false
 var _tutorial_rewards_granted := false
 var _tutorial_reward_pickups_remaining := 0
@@ -60,8 +63,8 @@ var _death_prompt_main_menu_button: Button
 var _room_objective_ui: Node
 var _minimap_ui: LabMinimapUI
 var _formal_chapter_id := FORMAL_CHAPTER_ID
-var _formal_chapter_title := ""
-var _formal_chapter_sector := ""
+var _formal_chapter_title := "none"
+var _formal_chapter_sector := "none"
 var _formal_layer_index := 0
 var _base_completed_chapter_id := 0
 var _base_next_chapter_id := 0
@@ -289,7 +292,10 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	if _character.has_signal("respawn_requested"):
 		_character.connect("respawn_requested", Callable(self, "_on_character_death_requested"))
 
-	if play_tutorial:
+	if debug_start_chapter > 0:
+		_configure_character_for_starting_loadout()
+		_start_debug_formal_entry()
+	elif play_tutorial:
 		_configure_character_for_starting_loadout()
 		_start_tutorial_run(_selected_character_id)
 	else:
@@ -401,6 +407,46 @@ func _start_formal_run(layer_index := 1, chapter_id := FORMAL_CHAPTER_ID) -> voi
 	_update_room_doors()
 	_set_minimap_rooms()
 	_enter_start_room()
+
+
+func _start_debug_formal_entry() -> void:
+	if debug_override_seed != 0:
+		dungeon_seed = debug_override_seed
+	var chapter_id := clampi(debug_start_chapter, CHAPTER_1_ID, CHAPTER_5_ID)
+	_start_formal_run(1, chapter_id)
+	if debug_start_room_type != "":
+		call_deferred("_debug_move_to_room_type", debug_start_room_type)
+	print("Debug entry ready: chapter %d, target '%s', seed %d." % [chapter_id, debug_start_room_type, LabDungeonGenerator.last_seed])
+
+
+func _debug_move_to_room_type(target_type: String) -> void:
+	var target_room := _debug_find_room(target_type)
+	if target_room == null:
+		push_warning("Debug entry failed: no room found for target '%s'." % target_type)
+		return
+	_current_room = target_room.room_pos
+	$Camera2D.position = _room_camera_position(_current_room)
+	if _character != null and is_instance_valid(_character):
+		_character.global_position = _room_center(target_room)
+		_character.set("velocity", Vector2.ZERO)
+	target_room.enter_room()
+	_update_room_feedback_for_room(target_room)
+	print("Debug entry moved to %s [%s] at %s." % [target_room.lab_room_label, target_room.lab_room_type, target_room.room_pos])
+
+
+func _debug_find_room(target_type: String) -> Room:
+	if target_type == "pre_boss_shop":
+		target_type = "merchant"
+	if target_type == "event":
+		for room_pos in rooms:
+			var event_room := rooms[room_pos] as Room
+			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod"]:
+				return event_room
+	for room_pos in rooms:
+		var room := rooms[room_pos] as Room
+		if room != null and room.lab_room_type == target_type:
+			return room
+	return null
 
 
 func _start_chapter_base(completed_chapter_id: int) -> void:

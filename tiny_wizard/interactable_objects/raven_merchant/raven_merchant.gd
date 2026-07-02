@@ -12,6 +12,7 @@ const RELIC_RECYCLE_VALUE := 5
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const WEAPON_CHOICE_OVERLAY := preload("res://tiny_wizard/gui/weapon_choice_overlay/weapon_choice_overlay.gd")
+const RELIC_SELL_DIALOG_SCENE := preload("res://tiny_wizard/gui/relic_ui/relic_sell_dialog.tscn")
 const WEAPON_CATALOG := preload("res://tiny_wizard/player/weapons/weapon_catalog.gd")
 const WEAPON_AFFIX_SERVICE := preload("res://tiny_wizard/player/weapons/weapon_affix_service.gd")
 const OFFER_NONE := "none"
@@ -29,6 +30,7 @@ const OFFER_STOCK_REFRESH := "stock_refresh"
 @export_range(0, 2, 1) var max_affix_count := 1
 @export var allow_stock_refresh := false
 @export_range(0, 99, 1) var stock_refresh_cost := 0
+@export_range(0, 99, 1) var potion_price := 20
 
 var _candidate_character: Node2D
 var _dialog_open := false
@@ -42,6 +44,7 @@ var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
 var _retired_weapon_keys := {}
 var _choice_overlay: LabWeaponChoiceOverlay
+var _relic_sell_dialog: RelicSellDialog
 var _visual_time := 0.0
 var _stock_refresh_used := false
 
@@ -139,6 +142,7 @@ func _set_dialog_open(open: bool) -> void:
 	if not _dialog_open:
 		_awaiting_weapon_replacement = false
 		_close_choice_overlay()
+		_close_relic_sell_dialog()
 	dialog_panel.visible = _dialog_open
 	if status_light is Polygon2D:
 		var light := status_light as Polygon2D
@@ -178,19 +182,23 @@ func _apply_selected_offer(character: Node2D) -> void:
 	var relic_count := _get_relic_count(character)
 
 	if _selected_offer_type == OFFER_RELIC_RECYCLE:
+		var sellable_count := _get_sellable_relic_count(character)
 		var weapon_stock_note := ""
 		if not _has_weapon_offer_available():
 			weapon_stock_note = "\n当前无武器可供购买；原质可用于购买后续武器。"
-		status_label.text = "你持有 %d 个%s、%d 个%s。回收 1 个%s可换取 %d 个%s。" % [
+		status_label.text = "你持有 %d 个%s、%d 个%s，其中 %d 个可出售。出售所得会转为%s。药剂报价暂保留为 %d 个%s，本版本不扣除。%s" % [
 			currency_count,
 			CURRENCY_DISPLAY_NAME,
 			relic_count,
 			RELIC_DISPLAY_NAME,
+			sellable_count,
 			RELIC_DISPLAY_NAME,
-			RELIC_RECYCLE_VALUE,
 			CURRENCY_DISPLAY_NAME,
-		] + weapon_stock_note
-		hint_label.text = "↑ / ↓ 选择项目，按 F 回收遗物。"
+			potion_price,
+			CURRENCY_DISPLAY_NAME,
+			weapon_stock_note,
+		]
+		hint_label.text = "↑ / ↓ 选择项目，按 F 打开遗物出售窗口。"
 		return
 
 	if _selected_offer_type == OFFER_STOCK_REFRESH:
@@ -254,7 +262,7 @@ func _try_purchase(character: Node2D, replacement_slot := -1) -> void:
 		return
 
 	if _selected_offer_type == OFFER_RELIC_RECYCLE:
-		_complete_relic_recycle(character, validation)
+		_open_relic_sell_dialog(character, validation)
 		return
 
 	if _selected_offer_type == OFFER_STOCK_REFRESH:
@@ -294,10 +302,10 @@ func _validate_purchase(character: Node2D) -> Dictionary:
 		}
 
 	if _selected_offer_type == OFFER_RELIC_RECYCLE:
-		var relic_count := _get_relic_count(character)
-		if relic_count <= 0:
-			return {"ok": false, "message": "你没有可回收的遗物。击败关卡 Boss 后再回来。"}
-		if not _can_receive_currency(inventory):
+		var sellable_count := _get_sellable_relic_count(character)
+		if sellable_count <= 0:
+			return {"ok": false, "message": "当前没有可出售的遗物。"}
+		if not _can_receive_currency_amount(inventory, 1):
 			return {"ok": false, "message": "背包没有空间接收原质。"}
 		return {
 			"ok": true,
@@ -427,7 +435,7 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 		status_label.text = "已购买 %s，加入 %d 号位。" % [purchased_name, slot_index + 1]
 	if no_weapon_stock_after_purchase:
 		status_label.text += "\n当前无武器可供购买。%s可用于购买武器。" % CURRENCY_DISPLAY_NAME
-		hint_label.text = "本商人没有新的武器库存。仍可回收遗物换取原质。"
+		hint_label.text = "本商人没有新的武器库存。仍可出售遗物换取原质。"
 	INTERACTION_FEEDBACK.show_from(self, "交易完成：%s。" % purchased_name, 1.35)
 
 
@@ -477,6 +485,97 @@ func _complete_relic_recycle(character: Node2D, validation: Dictionary) -> void:
 		CURRENCY_DISPLAY_NAME,
 	]
 	INTERACTION_FEEDBACK.show_from(self, "回收完成：+%d %s。" % [RELIC_RECYCLE_VALUE, CURRENCY_DISPLAY_NAME], 1.35)
+
+
+func _open_relic_sell_dialog(character: Node2D, validation: Dictionary) -> void:
+	var inventory := validation.get("inventory") as QuiverInventory
+	var relic_controller := _get_relic_controller(character)
+	if inventory == null or relic_controller == null:
+		status_label.text = "无法出售遗物：未检测到遗物或背包控制器。"
+		return
+
+	var sellable_relics := relic_controller.get_sellable_relics()
+	if sellable_relics.is_empty():
+		status_label.text = "当前没有可出售的遗物。"
+		return
+
+	_close_relic_sell_dialog()
+	_relic_sell_dialog = RELIC_SELL_DIALOG_SCENE.instantiate() as RelicSellDialog
+	if _relic_sell_dialog == null:
+		status_label.text = "无法打开遗物出售窗口。"
+		return
+	add_child(_relic_sell_dialog)
+	_relic_sell_dialog.position = Vector2(172.0, -118.0)
+	_relic_sell_dialog.setup(sellable_relics)
+	_relic_sell_dialog.relic_selected.connect(_on_relic_sell_selected.bind(character, _relic_sell_dialog))
+	_relic_sell_dialog.cancelled.connect(_on_relic_sell_cancelled.bind(_relic_sell_dialog))
+	status_label.text = "选择一个遗物出售。药剂报价为 %d 个%s，本版本暂不扣除。" % [potion_price, CURRENCY_DISPLAY_NAME]
+
+
+func _on_relic_sell_selected(relic_id: StringName, character: Node2D, dialog: RelicSellDialog) -> void:
+	if not is_instance_valid(character):
+		_close_relic_sell_dialog()
+		return
+	_complete_relic_sell(character, relic_id)
+	if is_instance_valid(dialog):
+		dialog.queue_free()
+	if _relic_sell_dialog == dialog:
+		_relic_sell_dialog = null
+
+
+func _on_relic_sell_cancelled(dialog: RelicSellDialog) -> void:
+	if is_instance_valid(dialog):
+		dialog.queue_free()
+	if _relic_sell_dialog == dialog:
+		_relic_sell_dialog = null
+	status_label.text = "出售已取消，没有消耗%s。" % CURRENCY_DISPLAY_NAME
+
+
+func _close_relic_sell_dialog() -> void:
+	if _relic_sell_dialog == null:
+		return
+	if is_instance_valid(_relic_sell_dialog):
+		_relic_sell_dialog.queue_free()
+	_relic_sell_dialog = null
+
+
+func _complete_relic_sell(character: Node2D, relic_id: StringName) -> void:
+	var inventory := character.get("inventory") as QuiverInventory
+	var relic_controller := _get_relic_controller(character)
+	if inventory == null or relic_controller == null:
+		status_label.text = "出售失败：未检测到背包或遗物控制器。"
+		return
+
+	var definition := relic_controller.get_relic_definition(relic_id)
+	if definition == null or not relic_controller.has_relic(relic_id):
+		status_label.text = "出售失败：遗物状态已变化。"
+		_refresh_offer(character)
+		return
+
+	var sell_value := relic_controller.get_relic_sell_price(relic_id)
+	if not _can_receive_currency_amount(inventory, sell_value):
+		status_label.text = "出售失败：背包没有空间接收原质。"
+		return
+
+	if not relic_controller.remove_relic(relic_id):
+		status_label.text = "出售失败：无法移除遗物。"
+		_refresh_offer(character)
+		return
+
+	var added := inventory.add_item(CURRENCY_ITEM, sell_value)
+	if not added:
+		relic_controller.add_relic(definition)
+		status_label.text = "出售失败：无法接收原质。"
+		return
+
+	var relic_name := definition.display_name
+	if relic_name == "":
+		relic_name = definition.placeholder_text
+	if relic_name == "":
+		relic_name = str(relic_id)
+	_refresh_offer(character)
+	status_label.text = "已出售 %s，获得 %d 个%s。" % [relic_name, sell_value, CURRENCY_DISPLAY_NAME]
+	INTERACTION_FEEDBACK.show_from(self, "遗物出售：+%d %s。" % [sell_value, CURRENCY_DISPLAY_NAME], 1.35)
 
 
 func _enter_weapon_replacement_mode() -> void:
@@ -566,7 +665,7 @@ func _build_available_offers(character: Node2D) -> Array[Dictionary]:
 		})
 	offers.append({
 		"type": OFFER_RELIC_RECYCLE,
-		"name": "回收%s" % RELIC_DISPLAY_NAME,
+		"name": "出售%s" % RELIC_DISPLAY_NAME,
 	})
 	return offers
 
@@ -602,6 +701,13 @@ func _build_stock_list_text() -> String:
 		var marker := ">" if index == _selected_offer_index else " "
 		var direct_key := "%d" % (index + 1) if index < 4 else "-"
 		var offer_type := str(offer.get("type", OFFER_NONE))
+		if offer_type == OFFER_RELIC_RECYCLE:
+			lines.append("%s [%s] 出售%s  /  选择" % [
+				marker,
+				direct_key,
+				RELIC_DISPLAY_NAME,
+			])
+			continue
 		if offer_type == OFFER_WEAPON:
 			var price := "免费" if weapon_cost <= 0 else "%d %s" % [weapon_cost, CURRENCY_DISPLAY_NAME]
 			lines.append("%s [%s] %s  /  %s" % [
@@ -609,14 +715,6 @@ func _build_stock_list_text() -> String:
 				direct_key,
 				str(offer.get("name", "未知武器")),
 				price,
-			])
-		elif offer_type == OFFER_RELIC_RECYCLE:
-			lines.append("%s [%s] 回收%s  /  +%d %s" % [
-				marker,
-				direct_key,
-				RELIC_DISPLAY_NAME,
-				RELIC_RECYCLE_VALUE,
-				CURRENCY_DISPLAY_NAME,
 			])
 		elif offer_type == OFFER_STOCK_REFRESH:
 			var price := "免费" if stock_refresh_cost <= 0 else "%d %s" % [stock_refresh_cost, CURRENCY_DISPLAY_NAME]
@@ -676,6 +774,13 @@ func _get_relic_controller(character: Node2D) -> RelicController:
 	return character.get_node_or_null("RelicController") as RelicController
 
 
+func _get_sellable_relic_count(character: Node2D) -> int:
+	var relic_controller := _get_relic_controller(character)
+	if relic_controller == null:
+		return 0
+	return relic_controller.get_sellable_relics().size()
+
+
 func _remove_one_relic(character: Node2D, inventory: QuiverInventory) -> bool:
 	var relic_controller := _get_relic_controller(character)
 	if relic_controller != null:
@@ -689,10 +794,14 @@ func _remove_one_relic(character: Node2D, inventory: QuiverInventory) -> bool:
 
 
 func _can_receive_currency(inventory: QuiverInventory) -> bool:
+	return _can_receive_currency_amount(inventory, RELIC_RECYCLE_VALUE)
+
+
+func _can_receive_currency_amount(inventory: QuiverInventory, amount: int) -> bool:
 	if inventory == null or CURRENCY_ITEM == null:
 		return false
 	var room_left := int(inventory.call("_room_left_for_item", CURRENCY_ITEM))
-	return room_left == -1 or room_left >= RELIC_RECYCLE_VALUE
+	return room_left == -1 or room_left >= amount
 
 
 func _get_weapon_name(weapon_scene: PackedScene) -> String:

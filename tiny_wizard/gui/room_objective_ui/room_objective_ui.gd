@@ -162,6 +162,14 @@ func _refresh() -> void:
 func _get_objective_text() -> String:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return _objective_text
+	var objective := _get_room_objective()
+	var configured_text := str(objective.get("objective_text", ""))
+	if _has_event_target_objective():
+		if configured_text == "" and _current_room.has_meta("event_objective_text"):
+			configured_text = str(_current_room.get_meta("event_objective_text"))
+		return _replace_target_counter(configured_text)
+	if configured_text != "":
+		return configured_text
 	if _has_pollution_objective():
 		if _current_room.has_meta("event_objective_text"):
 			return str(_current_room.get_meta("event_objective_text"))
@@ -181,19 +189,11 @@ func _get_progress_text() -> String:
 
 	if _current_room.is_cleared:
 		return "封锁解除"
-	if _has_pollution_objective():
-		var pollution_total := int(_current_room.call("get_pollution_source_total"))
-		var pollution_remaining := int(_current_room.call("get_pollution_source_remaining"))
-		var pollution_cleared := maxi(0, pollution_total - pollution_remaining)
-		var target_label := "污染源"
-		if _current_room.has_meta("event_target_label"):
-			target_label = str(_current_room.get_meta("event_target_label"))
-		return "%s：%d/%d    剩余样本：%d" % [target_label, pollution_cleared, pollution_total, remaining]
-	if _has_cryo_pod_objective():
-		var pod_total := int(_current_room.call("get_cryo_pod_total"))
-		var pod_remaining := int(_current_room.call("get_cryo_pod_remaining"))
-		var pod_checked := maxi(0, pod_total - pod_remaining)
-		return "冷冻舱：%d/%d    剩余样本：%d" % [pod_checked, pod_total, remaining]
+	if _has_event_target_objective():
+		var target_total := _get_event_target_total()
+		var target_remaining := _get_event_target_remaining()
+		var target_cleared := maxi(0, target_total - target_remaining)
+		return "%s：%d/%d    剩余样本：%d" % [_get_event_target_label(), target_cleared, target_total, remaining]
 	if not _current_room.has_method("has_enemy_clear_objective") or not bool(_current_room.call("has_enemy_clear_objective")):
 		return ""
 	if _current_room.lab_room_type == "boss":
@@ -204,6 +204,10 @@ func _get_progress_text() -> String:
 func _get_completion_text() -> String:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return ""
+	var objective := _get_room_objective()
+	var configured_text := str(objective.get("completion_text", ""))
+	if configured_text != "":
+		return configured_text
 
 	match _current_room.lab_room_type:
 		"combat":
@@ -249,6 +253,69 @@ func _has_cryo_pod_objective() -> bool:
 	if not _current_room.has_method("has_cryo_pod_objective"):
 		return false
 	return bool(_current_room.call("has_cryo_pod_objective"))
+
+
+func _get_room_objective() -> Dictionary:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return {}
+	if _current_room.has_method("get_room_objective"):
+		return _current_room.call("get_room_objective") as Dictionary
+	return {}
+
+
+func _has_event_target_objective() -> bool:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return false
+	var objective_type := str(_get_room_objective().get("type", ""))
+	if objective_type in [Room.OBJECTIVE_DESTROY_TARGETS, Room.OBJECTIVE_INTERACT_TARGETS]:
+		return _get_event_target_total() > 0
+	return _has_pollution_objective() or _has_cryo_pod_objective()
+
+
+func _get_event_target_total() -> int:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return 0
+	if _current_room.has_method("get_event_target_total"):
+		return int(_current_room.call("get_event_target_total"))
+	if _has_pollution_objective():
+		return int(_current_room.call("get_pollution_source_total"))
+	if _has_cryo_pod_objective():
+		return int(_current_room.call("get_cryo_pod_total"))
+	return int(_get_room_objective().get("target_total", 0))
+
+
+func _get_event_target_remaining() -> int:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return 0
+	if _current_room.has_method("get_event_target_remaining"):
+		return int(_current_room.call("get_event_target_remaining"))
+	if _has_pollution_objective():
+		return int(_current_room.call("get_pollution_source_remaining"))
+	if _has_cryo_pod_objective():
+		return int(_current_room.call("get_cryo_pod_remaining"))
+	return 0
+
+
+func _get_event_target_label() -> String:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return "目标"
+	if _current_room.has_method("get_event_target_label"):
+		return str(_current_room.call("get_event_target_label"))
+	if _current_room.has_meta("event_target_label"):
+		return str(_current_room.get_meta("event_target_label"))
+	return str(_get_room_objective().get("target_label", "目标"))
+
+
+func _replace_target_counter(text: String) -> String:
+	if text == "":
+		text = "%s 0/%d。" % [_get_event_target_label(), _get_event_target_total()]
+	var total := _get_event_target_total()
+	var current := maxi(0, total - _get_event_target_remaining())
+	var counter := "%d/%d" % [current, total]
+	for possible in ["0/%d" % total, "0/3", "0/0"]:
+		if text.find(possible) >= 0:
+			return text.replace(possible, counter)
+	return "%s（%s）" % [text, counter]
 
 
 func _make_panel_style() -> StyleBoxFlat:

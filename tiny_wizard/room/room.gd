@@ -6,6 +6,17 @@ enum Direction {RIGHT, DOWN, LEFT, UP}
 enum Status {UNEXPLORED, EXPLORED}
 
 const ROOM_SIZE = Vector2(1024,600)
+const OBJECTIVE_CLEAR_ENEMIES := "CLEAR_ENEMIES"
+const OBJECTIVE_DESTROY_TARGETS := "DESTROY_TARGETS"
+const OBJECTIVE_INTERACT_TARGETS := "INTERACT_TARGETS"
+const OBJECTIVE_READ_ARCHIVE := "READ_ARCHIVE"
+const OBJECTIVE_CHOOSE_REWARD := "CHOOSE_REWARD"
+const OBJECTIVE_SHOP := "SHOP"
+const OBJECTIVE_BOSS := "BOSS"
+const ROOM_STATE_NOT_VISITED := "NOT_VISITED"
+const ROOM_STATE_IN_PROGRESS := "IN_PROGRESS"
+const ROOM_STATE_COMPLETED := "COMPLETED"
+const ROOM_STATE_REWARD_CLAIMED := "REWARD_CLAIMED"
 
 const OPEN_DOORS = [
 	preload("res://tiny_wizard/assets/placeholder_art/doors/right_door.png"),
@@ -49,6 +60,9 @@ var room_pos := Vector2i.ZERO
 var lab_room_type := "combat"
 var lab_room_label := "战斗房"
 var is_cleared := false
+var room_state := ROOM_STATE_NOT_VISITED
+var room_objective: Dictionary = {}
+var reward_claimed := false
 var objective_initial_enemy_count := 0
 var pollution_source_total := 0
 var pollution_source_remaining := 0
@@ -58,6 +72,7 @@ signal room_cleared(room: Room)
 signal objective_progress_changed(room: Room)
 
 func _ready():
+	_ensure_default_room_objective()
 	objective_initial_enemy_count = get_remaining_enemy_count()
 	if get_tree().current_scene != self:
 		_set_enemies_active(false)
@@ -105,10 +120,15 @@ func get_spawning_point(direction):
 
 func enter_room():
 	if is_cleared:
+		if room_state != ROOM_STATE_REWARD_CLAIMED:
+			room_state = ROOM_STATE_COMPLETED
 		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
 			open_door(d)
 		_update_room_chest_locks()
 		return
+
+	if room_state == ROOM_STATE_NOT_VISITED:
+		room_state = ROOM_STATE_IN_PROGRESS
 
 	var enemies = $Enemies.get_children()
 	objective_initial_enemy_count = maxi(objective_initial_enemy_count, enemies.size())
@@ -162,6 +182,8 @@ func _mark_room_cleared() -> void:
 	if is_cleared:
 		return
 	is_cleared = true
+	if room_state != ROOM_STATE_REWARD_CLAIMED:
+		room_state = ROOM_STATE_COMPLETED
 	_update_room_chest_locks()
 	_on_room_cleared()
 	objective_progress_changed.emit(self)
@@ -173,6 +195,67 @@ func _on_room_cleared() -> void:
 	pass
 
 
+func set_room_objective(objective: Dictionary) -> void:
+	room_objective = objective.duplicate(true)
+	if room_objective.has("objective_text"):
+		set_meta("event_objective_text", str(room_objective.get("objective_text", "")))
+	if room_objective.has("target_label"):
+		set_meta("event_target_label", str(room_objective.get("target_label", "")))
+	if room_objective.has("completion_text"):
+		set_meta("event_completion_text", str(room_objective.get("completion_text", "")))
+
+
+func get_room_objective() -> Dictionary:
+	_ensure_default_room_objective()
+	return room_objective
+
+
+func get_room_objective_type() -> String:
+	_ensure_default_room_objective()
+	return str(room_objective.get("type", OBJECTIVE_CLEAR_ENEMIES))
+
+
+func get_room_state() -> String:
+	return room_state
+
+
+func mark_reward_claimed() -> void:
+	reward_claimed = true
+	room_state = ROOM_STATE_REWARD_CLAIMED
+	objective_progress_changed.emit(self)
+
+
+func has_reward_claimed() -> bool:
+	return reward_claimed
+
+
+func get_event_target_label() -> String:
+	if has_meta("event_target_label"):
+		return str(get_meta("event_target_label"))
+	_ensure_default_room_objective()
+	return str(room_objective.get("target_label", "目标"))
+
+
+func get_event_target_total() -> int:
+	if has_method("get_cryo_pod_total") and bool(call("has_cryo_pod_objective")):
+		return int(call("get_cryo_pod_total"))
+	if pollution_source_total > 0:
+		return pollution_source_total
+	_ensure_default_room_objective()
+	return int(room_objective.get("target_total", 0))
+
+
+func get_event_target_remaining() -> int:
+	if is_cleared:
+		return 0
+	if has_method("get_cryo_pod_remaining") and has_method("has_cryo_pod_objective") and bool(call("has_cryo_pod_objective")):
+		return int(call("get_cryo_pod_remaining"))
+	if pollution_source_total > 0:
+		return pollution_source_remaining
+	_ensure_default_room_objective()
+	return int(room_objective.get("target_remaining", 0))
+
+
 func register_pollution_source(source: Node) -> void:
 	if source == null:
 		return
@@ -180,6 +263,8 @@ func register_pollution_source(source: Node) -> void:
 	pollution_source_total += 1
 	pollution_source_remaining += 1
 	lab_room_type = "pollution" if lab_room_type == "combat" else lab_room_type
+	if room_objective.is_empty() or get_room_objective_type() == OBJECTIVE_CLEAR_ENEMIES:
+		set_room_objective(_make_default_objective())
 
 	var destroyed_callable := Callable(self, "_on_pollution_source_destroyed")
 	if source.has_signal("pollution_source_destroyed") and not source.is_connected("pollution_source_destroyed", destroyed_callable):
@@ -188,7 +273,7 @@ func register_pollution_source(source: Node) -> void:
 
 
 func has_pending_room_event_objectives() -> bool:
-	return pollution_source_remaining > 0
+	return get_event_target_remaining() > 0
 
 
 func has_pollution_source_objective() -> bool:
@@ -216,6 +301,8 @@ func get_objective_initial_enemy_count() -> int:
 
 
 func has_enemy_clear_objective() -> bool:
+	if get_room_objective_type() in [OBJECTIVE_CLEAR_ENEMIES, OBJECTIVE_DESTROY_TARGETS, OBJECTIVE_INTERACT_TARGETS, OBJECTIVE_BOSS]:
+		return objective_initial_enemy_count > 0 or get_remaining_enemy_count() > 0
 	if lab_room_type in ["combat", "pollution", "reward", "boss", "cryo_pod", "cryo_vent", "elite"]:
 		return objective_initial_enemy_count > 0 or get_remaining_enemy_count() > 0
 	return false
@@ -298,3 +385,79 @@ func _direction_to_index(direction: Vector2) -> Direction:
 	if direction.x < 0:
 		return Direction.LEFT
 	return Direction.UP
+
+
+func _ensure_default_room_objective() -> void:
+	if room_objective.is_empty():
+		room_objective = _make_default_objective()
+
+
+func _make_default_objective() -> Dictionary:
+	match lab_room_type:
+		"start":
+			return {
+				"type": OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": "进入当前区域。",
+				"completion_text": "区域入口已确认。",
+			}
+		"pollution":
+			return {
+				"type": OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "摧毁目标 0/3，并清除房内敌人。",
+				"target_label": "目标",
+				"target_total": 3,
+				"completion_text": "封锁解除：目标已清除。",
+			}
+		"data_comm":
+			return {
+				"type": OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "重启通讯终端 0/3。",
+				"target_label": "通讯终端",
+				"target_total": 3,
+				"completion_text": "封锁解除：通讯终端已重启。",
+			}
+		"data_satellite":
+			return {
+				"type": OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "关闭伪装节点 0/3。",
+				"target_label": "伪装节点",
+				"target_total": 3,
+				"completion_text": "封锁解除：伪装节点已关闭。",
+			}
+		"cryo_pod":
+			return {
+				"type": OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "检查冷冻舱 0/3。",
+				"target_label": "冷冻舱",
+				"target_total": 3,
+				"completion_text": "封锁解除：冷冻舱已检查。",
+			}
+		"weapon":
+			return {
+				"type": OBJECTIVE_CHOOSE_REWARD,
+				"objective_text": "选择一件武器。",
+				"completion_text": "武器选择已完成。",
+			}
+		"merchant":
+			return {
+				"type": OBJECTIVE_SHOP,
+				"objective_text": "整备补给。",
+				"completion_text": "补给窗口已开启。",
+			}
+		"archive":
+			return {
+				"type": OBJECTIVE_READ_ARCHIVE,
+				"objective_text": "读取黑匣子档案。",
+				"completion_text": "数据档案已同步。",
+			}
+		"boss":
+			return {
+				"type": OBJECTIVE_BOSS,
+				"objective_text": "击败 Boss。",
+				"completion_text": "Boss 已击败。",
+			}
+	return {
+		"type": OBJECTIVE_CLEAR_ENEMIES,
+		"objective_text": "清除所有敌人。",
+		"completion_text": "封锁解除。",
+	}

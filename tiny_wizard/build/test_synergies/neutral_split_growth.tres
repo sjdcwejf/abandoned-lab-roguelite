@@ -12,12 +12,15 @@ value = 10.0
 [resource]
 script = ExtResource("1_syn")
 synergy_id = &"neutral_split_growth"
-display_name = "裂殖增生"
+display_name = "裂殖菌核"
+description = "裂殖胚核与菌忆伞盖融合后的结果。"
 enabled = true
 synergy_scope = 0
 exclusive_group = &"growth_fusion"
 tier = 1
 priority = 10
-placeholder_text = "裂殖与孢子记忆共振，最大能量额外 +10。"
+placeholder_text = "裂殖胚核与菌忆伞盖融合，最大能量额外 +10。"
 required_item_ids = Array[StringName]([&"split_embryo_core", &"fungal_memory_cap"])
+result_display_as_relic = true
+hide_required_items_in_ui = true
 stat_modifiers = Array[BuildStatModifier]([SubResource("Resource_max_energy")])

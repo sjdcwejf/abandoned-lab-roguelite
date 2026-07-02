@@ -35,11 +35,7 @@ static func get_available_relics(
 			continue
 		if item.item_type != BuildItemDefinition.ItemType.RELIC:
 			continue
-		if relic_controller != null:
-			var install_result := relic_controller.can_add_relic(item)
-			if not install_result.success:
-				continue
-		elif item.relic_scope == BuildItemDefinition.RelicScope.NONE:
+		if not _is_relic_available_for_controller(item, relic_controller):
 			continue
 		result.append(item)
 
@@ -59,11 +55,7 @@ static func get_available_relics_from_items(
 			continue
 		if item.item_type != BuildItemDefinition.ItemType.RELIC:
 			continue
-		if relic_controller != null:
-			var install_result := relic_controller.can_add_relic(item)
-			if not install_result.success:
-				continue
-		elif item.relic_scope == BuildItemDefinition.RelicScope.NONE:
+		if not _is_relic_available_for_controller(item, relic_controller):
 			continue
 		result.append(item)
 	return result
@@ -87,3 +79,17 @@ static func pick_random_relic(
 	if rng == null:
 		return candidates.pick_random()
 	return candidates[rng.randi_range(0, candidates.size() - 1)]
+
+
+static func _is_relic_available_for_controller(
+	definition: BuildItemDefinition,
+	relic_controller: RelicController
+) -> bool:
+	if definition == null:
+		return false
+	if relic_controller == null:
+		return definition.relic_scope != BuildItemDefinition.RelicScope.NONE
+	if relic_controller.has_relic(definition.item_id):
+		return false
+	var install_result := relic_controller.can_add_relic(definition)
+	return install_result.success

@@ -8,6 +8,9 @@ var cryo_pod_remaining := 0
 
 func _ready() -> void:
 	super._ready()
+	set_meta("event_objective_text", "检查冷冻舱 0/3，并清除释放出的封存样本。")
+	set_meta("event_target_label", "冷冻舱")
+	set_meta("event_completion_text", "封锁解除：冷冻舱已检查。")
 	_register_authored_cryo_pods(self)
 
 

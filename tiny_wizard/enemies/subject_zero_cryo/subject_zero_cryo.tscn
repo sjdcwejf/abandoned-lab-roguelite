@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="PackedScene" path="res://top-down-shooter-core/character/character.tscn" id="1_character"]
 [ext_resource type="Script" path="res://tiny_wizard/enemies/subject_zero_cryo/subject_zero_cryo.gd" id="2_script"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/placeholder_art/shadow.png" id="7_shadow"]
 [ext_resource type="PackedScene" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="8_detector"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/enemies/stasis_crawler/stasis_crawler.tscn" id="9_summon"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/visual/visual.gd" id="10_visual"]
 
 [sub_resource type="Resource" id="Resource_stats"]
 resource_local_to_scene = true
@@ -77,6 +78,7 @@ death_burst_scale = 2.2
 
 [node name="Visual" parent="." index="0"]
 modulate = Color(0.7, 0.9, 1, 1)
+script = ExtResource("10_visual")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual" index="0"]
 modulate = Color(0.62, 0.88, 1, 1)
@@ -100,4 +102,3 @@ shape = SubResource("CircleShape2D_detector")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
 position = Vector2(0, -56)
 shape = SubResource("CircleShape2D_body")
-

@@ -34,6 +34,9 @@ func mark_opened() -> void:
 	_room_locked = false
 	_freeze_physics_body()
 	_apply_room_lock()
+	var room := _find_parent_room()
+	if room != null and room.has_method("mark_reward_claimed"):
+		room.call("mark_reward_claimed")
 
 
 func is_opened() -> bool:
@@ -110,3 +113,12 @@ func _disable_collision_shapes(root: Node) -> void:
 		if child is CollisionShape2D:
 			(child as CollisionShape2D).set_deferred("disabled", true)
 		_disable_collision_shapes(child)
+
+
+func _find_parent_room() -> Room:
+	var current := get_parent()
+	while current != null:
+		if current is Room:
+			return current as Room
+		current = current.get_parent()
+	return null

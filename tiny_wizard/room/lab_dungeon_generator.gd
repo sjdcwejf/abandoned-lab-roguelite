@@ -54,6 +54,7 @@ const MAIN_PATH_ROOM_COUNT := 6
 const REWARD_ROOM_COUNT := 2
 const MAX_LAYOUT_ATTEMPTS := 80
 const LAYOUT_RADIUS := 3
+const ROOM_ROLE_PRE_BOSS_SHOP := "PRE_BOSS_SHOP"
 
 const DIRECTIONS := [
 	Vector2i.RIGHT,
@@ -217,6 +218,7 @@ static func generate(rooms_parent: Node2D, requested_seed := 0, chapter_id := DE
 			FORMAL_ENCOUNTER_GENERATOR.populate(room, rng, int(spec.get("depth", 1)))
 		rooms_parent.add_child(room)
 		generated_rooms[room.room_pos] = room
+	_validate_generated_rooms(generated_rooms, chapter_config, layer_index)
 
 	return generated_rooms
 
@@ -468,6 +470,9 @@ static func _instantiate_room(spec: Dictionary) -> Room:
 	room.set_meta("chapter_title", str(spec.get("chapter_title", "")))
 	room.set_meta("chapter_sector", str(spec.get("chapter_sector", "")))
 	room.set_meta("planned_minutes", str(spec.get("planned_minutes", "")))
+	room.set_meta("room_role", str(spec.get("room_role", "")))
+	if room.has_method("set_room_objective"):
+		room.call("set_room_objective", spec.get("objective", {}) as Dictionary)
 	room.position = START_ROOM_OFFSET + Vector2(coord.x, coord.y) * Room.ROOM_SIZE
 	return room
 
@@ -503,10 +508,15 @@ static func _generate_random_layout(rng: RandomNumberGenerator, chapter_config: 
 		if not _has_isolated_pre_boss_room(main_path, reward_coords):
 			continue
 
-		return _build_room_specs(main_path, reward_coords, rng, chapter_config, layer_index)
+		var specs := _build_room_specs(main_path, reward_coords, rng, chapter_config, layer_index)
+		if _validate_room_specs(specs, chapter_config, layer_index, false):
+			return specs
+		_validate_room_specs(specs, chapter_config, layer_index, true)
 
-	push_warning("Random dungeon layout failed; using fallback layout.")
-	return FALLBACK_ROOM_LAYOUT
+	push_warning("Random dungeon layout failed; using chapter-safe fallback layout.")
+	var fallback_specs := _build_safe_fallback_specs(rng, chapter_config, layer_index)
+	_validate_room_specs(fallback_specs, chapter_config, layer_index, true)
+	return fallback_specs
 
 
 static func _build_main_path(rng: RandomNumberGenerator, room_count: int, layout_radius: int) -> Array:
@@ -696,7 +706,371 @@ static func _make_spec(coord: Vector2i, room_type: String, label: String, scene:
 		"chapter_sector": str(chapter_config.get("sector", "")),
 		"planned_minutes": str(chapter_config.get("planned_minutes", "")),
 		"layer_index": layer_index,
+		"room_role": ROOM_ROLE_PRE_BOSS_SHOP if room_type == "merchant" else "",
+		"objective": _make_room_objective(room_type, label, chapter_config),
 	}
+
+
+static func _make_room_objective(room_type: String, label: String, chapter_config: Dictionary) -> Dictionary:
+	var chapter_id := int(chapter_config.get("id", DEFAULT_CHAPTER_ID))
+	match room_type:
+		"start":
+			return {
+				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": _chapter_start_objective(chapter_id),
+				"completion_text": "入口同步完成。",
+			}
+		"combat":
+			return {
+				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": _chapter_combat_objective(chapter_id, label),
+				"completion_text": "封锁解除：异常单位已清除。",
+			}
+		"pollution":
+			return _chapter_event_objective(chapter_id, label)
+		"data_comm":
+			return {
+				"type": Room.OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "重启通讯终端 0/3。",
+				"target_label": "通讯终端",
+				"target_total": 3,
+				"completion_text": "封锁解除：通讯终端已重启。",
+			}
+		"data_satellite":
+			return {
+				"type": Room.OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "关闭伪装节点 0/3。",
+				"target_label": "伪装节点",
+				"target_total": 3,
+				"completion_text": "封锁解除：伪装节点已关闭。",
+			}
+		"cryo_pod":
+			return {
+				"type": Room.OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "检查冷冻舱 0/3。",
+				"target_label": "冷冻舱",
+				"target_total": 3,
+				"completion_text": "封锁解除：冷冻舱已检查。",
+			}
+		"cryo_vent":
+			return {
+				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": "避开周期冷气喷口，清除房内冻伤样本。",
+				"completion_text": "封锁解除：低温喷口已稳定。",
+			}
+		"elite":
+			return {
+				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": "击败仓库守卫。" if chapter_id == 4 else "击败冰核守卫，回收低温封存遗物。",
+				"completion_text": "封锁解除：高威胁单位已清除。",
+			}
+		"reward":
+			return {
+				"type": Room.OBJECTIVE_CHOOSE_REWARD,
+				"objective_text": "肃清守卫样本，回收补给箱。",
+				"completion_text": "奖励解锁：补给箱可领取。",
+			}
+		"weapon":
+			return {
+				"type": Room.OBJECTIVE_CHOOSE_REWARD,
+				"objective_text": "选择一件武器。",
+				"completion_text": "武器选择已开放。",
+			}
+		"merchant":
+			return {
+				"type": Room.OBJECTIVE_SHOP,
+				"objective_text": _chapter_shop_objective(chapter_id),
+				"completion_text": "补给窗口已开启。",
+			}
+		"archive":
+			return {
+				"type": Room.OBJECTIVE_READ_ARCHIVE,
+				"objective_text": "读取黑匣子档案。",
+				"completion_text": "数据档案已同步：黑匣子记录可查看。",
+			}
+		"boss":
+			return {
+				"type": Room.OBJECTIVE_BOSS,
+				"objective_text": str(chapter_config.get("boss_objective", "击败当前章节 Boss。")),
+				"completion_text": "Boss 已击败：裂隙稳定。",
+			}
+	return {
+		"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+		"objective_text": "清除所有敌人。",
+		"completion_text": "封锁解除。",
+	}
+
+
+static func _chapter_start_objective(chapter_id: int) -> String:
+	match chapter_id:
+		5:
+			return "进入数据中枢。"
+		4:
+			return "进入兵器工厂。"
+		3:
+			return "确认当前构筑，进入低温封存区。"
+		2:
+			return "确认前哨构筑，进入生态温室。"
+	return "确认装备状态，进入极渊前哨基地。"
+
+
+static func _chapter_combat_objective(chapter_id: int, label: String) -> String:
+	match chapter_id:
+		5:
+			return "清除所有异常单位。"
+		4:
+			return "清理装配线异常单位。" if label == "无人机装配线" else "清除所有安保单位。"
+		3:
+			return "清除冷雾处理间内的冻伤样本。"
+		2:
+			return "清除孢子培养廊内的失控样本。"
+	return "清除房内样本，解除门锁。"
+
+
+static func _chapter_event_objective(chapter_id: int, _label: String) -> Dictionary:
+	match chapter_id:
+		5:
+			return {
+				"type": Room.OBJECTIVE_INTERACT_TARGETS,
+				"objective_text": "同步数据节点 0/3。",
+				"target_label": "数据节点",
+				"target_total": 3,
+				"completion_text": "封锁解除：数据节点已同步。",
+			}
+		4:
+			return {
+				"type": Room.OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "摧毁外骨骼测试节点 0/3。",
+				"target_label": "外骨骼测试节点",
+				"target_total": 3,
+				"completion_text": "封锁解除：外骨骼测试节点已摧毁。",
+			}
+		2:
+			return {
+				"type": Room.OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "摧毁孢子囊 0/3，并清除房内敌人。",
+				"target_label": "孢子囊",
+				"target_total": 3,
+				"completion_text": "封锁解除：孢子囊已清除。",
+			}
+	return {
+		"type": Room.OBJECTIVE_DESTROY_TARGETS,
+		"objective_text": "摧毁目标 0/3，并清除房内敌人。",
+		"target_label": "目标",
+		"target_total": 3,
+		"completion_text": "封锁解除：目标已清除。",
+	}
+
+
+static func _chapter_shop_objective(chapter_id: int) -> String:
+	match chapter_id:
+		5:
+			return "整备并检查数据档案。"
+		4:
+			return "整备武器与补给。"
+		3:
+			return "确认低温封存舱状态，进入零号封存室。"
+		2:
+			return "在渡鸦温室补给站交易，准备进入培育舱。"
+	return "与渡鸦交易，补充装备后前往下一房间。"
+
+
+static func _build_safe_fallback_specs(rng: RandomNumberGenerator, chapter_config: Dictionary, layer_index: int) -> Array:
+	var label_counts := {}
+	var scene_pools := _build_scene_pools(chapter_config)
+	var specs := []
+	var path_types := (chapter_config.get("main_room_types", ["combat", "combat", "weapon"]) as Array).duplicate()
+	path_types.append("merchant")
+	path_types.append("boss")
+	specs.append(_make_spec(
+		Vector2i.ZERO,
+		"start",
+		str(chapter_config.get("start_label", "封存气闸")),
+		chapter_config.get("start_room_scene", START_ROOM_SCENE) as PackedScene,
+		0,
+		chapter_config,
+		layer_index
+	))
+
+	for index in range(path_types.size()):
+		var room_type := str(path_types[index])
+		var coord := Vector2i(index + 1, 0)
+		var scene := _take_scene(scene_pools, room_type, rng)
+		specs.append(_make_spec(coord, room_type, _next_label(room_type, label_counts, chapter_config), scene, index + 1, chapter_config, layer_index))
+
+	return specs
+
+
+static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, layer_index: int, print_errors := true) -> bool:
+	var errors := PackedStringArray()
+	var coords := {}
+	var start_specs := []
+	var boss_specs := []
+	var merchant_specs := []
+	var type_counts := {}
+
+	for spec_value in room_specs:
+		var spec := spec_value as Dictionary
+		var coord := spec.get("coord", Vector2i.ZERO) as Vector2i
+		var room_type := str(spec.get("type", ""))
+		coords[coord] = true
+		type_counts[room_type] = int(type_counts.get(room_type, 0)) + 1
+		match room_type:
+			"start":
+				start_specs.append(spec)
+			"boss":
+				boss_specs.append(spec)
+			"merchant":
+				merchant_specs.append(spec)
+
+	if start_specs.is_empty():
+		errors.append("Map validation failed: missing spawn room")
+	if boss_specs.is_empty():
+		errors.append("Map validation failed: missing boss room")
+	if merchant_specs.is_empty():
+		errors.append("Map validation failed: pre-boss shop missing")
+
+	if not boss_specs.is_empty() and not merchant_specs.is_empty():
+		var boss_coord := boss_specs[0].get("coord", Vector2i.ZERO) as Vector2i
+		var merchant_coord := merchant_specs[0].get("coord", Vector2i.ZERO) as Vector2i
+		if not _are_adjacent(merchant_coord, boss_coord):
+			errors.append("Map validation failed: pre-boss shop is not adjacent to boss")
+		var merchant_objective := merchant_specs[0].get("objective", {}) as Dictionary
+		if str(merchant_specs[0].get("room_role", "")) != ROOM_ROLE_PRE_BOSS_SHOP:
+			errors.append("Map validation failed: merchant room is not marked PRE_BOSS_SHOP")
+		if str(merchant_objective.get("type", "")) != Room.OBJECTIVE_SHOP:
+			errors.append("Map validation failed: pre-boss shop objective is not SHOP")
+
+	if not start_specs.is_empty():
+		var reachable := _collect_reachable_coords(start_specs[0].get("coord", Vector2i.ZERO) as Vector2i, coords)
+		for coord in coords.keys():
+			if not reachable.has(coord):
+				errors.append("Map validation failed: unreachable room at %s" % [coord])
+
+	var required_room_types := chapter_config.get("main_room_types", []) as Array
+	for required_value in required_room_types:
+		var required_type := str(required_value)
+		if int(type_counts.get(required_type, 0)) <= 0:
+			errors.append("Map validation failed: missing key room type %s" % required_type)
+
+	for spec_value in room_specs:
+		var spec := spec_value as Dictionary
+		var room_type := str(spec.get("type", ""))
+		var objective := spec.get("objective", {}) as Dictionary
+		if room_type == "merchant":
+			if int(objective.get("target_total", 0)) > 0:
+				errors.append("Map validation failed: shop has event targets")
+		if room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod"]:
+			var target_total := int(objective.get("target_total", 0))
+			if target_total != 3:
+				errors.append("Map validation failed: event target count mismatch in %s" % room_type)
+		if room_type == "boss" and str(objective.get("type", "")) != Room.OBJECTIVE_BOSS:
+			errors.append("Map validation failed: boss room objective is not BOSS")
+
+	if not errors.is_empty():
+		if print_errors:
+			for error_message in errors:
+				push_warning("%s | chapter %s layer %d" % [error_message, str(chapter_config.get("title", "")), layer_index])
+		return false
+	return true
+
+
+static func _collect_reachable_coords(start_coord: Vector2i, coords: Dictionary) -> Dictionary:
+	var reachable := {}
+	var queue := [start_coord]
+	reachable[start_coord] = true
+	while not queue.is_empty():
+		var current := queue.pop_front() as Vector2i
+		for direction: Vector2i in DIRECTIONS:
+			var next_coord := current + direction
+			if not coords.has(next_coord):
+				continue
+			if reachable.has(next_coord):
+				continue
+			reachable[next_coord] = true
+			queue.append(next_coord)
+	return reachable
+
+
+static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_config: Dictionary, layer_index: int) -> bool:
+	var errors := PackedStringArray()
+	var start_room: Room = null
+	var boss_room: Room = null
+	var merchant_room: Room = null
+	var coords := {}
+
+	for room_pos in generated_rooms:
+		var room := generated_rooms[room_pos] as Room
+		if room == null:
+			continue
+		coords[room.room_pos] = true
+		match room.lab_room_type:
+			"start":
+				start_room = room
+			"boss":
+				boss_room = room
+			"merchant":
+				merchant_room = room
+				if _count_children_in_group(room, "room_event_targets") > 0:
+					errors.append("Map validation failed: shop has event targets")
+				if _count_descendants_of_type(room, "LabChest") > 0:
+					errors.append("Map validation failed: shop has chest")
+				if room.has_node("Enemies") and room.get_node("Enemies").get_child_count() > 0:
+					errors.append("Map validation failed: shop has enemies")
+			"pollution", "data_comm", "data_satellite", "cryo_pod":
+				if room.has_method("get_event_target_total"):
+					var target_total := int(room.call("get_event_target_total"))
+					if target_total != 3:
+						errors.append("Map validation failed: event target count mismatch in %s (%d)" % [room.lab_room_type, target_total])
+
+	if start_room == null:
+		errors.append("Map validation failed: missing spawn room")
+	if boss_room == null:
+		errors.append("Map validation failed: missing boss room")
+	if merchant_room == null:
+		errors.append("Map validation failed: pre-boss shop missing")
+	if boss_room != null and merchant_room != null and not _are_adjacent(merchant_room.room_pos, boss_room.room_pos):
+		errors.append("Map validation failed: pre-boss shop is not adjacent to boss")
+	if start_room != null:
+		var reachable := _collect_reachable_coords(start_room.room_pos, coords)
+		for coord in coords.keys():
+			if not reachable.has(coord):
+				errors.append("Map validation failed: unreachable instantiated room at %s" % [coord])
+	if boss_room != null and _boss_has_active_enemy(boss_room):
+		errors.append("Map validation failed: boss appears active before room entry")
+
+	if not errors.is_empty():
+		for error_message in errors:
+			push_warning("%s | chapter %s layer %d" % [error_message, str(chapter_config.get("title", "")), layer_index])
+		return false
+	return true
+
+
+static func _count_children_in_group(root: Node, group_name: String) -> int:
+	var count := 0
+	if root.is_in_group(group_name):
+		count += 1
+	for child in root.get_children():
+		count += _count_children_in_group(child, group_name)
+	return count
+
+
+static func _count_descendants_of_type(root: Node, class_name_value: String) -> int:
+	var count := 0
+	if class_name_value == "LabChest" and root is LabChest:
+		count += 1
+	for child in root.get_children():
+		count += _count_descendants_of_type(child, class_name_value)
+	return count
+
+
+static func _boss_has_active_enemy(boss_room: Room) -> bool:
+	if not boss_room.has_node("Enemies"):
+		return false
+	for enemy in boss_room.get_node("Enemies").get_children():
+		if enemy.process_mode != Node.PROCESS_MODE_DISABLED:
+			return true
+	return false
 
 
 static func _next_label(room_type: String, label_counts: Dictionary, chapter_config: Dictionary) -> String:

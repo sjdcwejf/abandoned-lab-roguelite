@@ -4,6 +4,9 @@ extends Room
 
 func _ready() -> void:
 	super._ready()
+	set_meta("event_objective_text", "摧毁孢子囊 0/3，并清除房内敌人。")
+	set_meta("event_target_label", "孢子囊")
+	set_meta("event_completion_text", "封锁解除：孢子囊已清除。")
 	_register_authored_spore_pods(self)
 
 
