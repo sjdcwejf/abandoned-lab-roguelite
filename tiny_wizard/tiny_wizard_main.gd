@@ -103,6 +103,10 @@ func can_pause_game() -> bool:
 	return _character != null and is_instance_valid(_character)
 
 
+func can_open_debug_chapter_menu() -> bool:
+	return can_pause_game()
+
+
 func _collect_existing_rooms() -> Dictionary:
 	var collected_rooms := {}
 	for room in $Rooms.get_children():
@@ -419,10 +423,29 @@ func _start_debug_formal_entry() -> void:
 	print("Debug entry ready: chapter %d, target '%s', seed %d." % [chapter_id, debug_start_room_type, LabDungeonGenerator.last_seed])
 
 
+func debug_enter_chapter(chapter_id: int, target_room_type: String = "none") -> void:
+	var resolved_chapter_id := clampi(chapter_id, CHAPTER_1_ID, CHAPTER_5_ID)
+	if _selected_character_id == "" or _selected_character_id == "none":
+		_selected_character_id = CharacterSelectScreen.TIEMU_ID
+	if not _rebuild_selected_character_for_checkpoint():
+		return
+
+	var resolved_target_type := target_room_type.strip_edges()
+	_start_formal_run(1, resolved_chapter_id)
+	if resolved_target_type != "" and resolved_target_type != "none" and resolved_target_type != "start":
+		call_deferred("_debug_move_to_room_type", resolved_target_type)
+
+	var chapter_title := LabDungeonGenerator.get_chapter_title(resolved_chapter_id)
+	var target_label := _get_debug_target_label(resolved_target_type)
+	_show_story_feedback("开发入口：已进入%s｜%s。" % [chapter_title, target_label], 1.6)
+	print("In-game debug entry ready: chapter %d, target '%s', seed %d." % [resolved_chapter_id, resolved_target_type, LabDungeonGenerator.last_seed])
+
+
 func _debug_move_to_room_type(target_type: String) -> void:
 	var target_room := _debug_find_room(target_type)
 	if target_room == null:
 		push_warning("Debug entry failed: no room found for target '%s'." % target_type)
+		_show_story_feedback("开发入口未找到目标房间：%s。" % _get_debug_target_label(target_type), 1.6)
 		return
 	_current_room = target_room.room_pos
 	$Camera2D.position = _room_camera_position(_current_room)
@@ -432,6 +455,30 @@ func _debug_move_to_room_type(target_type: String) -> void:
 	target_room.enter_room()
 	_update_room_feedback_for_room(target_room)
 	print("Debug entry moved to %s [%s] at %s." % [target_room.lab_room_label, target_room.lab_room_type, target_room.room_pos])
+
+
+func _get_debug_target_label(target_type: String) -> String:
+	match target_type:
+		"event":
+			return "事件房"
+		"weapon":
+			return "武器房"
+		"pre_boss_shop", "merchant":
+			return "Boss 前补给站"
+		"boss":
+			return "Boss 房"
+		"archive":
+			return "档案房"
+		"pollution":
+			return "污染事件房"
+		"data_comm":
+			return "通讯塔控制室"
+		"data_satellite":
+			return "卫星伪装系统"
+		"cryo_pod":
+			return "冷冻舱事件房"
+		_:
+			return "出生房"
 
 
 func _debug_find_room(target_type: String) -> Room:
