@@ -72,6 +72,7 @@ signal room_cleared(room: Room)
 signal objective_progress_changed(room: Room)
 
 func _ready():
+	_disable_decorative_blockers(self)
 	_ensure_default_room_objective()
 	objective_initial_enemy_count = get_remaining_enemy_count()
 	if get_tree().current_scene != self:
@@ -87,6 +88,25 @@ func _ready():
 		var gui = GUI_SCENE.instantiate()
 		add_child(gui)
 		player_node.gui_path = gui.get_path()
+
+
+func _disable_decorative_blockers(root: Node) -> void:
+	for child in root.get_children():
+		var child_name := String(child.name).to_lower()
+		if child_name.contains("blocker") and not child_name.contains("door"):
+			_make_node_nonblocking(child)
+		_disable_decorative_blockers(child)
+
+
+func _make_node_nonblocking(node: Node) -> void:
+	if node is CollisionObject2D:
+		var collision_object := node as CollisionObject2D
+		collision_object.collision_layer = 0
+		collision_object.collision_mask = 0
+	if node is CollisionShape2D:
+		(node as CollisionShape2D).disabled = true
+	for child in node.get_children():
+		_make_node_nonblocking(child)
 
 # Get the position of the room on the level matrix: (0,0), (0,1)...
 func get_room_matrix_position()->Vector2i:

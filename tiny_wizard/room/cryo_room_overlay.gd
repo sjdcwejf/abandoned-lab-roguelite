@@ -2,15 +2,21 @@ class_name CryoRoomOverlay
 extends Node2D
 
 
+const LAB_STUFF_TEXTURE = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png")
+const FACILITY_ORB_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/orb_spritesheet.png")
+
 @export var variant := "combat"
 
 
 func _ready() -> void:
 	z_index = -2
 	_build_floor_tint()
+	_build_floor_panels()
 	_build_tile_grid()
 	_build_frost_patches()
 	_build_equipment_accents()
+	_build_cryo_asset_props()
+	_build_frost_cracks()
 
 
 func _build_floor_tint() -> void:
@@ -33,6 +39,14 @@ func _build_tile_grid() -> void:
 		_add_line(Vector2(86, y), Vector2(938, y), Color(0.18, 0.33, 0.38, 0.28), 1.0)
 
 
+func _build_floor_panels() -> void:
+	var panel_color := Color(0.03, 0.075, 0.095, 0.34)
+	for x in range(128, 896, 128):
+		for y in range(144, 464, 96):
+			if (x + y) % 256 == 0:
+				_add_panel(Vector2(x + 32, y + 24), Vector2(84, 52), panel_color)
+
+
 func _build_frost_patches() -> void:
 	var patches := _variant_patches()
 	for patch in patches:
@@ -45,6 +59,32 @@ func _build_equipment_accents() -> void:
 		var pos := item.get("position", Vector2.ZERO) as Vector2
 		var size := item.get("size", Vector2(80, 36)) as Vector2
 		_add_equipment(pos, size, item.get("glow", false))
+
+
+func _build_cryo_asset_props() -> void:
+	for prop in _variant_asset_props():
+		var texture: Texture2D = prop.get("texture") as Texture2D
+		var region: Rect2 = prop.get("region", Rect2(0, 0, 32, 32)) as Rect2
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
+		var color: Color = prop.get("modulate", Color.WHITE) as Color
+		_add_asset_sprite(texture, region, position, scale_value, color)
+
+
+func _build_frost_cracks() -> void:
+	var cracks := [
+		[Vector2(312, 154), Vector2(344, 168), Vector2(360, 196), Vector2(390, 204)],
+		[Vector2(680, 420), Vector2(710, 402), Vector2(740, 410), Vector2(770, 386)],
+		[Vector2(472, 238), Vector2(486, 266), Vector2(516, 274), Vector2(532, 300)],
+	]
+	for crack in cracks:
+		var line := Line2D.new()
+		line.name = "FrostCrack"
+		line.z_index = 2
+		line.width = 1.5
+		line.default_color = Color(0.6, 0.95, 1.0, 0.34)
+		line.points = PackedVector2Array(crack)
+		add_child(line)
 
 
 func _variant_patches() -> Array[Dictionary]:
@@ -123,6 +163,38 @@ func _variant_equipment() -> Array[Dictionary]:
 	]
 
 
+func _variant_asset_props() -> Array[Dictionary]:
+	var pod_region := Rect2(992, 214, 54, 98)
+	var console_region := Rect2(882, 304, 80, 56)
+	var side_panel_region := Rect2(736, 0, 144, 40)
+	var orb_region := Rect2(0, 0, 16, 16)
+	match variant:
+		"start":
+			return [
+				{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(206, 298), "scale": Vector2(1.2, 1.2), "modulate": Color(0.7, 0.92, 1.0, 0.92)},
+				{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(818, 300), "scale": Vector2(1.2, 1.2), "modulate": Color(0.7, 0.92, 1.0, 0.92)},
+				{"texture": LAB_STUFF_TEXTURE, "region": side_panel_region, "position": Vector2(512, 128), "scale": Vector2(1.0, 1.0), "modulate": Color(0.8, 0.95, 1.0, 0.82)},
+			]
+		"pod":
+			return [
+				{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(180, 232), "scale": Vector2(1.25, 1.25), "modulate": Color(0.62, 0.92, 1.0, 0.9)},
+				{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(180, 376), "scale": Vector2(1.25, 1.25), "modulate": Color(0.62, 0.92, 1.0, 0.9)},
+				{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(844, 232), "scale": Vector2(1.25, 1.25), "modulate": Color(0.62, 0.92, 1.0, 0.9)},
+				{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(844, 376), "scale": Vector2(1.25, 1.25), "modulate": Color(0.62, 0.92, 1.0, 0.9)},
+			]
+		"reward", "elite", "boss":
+			return [
+				{"texture": LAB_STUFF_TEXTURE, "region": console_region, "position": Vector2(512, 126), "scale": Vector2(1.08, 1.08), "modulate": Color(0.72, 0.92, 1.0, 0.9)},
+				{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(210, 420), "scale": Vector2(1.6, 1.6), "modulate": Color(0.58, 0.9, 1.0, 0.85)},
+				{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(816, 184), "scale": Vector2(1.6, 1.6), "modulate": Color(0.58, 0.9, 1.0, 0.85)},
+			]
+	return [
+		{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(180, 304), "scale": Vector2(1.15, 1.15), "modulate": Color(0.68, 0.9, 1.0, 0.86)},
+		{"texture": LAB_STUFF_TEXTURE, "region": pod_region, "position": Vector2(844, 304), "scale": Vector2(1.15, 1.15), "modulate": Color(0.68, 0.9, 1.0, 0.86)},
+		{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(512, 128), "scale": Vector2(1.5, 1.5), "modulate": Color(0.5, 0.92, 1.0, 0.78)},
+	]
+
+
 func _add_patch(center: Vector2, size: Vector2, alpha: float) -> void:
 	var patch := Polygon2D.new()
 	patch.name = "FrostPatch"
@@ -137,6 +209,36 @@ func _add_patch(center: Vector2, size: Vector2, alpha: float) -> void:
 		center + Vector2(-half.x * 0.42, half.y * 0.7),
 	])
 	add_child(patch)
+
+
+func _add_panel(center: Vector2, size: Vector2, color: Color) -> void:
+	var half := size * 0.5
+	var panel := Polygon2D.new()
+	panel.name = "CryoFloorPanel"
+	panel.color = color
+	panel.polygon = PackedVector2Array([
+		center + Vector2(-half.x, -half.y),
+		center + Vector2(half.x, -half.y),
+		center + Vector2(half.x, half.y),
+		center + Vector2(-half.x, half.y),
+	])
+	add_child(panel)
+
+
+func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color) -> void:
+	if texture == null:
+		return
+	var atlas := AtlasTexture.new()
+	atlas.atlas = texture
+	atlas.region = region
+	var sprite := Sprite2D.new()
+	sprite.name = "CryoAssetProp"
+	sprite.texture = atlas
+	sprite.position = position
+	sprite.scale = scale_value
+	sprite.modulate = color
+	sprite.z_index = 3
+	add_child(sprite)
 
 
 func _add_equipment(center: Vector2, size: Vector2, glow: bool) -> void:

@@ -2,16 +2,24 @@ class_name ExosuitFactoryOverlay
 extends Node2D
 
 
+const FACILITY_CRATES_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/crates_spritesheet.png")
+const FACILITY_DOODADS_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/doodads_spritesheet.png")
+const FACILITY_COMPUTER_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png")
+const LAB_STUFF_TEXTURE = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png")
+
 @export var variant := "combat"
 
 
 func _ready() -> void:
 	z_index = -2
 	_build_floor_tint()
+	_build_industrial_floor_panels()
 	_build_tile_grid()
 	_build_warning_tracks()
 	_build_energy_lines()
 	_build_factory_equipment()
+	_build_factory_asset_props()
+	_build_oil_scuffs()
 
 
 func _build_floor_tint() -> void:
@@ -32,6 +40,15 @@ func _build_tile_grid() -> void:
 		_add_line(Vector2(x, 104), Vector2(x, 496), Color(0.28, 0.31, 0.33, 0.26), 1.0)
 	for y in range(128, 488, 64):
 		_add_line(Vector2(86, y), Vector2(938, y), Color(0.28, 0.31, 0.33, 0.26), 1.0)
+
+
+func _build_industrial_floor_panels() -> void:
+	for x in range(128, 896, 96):
+		for y in range(128, 488, 96):
+			var color := Color(0.12, 0.12, 0.12, 0.32)
+			if (x / 96 + y / 96) % 2 == 0:
+				color = Color(0.07, 0.075, 0.08, 0.44)
+			_add_floor_panel(Vector2(x + 32, y + 32), Vector2(72, 72), color)
 
 
 func _build_warning_tracks() -> void:
@@ -59,6 +76,29 @@ func _build_factory_equipment() -> void:
 			item.get("kind", "rack"),
 			bool(item.get("glow", false))
 		)
+
+
+func _build_factory_asset_props() -> void:
+	for prop in _variant_asset_props():
+		var texture: Texture2D = prop.get("texture") as Texture2D
+		var region: Rect2 = prop.get("region", Rect2(0, 0, 16, 16)) as Rect2
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
+		var color: Color = prop.get("modulate", Color.WHITE) as Color
+		_add_asset_sprite(texture, region, position, scale_value, color)
+
+
+func _build_oil_scuffs() -> void:
+	var scuffs := [
+		{"position": Vector2(332, 406), "size": Vector2(130, 42), "alpha": 0.26},
+		{"position": Vector2(708, 202), "size": Vector2(118, 38), "alpha": 0.22},
+		{"position": Vector2(540, 448), "size": Vector2(160, 34), "alpha": 0.2},
+	]
+	for scuff in scuffs:
+		var position: Vector2 = scuff.get("position", Vector2.ZERO) as Vector2
+		var size: Vector2 = scuff.get("size", Vector2(100, 30)) as Vector2
+		var alpha := float(scuff.get("alpha", 0.2))
+		_add_oil_scuff(position, size, alpha)
 
 
 func _variant_warning_strips() -> Array[Dictionary]:
@@ -165,6 +205,40 @@ func _variant_equipment() -> Array[Dictionary]:
 	]
 
 
+func _variant_asset_props() -> Array[Dictionary]:
+	var crate_region := Rect2(0, 0, 16, 16)
+	var metal_crate_region := Rect2(16, 0, 16, 16)
+	var parts_bin_region := Rect2(32, 48, 16, 16)
+	var tool_region := Rect2(32, 0, 16, 16)
+	var computer_region := Rect2(0, 0, 16, 16)
+	var terminal_region := Rect2(882, 304, 80, 56)
+	match variant:
+		"start":
+			return [
+				{"texture": FACILITY_CRATES_TEXTURE, "region": crate_region, "position": Vector2(212, 420), "scale": Vector2(1.6, 1.6)},
+				{"texture": FACILITY_CRATES_TEXTURE, "region": metal_crate_region, "position": Vector2(812, 178), "scale": Vector2(1.6, 1.6)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(512, 132), "scale": Vector2(1.8, 1.8), "modulate": Color(1.0, 0.86, 0.65, 0.9)},
+			]
+		"weapon", "merchant":
+			return [
+				{"texture": LAB_STUFF_TEXTURE, "region": terminal_region, "position": Vector2(512, 224), "scale": Vector2(1.0, 1.0), "modulate": Color(1.0, 0.82, 0.55, 0.92)},
+				{"texture": FACILITY_CRATES_TEXTURE, "region": parts_bin_region, "position": Vector2(230, 420), "scale": Vector2(1.7, 1.7)},
+				{"texture": FACILITY_CRATES_TEXTURE, "region": parts_bin_region, "position": Vector2(794, 420), "scale": Vector2(1.7, 1.7)},
+				{"texture": FACILITY_DOODADS_TEXTURE, "region": tool_region, "position": Vector2(366, 390), "scale": Vector2(1.5, 1.5), "modulate": Color(1.0, 0.72, 0.4, 0.9)},
+			]
+		"test", "elite", "boss":
+			return [
+				{"texture": FACILITY_CRATES_TEXTURE, "region": metal_crate_region, "position": Vector2(186, 186), "scale": Vector2(1.7, 1.7)},
+				{"texture": FACILITY_CRATES_TEXTURE, "region": metal_crate_region, "position": Vector2(838, 414), "scale": Vector2(1.7, 1.7)},
+				{"texture": FACILITY_DOODADS_TEXTURE, "region": Rect2(0, 16, 16, 16), "position": Vector2(512, 152), "scale": Vector2(1.6, 1.6), "modulate": Color(1.0, 0.45, 0.28, 0.88)},
+			]
+	return [
+		{"texture": FACILITY_CRATES_TEXTURE, "region": crate_region, "position": Vector2(202, 420), "scale": Vector2(1.5, 1.5)},
+		{"texture": FACILITY_CRATES_TEXTURE, "region": metal_crate_region, "position": Vector2(822, 182), "scale": Vector2(1.5, 1.5)},
+		{"texture": FACILITY_DOODADS_TEXTURE, "region": tool_region, "position": Vector2(512, 128), "scale": Vector2(1.4, 1.4), "modulate": Color(1.0, 0.72, 0.36, 0.86)},
+	]
+
+
 func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> void:
 	var half := size * 0.5
 	var body := Polygon2D.new()
@@ -193,6 +267,52 @@ func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> vo
 			_add_line(center + Vector2(-half.y, offset), center + Vector2(half.y, offset + 18), Color(1.0, 0.68, 0.12, 0.55), 2.0)
 		else:
 			_add_line(center + Vector2(offset, -half.y), center + Vector2(offset + 18, half.y), Color(1.0, 0.68, 0.12, 0.55), 2.0)
+
+
+func _add_floor_panel(center: Vector2, size: Vector2, color: Color) -> void:
+	var half := size * 0.5
+	var panel := Polygon2D.new()
+	panel.name = "FactoryFloorPanel"
+	panel.color = color
+	panel.polygon = PackedVector2Array([
+		center + Vector2(-half.x, -half.y),
+		center + Vector2(half.x, -half.y),
+		center + Vector2(half.x, half.y),
+		center + Vector2(-half.x, half.y),
+	])
+	add_child(panel)
+
+
+func _add_oil_scuff(center: Vector2, size: Vector2, alpha: float) -> void:
+	var half := size * 0.5
+	var scuff := Polygon2D.new()
+	scuff.name = "OilScuff"
+	scuff.color = Color(0.01, 0.01, 0.012, alpha)
+	scuff.polygon = PackedVector2Array([
+		center + Vector2(-half.x, -half.y * 0.2),
+		center + Vector2(-half.x * 0.42, -half.y),
+		center + Vector2(half.x * 0.76, -half.y * 0.55),
+		center + Vector2(half.x, half.y * 0.12),
+		center + Vector2(half.x * 0.34, half.y),
+		center + Vector2(-half.x * 0.7, half.y * 0.62),
+	])
+	add_child(scuff)
+
+
+func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color) -> void:
+	if texture == null:
+		return
+	var atlas := AtlasTexture.new()
+	atlas.atlas = texture
+	atlas.region = region
+	var sprite := Sprite2D.new()
+	sprite.name = "FactoryAssetProp"
+	sprite.texture = atlas
+	sprite.position = position
+	sprite.scale = scale_value
+	sprite.modulate = color
+	sprite.z_index = 3
+	add_child(sprite)
 
 
 func _add_equipment(center: Vector2, size: Vector2, kind: String, glow: bool) -> void:

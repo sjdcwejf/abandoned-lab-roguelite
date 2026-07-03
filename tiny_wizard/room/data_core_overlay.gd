@@ -2,16 +2,24 @@ class_name DataCoreOverlay
 extends Node2D
 
 
+const FACILITY_COMPUTER_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png")
+const FACILITY_SCREEN_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/computer_screen_large.png")
+const FACILITY_ORB_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/orb_spritesheet.png")
+const FACILITY_BUTTON_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/button_large_spritesheet.png")
+
 @export var variant := "server"
 
 
 func _ready() -> void:
 	z_index = -2
 	_build_floor()
+	_build_data_floor_panels()
 	_build_grid()
 	_build_data_lines()
 	_build_equipment()
 	_build_alert_marks()
+	_build_data_asset_props()
+	_build_signal_noise()
 
 
 func _build_floor() -> void:
@@ -32,6 +40,15 @@ func _build_grid() -> void:
 		_add_line(Vector2(x, 104), Vector2(x, 496), Color(0.18, 0.36, 0.45, 0.24), 1.0)
 	for y in range(128, 488, 64):
 		_add_line(Vector2(86, y), Vector2(938, y), Color(0.18, 0.36, 0.45, 0.22), 1.0)
+
+
+func _build_data_floor_panels() -> void:
+	for x in range(128, 896, 128):
+		for y in range(128, 488, 96):
+			var alpha := 0.24
+			if (x + y) % 256 == 0:
+				alpha = 0.38
+			_add_panel(Vector2(x + 32, y + 28), Vector2(88, 54), Color(0.025, 0.07, 0.095, alpha))
 
 
 func _build_data_lines() -> void:
@@ -58,6 +75,33 @@ func _build_alert_marks() -> void:
 	var marks := _variant_alert_marks()
 	for mark in marks:
 		_add_warning_strip(mark.get("position", Vector2.ZERO), mark.get("size", Vector2(160, 20)), bool(mark.get("vertical", false)))
+
+
+func _build_data_asset_props() -> void:
+	for prop in _variant_asset_props():
+		var texture: Texture2D = prop.get("texture") as Texture2D
+		var region: Rect2 = prop.get("region", Rect2(0, 0, 16, 16)) as Rect2
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
+		var color: Color = prop.get("modulate", Color.WHITE) as Color
+		_add_asset_sprite(texture, region, position, scale_value, color)
+
+
+func _build_signal_noise() -> void:
+	var segments := [
+		[Vector2(282, 188), Vector2(312, 188), Vector2(326, 198)],
+		[Vector2(696, 402), Vector2(730, 402), Vector2(746, 390)],
+		[Vector2(466, 154), Vector2(492, 166), Vector2(530, 166)],
+		[Vector2(552, 446), Vector2(584, 434), Vector2(620, 434)],
+	]
+	for segment in segments:
+		var line := Line2D.new()
+		line.name = "DataSignalNoise"
+		line.z_index = 2
+		line.width = 1.5
+		line.default_color = Color(0.54, 0.95, 1.0, 0.34)
+		line.points = PackedVector2Array(segment)
+		add_child(line)
 
 
 func _variant_data_lines() -> Array[Dictionary]:
@@ -140,6 +184,49 @@ func _variant_equipment() -> Array[Dictionary]:
 	]
 
 
+func _variant_asset_props() -> Array[Dictionary]:
+	var computer_region := Rect2(0, 0, 16, 16)
+	var screen_region := Rect2(0, 0, 239, 160)
+	var orb_region := Rect2(0, 0, 16, 16)
+	var button_region := Rect2(0, 0, 16, 16)
+	match variant:
+		"start":
+			return [
+				{"texture": FACILITY_SCREEN_TEXTURE, "region": screen_region, "position": Vector2(512, 132), "scale": Vector2(0.36, 0.36), "modulate": Color(0.62, 0.9, 1.0, 0.9)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(210, 414), "scale": Vector2(1.8, 1.8)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(816, 186), "scale": Vector2(1.8, 1.8)},
+			]
+		"comm":
+			return [
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(252, 222), "scale": Vector2(2.1, 2.1), "modulate": Color(0.7, 0.95, 1.0, 0.92)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(772, 382), "scale": Vector2(2.1, 2.1), "modulate": Color(0.7, 0.95, 1.0, 0.92)},
+				{"texture": FACILITY_BUTTON_TEXTURE, "region": button_region, "position": Vector2(512, 132), "scale": Vector2(1.5, 1.5), "modulate": Color(0.95, 0.46, 0.26, 0.92)},
+			]
+		"satellite":
+			return [
+				{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(512, 300), "scale": Vector2(2.2, 2.2), "modulate": Color(1.0, 0.22, 0.18, 0.9)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(214, 212), "scale": Vector2(1.9, 1.9), "modulate": Color(1.0, 0.45, 0.35, 0.9)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(810, 388), "scale": Vector2(1.9, 1.9), "modulate": Color(1.0, 0.45, 0.35, 0.9)},
+			]
+		"archive", "boss":
+			return [
+				{"texture": FACILITY_SCREEN_TEXTURE, "region": screen_region, "position": Vector2(512, 302), "scale": Vector2(0.46, 0.46), "modulate": Color(0.9, 0.72, 0.36, 0.88)},
+				{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(230, 184), "scale": Vector2(1.6, 1.6), "modulate": Color(0.55, 0.92, 1.0, 0.82)},
+				{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(794, 416), "scale": Vector2(1.6, 1.6), "modulate": Color(0.55, 0.92, 1.0, 0.82)},
+			]
+		"merchant":
+			return [
+				{"texture": FACILITY_SCREEN_TEXTURE, "region": screen_region, "position": Vector2(512, 224), "scale": Vector2(0.42, 0.34), "modulate": Color(0.55, 0.92, 1.0, 0.9)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(218, 418), "scale": Vector2(1.8, 1.8)},
+				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(806, 418), "scale": Vector2(1.8, 1.8)},
+			]
+	return [
+		{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(188, 420), "scale": Vector2(1.7, 1.7)},
+		{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(836, 182), "scale": Vector2(1.7, 1.7)},
+		{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(512, 300), "scale": Vector2(1.6, 1.6), "modulate": Color(0.48, 0.9, 1.0, 0.78)},
+	]
+
+
 func _variant_alert_marks() -> Array[Dictionary]:
 	match variant:
 		"satellite":
@@ -175,6 +262,36 @@ func _add_equipment(center: Vector2, size: Vector2, kind: String, accent: Color)
 			_add_line(Vector2(center.x - half.x * 0.58, y), Vector2(center.x + half.x * 0.58, y), Color(0.7, 0.92, 1.0, 0.25), 2.0)
 	if kind in ["core", "dish", "blackbox", "terminal"]:
 		_add_line(center + Vector2(-half.x * 0.55, 0), center + Vector2(half.x * 0.55, 0), accent, 4.0)
+
+
+func _add_panel(center: Vector2, size: Vector2, color: Color) -> void:
+	var half := size * 0.5
+	var panel := Polygon2D.new()
+	panel.name = "DataFloorPanel"
+	panel.color = color
+	panel.polygon = PackedVector2Array([
+		center + Vector2(-half.x, -half.y),
+		center + Vector2(half.x, -half.y),
+		center + Vector2(half.x, half.y),
+		center + Vector2(-half.x, half.y),
+	])
+	add_child(panel)
+
+
+func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color) -> void:
+	if texture == null:
+		return
+	var atlas := AtlasTexture.new()
+	atlas.atlas = texture
+	atlas.region = region
+	var sprite := Sprite2D.new()
+	sprite.name = "DataAssetProp"
+	sprite.texture = atlas
+	sprite.position = position
+	sprite.scale = scale_value
+	sprite.modulate = color
+	sprite.z_index = 3
+	add_child(sprite)
 
 
 func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> void:

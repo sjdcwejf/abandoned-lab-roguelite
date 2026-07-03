@@ -513,7 +513,7 @@ func _start_chapter_base(completed_chapter_id: int) -> void:
 	_apply_base_story_progress()
 	_enter_base_room()
 	if completed_chapter_id == CHAPTER_5_ID:
-		_show_story_feedback("数据中枢记录已完成，深层熵区入口将在后续版本开放。", 2.0)
+		_show_story_feedback("数据中枢记录已完成，后续深层区域将在后续版本开放。", 2.0)
 
 
 func _enter_base_room() -> void:
@@ -1017,7 +1017,7 @@ func _refresh_layer_clear_screen() -> void:
 
 func _get_layer_clear_summary_text() -> String:
 	if _formal_chapter_id == CHAPTER_5_ID:
-		return "数据中枢记录已完成，深层熵区入口将在后续版本开放。当前构筑快照："
+		return "数据中枢记录已完成，后续深层区域将在后续版本开放。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_4_ID:
 		return "弥赛亚重装清理机停放库已记录。数据中枢访问权限已解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_3_ID:
@@ -1029,7 +1029,7 @@ func _get_layer_clear_summary_text() -> String:
 
 func _get_layer_clear_next_button_text() -> String:
 	if _formal_chapter_id == CHAPTER_5_ID:
-		return "第六章：深层熵区，后续版本开放"
+		return "后续深层区域，后续版本开放"
 	if _formal_chapter_id == CHAPTER_4_ID:
 		return "进入临时安全屋，准备前往第五章"
 	if _formal_chapter_id == CHAPTER_3_ID:
@@ -1405,7 +1405,7 @@ func _update_base_room_feedback(room: Room) -> void:
 	var next_title := LabDungeonGenerator.get_chapter_title(_base_next_chapter_id) if _base_next_chapter_id > 0 else "后续章节"
 	var objective := "延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title
 	if _base_completed_chapter_id == CHAPTER_5_ID:
-		objective = "数据中枢记录已完成。深层熵区入口将在后续版本开放。"
+		objective = "数据中枢记录已完成。后续深层区域将在后续版本开放。"
 	_room_objective_ui.show_room(
 		room,
 		0,

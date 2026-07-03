@@ -28,7 +28,7 @@ func _ready() -> void:
 			exit_black_hole.stabilizing_text = "下一区域入口稳定中。"
 		else:
 			exit_black_hole.enter_prompt_text = "后续版本开放"
-			exit_black_hole.stabilizing_text = "深层熵区入口尚未开放。"
+			exit_black_hole.stabilizing_text = "后续深层区域入口尚未开放。"
 		exit_black_hole.set_active(false)
 	_set_relic_choices_enabled(_next_chapter_id > 0)
 
@@ -61,7 +61,7 @@ func _configure_text() -> void:
 			lines.append("渡鸦备注：进入 %s 前，选择一个遗物作为下一章构筑起点。" % next_chapter)
 		else:
 			lines.append("档案终端：数据中枢记录已归档。")
-			lines.append("渡鸦备注：深层熵区入口将在后续版本开放。")
+			lines.append("渡鸦备注：后续深层区域将在后续版本开放。")
 		if bool(get_meta("ending_hints_unlocked", false)):
 			lines.append("")
 			lines.append("结局条件提示：")
@@ -99,7 +99,7 @@ func _on_relic_choice_picked(definition: BuildItemDefinition) -> void:
 	if _choice_made:
 		return
 	if _next_chapter_id <= 0:
-		_update_status("深层熵区入口将在后续版本开放。")
+		_update_status("后续深层区域将在后续版本开放。")
 		return
 
 	_choice_made = true
@@ -130,7 +130,7 @@ func _update_status(override_text := "") -> void:
 		status_label.text = override_text
 		return
 	if _next_chapter_id <= 0:
-		status_label.text = "数据中枢记录已完成。第六章：深层熵区，后续版本开放。"
+		status_label.text = "数据中枢记录已完成。后续深层区域，后续版本开放。"
 		return
 	if _choice_made:
 		status_label.text = "%s 入口已稳定。整理补给后，进入下一章。" % _next_chapter_title
