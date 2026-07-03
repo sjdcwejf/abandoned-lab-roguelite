@@ -6,6 +6,9 @@ const FACILITY_CRATES_TEXTURE = preload("res://tiny_wizard/assets/third_party/sc
 const FACILITY_DOODADS_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/doodads_spritesheet.png")
 const FACILITY_COMPUTER_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png")
 const LAB_STUFF_TEXTURE = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png")
+const ROBOT_FACTORY_PAGE_01 = preload("res://tiny_wizard/assets/third_party/robot_factory_tileset_pack/page_01.png")
+const ROBOT_FACTORY_PAGE_03 = preload("res://tiny_wizard/assets/third_party/robot_factory_tileset_pack/page_03.png")
+const ROBOT_FACTORY_PAGE_04 = preload("res://tiny_wizard/assets/third_party/robot_factory_tileset_pack/page_04.png")
 
 @export var variant := "combat"
 
@@ -19,6 +22,8 @@ func _ready() -> void:
 	_build_energy_lines()
 	_build_factory_equipment()
 	_build_factory_asset_props()
+	_build_robot_factory_props()
+	_build_solid_blocking_props()
 	_build_oil_scuffs()
 
 
@@ -86,6 +91,25 @@ func _build_factory_asset_props() -> void:
 		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
 		var color: Color = prop.get("modulate", Color.WHITE) as Color
 		_add_asset_sprite(texture, region, position, scale_value, color)
+
+
+func _build_robot_factory_props() -> void:
+	for prop in _variant_robot_factory_props():
+		var texture: Texture2D = prop.get("texture") as Texture2D
+		var region: Rect2 = prop.get("region", Rect2(0, 0, 64, 64)) as Rect2
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
+		var color: Color = prop.get("modulate", Color.WHITE) as Color
+		var z_value := int(prop.get("z_index", 4))
+		_add_asset_sprite(texture, region, position, scale_value, color, z_value)
+
+
+func _build_solid_blocking_props() -> void:
+	for prop in _variant_solid_blocking_props():
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var size: Vector2 = prop.get("size", Vector2(64, 64)) as Vector2
+		var name_suffix := str(prop.get("name", "Factory"))
+		_add_solid_blocking_prop(name_suffix, position, size)
 
 
 func _build_oil_scuffs() -> void:
@@ -239,6 +263,59 @@ func _variant_asset_props() -> Array[Dictionary]:
 	]
 
 
+func _variant_robot_factory_props() -> Array[Dictionary]:
+	match variant:
+		"weapon":
+			return [
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(0, 0, 184, 110), "position": Vector2(230, 290), "scale": Vector2(0.55, 0.55), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(0, 106, 184, 118), "position": Vector2(796, 292), "scale": Vector2(0.55, 0.55), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(396, 318, 180, 82), "position": Vector2(512, 224), "scale": Vector2(0.78, 0.78), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(576, 408, 132, 112), "position": Vector2(350, 420), "scale": Vector2(0.7, 0.7), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(344, 522, 128, 96), "position": Vector2(674, 420), "scale": Vector2(0.68, 0.68), "z_index": 5},
+			]
+		"combat":
+			return [
+				{"texture": ROBOT_FACTORY_PAGE_03, "region": Rect2(250, 100, 500, 92), "position": Vector2(512, 150), "scale": Vector2(0.86, 0.86), "z_index": 4},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(0, 0, 184, 110), "position": Vector2(238, 260), "scale": Vector2(0.58, 0.58), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(0, 106, 184, 118), "position": Vector2(786, 342), "scale": Vector2(0.58, 0.58), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(204, 0, 240, 80), "position": Vector2(512, 430), "scale": Vector2(0.92, 0.72), "z_index": 3},
+				{"texture": ROBOT_FACTORY_PAGE_01, "region": Rect2(370, 530, 260, 88), "position": Vector2(512, 220), "scale": Vector2(0.82, 0.82), "z_index": 4},
+			]
+		"elite", "boss":
+			return [
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(0, 520, 256, 170), "position": Vector2(190, 314), "scale": Vector2(0.56, 0.56), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_04, "region": Rect2(0, 520, 256, 170), "position": Vector2(834, 314), "scale": Vector2(0.56, 0.56), "z_index": 5},
+				{"texture": ROBOT_FACTORY_PAGE_03, "region": Rect2(376, 0, 376, 110), "position": Vector2(512, 146), "scale": Vector2(0.92, 0.92), "z_index": 5},
+			]
+	return []
+
+
+func _variant_solid_blocking_props() -> Array[Dictionary]:
+	match variant:
+		"weapon":
+			return [
+				{"name": "LeftExosuitRack", "position": Vector2(230, 304), "size": Vector2(104, 210)},
+				{"name": "RightExosuitRack", "position": Vector2(796, 304), "size": Vector2(104, 210)},
+				{"name": "QualityTerminal", "position": Vector2(512, 224), "size": Vector2(168, 54)},
+				{"name": "LeftPartsTable", "position": Vector2(350, 420), "size": Vector2(88, 52)},
+				{"name": "RightPartsTable", "position": Vector2(674, 420), "size": Vector2(88, 52)},
+			]
+		"combat":
+			return [
+				{"name": "LeftRobotArmBase", "position": Vector2(238, 262), "size": Vector2(84, 84)},
+				{"name": "RightRobotArmBase", "position": Vector2(786, 342), "size": Vector2(84, 84)},
+				{"name": "NorthAssemblyBridge", "position": Vector2(512, 150), "size": Vector2(370, 42)},
+				{"name": "CenterPartsBench", "position": Vector2(512, 220), "size": Vector2(190, 48)},
+			]
+		"elite", "boss":
+			return [
+				{"name": "LeftMechFrame", "position": Vector2(190, 314), "size": Vector2(92, 210)},
+				{"name": "RightMechFrame", "position": Vector2(834, 314), "size": Vector2(92, 210)},
+				{"name": "NorthCraneBridge", "position": Vector2(512, 146), "size": Vector2(350, 52)},
+			]
+	return []
+
+
 func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> void:
 	var half := size * 0.5
 	var body := Polygon2D.new()
@@ -299,7 +376,7 @@ func _add_oil_scuff(center: Vector2, size: Vector2, alpha: float) -> void:
 	add_child(scuff)
 
 
-func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color) -> void:
+func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color, z_value := 3) -> void:
 	if texture == null:
 		return
 	var atlas := AtlasTexture.new()
@@ -311,8 +388,25 @@ func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, sca
 	sprite.position = position
 	sprite.scale = scale_value
 	sprite.modulate = color
-	sprite.z_index = 3
+	sprite.z_index = z_value
 	add_child(sprite)
+
+
+func _add_solid_blocking_prop(name_suffix: String, center: Vector2, size: Vector2) -> void:
+	var body := StaticBody2D.new()
+	body.name = "SolidBlocker%s" % name_suffix
+	body.position = center
+	body.collision_layer = 1
+	body.collision_mask = 15
+	body.add_to_group("solid_blocking_prop")
+	body.set_meta("solid_blocking_prop", true)
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape.shape = rect
+	body.add_child(shape)
+	add_child(body)
 
 
 func _add_equipment(center: Vector2, size: Vector2, kind: String, glow: bool) -> void:

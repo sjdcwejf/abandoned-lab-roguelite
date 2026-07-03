@@ -6,6 +6,9 @@ const FACILITY_COMPUTER_TEXTURE = preload("res://tiny_wizard/assets/third_party/
 const FACILITY_SCREEN_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/computer_screen_large.png")
 const FACILITY_ORB_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/orb_spritesheet.png")
 const FACILITY_BUTTON_TEXTURE = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/button_large_spritesheet.png")
+const CYBERPUNK_INTERIORS_TEXTURE = preload("res://tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/Cyberpunk_Interiors.png")
+const CYBERPUNK_FLOORS_TEXTURE = preload("res://tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/Cyberpunk_Interiors_Floors.png")
+const CYBERPUNK_WALLS_TEXTURE = preload("res://tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/Cyberpunk_Interiors_Walls.png")
 
 @export var variant := "server"
 
@@ -19,6 +22,8 @@ func _ready() -> void:
 	_build_equipment()
 	_build_alert_marks()
 	_build_data_asset_props()
+	_build_cyberpunk_data_props()
+	_build_solid_blocking_props()
 	_build_signal_noise()
 
 
@@ -85,6 +90,25 @@ func _build_data_asset_props() -> void:
 		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
 		var color: Color = prop.get("modulate", Color.WHITE) as Color
 		_add_asset_sprite(texture, region, position, scale_value, color)
+
+
+func _build_cyberpunk_data_props() -> void:
+	for prop in _variant_cyberpunk_props():
+		var texture: Texture2D = prop.get("texture") as Texture2D
+		var region: Rect2 = prop.get("region", Rect2(0, 0, 16, 16)) as Rect2
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var scale_value: Vector2 = prop.get("scale", Vector2.ONE) as Vector2
+		var color: Color = prop.get("modulate", Color.WHITE) as Color
+		var z_value := int(prop.get("z_index", 4))
+		_add_asset_sprite(texture, region, position, scale_value, color, z_value)
+
+
+func _build_solid_blocking_props() -> void:
+	for prop in _variant_solid_blocking_props():
+		var position: Vector2 = prop.get("position", Vector2.ZERO) as Vector2
+		var size: Vector2 = prop.get("size", Vector2(64, 64)) as Vector2
+		var name_suffix := str(prop.get("name", "Data"))
+		_add_solid_blocking_prop(name_suffix, position, size)
 
 
 func _build_signal_noise() -> void:
@@ -227,6 +251,64 @@ func _variant_asset_props() -> Array[Dictionary]:
 	]
 
 
+func _variant_cyberpunk_props() -> Array[Dictionary]:
+	match variant:
+		"server":
+			return [
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 96, 48, 64), "position": Vector2(188, 248), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(48, 96, 48, 64), "position": Vector2(188, 368), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 96, 48, 64), "position": Vector2(836, 248), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(48, 96, 48, 64), "position": Vector2(836, 368), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 48, 112, 32), "position": Vector2(512, 126), "scale": Vector2(2.1, 1.65), "modulate": Color(0.68, 0.9, 1.0, 0.94), "z_index": 4},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(176, 96, 64, 32), "position": Vector2(512, 388), "scale": Vector2(1.2, 1.2), "z_index": 5},
+			]
+		"archive":
+			return [
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 96, 48, 64), "position": Vector2(208, 238), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(48, 96, 48, 64), "position": Vector2(208, 372), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 96, 48, 64), "position": Vector2(816, 238), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(48, 96, 48, 64), "position": Vector2(816, 372), "scale": Vector2(1.8, 1.8), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(96, 48, 96, 48), "position": Vector2(512, 300), "scale": Vector2(1.75, 1.55), "modulate": Color(0.9, 0.78, 0.48, 0.94), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(192, 112, 48, 32), "position": Vector2(512, 430), "scale": Vector2(1.4, 1.4), "z_index": 5},
+			]
+		"comm", "satellite":
+			return [
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(96, 0, 112, 48), "position": Vector2(512, 126), "scale": Vector2(1.8, 1.3), "z_index": 4},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(176, 96, 64, 32), "position": Vector2(252, 222), "scale": Vector2(1.2, 1.2), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(176, 96, 64, 32), "position": Vector2(772, 382), "scale": Vector2(1.2, 1.2), "z_index": 5},
+			]
+		"merchant":
+			return [
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 48, 112, 32), "position": Vector2(512, 224), "scale": Vector2(2.2, 1.45), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(0, 96, 48, 64), "position": Vector2(210, 386), "scale": Vector2(1.5, 1.5), "z_index": 5},
+				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(48, 96, 48, 64), "position": Vector2(814, 386), "scale": Vector2(1.5, 1.5), "z_index": 5},
+			]
+	return []
+
+
+func _variant_solid_blocking_props() -> Array[Dictionary]:
+	match variant:
+		"server":
+			return [
+				{"name": "LeftServerColumnA", "position": Vector2(188, 248), "size": Vector2(82, 96)},
+				{"name": "LeftServerColumnB", "position": Vector2(188, 368), "size": Vector2(82, 96)},
+				{"name": "RightServerColumnA", "position": Vector2(836, 248), "size": Vector2(82, 96)},
+				{"name": "RightServerColumnB", "position": Vector2(836, 368), "size": Vector2(82, 96)},
+				{"name": "NorthDataBridge", "position": Vector2(512, 126), "size": Vector2(270, 42)},
+				{"name": "RavenKeyTerminal", "position": Vector2(512, 388), "size": Vector2(86, 56)},
+			]
+		"archive":
+			return [
+				{"name": "LeftArchiveColumnA", "position": Vector2(208, 238), "size": Vector2(82, 96)},
+				{"name": "LeftArchiveColumnB", "position": Vector2(208, 372), "size": Vector2(82, 96)},
+				{"name": "RightArchiveColumnA", "position": Vector2(816, 238), "size": Vector2(82, 96)},
+				{"name": "RightArchiveColumnB", "position": Vector2(816, 372), "size": Vector2(82, 96)},
+				{"name": "BlackBoxArchiveCore", "position": Vector2(512, 300), "size": Vector2(190, 92)},
+				{"name": "MotherBaitTerminal", "position": Vector2(512, 430), "size": Vector2(86, 50)},
+			]
+	return []
+
+
 func _variant_alert_marks() -> Array[Dictionary]:
 	match variant:
 		"satellite":
@@ -278,7 +360,7 @@ func _add_panel(center: Vector2, size: Vector2, color: Color) -> void:
 	add_child(panel)
 
 
-func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color) -> void:
+func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, scale_value: Vector2, color: Color, z_value := 3) -> void:
 	if texture == null:
 		return
 	var atlas := AtlasTexture.new()
@@ -290,8 +372,25 @@ func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, sca
 	sprite.position = position
 	sprite.scale = scale_value
 	sprite.modulate = color
-	sprite.z_index = 3
+	sprite.z_index = z_value
 	add_child(sprite)
+
+
+func _add_solid_blocking_prop(name_suffix: String, center: Vector2, size: Vector2) -> void:
+	var body := StaticBody2D.new()
+	body.name = "SolidBlocker%s" % name_suffix
+	body.position = center
+	body.collision_layer = 1
+	body.collision_mask = 15
+	body.add_to_group("solid_blocking_prop")
+	body.set_meta("solid_blocking_prop", true)
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape.shape = rect
+	body.add_child(shape)
+	add_child(body)
 
 
 func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> void:

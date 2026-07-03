@@ -427,8 +427,11 @@ func debug_enter_chapter(chapter_id: int, target_room_type: String = "none") -> 
 	var resolved_chapter_id := clampi(chapter_id, CHAPTER_1_ID, CHAPTER_5_ID)
 	if _selected_character_id == "" or _selected_character_id == "none":
 		_selected_character_id = CharacterSelectScreen.TIEMU_ID
-	if not _rebuild_selected_character_for_checkpoint():
-		return
+	if _character == null or not is_instance_valid(_character):
+		if not _rebuild_selected_character_for_checkpoint():
+			return
+	else:
+		_set_character_control_enabled(true)
 
 	var resolved_target_type := target_room_type.strip_edges()
 	_start_formal_run(1, resolved_chapter_id)
@@ -437,7 +440,7 @@ func debug_enter_chapter(chapter_id: int, target_room_type: String = "none") -> 
 
 	var chapter_title := LabDungeonGenerator.get_chapter_title(resolved_chapter_id)
 	var target_label := _get_debug_target_label(resolved_target_type)
-	_show_story_feedback("开发入口：已进入%s｜%s。" % [chapter_title, target_label], 1.6)
+	_show_story_feedback("开发入口：已保留构筑并进入%s｜%s。" % [chapter_title, target_label], 1.6)
 	print("In-game debug entry ready: chapter %d, target '%s', seed %d." % [resolved_chapter_id, resolved_target_type, LabDungeonGenerator.last_seed])
 
 

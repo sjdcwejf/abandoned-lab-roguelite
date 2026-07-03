@@ -95,7 +95,7 @@ func _build_layout() -> void:
 	layout.add_child(title)
 
 	var hint := Label.new()
-	hint.text = "选择章节后会重置当前探索构筑，仅保留已选择角色。"
+	hint.text = "选择章节后默认保留当前构筑、武器词条、遗物和资源，只切换测试章节。"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override("font_size", 13)
@@ -170,10 +170,10 @@ func _get_chapter_entries() -> Array[Dictionary]:
 
 
 func _on_chapter_pressed(chapter_id: int) -> void:
-	var target_room_type := "none"
+	var target_room_type: String = "none"
 	if _target_option != null:
-		var metadata: Variant = _target_option.get_item_metadata(_target_option.selected)
-		target_room_type = str(metadata)
+		var metadata_value: Variant = _target_option.get_item_metadata(_target_option.selected)
+		target_room_type = str(metadata_value)
 	chapter_entry_requested.emit(chapter_id, target_room_type)
 
 

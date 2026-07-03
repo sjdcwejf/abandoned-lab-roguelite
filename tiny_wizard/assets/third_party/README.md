@@ -11,6 +11,8 @@
 | `sci_fi_facility/` | 科幻设施、控制台、按钮、电脑、箱子和补充物件 | 见根目录 `ASSET_CREDITS.md` |
 | `land_of_pixels_lab/` | 生化实验室细节、培养管、绿色液体、终端、管道和特效 | 见根目录 `ASSET_CREDITS.md` |
 | `warped_top_down_lab/` | 第三章低温封存区实验室底板、墙体和科技走廊 | 见根目录 `ASSET_CREDITS.md` |
+| `robot_factory_tileset_pack/` | 第四章外骨骼兵器工厂机械臂、装配线、工业设备和机甲支架 | 见根目录 `ASSET_CREDITS.md`；付费素材，不提交原始 rar |
+| `cyberpunk_interiors_16x16/` | 第五章数据中枢服务器柜、控制台、数据终端和科技室内物件 | 见根目录 `ASSET_CREDITS.md`；付费素材，不提交原始 zip |
 
 ## 后续候选目录
 

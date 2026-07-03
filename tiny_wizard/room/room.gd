@@ -72,7 +72,7 @@ signal room_cleared(room: Room)
 signal objective_progress_changed(room: Room)
 
 func _ready():
-	_disable_decorative_blockers(self)
+	_normalize_room_blockers(self)
 	_ensure_default_room_objective()
 	objective_initial_enemy_count = get_remaining_enemy_count()
 	if get_tree().current_scene != self:
@@ -90,12 +90,34 @@ func _ready():
 		player_node.gui_path = gui.get_path()
 
 
-func _disable_decorative_blockers(root: Node) -> void:
+func _normalize_room_blockers(root: Node) -> void:
 	for child in root.get_children():
 		var child_name := String(child.name).to_lower()
-		if child_name.contains("blocker") and not child_name.contains("door"):
+		if _is_solid_blocking_prop(child):
+			_make_node_blocking(child)
+		elif child_name.contains("blocker") and not child_name.contains("door"):
 			_make_node_nonblocking(child)
-		_disable_decorative_blockers(child)
+		_normalize_room_blockers(child)
+
+
+func _is_solid_blocking_prop(node: Node) -> bool:
+	var node_name := String(node.name).to_lower()
+	return node.is_in_group("solid_blocking_prop") \
+		or bool(node.get_meta("solid_blocking_prop", false)) \
+		or node_name.contains("solidblocker") \
+		or node_name.contains("solid_blocking") \
+		or node_name.contains("solidprop")
+
+
+func _make_node_blocking(node: Node) -> void:
+	if node is CollisionObject2D:
+		var collision_object := node as CollisionObject2D
+		collision_object.collision_layer = 1
+		collision_object.collision_mask = 15
+	if node is CollisionShape2D:
+		(node as CollisionShape2D).disabled = false
+	for child in node.get_children():
+		_make_node_blocking(child)
 
 
 func _make_node_nonblocking(node: Node) -> void:

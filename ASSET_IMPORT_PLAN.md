@@ -43,6 +43,8 @@
 | Land of Pixels Laboratory Tileset | itch.io / 本地 zip | marceles | 第二章、第三章、生化细节 | 培养管、液体、终端、管道、特效 | 16x16、32x32、48x48；项目优先 32x32 | 自定义授权 | 是 | 未要求，建议署名 | 是 | 不允许转售素材包 | 是 | `tiny_wizard/assets/third_party/land_of_pixels_lab/` | `LICENSE.txt` 明确允许商业使用和修改，但不可转售素材包。 |
 | Sci-Fi Facility Asset Pack | itch.io / 本地 zip | Murphy's Dad | 第三章、第四章、第五章补充设备 | 控制台、按钮、电脑、箱子、设施物件 | 混合 spritesheet | CC0 | 是 | 否，署名可选 | 是 | 是 | 是 | `tiny_wizard/assets/third_party/sci_fi_facility/` | `README.txt` 写明 CC0，署名 Murphy's Dad 可选。 |
 | Warped Top-Down Tech Lab / Top Down Lab files | itch.io / 本地 zip | Luis Zuno / Ansimuz | 第三章低温封存区 | 实验室地板、墙体、走廊、科技底板 | 未统一标注，按 tileset 使用 | 自定义公开授权 | 是 | 否，署名可选 | 是 | 是 | 是 | `tiny_wizard/assets/third_party/warped_top_down_lab/` | `public-license.txt` 允许个人/商业使用、修改和再分发。 |
+| Giant Mech Factory Pixel Art Tileset Pack | itch.io / 本地购买包 | Cute SCKR | 第四章外骨骼兵器工厂 | 机械臂、装配线、工业设备、机甲支架、工厂控制台 | 混合像素 spritesheet | 购买授权；禁止素材包再分发 | 是 | 未强制，建议署名 | 是 | 原始素材不得作为素材包再分发 | 是 | `tiny_wizard/assets/third_party/robot_factory_tileset_pack/` | 用户已提供购买证明；当前用于私有开发仓库。公开源码前需确认解压 PNG 是否可分发。 |
+| Cyberpunk / Sci-Fi Interior 16x16 Tileset | itch.io / 本地购买包 | BeezeeBox | 第五章数据中枢 | 服务器机柜、控制台、数据终端、科技室内物件 | 16x16 | 购买授权；禁止素材包再分发 | 是 | 未强制，建议署名 | 是 | 原始素材不得作为素材包再分发 | 是 | `tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/` | 用户已提供购买证明；当前用于私有开发仓库。公开源码前需确认解压 PNG 是否可分发。 |
 
 ## 第四章：外骨骼兵器工厂素材缺口
 

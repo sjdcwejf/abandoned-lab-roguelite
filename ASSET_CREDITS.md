@@ -1,5 +1,14 @@
 # Asset Credits
 
+## v0.1.98 第四/第五章付费素材导入｜先凯
+
+本节记录 2026-07-03 由项目所有者提供购买证明并导入的两套付费素材。当前仓库为私有开发用途；未来如果仓库公开或分发源码包，需要再次确认是否允许公开再分发解压后的 PNG 运行素材。原始 `.zip` / `.rar` 不进入仓库。
+
+| 素材名称 | 作者 | 来源 | 许可证 | 使用位置 | 是否需要署名 | 备注 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Cyberpunk / Sci-Fi Interior 16x16 Tileset | BeezeeBox | itch.io；用户已提供本地购买包 `Cyberpunk_Interiors_16x16_V-1.zip` 和购买证明 | 购买授权：可用于个人/商业游戏，可修改；禁止转售、再分发或公开分享原始素材文件；包内未附 standalone license | 第五章“数据中枢”：服务器机柜、控制台、数据终端、黑匣子档案库室内物件 | 页面未强制署名，建议保留作者名 | 项目目录：`tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/`。公开仓库前需确认解压 PNG 是否允许随源码分发。 |
+| Giant Mech Factory Pixel Art Tileset Pack | Cute SCKR | itch.io；用户已提供本地购买包 `Robot_Factory_Tileset_Pack.rar` 和购买证明 | 购买授权：可用于个人/商业游戏，可修改；禁止转售、再分发或公开分享原始素材文件；包内未附 standalone license | 第四章“外骨骼兵器工厂”：机械臂、装配线、工业设备、机甲支架、工厂控制台 | 页面未强制署名，建议保留作者名 | 项目目录：`tiny_wizard/assets/third_party/robot_factory_tileset_pack/`。公开仓库前需确认解压 PNG 是否允许随源码分发。 |
+
 ## v0.1.86 素材授权审计｜先凯
 
 本节记录当前已经导入项目的 5 个第三方素材库。后续新增素材时，必须同时更新本文档和 `ASSET_IMPORT_PLAN.md`。授权不明确的素材不得被写成“已确认可商用”，也不得提交原始付费 zip。
