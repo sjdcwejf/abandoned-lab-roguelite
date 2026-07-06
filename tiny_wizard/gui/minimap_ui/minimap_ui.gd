@@ -7,6 +7,7 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 const TILE_SIZE := Vector2(22, 22)
 const TILE_GAP := 6.0
 const MAP_AREA_SIZE := Vector2(178, 136)
+const UNKNOWN_ROOM_TYPE := "unknown"
 
 var _rooms := {}
 var _explored := {}
@@ -109,7 +110,7 @@ func _build_ui() -> void:
 	layout.add_child(_map_area)
 
 	var legend := Label.new()
-	legend.text = "我：当前位置  始：起点  王：Boss  商：前厅/渡鸦  奖：奖励  武：武器  事：事件  档：档案  舱：冷冻舱  冷：低温喷口  精：精英"
+	legend.text = "高亮：当前位置  ?：未知  始：起点  战：战斗  王：Boss  商：补给  奖：奖励  武：武器  事：事件  档：档案  舱：冷冻舱  冷：低温喷口  精：精英"
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	legend.add_theme_font_size_override("font_size", 10)
@@ -169,31 +170,35 @@ func _get_bounds() -> Array:
 func _make_room_tile(room_coord: Vector2i, room: Room) -> PanelContainer:
 	var is_current := room_coord == _current_coord
 	var is_explored := bool(_explored.get(room_coord, false))
+	var display_room_type := room.lab_room_type if is_explored else UNKNOWN_ROOM_TYPE
 
 	var tile := PanelContainer.new()
 	tile.custom_minimum_size = TILE_SIZE
 	tile.size = TILE_SIZE
 	tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tile.add_theme_stylebox_override("panel", _make_tile_style(room.lab_room_type, is_current, is_explored))
+	tile.add_theme_stylebox_override("panel", _make_tile_style(display_room_type, is_current, is_explored))
+	tile.tooltip_text = _get_room_tooltip(room, is_explored, is_current)
 
 	var label := Label.new()
-	label.text = _get_room_symbol(room.lab_room_type, is_current)
+	label.text = _get_room_symbol(display_room_type)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", _get_symbol_font_size(label.text))
-	label.add_theme_color_override("font_color", _get_symbol_color(room.lab_room_type, is_current, is_explored))
+	label.add_theme_color_override("font_color", _get_symbol_color(display_room_type, is_current, is_explored))
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tile.add_child(label)
 
 	return tile
 
 
-func _get_room_symbol(room_type: String, is_current: bool) -> String:
-	if is_current:
-		return "我"
+func _get_room_symbol(room_type: String) -> String:
 	match room_type:
+		UNKNOWN_ROOM_TYPE:
+			return "?"
 		"start":
 			return "始"
+		"combat":
+			return "战"
 		"boss":
 			return "王"
 		"merchant":
@@ -220,15 +225,17 @@ func _get_room_symbol(room_type: String, is_current: bool) -> String:
 
 
 func _get_symbol_font_size(symbol: String) -> int:
+	if symbol == "?":
+		return 15
 	return 12 if symbol.length() > 0 and symbol != "●" else 15
 
 
-func _get_symbol_color(room_type: String, is_current: bool, is_explored: bool) -> Color:
+func _get_symbol_color(room_type: String, is_current: bool, _is_explored: bool) -> Color:
 	if is_current:
 		return Color(0.02, 0.08, 0.09, 1.0)
-	if not is_explored and room_type == "combat":
-		return Color(0.3, 0.42, 0.44, 0.45)
 	match room_type:
+		UNKNOWN_ROOM_TYPE:
+			return Color(0.58, 0.66, 0.68, 0.8)
 		"boss":
 			return Color(1.0, 0.36, 0.26, 1.0)
 		"merchant":
@@ -263,7 +270,8 @@ func _make_tile_style(room_type: String, is_current: bool, is_explored: bool) ->
 	style.border_color = Color(0.16, 0.36, 0.4, 0.76)
 
 	if is_current:
-		style.bg_color = Color(0.36, 0.92, 1.0, 0.95)
+		var current_base := _get_type_color(room_type)
+		style.bg_color = current_base.lerp(Color(0.36, 0.92, 1.0, 1.0), 0.55)
 		style.border_color = Color(0.86, 1.0, 1.0, 1.0)
 		style.set_border_width_all(2)
 		return style
@@ -273,15 +281,15 @@ func _make_tile_style(room_type: String, is_current: bool, is_explored: bool) ->
 		style.bg_color = base.lerp(Color(0.82, 0.95, 1.0, 1.0), 0.16)
 		style.border_color = base.lerp(Color(0.92, 1.0, 1.0, 1.0), 0.28)
 	else:
-		style.bg_color = base.darkened(0.52)
-		style.bg_color.a = 0.55 if _is_special_room(room_type) else 0.22
-		style.border_color = base.darkened(0.18)
-		style.border_color.a = 0.5 if _is_special_room(room_type) else 0.25
+		style.bg_color = Color(0.075, 0.105, 0.115, 0.52)
+		style.border_color = Color(0.26, 0.35, 0.38, 0.46)
 	return style
 
 
 func _get_type_color(room_type: String) -> Color:
 	match room_type:
+		UNKNOWN_ROOM_TYPE:
+			return Color(0.1, 0.14, 0.15, 0.72)
 		"start":
 			return Color(0.14, 0.46, 0.28, 0.92)
 		"boss":
@@ -307,6 +315,13 @@ func _get_type_color(room_type: String) -> Color:
 		"elite":
 			return Color(0.32, 0.16, 0.52, 0.92)
 	return Color(0.12, 0.22, 0.25, 0.85)
+
+
+func _get_room_tooltip(room: Room, is_explored: bool, is_current: bool) -> String:
+	if not is_explored:
+		return "未知房间"
+	var prefix := "当前位置：" if is_current else ""
+	return "%s%s" % [prefix, room.lab_room_label]
 
 
 func _is_special_room(room_type: String) -> bool:
