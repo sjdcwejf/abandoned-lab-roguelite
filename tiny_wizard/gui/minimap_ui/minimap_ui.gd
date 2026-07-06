@@ -33,7 +33,9 @@ func set_rooms(room_map: Dictionary, floor_index: int, chapter_label := "") -> v
 	_floor_index = floor_index
 	_chapter_label = chapter_label
 	_explored.clear()
+	_current_coord = Vector2i.ZERO
 	_refresh()
+	hide_map()
 
 
 func update_current_room(room_coord: Vector2i) -> void:
@@ -110,7 +112,7 @@ func _build_ui() -> void:
 	layout.add_child(_map_area)
 
 	var legend := Label.new()
-	legend.text = "高亮：当前位置  ?：未知  始：起点  战：战斗  王：Boss  商：补给  奖：奖励  武：武器  事：事件  档：档案  舱：冷冻舱  冷：低温喷口  精：精英"
+	legend.text = "仅显示已探索房间  高亮：当前位置  始：起点  战：战斗  商：补给  王：Boss"
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	legend.add_theme_font_size_override("font_size", 10)
@@ -133,7 +135,11 @@ func _refresh() -> void:
 	if _rooms.is_empty():
 		return
 
-	var bounds := _get_bounds()
+	var visible_room_coords := _get_visible_room_coords()
+	if visible_room_coords.is_empty():
+		return
+
+	var bounds := _get_bounds(visible_room_coords)
 	var min_coord: Vector2i = bounds[0]
 	var max_coord: Vector2i = bounds[1]
 	var grid_size := Vector2(
@@ -142,7 +148,8 @@ func _refresh() -> void:
 	)
 	var origin := (MAP_AREA_SIZE - grid_size) * 0.5
 
-	for room_coord in _rooms.keys():
+	for room_coord_value in visible_room_coords:
+		var room_coord := room_coord_value as Vector2i
 		var room := _rooms[room_coord] as Room
 		if room == null:
 			continue
@@ -156,10 +163,21 @@ func _refresh() -> void:
 		CHINESE_FONT_BOOTSTRAP.apply_to_tree(tile)
 
 
-func _get_bounds() -> Array:
+func _get_visible_room_coords() -> Array:
+	var visible_room_coords := []
+	for room_coord in _explored.keys():
+		if _rooms.has(room_coord):
+			visible_room_coords.append(room_coord)
+	if _rooms.has(_current_coord) and not visible_room_coords.has(_current_coord):
+		visible_room_coords.append(_current_coord)
+	return visible_room_coords
+
+
+func _get_bounds(room_coords: Array) -> Array:
 	var min_coord := Vector2i(99999, 99999)
 	var max_coord := Vector2i(-99999, -99999)
-	for room_coord in _rooms.keys():
+	for room_coord_value in room_coords:
+		var room_coord := room_coord_value as Vector2i
 		min_coord.x = mini(min_coord.x, room_coord.x)
 		min_coord.y = mini(min_coord.y, room_coord.y)
 		max_coord.x = maxi(max_coord.x, room_coord.x)
@@ -170,7 +188,7 @@ func _get_bounds() -> Array:
 func _make_room_tile(room_coord: Vector2i, room: Room) -> PanelContainer:
 	var is_current := room_coord == _current_coord
 	var is_explored := bool(_explored.get(room_coord, false))
-	var display_room_type := room.lab_room_type if is_explored else UNKNOWN_ROOM_TYPE
+	var display_room_type: String = room.lab_room_type if is_explored else UNKNOWN_ROOM_TYPE
 
 	var tile := PanelContainer.new()
 	tile.custom_minimum_size = TILE_SIZE

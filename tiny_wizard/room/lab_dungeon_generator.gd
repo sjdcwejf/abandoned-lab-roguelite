@@ -496,6 +496,7 @@ static func _generate_random_layout(rng: RandomNumberGenerator, chapter_config: 
 	var main_path_room_count := maxi(4, int(chapter_config.get("main_path_room_count", MAIN_PATH_ROOM_COUNT)))
 	var reward_room_count := maxi(0, int(chapter_config.get("reward_room_count", REWARD_ROOM_COUNT)))
 	var layout_radius := maxi(2, int(chapter_config.get("layout_radius", LAYOUT_RADIUS)))
+	var last_failed_specs := []
 
 	for attempt in range(MAX_LAYOUT_ATTEMPTS):
 		var main_path := _build_main_path(rng, main_path_room_count, layout_radius)
@@ -511,9 +512,11 @@ static func _generate_random_layout(rng: RandomNumberGenerator, chapter_config: 
 		var specs := _build_room_specs(main_path, reward_coords, rng, chapter_config, layer_index)
 		if _validate_room_specs(specs, chapter_config, layer_index, false):
 			return specs
-		_validate_room_specs(specs, chapter_config, layer_index, true)
+		last_failed_specs = specs
 
 	push_warning("Random dungeon layout failed; using chapter-safe fallback layout.")
+	if not last_failed_specs.is_empty():
+		_validate_room_specs(last_failed_specs, chapter_config, layer_index, true)
 	var fallback_specs := _build_safe_fallback_specs(rng, chapter_config, layer_index)
 	_validate_room_specs(fallback_specs, chapter_config, layer_index, true)
 	return fallback_specs
@@ -552,26 +555,42 @@ static func _build_reward_branches(main_path: Array, rng: RandomNumberGenerator,
 		occupied[coord] = true
 
 	var reward_coords := []
-	while reward_coords.size() < reward_room_count:
-		var candidates := []
-		for path_index in range(1, main_path.size() - 2):
-			var attach_coord := main_path[path_index] as Vector2i
-			for direction: Vector2i in DIRECTIONS:
-				var branch_coord := attach_coord + direction
-				if occupied.has(branch_coord):
-					continue
-				if _is_outside_layout_bounds(branch_coord, layout_radius):
-					continue
-				candidates.append(branch_coord)
+	var attempts := 0
+	var max_attempts := maxi(80, reward_room_count * 80)
+	while reward_coords.size() < reward_room_count and attempts < max_attempts:
+		attempts += 1
+		var candidates := _collect_loop_branch_candidates(main_path, occupied, main_path, layout_radius)
 
 		if candidates.is_empty():
 			return []
 
-		var chosen := candidates[rng.randi_range(0, candidates.size() - 1)] as Vector2i
+		var chosen: Vector2i = candidates[rng.randi_range(0, candidates.size() - 1)] as Vector2i
 		reward_coords.append(chosen)
 		occupied[chosen] = true
 
 	return reward_coords
+
+
+static func _collect_loop_branch_candidates(anchor_coords: Array, occupied: Dictionary, main_path: Array, layout_radius: int) -> Array:
+	var candidates := []
+	var seen := {}
+	for anchor_value in anchor_coords:
+		var attach_coord: Vector2i = anchor_value as Vector2i
+		for direction: Vector2i in DIRECTIONS:
+			var branch_coord := attach_coord + direction
+			if seen.has(branch_coord):
+				continue
+			if occupied.has(branch_coord):
+				continue
+			if _is_outside_layout_bounds(branch_coord, layout_radius):
+				continue
+			if _touches_boss_without_being_merchant(branch_coord, main_path):
+				continue
+			if _count_adjacent_coords(branch_coord, occupied) < 2:
+				continue
+			seen[branch_coord] = true
+			candidates.append(branch_coord)
+	return candidates
 
 
 static func _build_room_specs(main_path: Array, reward_coords: Array, rng: RandomNumberGenerator, chapter_config: Dictionary, layer_index: int) -> Array:
@@ -631,8 +650,6 @@ static func _has_isolated_pre_boss_room(main_path: Array, reward_coords: Array) 
 		if coord == boss_coord or coord == merchant_coord:
 			continue
 		if _are_adjacent(coord, boss_coord):
-			return false
-		if coord != previous_coord and _are_adjacent(coord, merchant_coord):
 			return false
 
 	return true
@@ -882,8 +899,13 @@ static func _build_safe_fallback_specs(rng: RandomNumberGenerator, chapter_confi
 	var path_types := (chapter_config.get("main_room_types", ["combat", "combat", "weapon"]) as Array).duplicate()
 	path_types.append("merchant")
 	path_types.append("boss")
+	var main_path_room_count := maxi(4, int(chapter_config.get("main_path_room_count", MAIN_PATH_ROOM_COUNT)))
+	var reward_room_count := maxi(0, int(chapter_config.get("reward_room_count", REWARD_ROOM_COUNT)))
+	var layout_radius := maxi(2, int(chapter_config.get("layout_radius", LAYOUT_RADIUS)))
+	var main_path := _build_safe_main_path(main_path_room_count)
+	var reward_coords := _build_safe_reward_coords(main_path, reward_room_count, layout_radius)
 	specs.append(_make_spec(
-		Vector2i.ZERO,
+		main_path[0] as Vector2i,
 		"start",
 		str(chapter_config.get("start_label", "封存气闸")),
 		chapter_config.get("start_room_scene", START_ROOM_SCENE) as PackedScene,
@@ -894,11 +916,79 @@ static func _build_safe_fallback_specs(rng: RandomNumberGenerator, chapter_confi
 
 	for index in range(path_types.size()):
 		var room_type := str(path_types[index])
-		var coord := Vector2i(index + 1, 0)
+		var coord := main_path[index + 1] as Vector2i
 		var scene := _take_scene(scene_pools, room_type, rng)
 		specs.append(_make_spec(coord, room_type, _next_label(room_type, label_counts, chapter_config), scene, index + 1, chapter_config, layer_index))
 
+	for coord in reward_coords:
+		var scene := _take_scene(scene_pools, "reward", rng)
+		specs.append(_make_spec(coord as Vector2i, "reward", _next_label("reward", label_counts, chapter_config), scene, 0, chapter_config, layer_index))
+
 	return specs
+
+
+static func _build_safe_main_path(room_count: int) -> Array:
+	if room_count <= 6:
+		return [
+			Vector2i(0, 0),
+			Vector2i(1, 0),
+			Vector2i(1, 1),
+			Vector2i(0, 1),
+			Vector2i(0, 2),
+			Vector2i(0, 3),
+		]
+	if room_count == 7:
+		return [
+			Vector2i(0, 0),
+			Vector2i(1, 0),
+			Vector2i(1, 1),
+			Vector2i(0, 1),
+			Vector2i(0, 2),
+			Vector2i(1, 2),
+			Vector2i(1, 3),
+		]
+
+	var path := [
+		Vector2i(0, 0),
+		Vector2i(1, 0),
+		Vector2i(2, 0),
+		Vector2i(2, 1),
+		Vector2i(1, 1),
+		Vector2i(0, 1),
+	]
+	var extra_needed := maxi(0, room_count - 8)
+	var extra_candidates := [
+		Vector2i(-1, 1),
+		Vector2i(-1, 0),
+		Vector2i(-2, 0),
+		Vector2i(-2, 1),
+		Vector2i(-3, 1),
+	]
+	for index in range(mini(extra_needed, extra_candidates.size())):
+		path.append(extra_candidates[index])
+
+	var last_flexible_coord := path[path.size() - 1] as Vector2i
+	var merchant_coord := last_flexible_coord + Vector2i(0, 1)
+	var boss_coord := merchant_coord + Vector2i(0, 1)
+	path.append(merchant_coord)
+	path.append(boss_coord)
+	return path
+
+
+static func _build_safe_reward_coords(main_path: Array, reward_room_count: int, layout_radius: int) -> Array:
+	var occupied := {}
+	for coord in main_path:
+		occupied[coord] = true
+
+	var reward_coords := []
+	while reward_coords.size() < reward_room_count:
+		var candidates := _collect_loop_branch_candidates(main_path, occupied, main_path, layout_radius)
+		if candidates.is_empty():
+			return reward_coords
+		var chosen: Vector2i = candidates[0] as Vector2i
+		reward_coords.append(chosen)
+		occupied[chosen] = true
+	return reward_coords
 
 
 static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, layer_index: int, print_errors := true) -> bool:
@@ -946,6 +1036,7 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 		for coord in coords.keys():
 			if not reachable.has(coord):
 				errors.append("Map validation failed: unreachable room at %s" % [coord])
+		_append_room_exit_errors(errors, room_specs, coords)
 
 	var required_room_types := chapter_config.get("main_room_types", []) as Array
 	for required_value in required_room_types:
@@ -975,6 +1066,36 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 	return true
 
 
+static func _append_room_exit_errors(errors: PackedStringArray, room_specs: Array, coords: Dictionary) -> void:
+	for spec_value in room_specs:
+		var spec := spec_value as Dictionary
+		var room_type := str(spec.get("type", ""))
+		var coord := spec.get("coord", Vector2i.ZERO) as Vector2i
+		var exit_count := _count_adjacent_coords(coord, coords)
+		if room_type == "boss":
+			continue
+		if room_type == "start" and exit_count < 2:
+			errors.append("Map validation failed: spawn room has only one exit")
+			continue
+		if exit_count < 2:
+			errors.append("Map validation failed: room has only one exit at %s (%s)" % [coord, room_type])
+
+
+static func _append_generated_room_exit_errors(errors: PackedStringArray, generated_rooms: Dictionary, coords: Dictionary) -> void:
+	for room_pos in generated_rooms:
+		var room := generated_rooms[room_pos] as Room
+		if room == null:
+			continue
+		var exit_count := _count_adjacent_coords(room.room_pos, coords)
+		if room.lab_room_type == "boss":
+			continue
+		if room.lab_room_type == "start" and exit_count < 2:
+			errors.append("Map validation failed: spawn room has only one exit")
+			continue
+		if exit_count < 2:
+			errors.append("Map validation failed: room has only one exit at %s (%s)" % [room.room_pos, room.lab_room_type])
+
+
 static func _collect_reachable_coords(start_coord: Vector2i, coords: Dictionary) -> Dictionary:
 	var reachable := {}
 	var queue := [start_coord]
@@ -990,6 +1111,22 @@ static func _collect_reachable_coords(start_coord: Vector2i, coords: Dictionary)
 			reachable[next_coord] = true
 			queue.append(next_coord)
 	return reachable
+
+
+static func _count_adjacent_coords(coord: Vector2i, coords: Dictionary) -> int:
+	var count := 0
+	for direction: Vector2i in DIRECTIONS:
+		if coords.has(coord + direction):
+			count += 1
+	return count
+
+
+static func _touches_boss_without_being_merchant(coord: Vector2i, main_path: Array) -> bool:
+	if main_path.size() < 2:
+		return false
+	var boss_coord := main_path[main_path.size() - 1] as Vector2i
+	var merchant_coord := main_path[main_path.size() - 2] as Vector2i
+	return coord != merchant_coord and _are_adjacent(coord, boss_coord)
 
 
 static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_config: Dictionary, layer_index: int) -> bool:
@@ -1036,6 +1173,7 @@ static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_confi
 		for coord in coords.keys():
 			if not reachable.has(coord):
 				errors.append("Map validation failed: unreachable instantiated room at %s" % [coord])
+		_append_generated_room_exit_errors(errors, generated_rooms, coords)
 	if boss_room != null and _boss_has_active_enemy(boss_room):
 		errors.append("Map validation failed: boss appears active before room entry")
 
