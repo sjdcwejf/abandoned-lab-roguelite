@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_boss_room.tscn" id="1_base"]
+[ext_resource type="Script" path="res://tiny_wizard/room/mother_hive_overlay.gd" id="2_overlay"]
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "boss"
+lab_room_label = "母巢核心"
+
+[node name="MotherHiveOverlay" type="Node2D" parent="." index="8"]
+script = ExtResource("2_overlay")
+variant = "boss"
+
+[node name="PrototypeBoss" parent="Enemies" index="0"]
+boss_display_name = "原初母体（占位）"
+protomatter_min_drop = 8
+protomatter_max_drop = 12

@@ -17,6 +17,7 @@ const CHAPTER_2_ID := 2
 const CHAPTER_3_ID := 3
 const CHAPTER_4_ID := 4
 const CHAPTER_5_ID := 5
+const FINAL_CHAPTER_ID := 99
 const POLLUTION_EVENT_LAYER := 2
 const POLLUTION_EVENT_SOURCE_COUNT := 3
 const POLLUTION_EVENT_SOURCE_POSITIONS := [
@@ -28,8 +29,8 @@ const POLLUTION_EVENT_SOURCE_POSITIONS := [
 @export var use_generated_lab_dungeon := true
 @export var play_tutorial := true
 @export var dungeon_seed := 0
-@export_range(0, 5, 1) var debug_start_chapter := 0
-@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_satellite", "cryo_pod", "weapon", "archive", "boss") var debug_start_room_type := ""
+@export var debug_start_chapter := 0
+@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall", "final_signal", "final_antechamber", "weapon", "archive", "boss") var debug_start_room_type := ""
 @export var debug_override_seed := 0
 @export var start_room_coord := Vector2i.ZERO
 @export var tiemu_character_scene: PackedScene
@@ -416,7 +417,7 @@ func _start_formal_run(layer_index := 1, chapter_id := FORMAL_CHAPTER_ID) -> voi
 func _start_debug_formal_entry() -> void:
 	if debug_override_seed != 0:
 		dungeon_seed = debug_override_seed
-	var chapter_id := clampi(debug_start_chapter, CHAPTER_1_ID, CHAPTER_5_ID)
+	var chapter_id := _resolve_debug_chapter_id(debug_start_chapter)
 	_start_formal_run(1, chapter_id)
 	if debug_start_room_type != "" and debug_start_room_type != "none":
 		call_deferred("_debug_move_to_room_type", debug_start_room_type)
@@ -424,7 +425,7 @@ func _start_debug_formal_entry() -> void:
 
 
 func debug_enter_chapter(chapter_id: int, target_room_type: String = "none") -> void:
-	var resolved_chapter_id := clampi(chapter_id, CHAPTER_1_ID, CHAPTER_5_ID)
+	var resolved_chapter_id := _resolve_debug_chapter_id(chapter_id)
 	if _selected_character_id == "" or _selected_character_id == "none":
 		_selected_character_id = CharacterSelectScreen.TIEMU_ID
 	if _character == null or not is_instance_valid(_character):
@@ -442,6 +443,12 @@ func debug_enter_chapter(chapter_id: int, target_room_type: String = "none") -> 
 	var target_label := _get_debug_target_label(resolved_target_type)
 	_show_story_feedback("开发入口：已保留构筑并进入%s｜%s。" % [chapter_title, target_label], 1.6)
 	print("In-game debug entry ready: chapter %d, target '%s', seed %d." % [resolved_chapter_id, resolved_target_type, LabDungeonGenerator.last_seed])
+
+
+func _resolve_debug_chapter_id(raw_chapter_id: int) -> int:
+	if raw_chapter_id == FINAL_CHAPTER_ID:
+		return FINAL_CHAPTER_ID
+	return clampi(raw_chapter_id, CHAPTER_1_ID, CHAPTER_5_ID)
 
 
 func _debug_move_to_room_type(target_type: String) -> void:
@@ -480,6 +487,12 @@ func _get_debug_target_label(target_type: String) -> String:
 			return "卫星伪装系统"
 		"cryo_pod":
 			return "冷冻舱事件房"
+		"final_recall":
+			return "遗物召回腔"
+		"final_signal":
+			return "母体信号室"
+		"final_antechamber":
+			return "原初母巢前庭"
 		_:
 			return "出生房"
 
@@ -490,7 +503,7 @@ func _debug_find_room(target_type: String) -> Room:
 	if target_type == "event":
 		for room_pos in rooms:
 			var event_room := rooms[room_pos] as Room
-			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod"]:
+			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall", "final_signal"]:
 				return event_room
 	for room_pos in rooms:
 		var room := rooms[room_pos] as Room
@@ -516,7 +529,7 @@ func _start_chapter_base(completed_chapter_id: int) -> void:
 	_apply_base_story_progress()
 	_enter_base_room()
 	if completed_chapter_id == CHAPTER_5_ID:
-		_show_story_feedback("数据中枢记录已完成，后续深层区域将在后续版本开放。", 2.0)
+		_show_story_feedback("母体信号已锁定。最终章：母巢核心，入口已开启。", 2.0)
 
 
 func _enter_base_room() -> void:
@@ -802,8 +815,8 @@ func _on_black_hole_entered(body: Node2D) -> void:
 				call_deferred("_start_next_formal_layer")
 			elif LabDungeonGenerator.get_next_chapter_id(_formal_chapter_id) > 0:
 				call_deferred("_start_chapter_base", _formal_chapter_id)
-			elif _formal_chapter_id == CHAPTER_5_ID:
-				call_deferred("_start_chapter_base", _formal_chapter_id)
+			elif _formal_chapter_id == FINAL_CHAPTER_ID:
+				call_deferred("_complete_formal_layer")
 			else:
 				call_deferred("_complete_formal_layer")
 		RUN_STATE_BASE:
@@ -1019,8 +1032,10 @@ func _refresh_layer_clear_screen() -> void:
 
 
 func _get_layer_clear_summary_text() -> String:
+	if _formal_chapter_id == FINAL_CHAPTER_ID:
+		return _get_final_chapter_ending_summary_text()
 	if _formal_chapter_id == CHAPTER_5_ID:
-		return "数据中枢记录已完成，后续深层区域将在后续版本开放。当前构筑快照："
+		return "母体信号已锁定。最终章：母巢核心入口已开启。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_4_ID:
 		return "弥赛亚重装清理机停放库已记录。数据中枢访问权限已解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_3_ID:
@@ -1031,13 +1046,23 @@ func _get_layer_clear_summary_text() -> String:
 
 
 func _get_layer_clear_next_button_text() -> String:
+	if _formal_chapter_id == FINAL_CHAPTER_ID:
+		return "查看结局文本占位"
 	if _formal_chapter_id == CHAPTER_5_ID:
-		return "后续深层区域，后续版本开放"
+		return "进入临时安全屋，准备前往最终章"
 	if _formal_chapter_id == CHAPTER_4_ID:
 		return "进入临时安全屋，准备前往第五章"
 	if _formal_chapter_id == CHAPTER_3_ID:
 		return "%s：下一版本开放" % LabDungeonGenerator.get_chapter_completion_destination(_formal_chapter_id)
 	return "后续章节：下一版本开放"
+
+
+func _get_final_chapter_ending_summary_text() -> String:
+	if _raven_hidden_quest_unlocked:
+		return "逆命结局占位：协议无法识别你的状态。母体无法召回你。你也不再属于原来的生命序列。\n\n渡鸦旧债线已开启：那扇门不是他第一次打开的，但他确实把后来的人送了进去。"
+	if _ending_hints_unlocked:
+		return "纯净结局占位：母体信号逐渐熄灭。你没有回应召回。熵区第一次真正安静下来。"
+	return "召回结局占位：你切断了母巢核心，却听见体内遗物回应了另一个声音。母体已死。召回仍在继续。"
 
 
 func _get_layer_clear_weapon_text() -> String:
@@ -1408,7 +1433,7 @@ func _update_base_room_feedback(room: Room) -> void:
 	var next_title := LabDungeonGenerator.get_chapter_title(_base_next_chapter_id) if _base_next_chapter_id > 0 else "后续章节"
 	var objective := "延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title
 	if _base_completed_chapter_id == CHAPTER_5_ID:
-		objective = "数据中枢记录已完成。后续深层区域将在后续版本开放。"
+		objective = "母体信号已锁定。选择 1 个遗物，补给后进入最终章：母巢核心。"
 	_room_objective_ui.show_room(
 		room,
 		0,
@@ -1421,6 +1446,8 @@ func _update_base_room_feedback(room: Room) -> void:
 func _get_formal_room_type_label(room_type: String) -> String:
 	match room_type:
 		"start":
+			if _formal_chapter_id == FINAL_CHAPTER_ID:
+				return "母巢入口"
 			return "起点房"
 		"combat":
 			return "怪物房"
@@ -1436,6 +1463,14 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "数据事件房"
 		"data_satellite":
 			return "数据事件房"
+		"final_transition":
+			return "深层熵区过渡房"
+		"final_recall":
+			return "遗物召回腔"
+		"final_signal":
+			return "母体信号室"
+		"final_antechamber":
+			return "原初母巢前庭"
 		"cryo_pod":
 			return "冷冻舱事件房"
 		"cryo_vent":
@@ -1447,6 +1482,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"weapon":
 			return "武器房"
 		"merchant":
+			if _formal_chapter_id == FINAL_CHAPTER_ID:
+				return "最终补给站"
 			if _formal_chapter_id == CHAPTER_5_ID:
 				return "数据补给站"
 			if _formal_chapter_id == CHAPTER_4_ID:
@@ -1462,6 +1499,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 	match room_type:
 		"start":
+			if _formal_chapter_id == FINAL_CHAPTER_ID:
+				return "进入母巢深处。"
 			if _formal_chapter_id == CHAPTER_5_ID:
 				return "进入数据中枢。"
 			if _formal_chapter_id == CHAPTER_4_ID:
@@ -1499,6 +1538,14 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			return "重启通讯终端 0/3。"
 		"data_satellite":
 			return "关闭伪装节点 0/3。"
+		"final_transition":
+			return "清理房间内异常样本。"
+		"final_recall":
+			return "摧毁召回节点 0/3。"
+		"final_signal":
+			return "读取母体信号记录。"
+		"final_antechamber":
+			return "清除母巢前庭内的重构样本。"
 		"reward":
 			if _formal_chapter_id == CHAPTER_3_ID:
 				return "肃清封存样本库守卫，回收补给箱。"
@@ -1512,6 +1559,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 				return "回收渡鸦温室军械，整理当前构筑。"
 			return "回收随机军械，整理当前构筑。"
 		"merchant":
+			if _formal_chapter_id == FINAL_CHAPTER_ID:
+				return "最后整备。"
 			if _formal_chapter_id == CHAPTER_5_ID:
 				return "整备并检查数据档案。"
 			if _formal_chapter_id == CHAPTER_4_ID:

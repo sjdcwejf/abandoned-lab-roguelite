@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/mother_hive_overlay.gd" id="2_overlay"]
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "final_transition"
+lab_room_label = "深层熵区过渡房"
+
+[node name="MotherHiveOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "transition"

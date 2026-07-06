@@ -149,6 +149,9 @@ func _add_target_options() -> void:
 	var entries: Array[Dictionary] = [
 		{"label": "出生房", "target": "none"},
 		{"label": "事件房", "target": "event"},
+		{"label": "遗物召回腔", "target": "final_recall"},
+		{"label": "母体信号室", "target": "final_signal"},
+		{"label": "原初母巢前庭", "target": "final_antechamber"},
 		{"label": "武器房", "target": "weapon"},
 		{"label": "Boss 前补给站", "target": "pre_boss_shop"},
 		{"label": "Boss 房", "target": "boss"},
@@ -166,6 +169,7 @@ func _get_chapter_entries() -> Array[Dictionary]:
 		{"chapter": 3, "label": "第三章：低温封存区"},
 		{"chapter": 4, "label": "第四章：外骨骼兵器工厂"},
 		{"chapter": 5, "label": "第五章：数据中枢"},
+		{"chapter": 99, "label": "最终章：母巢核心"},
 	]
 
 

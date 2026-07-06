@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/data_core_event_room.gd" id="2_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/mother_hive_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_target"]
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "final_recall"
+lab_room_label = "遗物召回腔"
+event_objective_text = "摧毁召回节点 0/3，并清除房内异常样本。"
+event_target_label = "召回节点"
+event_completion_text = "封锁解除：召回节点已摧毁。"
+event_target_success_message = "召回节点已摧毁"
+
+[node name="MotherHiveOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "recall"
+
+[node name="RecallTargets" type="Node2D" parent="." index="8"]
+
+[node name="RecallNodeA" parent="RecallTargets" instance=ExtResource("4_target")]
+position = Vector2(384, 222)
+max_health = 5
+display_name = "召回节点"
+destroyed_display_name = "召回节点失效"
+
+[node name="RecallNodeB" parent="RecallTargets" instance=ExtResource("4_target")]
+position = Vector2(640, 222)
+max_health = 5
+display_name = "召回节点"
+destroyed_display_name = "召回节点失效"
+
+[node name="RecallNodeC" parent="RecallTargets" instance=ExtResource("4_target")]
+position = Vector2(512, 392)
+max_health = 5
+display_name = "召回节点"
+destroyed_display_name = "召回节点失效"

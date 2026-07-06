@@ -46,10 +46,18 @@ const DATA_CORE_SATELLITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_typ
 const DATA_CORE_ARCHIVE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_archive_room.tscn")
 const DATA_CORE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_supply_station_room.tscn")
 const DATA_CORE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn")
+const MOTHER_HIVE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_start_room.tscn")
+const MOTHER_HIVE_TRANSITION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_transition_room.tscn")
+const MOTHER_HIVE_RECALL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_recall_room.tscn")
+const MOTHER_HIVE_SIGNAL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_signal_room.tscn")
+const MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_antechamber_room.tscn")
+const MOTHER_HIVE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_supply_station_room.tscn")
+const MOTHER_HIVE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_boss_room.tscn")
 const FORMAL_ENCOUNTER_GENERATOR := preload("res://tiny_wizard/room/formal_encounter_generator.gd")
 
 const START_ROOM_OFFSET := Vector2(0, 200)
 const DEFAULT_CHAPTER_ID := 1
+const FINAL_CHAPTER_ID := 99
 const MAIN_PATH_ROOM_COUNT := 6
 const REWARD_ROOM_COUNT := 2
 const MAX_LAYOUT_ATTEMPTS := 80
@@ -98,6 +106,11 @@ const DATA_CORE_COMBAT_ROOM_SCENES := [
 const DATA_CORE_EVENT_ROOM_SCENES := [
 	DATA_CORE_COMM_ROOM_SCENE,
 	DATA_CORE_SATELLITE_ROOM_SCENE,
+]
+
+const MOTHER_HIVE_COMBAT_ROOM_SCENES := [
+	MOTHER_HIVE_TRANSITION_ROOM_SCENE,
+	MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE,
 ]
 
 const REWARD_ROOM_SCENES := [
@@ -214,7 +227,7 @@ static func generate(rooms_parent: Node2D, requested_seed := 0, chapter_id := DE
 	var generated_rooms := {}
 	for spec in room_layout:
 		var room := _instantiate_room(spec)
-		if str(spec["type"]) in ["combat", "cryo_vent"]:
+		if str(spec["type"]) in ["combat", "cryo_vent", "final_transition", "final_antechamber"]:
 			FORMAL_ENCOUNTER_GENERATOR.populate(room, rng, int(spec.get("depth", 1)))
 		rooms_parent.add_child(room)
 		generated_rooms[room.room_pos] = room
@@ -366,9 +379,9 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"merchant_label": "渡鸦数据补给站",
 				"boss_label": "清理协议AI核心室",
 				"boss_objective": "击败清理协议AI。",
-				"completion_destination": "后续深层区域，后续版本开放",
-				"next_chapter_id": 0,
-				"next_chapter_title": "后续深层区域",
+				"completion_destination": "最终章：母巢核心入口已开启",
+				"next_chapter_id": FINAL_CHAPTER_ID,
+				"next_chapter_title": "最终章：母巢核心",
 				"start_room_scene": DATA_CORE_START_ROOM_SCENE,
 				"combat_room_scenes": DATA_CORE_COMBAT_ROOM_SCENES,
 				"data_comm_room_scenes": [DATA_CORE_COMM_ROOM_SCENE],
@@ -378,6 +391,40 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"weapon_room_scenes": [],
 				"merchant_room_scenes": [DATA_CORE_SUPPLY_STATION_ROOM_SCENE],
 				"boss_room_scenes": [DATA_CORE_BOSS_ROOM_SCENE],
+			}
+		FINAL_CHAPTER_ID:
+			return {
+				"id": FINAL_CHAPTER_ID,
+				"title": "最终章：母巢核心",
+				"sector": "母巢核心",
+				"planned_minutes": "8-10",
+				"formal_layer_count": 1,
+				"main_path_room_count": 8,
+				"reward_room_count": 2,
+				"layout_radius": 4,
+				"main_room_types": ["final_transition", "final_recall", "final_signal", "final_antechamber", "final_transition"],
+				"start_label": "母巢入口",
+				"final_transition_label": "深层熵区过渡房",
+				"final_recall_label": "遗物召回腔",
+				"final_signal_label": "母体信号室",
+				"final_antechamber_label": "原初母巢前庭",
+				"reward_label_prefix": "母巢残响侧室",
+				"merchant_label": "渡鸦最终补给站",
+				"boss_label": "母巢核心",
+				"boss_objective": "击败原初母体。",
+				"completion_destination": "结局文本占位",
+				"next_chapter_id": 0,
+				"next_chapter_title": "主线已收束",
+				"start_room_scene": MOTHER_HIVE_START_ROOM_SCENE,
+				"combat_room_scenes": MOTHER_HIVE_COMBAT_ROOM_SCENES,
+				"final_transition_room_scenes": [MOTHER_HIVE_TRANSITION_ROOM_SCENE],
+				"final_recall_room_scenes": [MOTHER_HIVE_RECALL_ROOM_SCENE],
+				"final_signal_room_scenes": [MOTHER_HIVE_SIGNAL_ROOM_SCENE],
+				"final_antechamber_room_scenes": [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE],
+				"reward_room_scenes": [MOTHER_HIVE_TRANSITION_ROOM_SCENE, MOTHER_HIVE_SIGNAL_ROOM_SCENE],
+				"weapon_room_scenes": [],
+				"merchant_room_scenes": [MOTHER_HIVE_SUPPLY_STATION_ROOM_SCENE],
+				"boss_room_scenes": [MOTHER_HIVE_BOSS_ROOM_SCENE],
 			}
 	return get_chapter_config(DEFAULT_CHAPTER_ID)
 
@@ -661,6 +708,10 @@ static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 		"pollution": (chapter_config.get("pollution_room_scenes", [COMBAT_ROOM_A_SCENE]) as Array).duplicate(),
 		"data_comm": (chapter_config.get("data_comm_room_scenes", [DATA_CORE_COMM_ROOM_SCENE]) as Array).duplicate(),
 		"data_satellite": (chapter_config.get("data_satellite_room_scenes", [DATA_CORE_SATELLITE_ROOM_SCENE]) as Array).duplicate(),
+		"final_transition": (chapter_config.get("final_transition_room_scenes", [MOTHER_HIVE_TRANSITION_ROOM_SCENE]) as Array).duplicate(),
+		"final_recall": (chapter_config.get("final_recall_room_scenes", [MOTHER_HIVE_RECALL_ROOM_SCENE]) as Array).duplicate(),
+		"final_signal": (chapter_config.get("final_signal_room_scenes", [MOTHER_HIVE_SIGNAL_ROOM_SCENE]) as Array).duplicate(),
+		"final_antechamber": (chapter_config.get("final_antechamber_room_scenes", [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE]) as Array).duplicate(),
 		"cryo_pod": (chapter_config.get("cryo_pod_room_scenes", [CRYO_POD_ROOM_SCENE]) as Array).duplicate(),
 		"cryo_vent": (chapter_config.get("cryo_vent_room_scenes", [CRYO_VENT_ROOM_SCENE]) as Array).duplicate(),
 		"elite": (chapter_config.get("elite_room_scenes", [CRYO_ELITE_ROOM_SCENE]) as Array).duplicate(),
@@ -692,6 +743,14 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return [DATA_CORE_COMM_ROOM_SCENE]
 		"data_satellite":
 			return [DATA_CORE_SATELLITE_ROOM_SCENE]
+		"final_transition":
+			return [MOTHER_HIVE_TRANSITION_ROOM_SCENE]
+		"final_recall":
+			return [MOTHER_HIVE_RECALL_ROOM_SCENE]
+		"final_signal":
+			return [MOTHER_HIVE_SIGNAL_ROOM_SCENE]
+		"final_antechamber":
+			return [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE]
 		"cryo_pod":
 			return [CRYO_POD_ROOM_SCENE]
 		"cryo_vent":
@@ -761,6 +820,32 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 				"target_total": 3,
 				"completion_text": "封锁解除：伪装节点已关闭。",
 			}
+		"final_transition":
+			return {
+				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": "清理房间内异常样本。",
+				"completion_text": "封锁解除：重构样本已清除。",
+			}
+		"final_recall":
+			return {
+				"type": Room.OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "摧毁召回节点 0/3，并清除房内异常样本。",
+				"target_label": "召回节点",
+				"target_total": 3,
+				"completion_text": "封锁解除：召回节点已摧毁。",
+			}
+		"final_signal":
+			return {
+				"type": Room.OBJECTIVE_READ_ARCHIVE,
+				"objective_text": "读取母体信号记录。",
+				"completion_text": "母体信号记录已同步。",
+			}
+		"final_antechamber":
+			return {
+				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
+				"objective_text": "清除母巢前庭内的重构样本。",
+				"completion_text": "封锁解除：前庭样本已清除。",
+			}
 		"cryo_pod":
 			return {
 				"type": Room.OBJECTIVE_INTERACT_TARGETS,
@@ -820,6 +905,8 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 
 static func _chapter_start_objective(chapter_id: int) -> String:
 	match chapter_id:
+		FINAL_CHAPTER_ID:
+			return "进入母巢深处。"
 		5:
 			return "进入数据中枢。"
 		4:
@@ -881,6 +968,8 @@ static func _chapter_event_objective(chapter_id: int, _label: String) -> Diction
 
 static func _chapter_shop_objective(chapter_id: int) -> String:
 	match chapter_id:
+		FINAL_CHAPTER_ID:
+			return "最后整备。"
 		5:
 			return "整备并检查数据档案。"
 		4:
@@ -1051,7 +1140,7 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 		if room_type == "merchant":
 			if int(objective.get("target_total", 0)) > 0:
 				errors.append("Map validation failed: shop has event targets")
-		if room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod"]:
+		if room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall"]:
 			var target_total := int(objective.get("target_total", 0))
 			if target_total != 3:
 				errors.append("Map validation failed: event target count mismatch in %s" % room_type)
@@ -1154,7 +1243,7 @@ static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_confi
 					errors.append("Map validation failed: shop has chest")
 				if room.has_node("Enemies") and room.get_node("Enemies").get_child_count() > 0:
 					errors.append("Map validation failed: shop has enemies")
-			"pollution", "data_comm", "data_satellite", "cryo_pod":
+			"pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall":
 				if room.has_method("get_event_target_total"):
 					var target_total := int(room.call("get_event_target_total"))
 					if target_total != 3:
@@ -1230,6 +1319,14 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 			return str(chapter_config.get("data_comm_label", "通讯塔控制室"))
 		"data_satellite":
 			return str(chapter_config.get("data_satellite_label", "卫星伪装系统"))
+		"final_transition":
+			return str(chapter_config.get("final_transition_label", "深层熵区过渡房"))
+		"final_recall":
+			return str(chapter_config.get("final_recall_label", "遗物召回腔"))
+		"final_signal":
+			return str(chapter_config.get("final_signal_label", "母体信号室"))
+		"final_antechamber":
+			return str(chapter_config.get("final_antechamber_label", "原初母巢前庭"))
 		"cryo_pod":
 			return str(chapter_config.get("cryo_pod_label", "冷冻舱列阵"))
 		"cryo_vent":

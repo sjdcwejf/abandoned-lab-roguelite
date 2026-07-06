@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/mother_hive_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="3_terminal"]
+
+[node name="Room" instance=ExtResource("1_room")]
+lab_room_type = "final_signal"
+lab_room_label = "母体信号室"
+
+[node name="MotherHiveOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("2_overlay")
+variant = "signal"
+
+[node name="MotherSignalArchiveTerminal" parent="." index="8" instance=ExtResource("3_terminal")]
+position = Vector2(512, 410)
+archive_id = "mother_hive_signal_record"
+archive_title = "母体信号记录"
+archive_content = "《母体召回协议》\n遗物并非外部物件。它们是母体协议在设施内留下的可携带端口。\n\n《适配个体筛选记录》\n进入熵区的个体会在战斗、遗物暴露和源质压力下持续显现适配倾向。能够抵达核心者，将被列为高优先级召回对象。\n\n《渡鸦旧债最终片段》\n渡鸦曾经打开过内部访问门。记录显示，那不是第一扇门，也不是最后一次。"
+success_message = "母体信号记录已同步"
+clue_id = "raven_final_fragment"
+prompt_text = "按 F 读取母体信号记录"
