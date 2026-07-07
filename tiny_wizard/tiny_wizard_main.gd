@@ -30,7 +30,7 @@ const POLLUTION_EVENT_SOURCE_POSITIONS := [
 @export var play_tutorial := true
 @export var dungeon_seed := 0
 @export var debug_start_chapter := 0
-@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall", "final_signal", "final_antechamber", "weapon", "archive", "boss") var debug_start_room_type := ""
+@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_satellite", "cryo_pod", "final_interrogation", "final_signal", "final_antechamber", "weapon", "archive", "boss") var debug_start_room_type := ""
 @export var debug_override_seed := 0
 @export var start_room_coord := Vector2i.ZERO
 @export var tiemu_character_scene: PackedScene
@@ -74,6 +74,11 @@ var _raven_secret_clues := {}
 var _raven_secret_fragments := 0
 var _raven_hidden_quest_unlocked := false
 var _ending_hints_unlocked := false
+var _mother_interrogation_completed := false
+var _mother_response_type := ""
+var _mother_response_refuse := false
+var _mother_response_connect := false
+var _mother_response_rewrite := false
 
 var rooms := {}
 
@@ -283,6 +288,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_selected_character_id = character_id
 	_hide_layer_clear_screen()
 	_hide_death_prompt(false)
+	_reset_run_story_flags()
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
 
@@ -335,6 +341,7 @@ func _rebuild_selected_character_for_checkpoint() -> bool:
 
 	_hide_layer_clear_screen()
 	_hide_death_prompt(false)
+	_reset_run_story_flags()
 	get_tree().paused = false
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
@@ -487,8 +494,8 @@ func _get_debug_target_label(target_type: String) -> String:
 			return "卫星伪装系统"
 		"cryo_pod":
 			return "冷冻舱事件房"
-		"final_recall":
-			return "遗物召回腔"
+		"final_interrogation":
+			return "母体审讯室"
 		"final_signal":
 			return "母体信号室"
 		"final_antechamber":
@@ -503,7 +510,7 @@ func _debug_find_room(target_type: String) -> Room:
 	if target_type == "event":
 		for room_pos in rooms:
 			var event_room := rooms[room_pos] as Room
-			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall", "final_signal"]:
+			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod", "final_interrogation", "final_signal"]:
 				return event_room
 	for room_pos in rooms:
 		var room := rooms[room_pos] as Room
@@ -558,8 +565,55 @@ func _apply_base_story_progress() -> void:
 		base_room.call("refresh_story_progress")
 
 
+func _reset_run_story_flags() -> void:
+	_data_archive_records.clear()
+	_raven_secret_clues.clear()
+	_raven_secret_fragments = 0
+	_raven_hidden_quest_unlocked = false
+	_ending_hints_unlocked = false
+	_mother_interrogation_completed = false
+	_mother_response_type = ""
+	_mother_response_refuse = false
+	_mother_response_connect = false
+	_mother_response_rewrite = false
+
+
 func are_ending_hints_unlocked() -> bool:
 	return _ending_hints_unlocked
+
+
+func is_raven_hidden_quest_unlocked() -> bool:
+	return _raven_hidden_quest_unlocked
+
+
+func is_mother_interrogation_completed() -> bool:
+	return _mother_interrogation_completed
+
+
+func get_mother_interrogation_state() -> Dictionary:
+	return {
+		"mother_interrogation_completed": _mother_interrogation_completed,
+		"mother_response_type": _mother_response_type,
+		"mother_response_refuse": _mother_response_refuse,
+		"mother_response_connect": _mother_response_connect,
+		"mother_response_rewrite": _mother_response_rewrite,
+	}
+
+
+func record_mother_interrogation_response(response_type: String) -> void:
+	var normalized_response := response_type.strip_edges()
+	if normalized_response not in ["refuse", "connect", "rewrite"]:
+		normalized_response = "refuse"
+
+	_mother_interrogation_completed = true
+	_mother_response_type = normalized_response
+	_mother_response_refuse = normalized_response == "refuse"
+	_mother_response_connect = normalized_response == "connect"
+	_mother_response_rewrite = normalized_response == "rewrite"
+
+
+func show_story_feedback(message: String, seconds := 1.6) -> void:
+	_show_story_feedback(message, seconds)
 
 
 func record_data_archive(payload: Dictionary) -> void:
@@ -1465,8 +1519,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "数据事件房"
 		"final_transition":
 			return "深层熵区过渡房"
-		"final_recall":
-			return "遗物召回腔"
+		"final_interrogation":
+			return "母体审讯室"
 		"final_signal":
 			return "母体信号室"
 		"final_antechamber":
@@ -1540,8 +1594,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			return "关闭伪装节点 0/3。"
 		"final_transition":
 			return "清理房间内异常样本。"
-		"final_recall":
-			return "摧毁召回节点 0/3。"
+		"final_interrogation":
+			return "回应母体信号。"
 		"final_signal":
 			return "读取母体信号记录。"
 		"final_antechamber":

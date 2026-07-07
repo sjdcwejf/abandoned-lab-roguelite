@@ -48,7 +48,7 @@ const DATA_CORE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/roo
 const DATA_CORE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn")
 const MOTHER_HIVE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_start_room.tscn")
 const MOTHER_HIVE_TRANSITION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_transition_room.tscn")
-const MOTHER_HIVE_RECALL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_recall_room.tscn")
+const MOTHER_HIVE_INTERROGATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_interrogation_room.tscn")
 const MOTHER_HIVE_SIGNAL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_signal_room.tscn")
 const MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_antechamber_room.tscn")
 const MOTHER_HIVE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_supply_station_room.tscn")
@@ -402,10 +402,10 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"main_path_room_count": 8,
 				"reward_room_count": 2,
 				"layout_radius": 4,
-				"main_room_types": ["final_transition", "final_recall", "final_signal", "final_antechamber", "final_transition"],
+				"main_room_types": ["final_transition", "final_interrogation", "final_signal", "final_antechamber", "final_transition"],
 				"start_label": "母巢入口",
 				"final_transition_label": "深层熵区过渡房",
-				"final_recall_label": "遗物召回腔",
+				"final_interrogation_label": "母体审讯室",
 				"final_signal_label": "母体信号室",
 				"final_antechamber_label": "原初母巢前庭",
 				"reward_label_prefix": "母巢残响侧室",
@@ -418,7 +418,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"start_room_scene": MOTHER_HIVE_START_ROOM_SCENE,
 				"combat_room_scenes": MOTHER_HIVE_COMBAT_ROOM_SCENES,
 				"final_transition_room_scenes": [MOTHER_HIVE_TRANSITION_ROOM_SCENE],
-				"final_recall_room_scenes": [MOTHER_HIVE_RECALL_ROOM_SCENE],
+				"final_interrogation_room_scenes": [MOTHER_HIVE_INTERROGATION_ROOM_SCENE],
 				"final_signal_room_scenes": [MOTHER_HIVE_SIGNAL_ROOM_SCENE],
 				"final_antechamber_room_scenes": [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE],
 				"reward_room_scenes": [MOTHER_HIVE_TRANSITION_ROOM_SCENE, MOTHER_HIVE_SIGNAL_ROOM_SCENE],
@@ -709,7 +709,7 @@ static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 		"data_comm": (chapter_config.get("data_comm_room_scenes", [DATA_CORE_COMM_ROOM_SCENE]) as Array).duplicate(),
 		"data_satellite": (chapter_config.get("data_satellite_room_scenes", [DATA_CORE_SATELLITE_ROOM_SCENE]) as Array).duplicate(),
 		"final_transition": (chapter_config.get("final_transition_room_scenes", [MOTHER_HIVE_TRANSITION_ROOM_SCENE]) as Array).duplicate(),
-		"final_recall": (chapter_config.get("final_recall_room_scenes", [MOTHER_HIVE_RECALL_ROOM_SCENE]) as Array).duplicate(),
+		"final_interrogation": (chapter_config.get("final_interrogation_room_scenes", [MOTHER_HIVE_INTERROGATION_ROOM_SCENE]) as Array).duplicate(),
 		"final_signal": (chapter_config.get("final_signal_room_scenes", [MOTHER_HIVE_SIGNAL_ROOM_SCENE]) as Array).duplicate(),
 		"final_antechamber": (chapter_config.get("final_antechamber_room_scenes", [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE]) as Array).duplicate(),
 		"cryo_pod": (chapter_config.get("cryo_pod_room_scenes", [CRYO_POD_ROOM_SCENE]) as Array).duplicate(),
@@ -745,8 +745,8 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return [DATA_CORE_SATELLITE_ROOM_SCENE]
 		"final_transition":
 			return [MOTHER_HIVE_TRANSITION_ROOM_SCENE]
-		"final_recall":
-			return [MOTHER_HIVE_RECALL_ROOM_SCENE]
+		"final_interrogation":
+			return [MOTHER_HIVE_INTERROGATION_ROOM_SCENE]
 		"final_signal":
 			return [MOTHER_HIVE_SIGNAL_ROOM_SCENE]
 		"final_antechamber":
@@ -826,13 +826,11 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 				"objective_text": "清理房间内异常样本。",
 				"completion_text": "封锁解除：重构样本已清除。",
 			}
-		"final_recall":
+		"final_interrogation":
 			return {
-				"type": Room.OBJECTIVE_DESTROY_TARGETS,
-				"objective_text": "摧毁召回节点 0/3，并清除房内异常样本。",
-				"target_label": "召回节点",
-				"target_total": 3,
-				"completion_text": "封锁解除：召回节点已摧毁。",
+				"type": Room.OBJECTIVE_READ_ARCHIVE,
+				"objective_text": "回应母体信号。",
+				"completion_text": "母体回应已记录。",
 			}
 		"final_signal":
 			return {
@@ -1140,7 +1138,7 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 		if room_type == "merchant":
 			if int(objective.get("target_total", 0)) > 0:
 				errors.append("Map validation failed: shop has event targets")
-		if room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall"]:
+		if room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod"]:
 			var target_total := int(objective.get("target_total", 0))
 			if target_total != 3:
 				errors.append("Map validation failed: event target count mismatch in %s" % room_type)
@@ -1243,7 +1241,7 @@ static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_confi
 					errors.append("Map validation failed: shop has chest")
 				if room.has_node("Enemies") and room.get_node("Enemies").get_child_count() > 0:
 					errors.append("Map validation failed: shop has enemies")
-			"pollution", "data_comm", "data_satellite", "cryo_pod", "final_recall":
+			"pollution", "data_comm", "data_satellite", "cryo_pod":
 				if room.has_method("get_event_target_total"):
 					var target_total := int(room.call("get_event_target_total"))
 					if target_total != 3:
@@ -1321,8 +1319,8 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 			return str(chapter_config.get("data_satellite_label", "卫星伪装系统"))
 		"final_transition":
 			return str(chapter_config.get("final_transition_label", "深层熵区过渡房"))
-		"final_recall":
-			return str(chapter_config.get("final_recall_label", "遗物召回腔"))
+		"final_interrogation":
+			return str(chapter_config.get("final_interrogation_label", "母体审讯室"))
 		"final_signal":
 			return str(chapter_config.get("final_signal_label", "母体信号室"))
 		"final_antechamber":
