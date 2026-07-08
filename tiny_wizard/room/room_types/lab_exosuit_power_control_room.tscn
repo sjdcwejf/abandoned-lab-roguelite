@@ -1,0 +1,95 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_test_room.gd" id="2_script"]
+[ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="3_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_power_node"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="5_floater"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="6_crawler"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_power_cabinet"]
+size = Vector2(112, 236)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_control_console"]
+size = Vector2(156, 54)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cooling_unit"]
+size = Vector2(120, 70)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_gate"]
+size = Vector2(260, 44)
+
+[node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("2_script")
+lab_room_type = "pollution"
+lab_room_label = "动力控制室"
+
+[node name="ExosuitFactoryOverlay" type="Node2D" parent="." index="7"]
+script = ExtResource("3_overlay")
+variant = "power_control"
+
+[node name="LeftPowerCabinetBlocker" type="StaticBody2D" parent="." index="8"]
+position = Vector2(208, 300)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPowerCabinetBlocker"]
+shape = SubResource("RectangleShape2D_power_cabinet")
+
+[node name="RightPowerCabinetBlocker" type="StaticBody2D" parent="." index="9"]
+position = Vector2(816, 300)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPowerCabinetBlocker"]
+shape = SubResource("RectangleShape2D_power_cabinet")
+
+[node name="NorthPowerGateBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(512, 120)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthPowerGateBlocker"]
+shape = SubResource("RectangleShape2D_north_gate")
+
+[node name="SouthControlConsoleBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(512, 432)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthControlConsoleBlocker"]
+shape = SubResource("RectangleShape2D_control_console")
+
+[node name="CoolingUnitBlocker" type="StaticBody2D" parent="." index="12"]
+position = Vector2(512, 206)
+collision_layer = 1
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CoolingUnitBlocker"]
+shape = SubResource("RectangleShape2D_cooling_unit")
+
+[node name="TestNodes" type="Node2D" parent="." index="13"]
+
+[node name="PowerNodeA" parent="TestNodes" instance=ExtResource("4_power_node")]
+position = Vector2(372, 220)
+max_health = 5
+display_name = "动力控制节点"
+destroyed_display_name = "节点停机"
+
+[node name="PowerNodeB" parent="TestNodes" instance=ExtResource("4_power_node")]
+position = Vector2(512, 310)
+max_health = 5
+display_name = "动力控制节点"
+destroyed_display_name = "节点停机"
+
+[node name="PowerNodeC" parent="TestNodes" instance=ExtResource("4_power_node")]
+position = Vector2(652, 400)
+max_health = 5
+display_name = "动力控制节点"
+destroyed_display_name = "节点停机"
+
+[node name="FactoryFloater" parent="Enemies" index="0" instance=ExtResource("5_floater")]
+position = Vector2(418, 258)
+
+[node name="FactoryCrawler" parent="Enemies" index="1" instance=ExtResource("6_crawler")]
+position = Vector2(616, 356)

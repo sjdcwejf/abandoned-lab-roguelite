@@ -2,21 +2,70 @@
   "chapterId": 4,
   "chapterName": "第四章：外骨骼兵器工厂",
   "areaName": "外骨骼兵器工厂",
-  "theme": "exosuit_weapon_factory",
+  "theme": "chapter_4_factory_background_theme",
   "targetDurationMinutes": 5,
   "tileSize": 32,
   "baseRoomScene": "res://tiny_wizard/room/room.tscn",
   "visualOverlay": "res://tiny_wizard/room/exosuit_factory_overlay.gd",
+  "backgroundVariants": {
+    "start": "factory_power_control_background",
+    "combat": "factory_assembly_line_background",
+    "drone": "factory_maintenance_workshop_background",
+    "test": "factory_weapon_test_background",
+    "weapon": "factory_weapon_quality_background",
+    "elite": "factory_exoskeleton_hangar_background",
+    "merchant": "factory_armory_supply_background",
+    "boss": "factory_heavy_cleaner_boss_background",
+    "maintenance": "factory_maintenance_workshop_background",
+    "power_control": "factory_power_control_background"
+  },
+  "backgroundTheme": {
+    "floorSet": [
+      "factory_floor_steel_plate",
+      "factory_floor_assembly_line",
+      "factory_floor_hangar_marking",
+      "factory_floor_maintenance",
+      "factory_floor_power_control",
+      "factory_floor_weapon_test",
+      "factory_floor_boss_arena"
+    ],
+    "wallSet": [
+      "factory_wall_assembly",
+      "factory_wall_hangar",
+      "factory_wall_weapon_test",
+      "factory_wall_maintenance",
+      "factory_wall_power_control",
+      "factory_wall_heavy_metal",
+      "factory_wall_boss_arena"
+    ],
+    "doorSet": [
+      "factory_door_assembly",
+      "factory_door_hangar",
+      "factory_door_weapon_test",
+      "factory_door_power",
+      "factory_door_boss"
+    ],
+    "decalSet": [
+      "oil_scuff",
+      "welding_scars",
+      "hangar_slot_line",
+      "weapon_test_line",
+      "power_cable_trench",
+      "maintenance_tool_shadow"
+    ]
+  },
   "roomPool": {
     "start": [
       "res://tiny_wizard/room/room_types/lab_exosuit_start_room.tscn"
     ],
     "combat": [
       "res://tiny_wizard/room/room_types/lab_exosuit_assembly_room.tscn",
-      "res://tiny_wizard/room/room_types/lab_exosuit_drone_room.tscn"
+      "res://tiny_wizard/room/room_types/lab_exosuit_drone_room.tscn",
+      "res://tiny_wizard/room/room_types/lab_exosuit_maintenance_room.tscn"
     ],
     "event": [
-      "res://tiny_wizard/room/room_types/lab_exosuit_test_room.tscn"
+      "res://tiny_wizard/room/room_types/lab_exosuit_test_room.tscn",
+      "res://tiny_wizard/room/room_types/lab_exosuit_power_control_room.tscn"
     ],
     "reward": [
       "res://tiny_wizard/room/room_types/lab_reward_bomb_room.tscn",

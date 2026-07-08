@@ -34,7 +34,9 @@ const CRYO_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_cry
 const EXOSUIT_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_start_room.tscn")
 const EXOSUIT_ASSEMBLY_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_assembly_room.tscn")
 const EXOSUIT_DRONE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_drone_room.tscn")
+const EXOSUIT_MAINTENANCE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_maintenance_room.tscn")
 const EXOSUIT_TEST_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_test_room.tscn")
+const EXOSUIT_POWER_CONTROL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_power_control_room.tscn")
 const EXOSUIT_WEAPON_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_weapon_room.tscn")
 const EXOSUIT_ELITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_elite_room.tscn")
 const EXOSUIT_ARMORY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_exosuit_armory_station_room.tscn")
@@ -96,6 +98,7 @@ const CRYO_COMBAT_ROOM_SCENES := [
 const EXOSUIT_COMBAT_ROOM_SCENES := [
 	EXOSUIT_ASSEMBLY_ROOM_SCENE,
 	EXOSUIT_DRONE_ROOM_SCENE,
+	EXOSUIT_MAINTENANCE_ROOM_SCENE,
 ]
 
 const DATA_CORE_COMBAT_ROOM_SCENES := [
@@ -340,7 +343,8 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"layout_radius": 4,
 				"main_room_types": ["combat", "pollution", "combat", "weapon", "elite"],
 				"start_label": "兵器工厂入口",
-				"combat_labels": ["自动化装配线", "无人机装配线"],
+				"combat_labels": ["自动化装配线", "无人机装配线", "机械维护车间"],
+				"pollution_labels": ["外骨骼测试场", "动力控制室"],
 				"pollution_label": "外骨骼测试场",
 				"reward_label_prefix": "工厂补给缓存",
 				"weapon_label": "武器质检室",
@@ -353,7 +357,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"next_chapter_title": "第五章：数据中枢",
 				"start_room_scene": EXOSUIT_START_ROOM_SCENE,
 				"combat_room_scenes": EXOSUIT_COMBAT_ROOM_SCENES,
-				"pollution_room_scenes": [EXOSUIT_TEST_ROOM_SCENE],
+				"pollution_room_scenes": [EXOSUIT_TEST_ROOM_SCENE, EXOSUIT_POWER_CONTROL_ROOM_SCENE],
 				"reward_room_scenes": [REWARD_ROOM_A_SCENE, REWARD_ROOM_B_SCENE],
 				"weapon_room_scenes": [EXOSUIT_WEAPON_ROOM_SCENE],
 				"elite_room_scenes": [EXOSUIT_ELITE_ROOM_SCENE],
@@ -667,7 +671,7 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 		var room_type := main_room_types[path_index - 1] as String
 		var coord := main_path[path_index] as Vector2i
 		var scene := _take_scene(scene_pools, room_type, rng)
-		room_specs.append(_make_spec(coord, room_type, _next_label(room_type, label_counts, chapter_config), scene, path_index, chapter_config, layer_index))
+		room_specs.append(_make_spec(coord, room_type, _label_for_scene(room_type, label_counts, chapter_config, scene), scene, path_index, chapter_config, layer_index))
 
 	for coord in reward_coords:
 		var scene := _take_scene(scene_pools, "reward", rng)
@@ -921,7 +925,13 @@ static func _chapter_combat_objective(chapter_id: int, label: String) -> String:
 		5:
 			return "清除所有异常单位。"
 		4:
-			return "清理装配线异常单位。" if label == "无人机装配线" else "清除所有安保单位。"
+			if label == "无人机装配线":
+				return "清理装配线异常单位。"
+			if label == "机械维护车间":
+				return "清理维护车间异常单位。"
+			if label == "自动化装配线":
+				return "清除装配线安保单位。"
+			return "清除所有安保单位。"
 		3:
 			return "清除冷雾处理间内的冻伤样本。"
 		2:
@@ -940,6 +950,14 @@ static func _chapter_event_objective(chapter_id: int, _label: String) -> Diction
 				"completion_text": "封锁解除：数据节点已同步。",
 			}
 		4:
+			if _label == "动力控制室":
+				return {
+					"type": Room.OBJECTIVE_DESTROY_TARGETS,
+					"objective_text": "摧毁动力控制节点 0/3。",
+					"target_label": "动力控制节点",
+					"target_total": 3,
+					"completion_text": "封锁解除：动力控制节点已停机。",
+				}
 			return {
 				"type": Room.OBJECTIVE_DESTROY_TARGETS,
 				"objective_text": "摧毁外骨骼测试节点 0/3。",
@@ -1005,7 +1023,7 @@ static func _build_safe_fallback_specs(rng: RandomNumberGenerator, chapter_confi
 		var room_type := str(path_types[index])
 		var coord := main_path[index + 1] as Vector2i
 		var scene := _take_scene(scene_pools, room_type, rng)
-		specs.append(_make_spec(coord, room_type, _next_label(room_type, label_counts, chapter_config), scene, index + 1, chapter_config, layer_index))
+		specs.append(_make_spec(coord, room_type, _label_for_scene(room_type, label_counts, chapter_config, scene), scene, index + 1, chapter_config, layer_index))
 
 	for coord in reward_coords:
 		var scene := _take_scene(scene_pools, "reward", rng)
@@ -1296,6 +1314,28 @@ static func _boss_has_active_enemy(boss_room: Room) -> bool:
 		if enemy.process_mode != Node.PROCESS_MODE_DISABLED:
 			return true
 	return false
+
+
+static func _label_for_scene(room_type: String, label_counts: Dictionary, chapter_config: Dictionary, scene: PackedScene) -> String:
+	if int(chapter_config.get("id", DEFAULT_CHAPTER_ID)) == 4:
+		var scene_path: String = scene.resource_path
+		match scene_path:
+			"res://tiny_wizard/room/room_types/lab_exosuit_assembly_room.tscn":
+				label_counts[room_type] = int(label_counts.get(room_type, 0)) + 1
+				return "自动化装配线"
+			"res://tiny_wizard/room/room_types/lab_exosuit_drone_room.tscn":
+				label_counts[room_type] = int(label_counts.get(room_type, 0)) + 1
+				return "无人机装配线"
+			"res://tiny_wizard/room/room_types/lab_exosuit_maintenance_room.tscn":
+				label_counts[room_type] = int(label_counts.get(room_type, 0)) + 1
+				return "机械维护车间"
+			"res://tiny_wizard/room/room_types/lab_exosuit_test_room.tscn":
+				label_counts[room_type] = int(label_counts.get(room_type, 0)) + 1
+				return "外骨骼测试场"
+			"res://tiny_wizard/room/room_types/lab_exosuit_power_control_room.tscn":
+				label_counts[room_type] = int(label_counts.get(room_type, 0)) + 1
+				return "动力控制室"
+	return _next_label(room_type, label_counts, chapter_config)
 
 
 static func _next_label(room_type: String, label_counts: Dictionary, chapter_config: Dictionary) -> String:
