@@ -30,7 +30,7 @@ func _ready() -> void:
 	# Final chapter art must cover the inherited lab/factory backdrop while staying
 	# behind gameplay actors and interactables.
 	z_index = -2
-	_build_hive_background()
+	call_deferred("_build_hive_background")
 
 
 func _build_hive_background() -> void:
@@ -297,21 +297,112 @@ func _build_door_system(colors: Dictionary) -> void:
 	]
 	for door_value in doors:
 		var door: Dictionary = door_value as Dictionary
+		var direction: String = door.get("dir", "") as String
 		var center: Vector2 = door.get("p", Vector2.ZERO) as Vector2
 		var size: Vector2 = door.get("s", Vector2.ZERO) as Vector2
 		var light_position: Vector2 = door.get("light_p", Vector2.ZERO) as Vector2
 		var light_size: Vector2 = door.get("light_s", Vector2.ZERO) as Vector2
+		if _is_visual_door_hidden(direction):
+			_build_sealed_wall_patch(direction, center, size, colors)
+			continue
 		_add_rect("FinalHiveDoorVoid", center, size, door_dark, 32)
 		_add_octagon("FinalHiveDoorBrokenMetalFrame", center, size + Vector2(24, 18), door_metal, 33)
 		_add_rect("FinalHiveDoorOpeningRecess", center, size * 0.72, door_dark, 34)
 		_add_rect("FinalHiveDoorDeadLight", light_position, light_size, door_light, 35)
 
 		if _wall_grade() in ["corrupted", "living", "core"]:
-			_add_line("FinalHiveDoorRootConnection", _door_root_path(door.get("dir", "") as String), door_corrupt, 3.0, 36)
+			_add_line("FinalHiveDoorRootConnection", _door_root_path(direction), door_corrupt, 3.0, 36)
 		if variant == "recall":
 			_add_rect("FinalHiveRecallDoorMark", light_position, light_size + Vector2(12, 2), red, 36)
 		elif variant == "boss":
 			_add_ring("FinalHiveCoreDoorSigil", light_position, 28.0, door_corrupt, 2.2, 36)
+
+
+func _is_visual_door_hidden(direction: String) -> bool:
+	var room := get_parent()
+	if room == null:
+		return false
+	match direction:
+		"up":
+			return room.get("hide_up_door") == true
+		"down":
+			return room.get("hide_down_door") == true
+		"left":
+			return room.get("hide_left_door") == true
+		"right":
+			return room.get("hide_right_door") == true
+	return false
+
+
+func _build_sealed_wall_patch(direction: String, center: Vector2, size: Vector2, colors: Dictionary) -> void:
+	var wall_plate: Color = colors.get("wall_outer", Color(0.025, 0.03, 0.04, 0.98)) as Color
+	var rim: Color = colors.get("wall_rim", Color(0.105, 0.112, 0.128, 0.88)) as Color
+	var broken: Color = colors.get("wall_rim_broken", Color(0.046, 0.052, 0.064, 0.72)) as Color
+	var corruption: Color = colors.get("wall_corruption_band", Color(0.18, 0.035, 0.24, 0.42)) as Color
+	var crack: Color = colors.get("wall_crack", Color(0.34, 0.32, 0.44, 0.24)) as Color
+	var data: Color = colors.get("wall_data", Color(0.14, 0.42, 0.62, 0.24)) as Color
+	var patch_name := "FinalHiveSealedWall_%s" % direction
+
+	if direction in ["up", "down"]:
+		var rim_offset := 34.0 if direction == "up" else -34.0
+		_add_rect("%sPlate" % patch_name, center, Vector2(286, size.y + 8.0), wall_plate, 32)
+		_add_rect("%sMetalRim" % patch_name, center + Vector2(0, rim_offset), Vector2(248, 14), rim, 33)
+		_add_rect("%sBrokenPanelLeft" % patch_name, center + Vector2(-92, rim_offset * 0.35), Vector2(74, 26), broken, 34)
+		_add_rect("%sBrokenPanelRight" % patch_name, center + Vector2(94, -rim_offset * 0.25), Vector2(82, 22), broken, 34)
+		_add_line(
+			"%sCrack" % patch_name,
+			PackedVector2Array([
+				center + Vector2(-112, -12),
+				center + Vector2(-52, 6),
+				center + Vector2(18, -8),
+				center + Vector2(88, 10),
+			]),
+			crack,
+			2.4,
+			35
+		)
+		_add_line(
+			"%sDeadCable" % patch_name,
+			PackedVector2Array([
+				center + Vector2(-122, rim_offset * 0.55),
+				center + Vector2(-48, rim_offset * 0.38),
+				center + Vector2(26, rim_offset * 0.48),
+			]),
+			data,
+			1.6,
+			35
+		)
+		_add_octagon("%sCorruption" % patch_name, center + Vector2(118, rim_offset * 0.18), Vector2(76, 26), corruption, 35)
+	else:
+		var rim_offset := 34.0 if direction == "left" else -34.0
+		_add_rect("%sPlate" % patch_name, center, Vector2(size.x + 8.0, 246), wall_plate, 32)
+		_add_rect("%sMetalRim" % patch_name, center + Vector2(rim_offset, 0), Vector2(14, 208), rim, 33)
+		_add_rect("%sBrokenPanelTop" % patch_name, center + Vector2(rim_offset * 0.35, -78), Vector2(24, 68), broken, 34)
+		_add_rect("%sBrokenPanelBottom" % patch_name, center + Vector2(-rim_offset * 0.22, 84), Vector2(22, 78), broken, 34)
+		_add_line(
+			"%sCrack" % patch_name,
+			PackedVector2Array([
+				center + Vector2(-8, -104),
+				center + Vector2(8, -44),
+				center + Vector2(-6, 22),
+				center + Vector2(10, 92),
+			]),
+			crack,
+			2.4,
+			35
+		)
+		_add_line(
+			"%sDeadCable" % patch_name,
+			PackedVector2Array([
+				center + Vector2(rim_offset * 0.55, -110),
+				center + Vector2(rim_offset * 0.42, -38),
+				center + Vector2(rim_offset * 0.48, 36),
+			]),
+			data,
+			1.6,
+			35
+		)
+		_add_octagon("%sCorruption" % patch_name, center + Vector2(rim_offset * 0.28, 108), Vector2(28, 78), corruption, 35)
 
 
 func _door_root_path(direction: String) -> PackedVector2Array:
@@ -371,15 +462,16 @@ func _build_entrance_wall_structure(colors: Dictionary) -> void:
 	_add_rect("MotherHiveEntranceLeftBrokenMetalRim", Vector2(112, 300), Vector2(18, 296), broken_rim, 16)
 	_add_rect("MotherHiveEntranceRightBrokenMetalRim", Vector2(912, 300), Vector2(18, 296), broken_rim, 16)
 
-	_add_rect("MotherHiveEntranceTopDoorThresholdMask", Vector2(512, 128), Vector2(330, 26), rim_shadow, 17)
-	_add_rect("MotherHiveEntranceBottomDoorThresholdMask", Vector2(512, 472), Vector2(330, 26), rim_shadow, 17)
-	_add_rect("MotherHiveEntranceTopDoorDamagedLip", Vector2(512, 140), Vector2(236, 8), wall_plate, 18)
-	_add_rect("MotherHiveEntranceBottomDoorDamagedLip", Vector2(512, 460), Vector2(236, 8), wall_plate, 18)
-	_add_rect("MotherHiveEntranceTopDeadAccessLight", Vector2(512, 146), Vector2(104, 3), weak_light, 19)
-	_add_rect("MotherHiveEntranceBottomDeadAccessLight", Vector2(512, 454), Vector2(104, 3), weak_light, 19)
-
-	_add_octagon("MotherHiveEntranceTopDoorCorruptionLeft", Vector2(392, 138), Vector2(78, 32), corruption, 18)
-	_add_octagon("MotherHiveEntranceBottomDoorCorruptionRight", Vector2(632, 462), Vector2(84, 34), corruption, 18)
+	if not _is_visual_door_hidden("up"):
+		_add_rect("MotherHiveEntranceTopDoorThresholdMask", Vector2(512, 128), Vector2(330, 26), rim_shadow, 17)
+		_add_rect("MotherHiveEntranceTopDoorDamagedLip", Vector2(512, 140), Vector2(236, 8), wall_plate, 18)
+		_add_rect("MotherHiveEntranceTopDeadAccessLight", Vector2(512, 146), Vector2(104, 3), weak_light, 19)
+		_add_octagon("MotherHiveEntranceTopDoorCorruptionLeft", Vector2(392, 138), Vector2(78, 32), corruption, 18)
+	if not _is_visual_door_hidden("down"):
+		_add_rect("MotherHiveEntranceBottomDoorThresholdMask", Vector2(512, 472), Vector2(330, 26), rim_shadow, 17)
+		_add_rect("MotherHiveEntranceBottomDoorDamagedLip", Vector2(512, 460), Vector2(236, 8), wall_plate, 18)
+		_add_rect("MotherHiveEntranceBottomDeadAccessLight", Vector2(512, 454), Vector2(104, 3), weak_light, 19)
+		_add_octagon("MotherHiveEntranceBottomDoorCorruptionRight", Vector2(632, 462), Vector2(84, 34), corruption, 18)
 
 
 func _build_entrance_broken_data_channel(colors: Dictionary) -> void:
