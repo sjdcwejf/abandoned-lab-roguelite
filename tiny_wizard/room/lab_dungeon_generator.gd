@@ -204,7 +204,7 @@ const TUTORIAL_ROOM_LAYOUT := [
 	{
 		"coord": Vector2i(3, 0),
 		"type": "tutorial_combat",
-		"label": "破障训练实验室",
+		"label": "战斗补给训练室",
 		"scene": TUTORIAL_COMBAT_ROOM_SCENE,
 	},
 	{
