@@ -47,11 +47,14 @@ shape = SubResource("RectangleShape2D_top")
 
 [node name="RavenAccessKeyTerminal" parent="." index="11" instance=ExtResource("3_terminal")]
 position = Vector2(512, 388)
-archive_id = "raven_access_key_residue"
-archive_title = "渡鸦访问密钥残留"
-archive_content = "服务器日志中检测到一组旧版本内部访问密钥。\n该密钥曾多次访问通讯系统、档案库和外部转发节点。\n\n权限链已被人为擦除，但残留标识仍指向同一个代号：RAVEN。\n\n备注：该用户权限不属于普通救援人员。"
-success_message = "渡鸦旧债线索 +1"
-clue_id = "raven_old_key"
+archive_id = "server_data_terminal"
+archive_title = "服务器终端"
+archive_content = ""
+success_message = "终端已激活。"
+prompt_text = "按 F 激活服务器终端"
+show_panel_on_read = false
+record_to_main = false
+already_read_message = "终端已激活。"
 
 [node name="TerminalBlocker" type="StaticBody2D" parent="." index="12"]
 position = Vector2(512, 388)

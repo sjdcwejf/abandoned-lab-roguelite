@@ -74,11 +74,6 @@ var _raven_secret_clues := {}
 var _raven_secret_fragments := 0
 var _raven_hidden_quest_unlocked := false
 var _ending_hints_unlocked := false
-var _mother_interrogation_completed := false
-var _mother_response_type := ""
-var _mother_response_refuse := false
-var _mother_response_connect := false
-var _mother_response_rewrite := false
 
 var rooms := {}
 
@@ -491,15 +486,15 @@ func _get_debug_target_label(target_type: String) -> String:
 		"data_comm":
 			return "通讯塔控制室"
 		"data_satellite":
-			return "卫星伪装系统"
+			return "通讯控制区"
 		"cryo_pod":
 			return "冷冻舱事件房"
 		"final_interrogation":
-			return "母体审讯室"
+			return "核心干扰室"
 		"final_signal":
-			return "母体信号室"
+			return "核心终端室"
 		"final_antechamber":
-			return "原初母巢前庭"
+			return "Boss 前战斗区"
 		_:
 			return "出生房"
 
@@ -536,7 +531,7 @@ func _start_chapter_base(completed_chapter_id: int) -> void:
 	_apply_base_story_progress()
 	_enter_base_room()
 	if completed_chapter_id == CHAPTER_5_ID:
-		_show_story_feedback("母体信号已锁定。最终章：母巢核心，入口已开启。", 2.0)
+		_show_story_feedback("最终区域已解锁。", 2.0)
 
 
 func _enter_base_room() -> void:
@@ -571,11 +566,6 @@ func _reset_run_story_flags() -> void:
 	_raven_secret_fragments = 0
 	_raven_hidden_quest_unlocked = false
 	_ending_hints_unlocked = false
-	_mother_interrogation_completed = false
-	_mother_response_type = ""
-	_mother_response_refuse = false
-	_mother_response_connect = false
-	_mother_response_rewrite = false
 
 
 func are_ending_hints_unlocked() -> bool:
@@ -584,32 +574,6 @@ func are_ending_hints_unlocked() -> bool:
 
 func is_raven_hidden_quest_unlocked() -> bool:
 	return _raven_hidden_quest_unlocked
-
-
-func is_mother_interrogation_completed() -> bool:
-	return _mother_interrogation_completed
-
-
-func get_mother_interrogation_state() -> Dictionary:
-	return {
-		"mother_interrogation_completed": _mother_interrogation_completed,
-		"mother_response_type": _mother_response_type,
-		"mother_response_refuse": _mother_response_refuse,
-		"mother_response_connect": _mother_response_connect,
-		"mother_response_rewrite": _mother_response_rewrite,
-	}
-
-
-func record_mother_interrogation_response(response_type: String) -> void:
-	var normalized_response := response_type.strip_edges()
-	if normalized_response not in ["refuse", "connect", "rewrite"]:
-		normalized_response = "refuse"
-
-	_mother_interrogation_completed = true
-	_mother_response_type = normalized_response
-	_mother_response_refuse = normalized_response == "refuse"
-	_mother_response_connect = normalized_response == "connect"
-	_mother_response_rewrite = normalized_response == "rewrite"
 
 
 func show_story_feedback(message: String, seconds := 1.6) -> void:
@@ -628,21 +592,21 @@ func record_data_archive(payload: Dictionary) -> void:
 	}
 
 	var messages := PackedStringArray()
-	var success_message := str(payload.get("success_message", "数据档案已同步"))
+	var success_message := str(payload.get("success_message", "终端已激活。"))
 	if first_read and success_message != "":
 		_append_unique_story_message(messages, success_message)
 	if bool(payload.get("unlock_ending_hints", false)) and not _ending_hints_unlocked:
 		_ending_hints_unlocked = true
-		_append_unique_story_message(messages, "结局条件提示已解锁")
+		_append_unique_story_message(messages, "隐藏内容状态已保留")
 
 	var clue_id := str(payload.get("clue_id", ""))
 	if first_read and _is_raven_hidden_clue(clue_id) and not _raven_secret_clues.has(clue_id):
 		_raven_secret_clues[clue_id] = true
 		_raven_secret_fragments = _raven_secret_clues.size()
-		_append_unique_story_message(messages, "渡鸦旧债线索 +1")
+		_append_unique_story_message(messages, "隐藏线索 +1")
 		if _raven_secret_fragments >= 3 and not _raven_hidden_quest_unlocked:
 			_raven_hidden_quest_unlocked = true
-			_append_unique_story_message(messages, "渡鸦隐藏任务线已开启")
+			_append_unique_story_message(messages, "隐藏内容状态已保留")
 
 	if messages.is_empty():
 		if first_read:
@@ -1089,11 +1053,11 @@ func _get_layer_clear_summary_text() -> String:
 	if _formal_chapter_id == FINAL_CHAPTER_ID:
 		return _get_final_chapter_ending_summary_text()
 	if _formal_chapter_id == CHAPTER_5_ID:
-		return "母体信号已锁定。最终章：母巢核心入口已开启。当前构筑快照："
+		return "最终区域已解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_4_ID:
 		return "弥赛亚重装清理机停放库已记录。数据中枢访问权限已解锁。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_3_ID:
-		return "零号封存体已压制。已回收封存区黑匣子碎片，兵器工厂访问权限待解锁。当前构筑快照："
+		return "零号封存体已压制。下一章节入口开启。当前构筑快照："
 	if _formal_chapter_id == CHAPTER_2_ID:
 		return "温室守望者反应已记录。当前构筑快照："
 	return "失格者 A-03 已肃清。当前构筑快照："
@@ -1112,11 +1076,15 @@ func _get_layer_clear_next_button_text() -> String:
 
 
 func _get_final_chapter_ending_summary_text() -> String:
+	var extra := PackedStringArray()
 	if _raven_hidden_quest_unlocked:
-		return "逆命结局占位：协议无法识别你的状态。母体无法召回你。你也不再属于原来的生命序列。\n\n渡鸦旧债线已开启：那扇门不是他第一次打开的，但他确实把后来的人送了进去。"
+		extra.append("隐藏线状态已保留。")
 	if _ending_hints_unlocked:
-		return "纯净结局占位：母体信号逐渐熄灭。你没有回应召回。熵区第一次真正安静下来。"
-	return "召回结局占位：你切断了母巢核心，却听见体内遗物回应了另一个声音。母体已死。召回仍在继续。"
+		extra.append("结局提示状态已保留。")
+	var summary := "通关文本占位：章节完成。详细结局判定将在后续版本接入。"
+	if not extra.is_empty():
+		summary += "\n\n%s" % "\n".join(extra)
+	return summary
 
 
 func _get_layer_clear_weapon_text() -> String:
@@ -1486,7 +1454,7 @@ func _update_base_room_feedback(room: Room) -> void:
 	var next_title := LabDungeonGenerator.get_chapter_title(_base_next_chapter_id) if _base_next_chapter_id > 0 else "后续章节"
 	var objective := "延续当前角色与构筑，选择 1 个遗物，补给后进入%s。" % next_title
 	if _base_completed_chapter_id == CHAPTER_5_ID:
-		objective = "母体信号已锁定。选择 1 个遗物，补给后进入最终章：母巢核心。"
+		objective = "最终区域已解锁。选择 1 个遗物，补给后进入最终章：母巢核心。"
 	_room_objective_ui.show_room(
 		room,
 		0,
@@ -1517,13 +1485,13 @@ func _get_formal_room_type_label(room_type: String) -> String:
 		"data_satellite":
 			return "数据事件房"
 		"final_transition":
-			return "深层熵区过渡房"
+			return "高危战斗区"
 		"final_interrogation":
-			return "母体审讯室"
+			return "核心干扰室"
 		"final_signal":
-			return "母体信号室"
+			return "核心终端室"
 		"final_antechamber":
-			return "原初母巢前庭"
+			return "Boss 前战斗区"
 		"cryo_pod":
 			return "冷冻舱事件房"
 		"cryo_vent":
@@ -1536,14 +1504,14 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "武器房"
 		"merchant":
 			if _formal_chapter_id == FINAL_CHAPTER_ID:
-				return "最终补给站"
+				return "补给站"
 			if _formal_chapter_id == CHAPTER_5_ID:
 				return "数据补给站"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "军械补给站"
 			return "安全屋"
 		"archive":
-			return "剧情档案库"
+			return "数据封存区"
 		"boss":
 			return "Boss 房"
 	return "未知区域"
@@ -1579,8 +1547,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			if _formal_chapter_id == CHAPTER_5_ID:
 				if room_label == "通讯塔控制室":
 					return "重启通讯终端 0/3。"
-				if room_label == "卫星伪装系统":
-					return "关闭伪装节点 0/3。"
+				if room_label == "通讯控制区":
+					return "关闭控制节点 0/3。"
 				return "同步数据节点 0/3。"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "摧毁外骨骼测试节点 0/3。"
@@ -1590,15 +1558,15 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 		"data_comm":
 			return "重启通讯终端 0/3。"
 		"data_satellite":
-			return "关闭伪装节点 0/3。"
+			return "关闭控制节点 0/3。"
 		"final_transition":
-			return "清理房间内异常样本。"
+			return "清除房间内异常单位。"
 		"final_interrogation":
-			return "回应母体信号。"
+			return "激活核心终端。"
 		"final_signal":
-			return "读取母体信号记录。"
+			return "激活核心终端。"
 		"final_antechamber":
-			return "清除母巢前庭内的重构样本。"
+			return "清除战斗区内异常单位。"
 		"reward":
 			if _formal_chapter_id == CHAPTER_3_ID:
 				return "肃清封存样本库守卫，回收补给箱。"
@@ -1615,7 +1583,7 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			if _formal_chapter_id == FINAL_CHAPTER_ID:
 				return "最后整备。"
 			if _formal_chapter_id == CHAPTER_5_ID:
-				return "整备并检查数据档案。"
+				return "整备补给并检查终端。"
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "整备武器与补给。"
 			if _formal_chapter_id == CHAPTER_3_ID:
@@ -1632,7 +1600,7 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 				return "击败仓库守卫。"
 			return "击败冰核守卫，回收低温封存遗物。"
 		"archive":
-			return "读取黑匣子档案。"
+			return "激活数据终端。"
 		"boss":
 			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
 	return ""

@@ -14,11 +14,11 @@ size = Vector2(120, 84)
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("2_script")
 lab_room_type = "pollution"
-lab_room_label = "卫星伪装系统"
-event_objective_text = "关闭伪装节点 0/3，并清理房内异常单位。"
-event_target_label = "伪装节点"
-event_completion_text = "封锁解除：伪装节点已关闭。"
-event_target_success_message = "伪装节点已关闭"
+lab_room_label = "通讯控制区"
+event_objective_text = "关闭控制节点 0/3，并清理房内异常单位。"
+event_target_label = "控制节点"
+event_completion_text = "封锁解除：控制节点已关闭。"
+event_target_success_message = "控制节点已关闭"
 
 [node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
 script = ExtResource("3_overlay")
@@ -45,28 +45,31 @@ shape = SubResource("RectangleShape2D_server")
 [node name="DisguiseNodeA" parent="SatelliteNodes" instance=ExtResource("4_target")]
 position = Vector2(356, 384)
 max_health = 5
-display_name = "伪装节点"
+display_name = "控制节点"
 destroyed_display_name = "节点关闭"
 
 [node name="DisguiseNodeB" parent="SatelliteNodes" instance=ExtResource("4_target")]
 position = Vector2(512, 302)
 max_health = 5
-display_name = "伪装节点"
+display_name = "控制节点"
 destroyed_display_name = "节点关闭"
 
 [node name="DisguiseNodeC" parent="SatelliteNodes" instance=ExtResource("4_target")]
 position = Vector2(668, 220)
 max_health = 5
-display_name = "伪装节点"
+display_name = "控制节点"
 destroyed_display_name = "节点关闭"
 
 [node name="SatelliteArchiveTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
 position = Vector2(512, 454)
-archive_id = "satellite_disguise_log"
-archive_title = "卫星伪装系统运行记录"
-archive_content = "卫星伪装系统已连续运行 219 小时。\n外部热源图像、通讯记录和地表异常均已被替换为正常值。\n\n对外状态：设施维护中。\n内部状态：生态温室失控；低温封存区失效；兵器工厂进入自动清理模式。\n\n备注：禁止向外部发送真实事故画面。"
-success_message = "伪装节点已关闭"
-clue_id = "company_coverup_record"
+archive_id = "control_data_terminal"
+archive_title = "数据终端"
+archive_content = ""
+success_message = "目标完成。"
+prompt_text = "按 F 激活数据终端"
+show_panel_on_read = false
+record_to_main = false
+already_read_message = "终端已激活。"
 
 [node name="SignalFloater" parent="Enemies" index="0" instance=ExtResource("6_black")]
 position = Vector2(422, 344)

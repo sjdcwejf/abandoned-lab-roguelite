@@ -5,15 +5,15 @@
 
 [node name="Room" instance=ExtResource("1_base")]
 lab_room_type = "merchant"
-lab_room_label = "渡鸦最终补给站"
+lab_room_label = "补给站"
 
 [node name="MotherHiveOverlay" type="Node2D" parent="." index="7"]
 script = ExtResource("2_overlay")
 variant = "supply"
 
 [node name="RavenMerchant" parent="." index="8"]
-merchant_title = "渡鸦最终补给站"
-merchant_message = "前面就是母巢核心。进去之后，我可能无法再联系你。"
+merchant_title = "补给站"
+merchant_message = "补给窗口已开启。"
 max_weapon_offers = 3
 affix_roll_chance = 0.7
 max_affix_count = 1

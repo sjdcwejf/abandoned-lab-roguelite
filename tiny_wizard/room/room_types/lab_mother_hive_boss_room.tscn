@@ -12,6 +12,6 @@ script = ExtResource("2_overlay")
 variant = "boss"
 
 [node name="PrototypeBoss" parent="Enemies" index="0"]
-boss_display_name = "原初母体（占位）"
+boss_display_name = "核心 Boss（占位）"
 protomatter_min_drop = 8
 protomatter_max_drop = 12

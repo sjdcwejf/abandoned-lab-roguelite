@@ -62,11 +62,14 @@ destroyed_display_name = "终端重启"
 
 [node name="BlackBoxSignalTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
 position = Vector2(512, 142)
-archive_id = "initial_signal_black_box"
-archive_title = "黑匣子记录：事故初始信号"
-archive_content = "事故前 00:17:42，数据中枢接收到一段加密信息。\n该信息随后被伪装成外部泄露数据，并进入公开网络。\n\n初步标记：外部入侵。\n复核结果：信号源无法确认。\n\n异常点：信息结构与设施内部母体信号存在相似波形。"
-success_message = "黑匣子档案已记录"
-clue_id = "leak_source_record"
+archive_id = "comm_data_terminal"
+archive_title = "数据终端"
+archive_content = ""
+success_message = "数据节点已清除。"
+prompt_text = "按 F 激活数据终端"
+show_panel_on_read = false
+record_to_main = false
+already_read_message = "终端已激活。"
 
 [node name="DataFloater" parent="Enemies" index="0" instance=ExtResource("6_black")]
 position = Vector2(430, 260)

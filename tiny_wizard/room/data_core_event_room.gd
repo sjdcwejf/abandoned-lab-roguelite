@@ -7,7 +7,7 @@ const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedbac
 @export_multiline var event_objective_text := "处理数据终端，并清理房内异常单位。"
 @export var event_target_label := "数据终端"
 @export var event_completion_text := "封锁解除：数据终端已同步。"
-@export var event_target_success_message := "数据档案已同步"
+@export var event_target_success_message := "目标完成。"
 
 
 func _ready() -> void:

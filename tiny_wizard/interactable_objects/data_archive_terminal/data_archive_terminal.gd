@@ -8,15 +8,18 @@ const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_boot
 const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 
 @export var archive_id := ""
-@export var archive_title := "数据档案"
+@export var archive_title := "数据终端"
 @export_multiline var archive_content := ""
-@export var success_message := "数据档案已同步"
+@export var success_message := "终端已激活。"
 @export var clue_id := ""
 @export var unlock_ending_hints := false
 @export var requires_ending_hints := false
-@export var prompt_text := "按 F 读取档案"
-@export var locked_message := "权限不足：先读取公司黑匣子档案。"
+@export var prompt_text := "按 F 激活终端"
+@export var locked_message := "权限不足：先激活前置终端。"
 @export var read_once := true
+@export var show_panel_on_read := true
+@export var record_to_main := true
+@export var already_read_message := "该档案已同步。"
 @export var accent_color := Color(0.34, 0.92, 1.0, 1.0)
 
 var _candidate_character: Node2D
@@ -74,7 +77,7 @@ func _try_read_archive() -> void:
 	if _candidate_character == null:
 		return
 	if read_once and _read:
-		INTERACTION_FEEDBACK.show_from(self, "该档案已同步。", 1.2)
+		INTERACTION_FEEDBACK.show_from(self, already_read_message, 1.2)
 		return
 	if requires_ending_hints and not _main_has_ending_hints_unlocked():
 		INTERACTION_FEEDBACK.show_from(self, locked_message, 1.5)
@@ -83,8 +86,12 @@ func _try_read_archive() -> void:
 	_read = true
 	if prompt_label != null:
 		prompt_label.visible = false
-	_show_archive_panel()
-	_record_archive_to_main()
+	if show_panel_on_read:
+		_show_archive_panel()
+	if record_to_main:
+		_record_archive_to_main()
+	elif success_message != "":
+		INTERACTION_FEEDBACK.show_from(self, success_message, 1.4)
 	archive_read.emit(self)
 
 

@@ -74,6 +74,7 @@ signal objective_progress_changed(room: Room)
 func _ready():
 	_normalize_room_blockers(self)
 	_ensure_default_room_objective()
+	call_deferred("_connect_archive_terminals")
 	objective_initial_enemy_count = get_remaining_enemy_count()
 	if get_tree().current_scene != self:
 		_set_enemies_active(false)
@@ -175,6 +176,12 @@ func enter_room():
 	var enemies = $Enemies.get_children()
 	objective_initial_enemy_count = maxi(objective_initial_enemy_count, enemies.size())
 	objective_progress_changed.emit(self)
+	if get_room_objective_type() == OBJECTIVE_READ_ARCHIVE:
+		_connect_archive_terminals()
+		_update_room_chest_locks()
+		for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
+			close_door(d)
+		return
 	if not is_cleared and (enemies.size() > 0 or has_pending_room_event_objectives()):
 		# Wake up Enemies
 		if enemies.size() > 0:
@@ -228,6 +235,29 @@ func _mark_room_cleared() -> void:
 		room_state = ROOM_STATE_COMPLETED
 	_update_room_chest_locks()
 	_on_room_cleared()
+
+
+func _connect_archive_terminals() -> void:
+	_connect_archive_terminals_recursive(self)
+
+
+func _connect_archive_terminals_recursive(root: Node) -> void:
+	for child in root.get_children():
+		if child.has_signal("archive_read"):
+			var callable := Callable(self, "_on_archive_terminal_read")
+			if not child.is_connected("archive_read", callable):
+				child.connect("archive_read", callable)
+		_connect_archive_terminals_recursive(child)
+
+
+func _on_archive_terminal_read(_terminal: Node) -> void:
+	if is_cleared:
+		return
+	if get_room_objective_type() != OBJECTIVE_READ_ARCHIVE:
+		return
+	for d in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:
+		open_door(d)
+	_mark_room_cleared()
 	objective_progress_changed.emit(self)
 	RelicCombatEventBus.notify_room_cleared(self)
 	room_cleared.emit(self)
@@ -461,10 +491,10 @@ func _make_default_objective() -> Dictionary:
 		"data_satellite":
 			return {
 				"type": OBJECTIVE_INTERACT_TARGETS,
-				"objective_text": "关闭伪装节点 0/3。",
-				"target_label": "伪装节点",
+				"objective_text": "关闭控制节点 0/3。",
+				"target_label": "控制节点",
 				"target_total": 3,
-				"completion_text": "封锁解除：伪装节点已关闭。",
+				"completion_text": "封锁解除：控制节点已关闭。",
 			}
 		"cryo_pod":
 			return {
@@ -489,8 +519,14 @@ func _make_default_objective() -> Dictionary:
 		"archive":
 			return {
 				"type": OBJECTIVE_READ_ARCHIVE,
-				"objective_text": "读取黑匣子档案。",
-				"completion_text": "数据档案已同步。",
+				"objective_text": "激活数据终端。",
+				"completion_text": "数据节点已清除。",
+			}
+		"final_interrogation":
+			return {
+				"type": OBJECTIVE_READ_ARCHIVE,
+				"objective_text": "激活核心终端。",
+				"completion_text": "核心干扰已清除。出口已开启。",
 			}
 		"boss":
 			return {

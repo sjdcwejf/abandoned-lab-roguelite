@@ -223,9 +223,9 @@ func _get_completion_text() -> String:
 		"data_satellite":
 			if _current_room.has_meta("event_completion_text"):
 				return str(_current_room.get_meta("event_completion_text"))
-			return "封锁解除：伪装节点已关闭。"
+			return "封锁解除：控制节点已关闭。"
 		"archive":
-			return "数据档案已同步：黑匣子记录可查看。"
+			return "数据终端已激活。"
 		"cryo_pod":
 			return "封锁解除：冷冻舱已检查。"
 		"cryo_vent":

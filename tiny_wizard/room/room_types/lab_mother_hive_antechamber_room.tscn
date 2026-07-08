@@ -5,7 +5,7 @@
 
 [node name="Room" instance=ExtResource("1_room")]
 lab_room_type = "final_antechamber"
-lab_room_label = "原初母巢前庭"
+lab_room_label = "Boss 前战斗区"
 
 [node name="MotherHiveOverlay" type="Node2D" parent="." index="7"]
 script = ExtResource("2_overlay")

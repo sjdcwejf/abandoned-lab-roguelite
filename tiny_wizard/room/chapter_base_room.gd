@@ -64,15 +64,10 @@ func _configure_text() -> void:
 			lines.append("渡鸦备注：当前终局记录为占位版本，后续将补完结局表现。")
 		if bool(get_meta("ending_hints_unlocked", false)):
 			lines.append("")
-			lines.append("结局条件提示：")
-			lines.append("1. 与遗物融合越深，母体信号越容易定位你。")
-			lines.append("2. 未被遗物深度绑定的个体，仍可能绕过召回协议。")
-			lines.append("3. 在极端削弱状态下击杀母体，可能切断既定协议。")
+			lines.append("结局提示：隐藏内容状态已保留，后续版本展开。")
 		if bool(get_meta("raven_hidden_quest_unlocked", false)):
 			lines.append("")
-			lines.append("渡鸦：你看到了那些记录？")
-			lines.append("渡鸦：那不是完整真相。")
-			lines.append("渡鸦：我确实打开过门，但我不是第一个发出信号的人。")
+			lines.append("隐藏线索：渡鸦隐藏线状态已保留，后续版本展开。")
 		archive_label.text = "\n".join(lines)
 
 

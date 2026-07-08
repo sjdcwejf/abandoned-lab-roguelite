@@ -12,7 +12,7 @@ size = Vector2(220, 120)
 
 [node name="Room" instance=ExtResource("1_room")]
 lab_room_type = "archive"
-lab_room_label = "公司黑匣子档案库"
+lab_room_label = "数据封存区"
 
 [node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
 script = ExtResource("2_overlay")
@@ -44,9 +44,11 @@ shape = SubResource("RectangleShape2D_blackbox")
 
 [node name="MotherBaitArchiveTerminal" parent="." index="11" instance=ExtResource("3_terminal")]
 position = Vector2(512, 430)
-archive_id = "mother_bait_hypothesis"
-archive_title = "母体诱饵假说"
-archive_content = "最初泄露的加密信息不应被视为单纯求救信号。\n\n它可能是一种筛选机制。\n\n母体通过公司通讯系统释放异常信号，吸引外部个体进入熵区。进入者会在遗物、源质和战斗压力下持续暴露适配倾向。\n\n结论：熵区不是单纯事故现场。它可能正在选择能够抵达母巢核心的个体。"
-success_message = "结局条件提示已解锁"
-clue_id = "mother_bait_signal"
-unlock_ending_hints = true
+archive_id = "sealed_data_terminal"
+archive_title = "权限终端"
+archive_content = ""
+success_message = "权限终端已激活。"
+prompt_text = "按 F 激活权限终端"
+show_panel_on_read = false
+record_to_main = false
+already_read_message = "终端已激活。"

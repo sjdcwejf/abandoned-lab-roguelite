@@ -149,9 +149,9 @@ func _add_target_options() -> void:
 	var entries: Array[Dictionary] = [
 		{"label": "出生房", "target": "none"},
 		{"label": "事件房", "target": "event"},
-		{"label": "遗物召回腔", "target": "final_recall"},
-		{"label": "母体信号室", "target": "final_signal"},
-		{"label": "原初母巢前庭", "target": "final_antechamber"},
+		{"label": "核心干扰室", "target": "final_interrogation"},
+		{"label": "核心终端室", "target": "final_signal"},
+		{"label": "Boss 前战斗区", "target": "final_antechamber"},
 		{"label": "武器房", "target": "weapon"},
 		{"label": "Boss 前补给站", "target": "pre_boss_shop"},
 		{"label": "Boss 房", "target": "boss"},

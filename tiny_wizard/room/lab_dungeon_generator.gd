@@ -318,7 +318,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"reward_label_prefix": "封存样本库",
 				"merchant_label": "低温封存前厅",
 				"boss_label": "零号封存室",
-				"boss_objective": "击败零号封存体，回收封存区黑匣子碎片。",
+				"boss_objective": "击败零号封存体，解锁兵器工厂访问权限。",
 				"completion_destination": "兵器工厂访问权限",
 				"next_chapter_id": 4,
 				"next_chapter_title": "第四章：外骨骼兵器工厂",
@@ -378,12 +378,12 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"start_label": "数据中枢入口",
 				"combat_label_prefix": "服务器机房",
 				"data_comm_label": "通讯塔控制室",
-				"data_satellite_label": "卫星伪装系统",
-				"archive_label": "公司黑匣子档案库",
+				"data_satellite_label": "通讯控制区",
+				"archive_label": "数据封存区",
 				"merchant_label": "渡鸦数据补给站",
 				"boss_label": "清理协议AI核心室",
 				"boss_objective": "击败清理协议AI。",
-				"completion_destination": "最终章：母巢核心入口已开启",
+				"completion_destination": "最终区域已解锁",
 				"next_chapter_id": FINAL_CHAPTER_ID,
 				"next_chapter_title": "最终章：母巢核心",
 				"start_room_scene": DATA_CORE_START_ROOM_SCENE,
@@ -408,14 +408,14 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"layout_radius": 4,
 				"main_room_types": ["final_transition", "final_interrogation", "final_signal", "final_antechamber", "final_transition"],
 				"start_label": "母巢入口",
-				"final_transition_label": "深层熵区过渡房",
-				"final_interrogation_label": "母体审讯室",
-				"final_signal_label": "母体信号室",
-				"final_antechamber_label": "原初母巢前庭",
-				"reward_label_prefix": "母巢残响侧室",
-				"merchant_label": "渡鸦最终补给站",
+				"final_transition_label": "高危战斗区",
+				"final_interrogation_label": "核心干扰室",
+				"final_signal_label": "核心终端室",
+				"final_antechamber_label": "Boss 前战斗区",
+				"reward_label_prefix": "高危奖励房",
+				"merchant_label": "补给站",
 				"boss_label": "母巢核心",
-				"boss_objective": "击败原初母体。",
+				"boss_objective": "击败核心 Boss。",
 				"completion_destination": "结局文本占位",
 				"next_chapter_id": 0,
 				"next_chapter_title": "主线已收束",
@@ -819,34 +819,34 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 		"data_satellite":
 			return {
 				"type": Room.OBJECTIVE_INTERACT_TARGETS,
-				"objective_text": "关闭伪装节点 0/3。",
-				"target_label": "伪装节点",
+				"objective_text": "关闭控制节点 0/3。",
+				"target_label": "控制节点",
 				"target_total": 3,
-				"completion_text": "封锁解除：伪装节点已关闭。",
+				"completion_text": "封锁解除：控制节点已关闭。",
 			}
 		"final_transition":
 			return {
 				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
-				"objective_text": "清理房间内异常样本。",
-				"completion_text": "封锁解除：重构样本已清除。",
+				"objective_text": "清除房间内异常单位。",
+				"completion_text": "封锁解除：异常单位已清除。",
 			}
 		"final_interrogation":
 			return {
 				"type": Room.OBJECTIVE_READ_ARCHIVE,
-				"objective_text": "回应母体信号。",
-				"completion_text": "母体回应已记录。",
+				"objective_text": "激活核心终端。",
+				"completion_text": "核心干扰已清除。出口已开启。",
 			}
 		"final_signal":
 			return {
 				"type": Room.OBJECTIVE_READ_ARCHIVE,
-				"objective_text": "读取母体信号记录。",
-				"completion_text": "母体信号记录已同步。",
+				"objective_text": "激活核心终端。",
+				"completion_text": "终端已激活。",
 			}
 		"final_antechamber":
 			return {
 				"type": Room.OBJECTIVE_CLEAR_ENEMIES,
-				"objective_text": "清除母巢前庭内的重构样本。",
-				"completion_text": "封锁解除：前庭样本已清除。",
+				"objective_text": "清除战斗区内异常单位。",
+				"completion_text": "封锁解除：异常单位已清除。",
 			}
 		"cryo_pod":
 			return {
@@ -889,8 +889,8 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 		"archive":
 			return {
 				"type": Room.OBJECTIVE_READ_ARCHIVE,
-				"objective_text": "读取黑匣子档案。",
-				"completion_text": "数据档案已同步：黑匣子记录可查看。",
+				"objective_text": "激活数据终端。",
+				"completion_text": "数据节点已清除。",
 			}
 		"boss":
 			return {
@@ -987,7 +987,7 @@ static func _chapter_shop_objective(chapter_id: int) -> String:
 		FINAL_CHAPTER_ID:
 			return "最后整备。"
 		5:
-			return "整备并检查数据档案。"
+			return "整备补给并检查终端。"
 		4:
 			return "整备武器与补给。"
 		3:
@@ -1356,15 +1356,15 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 		"data_comm":
 			return str(chapter_config.get("data_comm_label", "通讯塔控制室"))
 		"data_satellite":
-			return str(chapter_config.get("data_satellite_label", "卫星伪装系统"))
+			return str(chapter_config.get("data_satellite_label", "通讯控制区"))
 		"final_transition":
-			return str(chapter_config.get("final_transition_label", "深层熵区过渡房"))
+			return str(chapter_config.get("final_transition_label", "高危战斗区"))
 		"final_interrogation":
-			return str(chapter_config.get("final_interrogation_label", "母体审讯室"))
+			return str(chapter_config.get("final_interrogation_label", "核心干扰室"))
 		"final_signal":
-			return str(chapter_config.get("final_signal_label", "母体信号室"))
+			return str(chapter_config.get("final_signal_label", "核心终端室"))
 		"final_antechamber":
-			return str(chapter_config.get("final_antechamber_label", "原初母巢前庭"))
+			return str(chapter_config.get("final_antechamber_label", "Boss 前战斗区"))
 		"cryo_pod":
 			return str(chapter_config.get("cryo_pod_label", "冷冻舱列阵"))
 		"cryo_vent":
@@ -1372,7 +1372,7 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 		"elite":
 			return str(chapter_config.get("elite_label", "精英封存室"))
 		"archive":
-			return str(chapter_config.get("archive_label", "档案库"))
+			return str(chapter_config.get("archive_label", "数据封存区"))
 		"reward":
 			return "%s %d" % [str(chapter_config.get("reward_label_prefix", "证物库")), count]
 		"weapon":

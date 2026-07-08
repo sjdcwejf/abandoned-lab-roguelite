@@ -47,12 +47,14 @@ shape = SubResource("RectangleShape2D_server")
 
 [node name="EndingHintTerminal" parent="." index="12" instance=ExtResource("3_terminal")]
 position = Vector2(392, 354)
-archive_id = "ending_hint_terminal"
-archive_title = "结局条件提示"
-archive_content = "1. 母体召回风险：与遗物融合越深，母体信号越容易定位你。\n\n2. 纯净路线提示：未被遗物深度绑定的个体，仍可能绕过召回协议。\n\n3. 逆命路线提示：在极端削弱状态下击杀母体，可能切断既定协议。"
-success_message = "结局条件提示已记录"
-requires_ending_hints = true
-prompt_text = "按 F 查看结局条件提示"
+archive_id = "supply_terminal"
+archive_title = "补给终端"
+archive_content = ""
+success_message = "终端已激活。"
+prompt_text = "按 F 激活补给终端"
+show_panel_on_read = false
+record_to_main = false
+already_read_message = "终端已激活。"
 
 [node name="EndingHintTerminalBlocker" type="StaticBody2D" parent="." index="13"]
 position = Vector2(392, 354)
@@ -64,7 +66,7 @@ shape = SubResource("RectangleShape2D_terminal")
 
 [node name="RavenMerchant" parent="." index="8"]
 merchant_title = "渡鸦数据补给站"
-merchant_message = "黑匣子索引已经松动。补给可以谈，但别把所有记录都当成我的债。"
+merchant_message = "补给窗口已开启。"
 max_weapon_offers = 2
 affix_roll_chance = 0.7
 max_affix_count = 1
