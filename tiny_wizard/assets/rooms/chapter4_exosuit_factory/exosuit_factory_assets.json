@@ -68,7 +68,7 @@
       "res://tiny_wizard/room/room_types/lab_exosuit_power_control_room.tscn"
     ],
     "reward": [
-      "res://tiny_wizard/room/room_types/lab_reward_bomb_room.tscn",
+      "res://tiny_wizard/room/room_types/lab_reward_supply_room.tscn",
       "res://tiny_wizard/room/room_types/lab_reward_guarded_room.tscn"
     ],
     "weapon": [

@@ -26,14 +26,5 @@ func hit(damage:=1, from:=Vector2.ZERO):
 	$Visual/AnimationPlayer.play("Blink")
 
 
-func _process(delta):
-	if Input.is_action_just_pressed("drop_bomb"):
-		(inventory as QuiverInventory).use_item(self, "Breach Charge")
-#			inventory.add_to_item('bombs', -1)
-#			var bomb = BOMB_SCENE.instantiate()
-#			bomb.position = position
-#			get_parent().add_child(bomb)
-
-
 func die():
 	respawn_requested.emit()

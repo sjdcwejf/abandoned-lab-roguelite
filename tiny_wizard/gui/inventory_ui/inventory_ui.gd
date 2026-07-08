@@ -4,7 +4,6 @@ extends MarginContainer
 
 
 @onready var counters = {
-	'Breach Charge': $VBoxContainer/Bombs/BombsCount,
 	'Protomatter Fragment': $VBoxContainer/Fragments/FragmentsCount,
 }
 

@@ -40,8 +40,6 @@ func _success_message(item: QuiverItem) -> String:
 			return "回收原质。"
 		"Relic":
 			return "获得遗物。"
-		"Breach Charge":
-			return "获得破障炸药。"
 		"Biometric Key":
 			return "获得生物识别钥。"
 		_:
@@ -62,8 +60,6 @@ func _display_name(item: QuiverItem) -> String:
 			return "原质"
 		"Relic":
 			return "遗物"
-		"Breach Charge":
-			return "破障炸药"
 		"Biometric Key":
 			return "生物识别钥"
 		_:

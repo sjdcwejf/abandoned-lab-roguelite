@@ -1147,13 +1147,12 @@ func _get_layer_clear_weapon_text() -> String:
 func _get_layer_clear_inventory_text() -> String:
 	var inventory := _get_character_inventory()
 	if inventory == null:
-		return "原质：0    遗物：0    生物识别钥：0    破障炸药：0"
+		return "原质：0    遗物：0    生物识别钥：0"
 
-	return "原质：%d    遗物：%d    生物识别钥：%d    破障炸药：%d" % [
+	return "原质：%d    遗物：%d    生物识别钥：%d" % [
 		inventory.get_item_amount("Protomatter Fragment"),
 		inventory.get_item_amount("Relic"),
-		inventory.get_item_amount("Biometric Key"),
-		inventory.get_item_amount("Breach Charge")
+		inventory.get_item_amount("Biometric Key")
 	]
 
 
@@ -1453,7 +1452,7 @@ func _update_tutorial_hint_for_room(room: Room) -> void:
 		"tutorial_merchant":
 			_show_tutorial_hint("渡鸦留下了一把检疫刃。按 F 拾取，按 4 装备，然后继续向右。")
 		"tutorial_combat":
-			_show_tutorial_hint("清理守卫样本。打开补给箱取得破障炸药，按 E 放置，炸开检疫树脂后回收物资。")
+			_show_tutorial_hint("清理守卫样本。打开补给箱回收物资，然后继续向右。")
 		"tutorial_boss":
 			if _tutorial_rewards_granted:
 				_show_tutorial_hint("封存唤醒序列完成。进入下行裂隙，前往正式封存区。")

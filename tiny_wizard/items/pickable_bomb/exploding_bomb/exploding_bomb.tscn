@@ -1,7 +1,6 @@
-[gd_scene load_steps=35 format=3 uid="uid://dppu1vhjy1n1g"]
+[gd_scene load_steps=34 format=3 uid="uid://dppu1vhjy1n1g"]
 
 [ext_resource type="Script" path="res://tiny_wizard/items/pickable_bomb/exploding_bomb/exploding_bomb.gd" id="1_jlf8b"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/items/breach_charge.png" id="2_4tqbq"]
 [ext_resource type="Texture2D" uid="uid://cjjugml0purnn" path="res://tiny_wizard/assets/placeholder_art/shadow.png" id="3_6a5oo"]
 [ext_resource type="Texture2D" uid="uid://bov30xsh3t18w" path="res://tiny_wizard/assets/placeholder_art/cirle_particle.png" id="3_ve3s1"]
 [ext_resource type="Texture2D" uid="uid://dqf5vs3gpkjvx" path="res://tiny_wizard/assets/placeholder_art/ground_bomb_trace.png" id="5_m0bgr"]
@@ -435,7 +434,6 @@ linear_damp = 1.106
 [node name="Sprite" type="Sprite2D" parent="RigidBody2D"]
 y_sort_enabled = true
 position = Vector2(-2, -14)
-texture = ExtResource("2_4tqbq")
 
 [node name="GPUParticles2D2" type="GPUParticles2D" parent="RigidBody2D/Sprite"]
 position = Vector2(-16, -9)
@@ -488,6 +486,3 @@ autoplay = "Explode"
 libraries = {
 "": SubResource("AnimationLibrary_i1gif")
 }
-
-[connection signal="body_shape_entered" from="RigidBody2D/ExplodingArea" to="." method="_on_exploding_area_body_shape_entered"]
-[connection signal="body_shape_exited" from="RigidBody2D/ExplodingArea" to="." method="_on_exploding_area_body_shape_exited"]
