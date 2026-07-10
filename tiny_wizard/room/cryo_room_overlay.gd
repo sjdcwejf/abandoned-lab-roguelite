@@ -4,24 +4,51 @@ extends Node2D
 
 const CRYO_FLOOR_FOG_SCENE: PackedScene = preload("res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_floor_fog_layer.tscn")
 const CRYO_SMOKE_VENT_SCENE: PackedScene = preload("res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_smoke_vent.tscn")
+const LAND_PIXELS_FLOOR: Texture2D = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesFloor32.png")
+const LAND_PIXELS_WALLS: Texture2D = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesWalls.png")
+const LAND_PIXELS_STUFF: Texture2D = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png")
+const SCI_FI_FACILITY_TILESET: Texture2D = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/tileset.png")
+const SCI_FI_FACILITY_COMPUTER: Texture2D = preload("res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png")
+const WARPED_LAB_TILESET: Texture2D = preload("res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png")
 
 const ROOM_CENTER := Vector2(512, 300)
 const FLOOR_MIN := Vector2(72, 92)
 const FLOOR_MAX := Vector2(952, 508)
+const LAND_TILE := Vector2(32, 32)
+const SCI_FI_TILE := Vector2(16, 16)
+const CRYO_FLOOR_BASE_REGION := Rect2(0, 0, 32, 32)
+const CRYO_FLOOR_GRID_REGION := Rect2(32, 0, 32, 32)
+const CRYO_FLOOR_PANEL_REGION := Rect2(64, 0, 32, 32)
+const CRYO_WALL_PANEL_REGION := Rect2(0, 0, 32, 32)
+const CRYO_WALL_INSULATED_REGION := Rect2(32, 0, 32, 32)
+const CRYO_WALL_RIM_REGION := Rect2(64, 0, 32, 32)
+const CRYO_STUFF_LOCKER_REGION := Rect2(256, 96, 32, 32)
+const CRYO_STUFF_CABINET_REGION := Rect2(288, 96, 32, 32)
+const SCI_FI_VENT_REGION := Rect2(0, 48, 16, 16)
+const SCI_FI_PANEL_REGION := Rect2(16, 48, 16, 16)
+const SCI_FI_PIPE_REGION := Rect2(32, 48, 16, 16)
+const SCI_FI_CONTROL_REGION := Rect2(0, 0, 16, 16)
+const WARPED_FALLBACK_WALL_REGION := Rect2(0, 32, 16, 16)
+const BACKGROUND_VISUAL_Z := -2
 
 const CHAPTER_3_CRYO_BACKGROUND_THEME := {
 	"name": "chapter_3_cryo_background_theme",
 	"floor_set": [
-		"cryo_frosted_metal_floor",
-		"cryo_coolant_channel_floor",
-		"cryo_storage_zone_floor",
-		"cryo_boss_core_floor",
+		"cryo_floor_base_cold_metal",
+		"cryo_floor_panel_grid",
+		"cryo_floor_coolant_channel",
+		"cryo_floor_frost_edge",
+		"cryo_floor_condensation",
+		"cryo_floor_low_temp_marking",
 	],
 	"wall_set": [
-		"cold_storage_wall",
-		"coolant_pipe_wall",
-		"freezer_unit_wall",
-		"boss_cryo_lock_wall",
+		"cryo_wall_panel_standard",
+		"cryo_wall_panel_insulated",
+		"cryo_wall_vent",
+		"cryo_wall_pipe",
+		"cryo_wall_storage_locker",
+		"cryo_wall_control_panel",
+		"cryo_wall_frost_corner",
 	],
 	"door_set": [
 		"frosted_cryo_door",
@@ -92,19 +119,19 @@ func _resolve_background_key() -> String:
 
 func _palette(background_key: String) -> Dictionary:
 	var palette: Dictionary = {
-		"floor_base": Color(0.078, 0.108, 0.12, 0.98),
-		"floor_panel": Color(0.105, 0.14, 0.15, 0.64),
-		"floor_shadow": Color(0.015, 0.028, 0.035, 0.44),
-		"frost": Color(0.72, 0.9, 0.94, 0.2),
-		"frost_strong": Color(0.86, 0.96, 0.98, 0.32),
-		"coolant": Color(0.44, 0.72, 0.78, 0.2),
-		"coolant_bright": Color(0.72, 0.9, 0.94, 0.3),
-		"wall": Color(0.075, 0.095, 0.105, 1.0),
-		"wall_inner": Color(0.115, 0.14, 0.148, 0.98),
-		"wall_rim": Color(0.15, 0.18, 0.185, 0.92),
-		"door_dark": Color(0.035, 0.052, 0.058, 0.98),
-		"door_light": Color(0.62, 0.88, 0.96, 0.28),
-		"red_fault": Color(0.9, 0.2, 0.15, 0.42),
+		"floor_base": Color(0.13, 0.165, 0.175, 0.98),
+		"floor_panel": Color(0.18, 0.215, 0.218, 0.58),
+		"floor_shadow": Color(0.055, 0.08, 0.09, 0.32),
+		"frost": Color(0.76, 0.92, 0.96, 0.18),
+		"frost_strong": Color(0.9, 0.98, 1.0, 0.26),
+		"coolant": Color(0.55, 0.78, 0.84, 0.16),
+		"coolant_bright": Color(0.78, 0.92, 0.96, 0.24),
+		"wall": Color(0.11, 0.135, 0.145, 1.0),
+		"wall_inner": Color(0.16, 0.19, 0.198, 0.98),
+		"wall_rim": Color(0.19, 0.22, 0.225, 0.88),
+		"door_dark": Color(0.07, 0.095, 0.105, 0.98),
+		"door_light": Color(0.7, 0.9, 0.96, 0.22),
+		"red_fault": Color(0.85, 0.2, 0.14, 0.26),
 		"mist": Color(0.9, 0.97, 1.0, 0.13),
 	}
 	match background_key:
@@ -117,60 +144,101 @@ func _palette(background_key: String) -> Dictionary:
 		"cryo_sample_warehouse":
 			palette["floor_panel"] = Color(0.095, 0.125, 0.132, 0.7)
 		"cryo_boss_room":
-			palette["wall"] = Color(0.055, 0.078, 0.09, 1.0)
-			palette["coolant_bright"] = Color(0.82, 0.96, 1.0, 0.34)
-			palette["red_fault"] = Color(0.95, 0.14, 0.12, 0.46)
+			palette["wall"] = Color(0.095, 0.122, 0.135, 1.0)
+			palette["coolant_bright"] = Color(0.84, 0.96, 1.0, 0.28)
+			palette["red_fault"] = Color(0.9, 0.14, 0.1, 0.34)
 	return palette
 
 
 func _build_cryo_floor_system(background_key: String, palette: Dictionary) -> void:
-	_add_rect("CryoFrostedMetalFloor", ROOM_CENTER, FLOOR_MAX - FLOOR_MIN, palette["floor_base"] as Color, 0)
-	_build_floor_panel_grid(palette)
+	_add_rect("CryoColdMetalFloorBase", ROOM_CENTER, FLOOR_MAX - FLOOR_MIN, palette["floor_base"] as Color, 0)
+	_build_cryo_floor_grid_v2(background_key, palette)
 	_build_variant_floor_zones(background_key, palette)
+	_build_low_temp_floor_markings(background_key, palette)
 	_build_coolant_floor_lines(background_key, palette)
+	_build_floor_edge_frost_v2(background_key, palette)
 
 
-func _build_floor_panel_grid(palette: Dictionary) -> void:
+func _build_cryo_floor_grid_v2(background_key: String, palette: Dictionary) -> void:
 	var panel_color: Color = palette["floor_panel"] as Color
 	var shadow_color: Color = palette["floor_shadow"] as Color
-	for x in range(128, 896, 128):
-		for y in range(144, 464, 96):
-			var center := Vector2(x + 32, y + 24)
+	for x in range(112, 912, 64):
+		for y in range(128, 480, 64):
+			var center := Vector2(x + 32, y + 32)
 			var color := panel_color
 			if int((x + y) / 32) % 3 == 0:
-				color = Color(panel_color.r * 0.82, panel_color.g * 0.82, panel_color.b * 0.82, panel_color.a)
-			_add_rect("CryoMetalFloorPanel", center, Vector2(84, 52), color, 1)
+				color = Color(panel_color.r * 0.82, panel_color.g * 0.86, panel_color.b * 0.9, panel_color.a)
+			var region := CRYO_FLOOR_BASE_REGION
 			if int((x + y) / 64) % 2 == 0:
-				_add_line("CryoPanelScratch", PackedVector2Array([
-					center + Vector2(-30, -14),
-					center + Vector2(18, -18),
-				]), shadow_color, 1.0, 2)
+				region = CRYO_FLOOR_GRID_REGION
+			if background_key in ["cryo_storage_room", "cryo_sample_warehouse"] and (x < 256 or x > 736):
+				region = CRYO_FLOOR_PANEL_REGION
+			_add_atlas_tile("CryoFloorAtlasPanel", LAND_PIXELS_FLOOR, region, center, Vector2(64, 64), color, 1)
+			if int((x + y) / 96) % 3 == 0:
+				_add_line("CryoFinePanelSeam", PackedVector2Array([
+					center + Vector2(-28, -18),
+					center + Vector2(26, -18),
+				]), Color(shadow_color.r, shadow_color.g, shadow_color.b, 0.22), 0.8, 2)
 
 
 func _build_variant_floor_zones(background_key: String, palette: Dictionary) -> void:
-	var zone_color := Color(0.04, 0.105, 0.13, 0.38)
+	var zone_color := Color(0.105, 0.16, 0.175, 0.32)
 	var frost_color: Color = palette["frost"] as Color
 	match background_key:
 		"cryo_control_room":
 			_add_rect("CryoControlTerminalZone", Vector2(512, 176), Vector2(270, 78), zone_color, 2)
-			_add_rect("CryoEntryColdMat", Vector2(512, 474), Vector2(210, 44), Color(0.08, 0.13, 0.145, 0.5), 2)
+			_add_rect("CryoEntryColdMat", Vector2(512, 474), Vector2(210, 44), Color(0.15, 0.2, 0.212, 0.36), 2)
 		"cryo_storage_room":
 			_add_rect("CryoStorageLeftZone", Vector2(184, 304), Vector2(126, 310), zone_color, 2)
 			_add_rect("CryoStorageRightZone", Vector2(840, 304), Vector2(126, 310), zone_color, 2)
-			_add_rect("CryoStorageMainLane", ROOM_CENTER, Vector2(360, 312), Color(0.07, 0.105, 0.12, 0.36), 2)
+			_add_rect("CryoStorageMainLane", ROOM_CENTER, Vector2(360, 312), Color(0.12, 0.16, 0.17, 0.28), 2)
 		"cryo_pipe_room":
 			_add_rect("CryoPipeTopServiceDeck", Vector2(512, 128), Vector2(620, 58), zone_color, 2)
 			_add_rect("CryoPipeBottomServiceDeck", Vector2(512, 472), Vector2(620, 58), zone_color, 2)
 		"cryo_sample_warehouse":
 			_add_rect("CryoSampleLeftStorage", Vector2(216, 300), Vector2(168, 268), zone_color, 2)
 			_add_rect("CryoSampleRightStorage", Vector2(808, 300), Vector2(168, 268), zone_color, 2)
-			_add_rect("CryoSampleRewardLane", ROOM_CENTER, Vector2(330, 220), Color(0.065, 0.1, 0.11, 0.3), 2)
+			_add_rect("CryoSampleRewardLane", ROOM_CENTER, Vector2(330, 220), Color(0.12, 0.155, 0.165, 0.26), 2)
 		"cryo_boss_room":
 			_add_ring("CryoBossColdCoreRing", ROOM_CENTER, 118.0, palette["coolant_bright"] as Color, 3.0, 3)
 			_add_ring("CryoBossOuterMoveRing", ROOM_CENTER, 188.0, Color(frost_color.r, frost_color.g, frost_color.b, 0.2), 2.0, 2)
-			_add_rect("CryoBossOuterLane", ROOM_CENTER, Vector2(640, 320), Color(0.05, 0.085, 0.1, 0.28), 1)
+			_add_rect("CryoBossOuterLane", ROOM_CENTER, Vector2(640, 320), Color(0.11, 0.15, 0.165, 0.26), 1)
 		_:
-			_add_rect("CryoCombatOpenLane", ROOM_CENTER, Vector2(500, 290), Color(0.065, 0.1, 0.115, 0.28), 2)
+			_add_rect("CryoCombatOpenLane", ROOM_CENTER, Vector2(500, 290), Color(0.12, 0.16, 0.172, 0.24), 2)
+
+
+func _build_low_temp_floor_markings(background_key: String, palette: Dictionary) -> void:
+	var coolant: Color = palette["coolant_bright"] as Color
+	var line_color := Color(coolant.r, coolant.g, coolant.b, 0.18)
+	for y in [154, 446]:
+		_add_line("CryoBlueWhiteBoundaryLine", PackedVector2Array([Vector2(128, y), Vector2(896, y)]), line_color, 1.4, 5)
+	for x in [184, 840]:
+		_add_line("CryoSideStorageBoundaryLine", PackedVector2Array([Vector2(x, 160), Vector2(x, 440)]), Color(line_color.r, line_color.g, line_color.b, 0.12), 1.0, 5)
+	match background_key:
+		"cryo_storage_room":
+			for y in [214, 306, 398]:
+				_add_line("CryoStorageBayNumberLine", PackedVector2Array([Vector2(132, y), Vector2(266, y)]), line_color, 1.2, 5)
+				_add_line("CryoStorageBayNumberLine", PackedVector2Array([Vector2(758, y), Vector2(892, y)]), line_color, 1.2, 5)
+			_add_label("CryoFloorBayLabel", "STORAGE", Vector2(138, 166), Color(coolant.r, coolant.g, coolant.b, 0.36), 7)
+		"cryo_pipe_room":
+			for x in [286, 512, 738]:
+				_add_rect("CryoCoolantChannelPlate", Vector2(x, 300), Vector2(42, 260), Color(0.07, 0.12, 0.14, 0.34), 3)
+				_add_line("CryoCoolantChannelLight", PackedVector2Array([Vector2(x, 184), Vector2(x, 416)]), Color(coolant.r, coolant.g, coolant.b, 0.14), 1.2, 5)
+		"cryo_sample_warehouse":
+			for x in [176, 252, 772, 848]:
+				_add_line("CryoWarehouseGridLine", PackedVector2Array([Vector2(x, 176), Vector2(x, 424)]), Color(line_color.r, line_color.g, line_color.b, 0.1), 0.8, 5)
+			_add_label("CryoFloorBayLabel", "FREEZER UNIT", Vector2(420, 430), Color(coolant.r, coolant.g, coolant.b, 0.34), 7)
+		"cryo_boss_room":
+			_add_rect("CryoBossCoreBasePlate", ROOM_CENTER, Vector2(190, 118), Color(0.08, 0.135, 0.155, 0.34), 3)
+			_add_label("CryoFloorBayLabel", "LOW TEMP", Vector2(472, 236), Color(coolant.r, coolant.g, coolant.b, 0.32), 7)
+
+
+func _build_floor_edge_frost_v2(_background_key: String, palette: Dictionary) -> void:
+	var frost: Color = palette["frost"] as Color
+	_add_patch("CryoNorthFrostEdge", Vector2(512, 148), Vector2(760, 24), Color(frost.r, frost.g, frost.b, 0.12), 6)
+	_add_patch("CryoSouthFrostEdge", Vector2(512, 452), Vector2(760, 24), Color(frost.r, frost.g, frost.b, 0.12), 6)
+	_add_patch("CryoWestFrostEdge", Vector2(130, 300), Vector2(28, 270), Color(frost.r, frost.g, frost.b, 0.11), 6)
+	_add_patch("CryoEastFrostEdge", Vector2(894, 300), Vector2(28, 270), Color(frost.r, frost.g, frost.b, 0.11), 6)
 
 
 func _build_coolant_floor_lines(background_key: String, palette: Dictionary) -> void:
@@ -232,42 +300,137 @@ func _build_wall_modules(background_key: String, palette: Dictionary) -> void:
 	var bottom_y := 502.0
 	var left_x := 92.0
 	var right_x := 932.0
-	for x in [210, 386, 638, 814]:
-		_add_rect("CryoWallVent", Vector2(x, top_y), Vector2(74, 12), Color(0.16, 0.22, 0.22, 0.62), 16)
-		_add_line("CryoWallVentSlat", PackedVector2Array([Vector2(x - 28, top_y), Vector2(x + 28, top_y)]), Color(0.72, 0.86, 0.9, 0.18), 1.0, 17)
-	for x in [256, 512, 768]:
-		_add_line("CryoTopCoolantPipe", PackedVector2Array([Vector2(x - 58, 118), Vector2(x + 58, 118)]), Color(coolant.r, coolant.g, coolant.b, 0.18), 1.8, 17)
-		_add_line("CryoBottomCoolantPipe", PackedVector2Array([Vector2(x - 58, 482), Vector2(x + 58, 482)]), Color(coolant.r, coolant.g, coolant.b, 0.14), 1.6, 17)
-	for y in [190, 300, 410]:
-		_add_line("CryoLeftCoolantPipe", PackedVector2Array([Vector2(left_x, y - 46), Vector2(left_x, y + 46)]), Color(coolant.r, coolant.g, coolant.b, 0.16), 1.6, 17)
-		_add_line("CryoRightCoolantPipe", PackedVector2Array([Vector2(right_x, y - 46), Vector2(right_x, y + 46)]), Color(coolant.r, coolant.g, coolant.b, 0.14), 1.6, 17)
+	for x in [146, 226, 306, 386, 638, 718, 798, 878]:
+		_add_cryo_wall_panel_standard(Vector2(x, top_y), "top", palette)
+		_add_cryo_wall_panel_insulated(Vector2(x, bottom_y), "bottom", palette)
+	for x in [246, 512, 778]:
+		_add_cryo_wall_vent(Vector2(x, top_y + 8), "top", palette)
+		_add_cryo_wall_pipe(Vector2(x, bottom_y - 8), "bottom", palette)
+	for y in [164, 226, 374, 436]:
+		_add_cryo_wall_pipe(Vector2(left_x, y), "left", palette)
+	for y in [164, 226, 374, 436]:
+		_add_cryo_wall_storage_locker(Vector2(right_x, y), "right", palette)
 
 	match background_key:
 		"cryo_pipe_room":
 			for x in [176, 318, 706, 850]:
-				_add_rect("CryoFreezerUnitPanel", Vector2(x, top_y + 22), Vector2(76, 24), Color(0.08, 0.13, 0.14, 0.74), 18)
-				_add_line("CryoFreezerUnitLight", PackedVector2Array([Vector2(x - 26, top_y + 22), Vector2(x + 26, top_y + 22)]), Color(light.r, light.g, light.b, 0.2), 1.4, 19)
+				_add_cryo_wall_pipe(Vector2(x, top_y + 24), "top", palette, Vector2(96, 26))
+				_add_cryo_wall_vent(Vector2(x, bottom_y - 24), "bottom", palette, Vector2(88, 24))
+			for y in [214, 300, 386]:
+				_add_cryo_wall_pipe(Vector2(left_x + 22, y), "left", palette, Vector2(28, 96))
 		"cryo_control_room":
-			_add_wall_panel(Vector2(512, 104), "LOW TEMP", light, 18)
-			_add_wall_panel(Vector2(150, 300), "-80C", light, 18)
-			_add_wall_panel(Vector2(874, 300), "COOLANT", light, 18)
+			_add_cryo_wall_control_panel(Vector2(512, 104), "LOW TEMP", palette)
+			_add_cryo_wall_control_panel(Vector2(150, 300), "-80C", palette)
+			_add_cryo_wall_control_panel(Vector2(874, 300), "COOLANT", palette)
 		"cryo_sample_warehouse":
-			_add_wall_panel(Vector2(266, bottom_y - 18), "STORAGE", light, 18)
-			_add_wall_panel(Vector2(760, bottom_y - 18), "CRYO", light, 18)
+			for y in [206, 300, 394]:
+				_add_cryo_wall_storage_locker(Vector2(right_x - 22, y), "right", palette, Vector2(40, 70))
+				_add_cryo_wall_storage_locker(Vector2(left_x + 22, y), "left", palette, Vector2(40, 70))
+			_add_cryo_wall_control_panel(Vector2(266, bottom_y - 18), "STORAGE", palette)
+			_add_cryo_wall_control_panel(Vector2(760, bottom_y - 18), "CRYO", palette)
+		"cryo_storage_room":
+			for y in [206, 300, 394]:
+				_add_cryo_wall_storage_locker(Vector2(right_x - 20, y), "right", palette, Vector2(42, 76))
+			for x in [226, 798]:
+				_add_cryo_wall_control_panel(Vector2(x, top_y + 20), "STORAGE", palette)
 		"cryo_boss_room":
 			for p in [Vector2(150, 126), Vector2(874, 126), Vector2(150, 474), Vector2(874, 474)]:
 				_add_rect("CryoBossFaultLight", p, Vector2(20, 10), fault, 19)
-				_add_line("CryoBossWallConduit", PackedVector2Array([p, ROOM_CENTER]), Color(light.r, light.g, light.b, 0.1), 1.0, 18)
+				_add_line("CryoBossWallConduit", PackedVector2Array([p, ROOM_CENTER]), Color(light.r, light.g, light.b, 0.08), 1.0, 18)
+			for x in [286, 512, 738]:
+				_add_cryo_wall_vent(Vector2(x, top_y + 16), "top", palette, Vector2(108, 24))
+				_add_cryo_wall_pipe(Vector2(x, bottom_y - 16), "bottom", palette, Vector2(118, 24))
 		_:
-			_add_wall_panel(Vector2(512, top_y + 18), "CRYO", light, 18)
+			_add_cryo_wall_control_panel(Vector2(512, top_y + 18), "CRYO", palette)
+
+
+func _add_cryo_wall_panel_standard(center: Vector2, direction: String, palette: Dictionary, size := Vector2(76, 30)) -> void:
+	var tint := Color(0.48, 0.62, 0.66, 0.46)
+	_add_atlas_tile("CryoWallPanelStandard", LAND_PIXELS_WALLS, CRYO_WALL_PANEL_REGION, center, size, tint, 16)
+	_add_rect("CryoWallPanelColdInset", center, size * Vector2(0.78, 0.18), Color(0.7, 0.9, 0.96, 0.07), 17)
+	if direction in ["top", "bottom"]:
+		_add_line("CryoWallPanelColdSeam", PackedVector2Array([
+			center + Vector2(-size.x * 0.42, size.y * 0.3),
+			center + Vector2(size.x * 0.42, size.y * 0.3),
+		]), palette["coolant"] as Color, 0.8, 18)
+
+
+func _add_cryo_wall_panel_insulated(center: Vector2, direction: String, palette: Dictionary, size := Vector2(76, 30)) -> void:
+	var tint := Color(0.55, 0.66, 0.68, 0.5)
+	_add_atlas_tile("CryoWallPanelInsulated", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center, size, tint, 16)
+	_add_rect("CryoInsulatedWallRib", center, size * Vector2(0.12, 0.72), Color(0.08, 0.12, 0.13, 0.34), 17)
+	if direction in ["top", "bottom"]:
+		_add_line("CryoInsulatedWallFrostSeam", PackedVector2Array([
+			center + Vector2(-size.x * 0.38, -size.y * 0.3),
+			center + Vector2(size.x * 0.38, -size.y * 0.3),
+		]), Color(0.86, 0.96, 1.0, 0.09), 0.8, 18)
+
+
+func _add_cryo_wall_vent(center: Vector2, direction: String, palette: Dictionary, size := Vector2(78, 24)) -> void:
+	_add_rect("CryoVentWallBackplate", center, size + Vector2(10, 8), Color(0.07, 0.105, 0.115, 0.84), 17)
+	_add_atlas_tile("CryoWallVentAtlas", SCI_FI_FACILITY_TILESET, SCI_FI_VENT_REGION, center, size, Color(0.62, 0.78, 0.8, 0.5), 18)
+	var horizontal := direction in ["top", "bottom"]
+	if horizontal:
+		for offset in [-7, 0, 7]:
+			_add_line("CryoVentSlat", PackedVector2Array([
+				center + Vector2(-size.x * 0.34, offset),
+				center + Vector2(size.x * 0.34, offset),
+			]), Color(0.82, 0.96, 1.0, 0.13), 0.8, 19)
+	else:
+		for offset in [-7, 0, 7]:
+			_add_line("CryoVentSlat", PackedVector2Array([
+				center + Vector2(offset, -size.y * 0.34),
+				center + Vector2(offset, size.y * 0.34),
+			]), Color(0.82, 0.96, 1.0, 0.13), 0.8, 19)
+
+
+func _add_cryo_wall_pipe(center: Vector2, direction: String, palette: Dictionary, size := Vector2(68, 30)) -> void:
+	_add_rect("CryoPipeWallBackplate", center, size + Vector2(10, 8), Color(0.06, 0.095, 0.105, 0.78), 17)
+	_add_atlas_tile("CryoPipeWallAtlas", SCI_FI_FACILITY_TILESET, SCI_FI_PIPE_REGION, center, size, Color(0.58, 0.78, 0.82, 0.46), 18)
+	var coolant: Color = palette["coolant"] as Color
+	if direction in ["left", "right"]:
+		for offset in [-8, 8]:
+			_add_line("CryoVerticalWallPipe", PackedVector2Array([
+				center + Vector2(offset, -size.y * 0.44),
+				center + Vector2(offset, size.y * 0.44),
+			]), Color(coolant.r, coolant.g, coolant.b, 0.16), 1.2, 19)
+	else:
+		for offset in [-6, 6]:
+			_add_line("CryoHorizontalWallPipe", PackedVector2Array([
+				center + Vector2(-size.x * 0.44, offset),
+				center + Vector2(size.x * 0.44, offset),
+			]), Color(coolant.r, coolant.g, coolant.b, 0.15), 1.2, 19)
+
+
+func _add_cryo_wall_storage_locker(center: Vector2, direction: String, palette: Dictionary, size := Vector2(42, 68)) -> void:
+	_add_rect("CryoStorageLockerWallBackplate", center, size + Vector2(10, 8), Color(0.075, 0.105, 0.112, 0.84), 17)
+	_add_atlas_tile("CryoStorageLockerAtlas", LAND_PIXELS_STUFF, CRYO_STUFF_LOCKER_REGION, center, size, Color(0.62, 0.78, 0.82, 0.48), 18)
+	var light: Color = palette["coolant_bright"] as Color
+	var sign_pos := center + (Vector2(-size.x * 0.22, 0) if direction == "right" else Vector2(size.x * 0.22, 0))
+	_add_rect("CryoStorageLockerTempLight", sign_pos, Vector2(4, size.y * 0.52), Color(light.r, light.g, light.b, 0.14), 19)
+
+
+func _add_cryo_wall_control_panel(center: Vector2, text: String, palette: Dictionary) -> void:
+	var light: Color = palette["coolant_bright"] as Color
+	_add_rect("CryoWallControlPanelBack", center, Vector2(104, 26), Color(0.055, 0.09, 0.1, 0.84), 18)
+	_add_atlas_tile("CryoWallControlPanelAtlas", SCI_FI_FACILITY_COMPUTER, Rect2(0, 0, 16, 16), center + Vector2(-36, 0), Vector2(26, 22), Color(0.58, 0.8, 0.84, 0.48), 19)
+	_add_line("CryoWallControlPanelStatus", PackedVector2Array([
+		center + Vector2(-14, -2),
+		center + Vector2(36, -2),
+	]), Color(light.r, light.g, light.b, 0.2), 1.1, 20)
+	_add_label("CryoWallStatusLabel", text, center + Vector2(-28, 4), Color(light.r, light.g, light.b, 0.42), 7)
 
 
 func _build_corner_frost(background_key: String, frost_color: Color) -> void:
 	var strong := Color(frost_color.r, frost_color.g, frost_color.b, min(frost_color.a + 0.12, 0.5))
-	_add_patch("CryoCornerFrostNW", Vector2(116, 126), Vector2(110, 46), strong, 18)
-	_add_patch("CryoCornerFrostNE", Vector2(908, 128), Vector2(96, 44), frost_color, 18)
-	_add_patch("CryoCornerFrostSW", Vector2(118, 474), Vector2(104, 48), frost_color, 18)
-	_add_patch("CryoCornerFrostSE", Vector2(906, 474), Vector2(112, 52), strong, 18)
+	_add_atlas_tile("CryoFrostCornerWallNW", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(116, 126), Vector2(76, 38), Color(0.62, 0.78, 0.82, 0.42), 17)
+	_add_atlas_tile("CryoFrostCornerWallNE", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(908, 128), Vector2(70, 38), Color(0.58, 0.75, 0.8, 0.38), 17)
+	_add_atlas_tile("CryoFrostCornerWallSW", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(118, 474), Vector2(72, 40), Color(0.58, 0.75, 0.8, 0.38), 17)
+	_add_atlas_tile("CryoFrostCornerWallSE", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(906, 474), Vector2(78, 42), Color(0.62, 0.78, 0.82, 0.42), 17)
+	_add_patch("CryoCornerFrostNW", Vector2(116, 126), Vector2(76, 30), strong, 18)
+	_add_patch("CryoCornerFrostNE", Vector2(908, 128), Vector2(68, 28), frost_color, 18)
+	_add_patch("CryoCornerFrostSW", Vector2(118, 474), Vector2(72, 30), frost_color, 18)
+	_add_patch("CryoCornerFrostSE", Vector2(906, 474), Vector2(78, 32), strong, 18)
 	if background_key == "cryo_boss_room":
 		for p in [Vector2(116, 126), Vector2(908, 128), Vector2(118, 474), Vector2(906, 474)]:
 			_add_ring("CryoBossCornerFreezeLock", p, 24.0, Color(0.56, 0.96, 1.0, 0.24), 1.4, 19, 18)
@@ -286,7 +449,7 @@ func _build_cryo_door_system(background_key: String, palette: Dictionary) -> voi
 		var center: Vector2 = door.get("center", Vector2.ZERO) as Vector2
 		var size: Vector2 = door.get("size", Vector2.ZERO) as Vector2
 		if _is_visual_door_hidden(direction):
-			continue
+			_add_sealed_cryo_wall_segment(direction, center, size, background_key, palette)
 		else:
 			var light: Vector2 = door.get("light", Vector2.ZERO) as Vector2
 			var light_size: Vector2 = door.get("light_size", Vector2.ZERO) as Vector2
@@ -327,10 +490,47 @@ func _add_cryo_door_frame(direction: String, center: Vector2, size: Vector2, lig
 	_add_rect("CryoDoorHazardCover", center, size + frame_extra, Color(0.065, 0.085, 0.092, 1.0), 24)
 	_add_rect("CryoDoorColdRecess", center, size * 0.72, palette["door_dark"] as Color, 25)
 	_add_rect("CryoDoorFrostedFrame", center, size + frame_extra * 0.6, Color(0.12, 0.155, 0.16, 0.96), 23)
+	if direction in ["up", "down"]:
+		for x_offset in [-64, 0, 64]:
+			_add_atlas_tile("CryoDoorInsulatedAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center + Vector2(x_offset, 0), Vector2(58, 42), Color(0.5, 0.66, 0.7, 0.38), 24)
+	else:
+		for y_offset in [-58, 0, 58]:
+			_add_atlas_tile("CryoDoorInsulatedAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center + Vector2(0, y_offset), Vector2(40, 58), Color(0.5, 0.66, 0.7, 0.38), 24)
 	_add_rect("CryoDoorColdLight", light, light_size, palette["door_light"] as Color, 26)
 	var frost_size := Vector2(size.x + 28, 10) if direction in ["up", "down"] else Vector2(10, size.y + 28)
 	_add_rect("CryoDoorFrostThreshold", light, frost_size, Color(0.86, 0.96, 1.0, 0.12), 26)
 	_add_rect("CryoDoorTempPanel", _door_panel_position(direction, center), Vector2(34, 16), Color(0.09, 0.13, 0.135, 0.92), 26)
+
+
+func _add_sealed_cryo_wall_segment(direction: String, center: Vector2, size: Vector2, background_key: String, palette: Dictionary) -> void:
+	var wall_color := palette["wall_inner"] as Color
+	var rim_color := palette["wall_rim"] as Color
+	if direction in ["up", "down"]:
+		var segment_size := Vector2(size.x + 86, 76)
+		_add_rect("CryoSealedInsulatedWallFill", center, segment_size, wall_color, 24)
+		for x_offset in [-96, -32, 32, 96]:
+			_add_atlas_tile("CryoSealedTopBottomWallAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center + Vector2(x_offset, 0), Vector2(62, 58), Color(0.55, 0.68, 0.7, 0.5), 25)
+		if background_key in ["cryo_storage_room", "cryo_sample_warehouse"]:
+			_add_cryo_wall_storage_locker(center + Vector2(-92, 0), direction, palette, Vector2(42, 44))
+			_add_cryo_wall_storage_locker(center + Vector2(92, 0), direction, palette, Vector2(42, 44))
+		else:
+			_add_cryo_wall_vent(center + Vector2(-86, 0), direction, palette, Vector2(74, 20))
+			_add_cryo_wall_pipe(center + Vector2(86, 0), direction, palette, Vector2(74, 20))
+	else:
+		var segment_size := Vector2(86, size.y + 112)
+		_add_rect("CryoSealedSideWallFill", center, segment_size, wall_color, 24)
+		for y_offset in [-122, -70, -18, 34, 86, 138]:
+			_add_atlas_tile("CryoSealedSideWallAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center + Vector2(0, y_offset), Vector2(52, 46), Color(0.55, 0.68, 0.7, 0.48), 25)
+		var rim_x := 28.0 if direction == "left" else -28.0
+		_add_rect("CryoSealedSideWallColdRimTop", center + Vector2(rim_x, -104), Vector2(10, 72), rim_color, 26)
+		_add_rect("CryoSealedSideWallColdRimBottom", center + Vector2(rim_x, 104), Vector2(10, 72), rim_color, 26)
+		if direction == "left":
+			_add_cryo_wall_pipe(center + Vector2(22, -104), direction, palette, Vector2(28, 62))
+			_add_cryo_wall_pipe(center + Vector2(22, 104), direction, palette, Vector2(28, 62))
+		else:
+			_add_cryo_wall_storage_locker(center + Vector2(-20, -104), direction, palette, Vector2(38, 58))
+			_add_cryo_wall_storage_locker(center + Vector2(-20, 104), direction, palette, Vector2(38, 58))
+	_add_patch("CryoSealedWallFrostEdge", center + (Vector2(0, 30) if direction == "up" else Vector2(0, -30) if direction == "down" else Vector2(34, 0) if direction == "left" else Vector2(-34, 0)), size * 0.32, palette["frost"] as Color, 27)
 
 
 func _door_panel_position(direction: String, center: Vector2) -> Vector2:
@@ -575,49 +775,49 @@ func _mist_specs(background_key: String) -> Array[Dictionary]:
 	match background_key:
 		"cryo_control_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 442), "size": Vector2(560, 86), "alpha": 0.09, "drift": Vector2(24, -2), "seconds": 12.0},
-				{"kind": "vent", "position": Vector2(214, 250), "direction": Vector2(0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.54, 0.38), "speed": 0.48},
-				{"kind": "vent", "position": Vector2(810, 400), "direction": Vector2(-0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.54, 0.38), "speed": 0.5},
-				{"kind": "vent", "position": Vector2(512, 124), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.18, "scale": Vector2(0.5, 0.34), "speed": 0.44, "intermittent": true, "active": 1.8, "pause": 3.4},
+				{"kind": "ground", "position": Vector2(512, 414), "size": Vector2(650, 118), "alpha": 0.16, "drift": Vector2(24, -2), "seconds": 13.0},
+				{"kind": "vent", "position": Vector2(214, 250), "direction": Vector2(0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.68, 0.48), "speed": 0.48},
+				{"kind": "vent", "position": Vector2(810, 400), "direction": Vector2(-0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.68, 0.48), "speed": 0.5},
+				{"kind": "vent", "position": Vector2(512, 142), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.3, "scale": Vector2(0.64, 0.44), "speed": 0.44, "intermittent": true, "active": 2.2, "pause": 2.6},
 			]
 		"cryo_storage_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 456), "size": Vector2(520, 76), "alpha": 0.1, "drift": Vector2(18, -2), "seconds": 12.5},
-				{"kind": "pod", "position": Vector2(180, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.24, "scale": Vector2(0.46, 0.34), "speed": 0.46},
-				{"kind": "pod", "position": Vector2(180, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.22, "scale": Vector2(0.48, 0.34), "speed": 0.44},
-				{"kind": "pod", "position": Vector2(844, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.24, "scale": Vector2(0.46, 0.34), "speed": 0.48},
-				{"kind": "pod", "position": Vector2(844, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.22, "scale": Vector2(0.48, 0.34), "speed": 0.44},
+				{"kind": "ground", "position": Vector2(512, 424), "size": Vector2(620, 110), "alpha": 0.17, "drift": Vector2(18, -2), "seconds": 13.0},
+				{"kind": "pod", "position": Vector2(180, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.36, "scale": Vector2(0.62, 0.46), "speed": 0.46},
+				{"kind": "pod", "position": Vector2(180, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.62, 0.46), "speed": 0.44},
+				{"kind": "pod", "position": Vector2(844, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.36, "scale": Vector2(0.62, 0.46), "speed": 0.48},
+				{"kind": "pod", "position": Vector2(844, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.62, 0.46), "speed": 0.44},
 			]
 		"cryo_pipe_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 430), "size": Vector2(560, 74), "alpha": 0.085, "drift": Vector2(-20, -2), "seconds": 12.0},
-				{"kind": "pipe", "position": Vector2(330, 138), "direction": Vector2(1, 0.12), "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.2, "scale": Vector2(0.42, 0.28), "speed": 0.42, "intermittent": true, "active": 1.8, "pause": 2.8},
-				{"kind": "pipe", "position": Vector2(702, 462), "direction": Vector2(-1, -0.08), "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.22, "scale": Vector2(0.42, 0.28), "speed": 0.46, "intermittent": true, "active": 1.9, "pause": 3.0},
-				{"kind": "vent", "position": Vector2(210, 124), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.52, 0.34), "speed": 0.48, "intermittent": true, "active": 2.0, "pause": 3.2},
-				{"kind": "vent", "position": Vector2(812, 476), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.18, "scale": Vector2(0.52, 0.34), "speed": 0.46, "intermittent": true, "active": 1.8, "pause": 3.0},
+				{"kind": "ground", "position": Vector2(512, 408), "size": Vector2(650, 108), "alpha": 0.15, "drift": Vector2(-20, -2), "seconds": 12.0},
+				{"kind": "pipe", "position": Vector2(330, 150), "direction": Vector2(1, 0.12), "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.34, "scale": Vector2(0.58, 0.38), "speed": 0.42, "intermittent": true, "active": 2.2, "pause": 2.4},
+				{"kind": "pipe", "position": Vector2(702, 450), "direction": Vector2(-1, -0.08), "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.36, "scale": Vector2(0.58, 0.38), "speed": 0.46, "intermittent": true, "active": 2.2, "pause": 2.6},
+				{"kind": "vent", "position": Vector2(210, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.66, 0.44), "speed": 0.48, "intermittent": true, "active": 2.2, "pause": 2.8},
+				{"kind": "vent", "position": Vector2(812, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.66, 0.44), "speed": 0.46, "intermittent": true, "active": 2.0, "pause": 2.6},
 			]
 		"cryo_sample_warehouse":
 			return [
-				{"kind": "ground", "position": Vector2(512, 448), "size": Vector2(620, 84), "alpha": 0.09, "drift": Vector2(18, -2), "seconds": 12.0},
-				{"kind": "pod", "position": Vector2(190, 282), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.44, 0.32), "speed": 0.46},
-				{"kind": "pod", "position": Vector2(190, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.18, "scale": Vector2(0.42, 0.3), "speed": 0.44},
-				{"kind": "pod", "position": Vector2(834, 282), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.44, 0.32), "speed": 0.48},
-				{"kind": "pod", "position": Vector2(834, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.18, "scale": Vector2(0.42, 0.3), "speed": 0.44},
+				{"kind": "ground", "position": Vector2(512, 420), "size": Vector2(700, 116), "alpha": 0.16, "drift": Vector2(18, -2), "seconds": 12.0},
+				{"kind": "pod", "position": Vector2(190, 282), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.6, 0.42), "speed": 0.46},
+				{"kind": "pod", "position": Vector2(190, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.3, "scale": Vector2(0.58, 0.4), "speed": 0.44},
+				{"kind": "pod", "position": Vector2(834, 282), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.6, 0.42), "speed": 0.48},
+				{"kind": "pod", "position": Vector2(834, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.3, "scale": Vector2(0.58, 0.4), "speed": 0.44},
 			]
 		"cryo_boss_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 444), "size": Vector2(700, 112), "alpha": 0.1, "drift": Vector2(22, -2), "seconds": 13.0},
-				{"kind": "vent", "position": Vector2(320, 124), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.56, 0.36), "speed": 0.46, "intermittent": true, "active": 2.0, "pause": 3.2},
-				{"kind": "vent", "position": Vector2(704, 476), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.2, "scale": Vector2(0.56, 0.36), "speed": 0.48, "intermittent": true, "active": 1.8, "pause": 3.0},
-				{"kind": "pipe", "position": Vector2(176, 224), "direction": Vector2.RIGHT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.2, "scale": Vector2(0.42, 0.28), "speed": 0.44},
-				{"kind": "pipe", "position": Vector2(848, 376), "direction": Vector2.LEFT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.2, "scale": Vector2(0.42, 0.28), "speed": 0.44},
-				{"kind": "pod", "position": Vector2(512, 150), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.22, "scale": Vector2(0.48, 0.32), "speed": 0.46},
+				{"kind": "ground", "position": Vector2(512, 420), "size": Vector2(760, 140), "alpha": 0.16, "drift": Vector2(22, -2), "seconds": 13.0},
+				{"kind": "vent", "position": Vector2(320, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.68, 0.46), "speed": 0.46, "intermittent": true, "active": 2.2, "pause": 2.8},
+				{"kind": "vent", "position": Vector2(704, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.68, 0.46), "speed": 0.48, "intermittent": true, "active": 2.0, "pause": 2.6},
+				{"kind": "pipe", "position": Vector2(176, 224), "direction": Vector2.RIGHT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.32, "scale": Vector2(0.58, 0.38), "speed": 0.44},
+				{"kind": "pipe", "position": Vector2(848, 376), "direction": Vector2.LEFT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.32, "scale": Vector2(0.58, 0.38), "speed": 0.44},
+				{"kind": "pod", "position": Vector2(512, 150), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.36, "scale": Vector2(0.62, 0.42), "speed": 0.46},
 			]
 	return [
-		{"kind": "ground", "position": Vector2(512, 438), "size": Vector2(560, 86), "alpha": 0.08, "drift": Vector2(18, -2), "seconds": 12.0},
-		{"kind": "vent", "position": Vector2(210, 232), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.18, "scale": Vector2(0.44, 0.32), "speed": 0.46},
-		{"kind": "vent", "position": Vector2(814, 420), "direction": Vector2.UP, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.18, "scale": Vector2(0.44, 0.32), "speed": 0.46},
-		{"kind": "pipe", "position": Vector2(872, 256), "direction": Vector2.LEFT, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.17, "scale": Vector2(0.38, 0.26), "speed": 0.42, "intermittent": true, "active": 1.6, "pause": 3.0},
+		{"kind": "ground", "position": Vector2(512, 412), "size": Vector2(650, 112), "alpha": 0.15, "drift": Vector2(18, -2), "seconds": 12.0},
+		{"kind": "vent", "position": Vector2(210, 232), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.3, "scale": Vector2(0.6, 0.44), "speed": 0.46},
+		{"kind": "vent", "position": Vector2(814, 420), "direction": Vector2.UP, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.3, "scale": Vector2(0.6, 0.44), "speed": 0.46},
+		{"kind": "pipe", "position": Vector2(872, 256), "direction": Vector2.LEFT, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.28, "scale": Vector2(0.52, 0.34), "speed": 0.42, "intermittent": true, "active": 2.0, "pause": 2.6},
 	]
 
 
@@ -625,7 +825,8 @@ func _add_cryo_floor_fog_layer(position: Vector2, size: Vector2, alpha: float, d
 	var fog := CRYO_FLOOR_FOG_SCENE.instantiate() as CryoFloorFogLayer
 	fog.name = "CryoFloorFogLayer"
 	fog.position = position
-	fog.z_index = 5
+	fog.z_as_relative = false
+	fog.z_index = BACKGROUND_VISUAL_Z
 	fog.configure(size, alpha, drift, Color(0.88, 0.96, 1.0, 1.0), seconds)
 	add_child(fog)
 
@@ -635,9 +836,29 @@ func _add_cryo_smoke_vent(position: Vector2, direction: Vector2, group: String, 
 	vent.name = "CryoSmokeVent"
 	vent.position = position
 	vent.rotation = direction.angle()
-	vent.z_index = 9
+	vent.z_as_relative = false
+	vent.z_index = BACKGROUND_VISUAL_Z
 	vent.configure(group, smoke, alpha, scale_value, speed, Color(0.92, 0.98, 1.0, 1.0), intermittent, active, pause)
 	add_child(vent)
+
+
+func _add_atlas_tile(node_name: String, texture: Texture2D, region: Rect2, center: Vector2, target_size: Vector2, tint: Color, z: int) -> Sprite2D:
+	var sprite := Sprite2D.new()
+	sprite.name = node_name
+	sprite.texture = texture
+	sprite.region_enabled = true
+	sprite.region_rect = region
+	sprite.centered = true
+	sprite.position = center
+	sprite.z_as_relative = false
+	sprite.z_index = BACKGROUND_VISUAL_Z
+	sprite.modulate = tint
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var region_size := region.size
+	if region_size.x > 0.0 and region_size.y > 0.0:
+		sprite.scale = Vector2(target_size.x / region_size.x, target_size.y / region_size.y)
+	add_child(sprite)
+	return sprite
 
 
 func _add_rect(node_name: String, center: Vector2, size: Vector2, color: Color, z: int) -> Polygon2D:
@@ -645,7 +866,8 @@ func _add_rect(node_name: String, center: Vector2, size: Vector2, color: Color, 
 	var rect := Polygon2D.new()
 	rect.name = node_name
 	rect.color = color
-	rect.z_index = z
+	rect.z_as_relative = false
+	rect.z_index = BACKGROUND_VISUAL_Z
 	rect.polygon = PackedVector2Array([
 		center + Vector2(-half.x, -half.y),
 		center + Vector2(half.x, -half.y),
@@ -660,7 +882,8 @@ func _add_patch(node_name: String, center: Vector2, size: Vector2, color: Color,
 	var patch := Polygon2D.new()
 	patch.name = node_name
 	patch.color = color
-	patch.z_index = z
+	patch.z_as_relative = false
+	patch.z_index = BACKGROUND_VISUAL_Z
 	var half := size * 0.5
 	patch.polygon = PackedVector2Array([
 		center + Vector2(-half.x, -half.y * 0.1),
@@ -677,7 +900,8 @@ func _add_patch(node_name: String, center: Vector2, size: Vector2, color: Color,
 func _add_line(node_name: String, points: PackedVector2Array, color: Color, width: float, z: int) -> Line2D:
 	var line := Line2D.new()
 	line.name = node_name
-	line.z_index = z
+	line.z_as_relative = false
+	line.z_index = BACKGROUND_VISUAL_Z
 	line.width = width
 	line.default_color = color
 	line.points = points
@@ -703,7 +927,8 @@ func _add_label(node_name: String, text: String, position: Vector2, color: Color
 	label.name = node_name
 	label.text = text
 	label.position = position
-	label.z_index = 31
+	label.z_as_relative = false
+	label.z_index = BACKGROUND_VISUAL_Z
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", color)
 	add_child(label)

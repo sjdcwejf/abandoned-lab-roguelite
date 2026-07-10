@@ -9,6 +9,7 @@ const FACILITY_BUTTON_TEXTURE = preload("res://tiny_wizard/assets/third_party/sc
 const CYBERPUNK_INTERIORS_TEXTURE = preload("res://tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/Cyberpunk_Interiors.png")
 const CYBERPUNK_FLOORS_TEXTURE = preload("res://tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/Cyberpunk_Interiors_Floors.png")
 const CYBERPUNK_WALLS_TEXTURE = preload("res://tiny_wizard/assets/third_party/cyberpunk_interiors_16x16/Cyberpunk_Interiors_Walls.png")
+const BACKGROUND_VISUAL_Z := -2
 
 @export var variant := "server"
 
@@ -69,17 +70,49 @@ func _build_door_frames() -> void:
 	var door_color: Color = palette["door_frame"] as Color
 	var light_color: Color = palette["door_light"] as Color
 	for door in [
-		{"position": Vector2(512, 112), "size": Vector2(160, 18), "light_position": Vector2(512, 122), "light_size": Vector2(82, 4)},
-		{"position": Vector2(512, 488), "size": Vector2(160, 18), "light_position": Vector2(512, 478), "light_size": Vector2(82, 4)},
-		{"position": Vector2(92, 300), "size": Vector2(18, 148), "light_position": Vector2(102, 300), "light_size": Vector2(4, 72)},
-		{"position": Vector2(932, 300), "size": Vector2(18, 148), "light_position": Vector2(922, 300), "light_size": Vector2(4, 72)},
+		{"dir": "up", "position": Vector2(512, 112), "size": Vector2(160, 18), "light_position": Vector2(512, 122), "light_size": Vector2(82, 4)},
+		{"dir": "down", "position": Vector2(512, 488), "size": Vector2(160, 18), "light_position": Vector2(512, 478), "light_size": Vector2(82, 4)},
+		{"dir": "left", "position": Vector2(92, 300), "size": Vector2(18, 148), "light_position": Vector2(102, 300), "light_size": Vector2(4, 72)},
+		{"dir": "right", "position": Vector2(932, 300), "size": Vector2(18, 148), "light_position": Vector2(922, 300), "light_size": Vector2(4, 72)},
 	]:
+		var direction := str(door.get("dir", ""))
+		if _is_visual_door_hidden(direction):
+			continue
 		var position: Vector2 = door.get("position", Vector2.ZERO) as Vector2
 		var size: Vector2 = door.get("size", Vector2.ZERO) as Vector2
 		var light_position: Vector2 = door.get("light_position", Vector2.ZERO) as Vector2
 		var light_size: Vector2 = door.get("light_size", Vector2.ZERO) as Vector2
 		_add_background_rect("DataCoreDoorFrame", position, size, door_color, 1)
 		_add_background_rect("DataCoreDoorLight", light_position, light_size, light_color, 2)
+
+
+func _is_visual_door_hidden(direction: String) -> bool:
+	var room := get_parent()
+	if room == null:
+		return false
+	var door_node_name := ""
+	match direction:
+		"up":
+			door_node_name = "UpDoor"
+			if room.get("hide_up_door") == true:
+				return true
+		"down":
+			door_node_name = "DownDoor"
+			if room.get("hide_down_door") == true:
+				return true
+		"left":
+			door_node_name = "LeftDoor"
+			if room.get("hide_left_door") == true:
+				return true
+		"right":
+			door_node_name = "RightDoor"
+			if room.get("hide_right_door") == true:
+				return true
+	if door_node_name != "":
+		var inherited_door := room.get_node_or_null("RoomWalls/%s" % door_node_name) as CanvasItem
+		if inherited_door != null and inherited_door.visible == false:
+			return true
+	return false
 
 
 func _build_grid() -> void:
@@ -213,7 +246,8 @@ func _build_signal_noise() -> void:
 	for segment in segments:
 		var line := Line2D.new()
 		line.name = "DataSignalNoise"
-		line.z_index = 2
+		line.z_as_relative = false
+		line.z_index = BACKGROUND_VISUAL_Z
 		line.width = 1.2
 		line.default_color = noise_color
 		line.points = PackedVector2Array(segment)
@@ -804,7 +838,8 @@ func _add_background_rect(node_name: String, center: Vector2, size: Vector2, col
 	var half := size * 0.5
 	var rect_node := Polygon2D.new()
 	rect_node.name = node_name
-	rect_node.z_index = z_value
+	rect_node.z_as_relative = false
+	rect_node.z_index = BACKGROUND_VISUAL_Z
 	rect_node.color = color
 	rect_node.polygon = PackedVector2Array([
 		center + Vector2(-half.x, -half.y),
@@ -827,7 +862,8 @@ func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, sca
 	sprite.position = position
 	sprite.scale = scale_value
 	sprite.modulate = color
-	sprite.z_index = z_value
+	sprite.z_as_relative = false
+	sprite.z_index = BACKGROUND_VISUAL_Z
 	add_child(sprite)
 
 
@@ -852,6 +888,8 @@ func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> vo
 	var half := size * 0.5
 	var body := Polygon2D.new()
 	body.name = "DataWarningStrip"
+	body.z_as_relative = false
+	body.z_index = BACKGROUND_VISUAL_Z
 	body.color = Color(0.45, 0.16, 0.09, 0.36)
 	if vertical:
 		body.polygon = PackedVector2Array([
@@ -873,7 +911,8 @@ func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> vo
 func _add_line(from: Vector2, to: Vector2, color: Color, width: float) -> void:
 	var line := Line2D.new()
 	line.name = "DataLine"
-	line.z_index = 1
+	line.z_as_relative = false
+	line.z_index = BACKGROUND_VISUAL_Z
 	line.width = width
 	line.default_color = color
 	line.points = PackedVector2Array([from, to])

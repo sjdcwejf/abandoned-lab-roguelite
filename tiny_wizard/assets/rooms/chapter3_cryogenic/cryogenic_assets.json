@@ -47,6 +47,39 @@
         "res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_smoke_vent.tscn"
       ]
     },
+    "v036fAtlasSources": {
+      "primaryFloor": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesFloor32.png",
+      "primaryWall": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesWalls.png",
+      "storageWallModules": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png",
+      "ventsPipesAndPanels": [
+        "res://tiny_wizard/assets/third_party/sci_fi_facility/tileset.png",
+        "res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png"
+      ],
+      "fallbackLabStructure": "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png",
+      "notUsedAsMainChapter3Visual": [
+        "mars_greenhouse",
+        "cyberpunk_interiors_16x16",
+        "robot_factory_tileset_pack"
+      ]
+    },
+    "v036fWallModules": [
+      "cryo_wall_panel_standard",
+      "cryo_wall_panel_insulated",
+      "cryo_wall_vent",
+      "cryo_wall_pipe",
+      "cryo_wall_storage_locker",
+      "cryo_wall_control_panel",
+      "cryo_wall_frost_corner"
+    ],
+    "v036fFloorModules": [
+      "cryo_floor_base_cold_metal",
+      "cryo_floor_panel_grid",
+      "cryo_floor_frost_edge",
+      "cryo_floor_crack_thin",
+      "cryo_floor_condensation",
+      "cryo_floor_coolant_channel",
+      "cryo_floor_low_temp_marking"
+    ],
     "collisionPolicy": "Background decals and mist effects are visual only. Existing authored blockers and interactables keep their original collision.",
     "v036cRefinements": [
       "Inherited base room wall and door art is hidden for chapter 3 rooms; CryoRoomOverlay draws the full cold-storage wall and door visuals.",
@@ -59,14 +92,29 @@
       "Deprecated the old GPUParticles2D cirle_particle-based cryo mist in CryoRoomOverlay.",
       "CryoFloorFogLayer creates one low-alpha floor fog patch per room, while CryoSmokeVent handles pod, vent and pipe leak puffs.",
       "Large side-wall freezer units were moved away from the center of side walls to reduce false door silhouettes."
-    ]
-  },
+    ],
+        "v036fRefinements": [
+            "CryoRoomOverlay now uses LandOfPixels atlas sprites for cold metal floor panels and cold-storage wall panels instead of relying on dark rectangles.",
+            "Sci-Fi Facility atlas sprites are used for refrigeration vents, coolant pipe walls and temperature control panels.",
+            "Top, bottom, left and right walls use different cryogenic structures: equipment vents, maintenance pipes, vertical coolant pipes and freezer locker walls.",
+            "Hidden door directions are filled with sealed insulated wall, storage locker, pipe or vent modules instead of door-like frames.",
+            "Floor visuals now combine cold metal grid panels, low-temperature boundary markings, coolant channels, frost edge and condensation layers.",
+            "Yellow-black warning stripes and large ice sticker shapes are not part of the chapter 3 main background language."
+        ],
+        "v036gRefinements": [
+            "All CryoRoomOverlay wall, floor, fog, vent, label and equipment visuals are pinned to the background draw layer so they cannot cover players, enemies, bosses or bullets.",
+            "CryoSmokeVent continues to load imported top-down smoke animation frames, while CryoFloorFogLayer uses Noiselong.png as low-alpha floor mist.",
+            "Mist and wall decorations remain visual only and do not add collision, damage areas, room objectives or pathing changes."
+        ]
+    },
   "tileSize": 32,
-  "baseTileset": "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png",
+  "baseTileset": "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesFloor32.png",
   "decorationTilesets": [
-    "res://tiny_wizard/assets/third_party/void_lab_tileset/laboratory floor_ walls_ and borders tileset-4.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesWalls.png",
+    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png",
     "res://tiny_wizard/assets/third_party/sci_fi_facility/tileset.png",
-    "res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesStuff.png"
+    "res://tiny_wizard/assets/third_party/sci_fi_facility/computer_spritesheet.png",
+    "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png"
   ],
   "hazardTilesets": [
     "res://tiny_wizard/interactable_objects/cryo_zone/cryo_zone.tscn"

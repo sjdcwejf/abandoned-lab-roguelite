@@ -24,6 +24,7 @@ const INNER_TOP_Y: float = 102.0
 const INNER_BOTTOM_Y: float = 498.0
 const INNER_LEFT_X: float = 76.0
 const INNER_RIGHT_X: float = 948.0
+const BACKGROUND_VISUAL_Z := -2
 
 
 func _ready() -> void:
@@ -303,7 +304,6 @@ func _build_door_system(colors: Dictionary) -> void:
 		var light_position: Vector2 = door.get("light_p", Vector2.ZERO) as Vector2
 		var light_size: Vector2 = door.get("light_s", Vector2.ZERO) as Vector2
 		if _is_visual_door_hidden(direction):
-			_build_sealed_wall_patch(direction, center, size, colors)
 			continue
 		_add_rect("FinalHiveDoorVoid", center, size, door_dark, 32)
 		_add_octagon("FinalHiveDoorBrokenMetalFrame", center, size + Vector2(24, 18), door_metal, 33)
@@ -1003,7 +1003,8 @@ func _add_rect(name_value: String, center: Vector2, size: Vector2, color: Color,
 	var half: Vector2 = size * 0.5
 	var polygon: Polygon2D = Polygon2D.new()
 	polygon.name = name_value
-	polygon.z_index = 1
+	polygon.z_as_relative = false
+	polygon.z_index = BACKGROUND_VISUAL_Z
 	polygon.color = color
 	polygon.polygon = PackedVector2Array([
 		center + Vector2(-half.x, -half.y),
@@ -1019,7 +1020,8 @@ func _add_diamond(name_value: String, center: Vector2, size: Vector2, color: Col
 	var half: Vector2 = size * 0.5
 	var polygon: Polygon2D = Polygon2D.new()
 	polygon.name = name_value
-	polygon.z_index = 1
+	polygon.z_as_relative = false
+	polygon.z_index = BACKGROUND_VISUAL_Z
 	polygon.color = color
 	polygon.polygon = PackedVector2Array([
 		center + Vector2(0, -half.y),
@@ -1036,7 +1038,8 @@ func _add_octagon(name_value: String, center: Vector2, size: Vector2, color: Col
 	var cut: Vector2 = Vector2(size.x * 0.18, size.y * 0.18)
 	var polygon: Polygon2D = Polygon2D.new()
 	polygon.name = name_value
-	polygon.z_index = 1
+	polygon.z_as_relative = false
+	polygon.z_index = BACKGROUND_VISUAL_Z
 	polygon.color = color
 	polygon.polygon = PackedVector2Array([
 		center + Vector2(-half.x + cut.x, -half.y),
@@ -1055,7 +1058,8 @@ func _add_octagon(name_value: String, center: Vector2, size: Vector2, color: Col
 func _add_line(name_value: String, points: PackedVector2Array, color: Color, width: float, _z_value: int) -> Line2D:
 	var line: Line2D = Line2D.new()
 	line.name = name_value
-	line.z_index = 1
+	line.z_as_relative = false
+	line.z_index = BACKGROUND_VISUAL_Z
 	line.width = width
 	line.default_color = color
 	line.points = points

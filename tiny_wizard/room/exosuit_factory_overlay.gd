@@ -17,6 +17,7 @@ const FLOOR_CENTER := Vector2(512, 300)
 const FLOOR_SIZE := Vector2(880, 416)
 const FLOOR_TOP_LEFT := Vector2(72, 92)
 const FLOOR_BOTTOM_RIGHT := Vector2(952, 508)
+const BACKGROUND_VISUAL_Z := -2
 
 @export var variant := "combat"
 
@@ -245,18 +246,54 @@ func _build_factory_door_frames(background_key: String) -> void:
 	if background_key == "armory_supply":
 		light_color = Color(0.22, 0.86, 1.0, 0.54)
 
-	_add_rect("FactoryNorthDoorFrame", Vector2(512, 104), Vector2(186, 34), door_color, 5)
-	_add_rect("FactorySouthDoorFrame", Vector2(512, 496), Vector2(186, 34), door_color, 5)
-	_add_rect("FactoryWestDoorFrame", Vector2(84, 300), Vector2(34, 164), door_color, 5)
-	_add_rect("FactoryEastDoorFrame", Vector2(940, 300), Vector2(34, 164), door_color, 5)
-	_add_line(Vector2(436, 104), Vector2(588, 104), light_color, 3.0, 6)
-	_add_line(Vector2(436, 496), Vector2(588, 496), light_color, 3.0, 6)
-	_add_line(Vector2(84, 238), Vector2(84, 362), light_color, 3.0, 6)
-	_add_line(Vector2(940, 238), Vector2(940, 362), light_color, 3.0, 6)
+	var doors: Array[Dictionary] = [
+		{"dir": "up", "frame": Vector2(512, 104), "size": Vector2(186, 34), "a": Vector2(436, 104), "b": Vector2(588, 104)},
+		{"dir": "down", "frame": Vector2(512, 496), "size": Vector2(186, 34), "a": Vector2(436, 496), "b": Vector2(588, 496)},
+		{"dir": "left", "frame": Vector2(84, 300), "size": Vector2(34, 164), "a": Vector2(84, 238), "b": Vector2(84, 362)},
+		{"dir": "right", "frame": Vector2(940, 300), "size": Vector2(34, 164), "a": Vector2(940, 238), "b": Vector2(940, 362)},
+	]
+	for door_value in doors:
+		var door: Dictionary = door_value
+		var direction := str(door.get("dir", ""))
+		if _is_visual_door_hidden(direction):
+			continue
+		_add_rect("FactoryDoorFrame", door.get("frame", Vector2.ZERO) as Vector2, door.get("size", Vector2.ZERO) as Vector2, door_color, 5)
+		_add_line(door.get("a", Vector2.ZERO) as Vector2, door.get("b", Vector2.ZERO) as Vector2, light_color, 3.0, 6)
 
 	if background_key in ["weapon_test", "weapon_quality", "boss_arena"]:
-		_add_warning_strip(Vector2(512, 124), Vector2(150, 12), false, 0.32)
-		_add_warning_strip(Vector2(512, 476), Vector2(150, 12), false, 0.28)
+		if not _is_visual_door_hidden("up"):
+			_add_warning_strip(Vector2(512, 124), Vector2(150, 12), false, 0.32)
+		if not _is_visual_door_hidden("down"):
+			_add_warning_strip(Vector2(512, 476), Vector2(150, 12), false, 0.28)
+
+
+func _is_visual_door_hidden(direction: String) -> bool:
+	var room := get_parent()
+	if room == null:
+		return false
+	var door_node_name := ""
+	match direction:
+		"up":
+			door_node_name = "UpDoor"
+			if room.get("hide_up_door") == true:
+				return true
+		"down":
+			door_node_name = "DownDoor"
+			if room.get("hide_down_door") == true:
+				return true
+		"left":
+			door_node_name = "LeftDoor"
+			if room.get("hide_left_door") == true:
+				return true
+		"right":
+			door_node_name = "RightDoor"
+			if room.get("hide_right_door") == true:
+				return true
+	if door_node_name != "":
+		var inherited_door := room.get_node_or_null("RoomWalls/%s" % door_node_name) as CanvasItem
+		if inherited_door != null and inherited_door.visible == false:
+			return true
+	return false
 
 
 func _build_wall_modules(background_key: String) -> void:
@@ -506,7 +543,8 @@ func _add_warning_strip(center: Vector2, size: Vector2, vertical: bool = false, 
 	var half: Vector2 = size * 0.5
 	var body := Polygon2D.new()
 	body.name = "FactoryWarningStrip"
-	body.z_index = 2
+	body.z_as_relative = false
+	body.z_index = BACKGROUND_VISUAL_Z
 	body.color = Color(0.62, 0.38, 0.08, alpha)
 	if vertical:
 		body.polygon = PackedVector2Array([
@@ -537,7 +575,8 @@ func _add_rect(rect_name: String, center: Vector2, size: Vector2, color: Color, 
 	var half: Vector2 = size * 0.5
 	var rect := Polygon2D.new()
 	rect.name = rect_name
-	rect.z_index = z_value
+	rect.z_as_relative = false
+	rect.z_index = BACKGROUND_VISUAL_Z
 	rect.color = color
 	rect.polygon = PackedVector2Array([
 		center + Vector2(-half.x, -half.y),
@@ -552,7 +591,8 @@ func _add_oil_scuff(center: Vector2, size: Vector2, alpha: float) -> void:
 	var half: Vector2 = size * 0.5
 	var scuff := Polygon2D.new()
 	scuff.name = "FactoryOilScuff"
-	scuff.z_index = 3
+	scuff.z_as_relative = false
+	scuff.z_index = BACKGROUND_VISUAL_Z
 	scuff.color = Color(0.01, 0.01, 0.012, alpha)
 	scuff.polygon = PackedVector2Array([
 		center + Vector2(-half.x, -half.y * 0.2),
@@ -577,7 +617,8 @@ func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, sca
 	sprite.position = position
 	sprite.scale = scale_value
 	sprite.modulate = color
-	sprite.z_index = z_value
+	sprite.z_as_relative = false
+	sprite.z_index = BACKGROUND_VISUAL_Z
 	add_child(sprite)
 
 
@@ -630,7 +671,8 @@ func _add_floor_label(text: String, position: Vector2, color: Color) -> void:
 	label.text = text
 	label.position = position
 	label.modulate = color
-	label.z_index = 3
+	label.z_as_relative = false
+	label.z_index = BACKGROUND_VISUAL_Z
 	label.scale = Vector2(0.55, 0.55)
 	add_child(label)
 
@@ -638,7 +680,8 @@ func _add_floor_label(text: String, position: Vector2, color: Color) -> void:
 func _add_line(from: Vector2, to: Vector2, color: Color, width: float, z_value: int = 1) -> void:
 	var line := Line2D.new()
 	line.name = "FactoryLine"
-	line.z_index = z_value
+	line.z_as_relative = false
+	line.z_index = BACKGROUND_VISUAL_Z
 	line.width = width
 	line.default_color = color
 	line.points = PackedVector2Array([from, to])
