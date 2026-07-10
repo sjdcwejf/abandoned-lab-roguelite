@@ -1,6 +1,66 @@
 {
   "chapterName": "低温封存区",
   "theme": "cryogenic_lab",
+  "backgroundTheme": {
+    "name": "chapter_3_cryo_background_theme",
+    "variants": {
+      "start": "cryo_control_room",
+      "combat": "cryo_combat_room",
+      "pod": "cryo_storage_room",
+      "vent": "cryo_pipe_room",
+      "reward": "cryo_sample_warehouse",
+      "elite": "cryo_sample_warehouse",
+      "boss": "cryo_boss_room"
+    },
+    "floorRules": [
+      "cold gray metal base panels",
+      "low temperature coolant channels",
+      "frost edge decals",
+      "condensation marks",
+      "ice crack decals",
+      "blue-white cold storage boundary lines"
+    ],
+    "wallRules": [
+      "cold storage outer walls",
+      "inner frosted metal rim",
+      "coolant pipes",
+      "refrigeration vents",
+      "temperature panels",
+      "frosted corners",
+      "sealed wall segment for hidden doors"
+    ],
+    "mistEffects": {
+      "CryoFloorFogLayer": "Noiselong.png driven low-alpha drifting floor fog near pods, doors, corners and freezer units",
+      "CryoSmokeVent": "top-down smoke sprite loops for local freezer vents, pod leaks and damaged coolant pipe steam"
+    },
+    "importedEffectAssets": {
+      "root": "res://tiny_wizard/assets/effects/chapter3_cryo_mist/",
+      "noise": "res://tiny_wizard/assets/effects/chapter3_cryo_mist/noise/Noiselong.png",
+      "smokeFrameFolders": [
+        "res://tiny_wizard/assets/effects/chapter3_cryo_mist/smoke/smoke_bright_gray/smoke9/",
+        "res://tiny_wizard/assets/effects/chapter3_cryo_mist/smoke/smoke_bright_gray/smoke10/",
+        "res://tiny_wizard/assets/effects/chapter3_cryo_mist/smoke/smoke_middle_gray/smoke9/",
+        "res://tiny_wizard/assets/effects/chapter3_cryo_mist/smoke/smoke_middle_gray/smoke10/"
+      ],
+      "scenes": [
+        "res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_floor_fog_layer.tscn",
+        "res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_smoke_vent.tscn"
+      ]
+    },
+    "collisionPolicy": "Background decals and mist effects are visual only. Existing authored blockers and interactables keep their original collision.",
+    "v036cRefinements": [
+      "Inherited base room wall and door art is hidden for chapter 3 rooms; CryoRoomOverlay draws the full cold-storage wall and door visuals.",
+      "Only connected directions draw passable frosted cryo door frames.",
+      "Unconnected directions draw no door-like structures; the continuous cryo wall remains uninterrupted.",
+      "Cryo mist uses low-alpha soft fog and pale cold-white particles instead of bright cyan energy lines."
+    ],
+    "v036eRefinements": [
+      "Imported Noiselong.png for drifting floor fog and smoke9/smoke10 bright/middle gray frames for local freezer steam.",
+      "Deprecated the old GPUParticles2D cirle_particle-based cryo mist in CryoRoomOverlay.",
+      "CryoFloorFogLayer creates one low-alpha floor fog patch per room, while CryoSmokeVent handles pod, vent and pipe leak puffs.",
+      "Large side-wall freezer units were moved away from the center of side walls to reduce false door silhouettes."
+    ]
+  },
   "tileSize": 32,
   "baseTileset": "res://tiny_wizard/assets/third_party/warped_top_down_lab/Tileset.png",
   "decorationTilesets": [
@@ -48,5 +108,5 @@
     "sci_fi_facility": 16,
     "land_of_pixels_lab": 32
   },
-  "notes": "Third chapter first playable pass is connected through reusable room scenes, procedural cryogenic overlays and CryoZone hazards. Imported tilesets remain the preferred art source for future final room art."
+  "notes": "Third chapter playable rooms use reusable room scenes plus CryoRoomOverlay for chapter_3_cryo_background_theme visuals, cold storage wall coverage, cryogenic floor decals and local cryo mist effects. Imported tilesets remain the preferred art source for future final room art."
 }
