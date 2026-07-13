@@ -1,4 +1,4 @@
-class_name MotherInterrogationRoom
+class_name CoreInterferenceRoom
 extends Room
 
 

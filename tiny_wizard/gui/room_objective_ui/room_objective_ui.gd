@@ -220,7 +220,7 @@ func _get_completion_text() -> String:
 			if _current_room.has_meta("event_completion_text"):
 				return str(_current_room.get_meta("event_completion_text"))
 			return "封锁解除：通讯终端已重启。"
-		"data_satellite":
+		"data_comm_control":
 			if _current_room.has_meta("event_completion_text"):
 				return str(_current_room.get_meta("event_completion_text"))
 			return "封锁解除：控制节点已关闭。"

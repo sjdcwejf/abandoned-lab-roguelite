@@ -488,7 +488,7 @@ func _make_default_objective() -> Dictionary:
 				"target_total": 3,
 				"completion_text": "封锁解除：通讯终端已重启。",
 			}
-		"data_satellite":
+		"data_comm_control":
 			return {
 				"type": OBJECTIVE_INTERACT_TARGETS,
 				"objective_text": "关闭控制节点 0/3。",
@@ -522,7 +522,7 @@ func _make_default_objective() -> Dictionary:
 				"objective_text": "激活数据终端。",
 				"completion_text": "数据节点已清除。",
 			}
-		"final_interrogation":
+		"final_core_interference":
 			return {
 				"type": OBJECTIVE_READ_ARCHIVE,
 				"objective_text": "激活核心终端。",

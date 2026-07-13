@@ -13,7 +13,7 @@ size = Vector2(120, 84)
 
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("2_script")
-lab_room_type = "pollution"
+lab_room_type = "data_comm_control"
 lab_room_label = "通讯控制区"
 event_objective_text = "关闭控制节点 0/3，并清理房内异常单位。"
 event_target_label = "控制节点"
@@ -22,7 +22,7 @@ event_target_success_message = "控制节点已关闭"
 
 [node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
 script = ExtResource("3_overlay")
-variant = "satellite"
+variant = "comm_control"
 
 [node name="LeftSignalBankBlocker" type="StaticBody2D" parent="." index="8"]
 position = Vector2(214, 212)
@@ -40,27 +40,27 @@ collision_mask = 15
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightSignalBankBlocker"]
 shape = SubResource("RectangleShape2D_server")
 
-[node name="SatelliteNodes" type="Node2D" parent="." index="10"]
+[node name="ControlNodes" type="Node2D" parent="." index="10"]
 
-[node name="DisguiseNodeA" parent="SatelliteNodes" instance=ExtResource("4_target")]
+[node name="ControlNodeA" parent="ControlNodes" instance=ExtResource("4_target")]
 position = Vector2(356, 384)
 max_health = 5
 display_name = "控制节点"
 destroyed_display_name = "节点关闭"
 
-[node name="DisguiseNodeB" parent="SatelliteNodes" instance=ExtResource("4_target")]
+[node name="ControlNodeB" parent="ControlNodes" instance=ExtResource("4_target")]
 position = Vector2(512, 302)
 max_health = 5
 display_name = "控制节点"
 destroyed_display_name = "节点关闭"
 
-[node name="DisguiseNodeC" parent="SatelliteNodes" instance=ExtResource("4_target")]
+[node name="ControlNodeC" parent="ControlNodes" instance=ExtResource("4_target")]
 position = Vector2(668, 220)
 max_health = 5
 display_name = "控制节点"
 destroyed_display_name = "节点关闭"
 
-[node name="SatelliteArchiveTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
+[node name="ControlDataTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
 position = Vector2(512, 454)
 archive_id = "control_data_terminal"
 archive_title = "数据终端"

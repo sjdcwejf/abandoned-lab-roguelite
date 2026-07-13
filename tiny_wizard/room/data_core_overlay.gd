@@ -292,7 +292,7 @@ func _background_palette() -> Dictionary:
 			palette["floor"] = Color(0.04, 0.047, 0.058, 0.72)
 			palette["panel"] = Color(0.022, 0.04, 0.06, 0.34)
 			palette["edge_light"] = Color(0.32, 0.38, 0.82, 0.2)
-		"satellite":
+		"comm_control":
 			palette["floor"] = Color(0.032, 0.037, 0.052, 0.76)
 			palette["panel"] = Color(0.018, 0.03, 0.058, 0.38)
 			palette["edge_light"] = Color(0.25, 0.4, 0.86, 0.2)
@@ -328,7 +328,7 @@ func _variant_floor_panels() -> Array[Dictionary]:
 				{"position": Vector2(252, 222), "size": Vector2(168, 132), "color": Color(0.014, 0.032, 0.054, 0.3)},
 				{"position": Vector2(772, 382), "size": Vector2(168, 132), "color": Color(0.014, 0.032, 0.054, 0.3)},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"position": Vector2(512, 300), "size": Vector2(360, 244), "color": Color(0.016, 0.028, 0.064, 0.3), "shape": "diamond"},
 				{"position": Vector2(512, 300), "size": Vector2(258, 184), "color": Color(0.018, 0.024, 0.05, 0.4), "shape": "octagon"},
@@ -387,7 +387,7 @@ func _variant_wall_lights() -> Array[Dictionary]:
 				{"position": Vector2(724, 112), "size": Vector2(66, 4)},
 				{"position": Vector2(512, 488), "size": Vector2(116, 4)},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"position": Vector2(208, 112), "size": Vector2(64, 4)},
 				{"position": Vector2(816, 112), "size": Vector2(64, 4)},
@@ -445,7 +445,7 @@ func _variant_wall_modules() -> Array[Dictionary]:
 				{"position": Vector2(746, 136), "size": Vector2(92, 18), "kind": "port", "color": Color(0.032, 0.052, 0.07, 0.28)},
 				{"position": Vector2(512, 464), "size": Vector2(146, 16), "kind": "screen", "color": Color(0.026, 0.042, 0.06, 0.28)},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"position": Vector2(180, 158), "size": Vector2(66, 18), "kind": "port", "color": Color(0.038, 0.046, 0.076, 0.34)},
 				{"position": Vector2(844, 158), "size": Vector2(66, 18), "kind": "port", "color": Color(0.038, 0.046, 0.076, 0.34)},
@@ -497,7 +497,7 @@ func _variant_identity_marks() -> Array[Dictionary]:
 				{"position": Vector2(512, 286), "size": Vector2(86, 48), "shape": "octagon", "color": Color(0.32, 0.72, 0.96, 0.11)},
 				{"position": Vector2(512, 216), "size": Vector2(246, 4), "color": Color(0.32, 0.72, 0.96, 0.15)},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"position": Vector2(512, 300), "size": Vector2(310, 3), "color": Color(0.42, 0.5, 0.95, 0.14)},
 				{"position": Vector2(512, 300), "size": Vector2(3, 210), "color": Color(0.42, 0.5, 0.95, 0.14)},
@@ -548,7 +548,7 @@ func _variant_data_lines() -> Array[Dictionary]:
 				{"from": Vector2(772, 382), "to": Vector2(604, 328), "color": Color(0.46, 0.5, 0.95, 0.14), "width": 1.6},
 				{"from": Vector2(360, 374), "to": Vector2(664, 374), "color": Color(0.32, 0.72, 0.92, 0.12), "width": 1.5},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"from": Vector2(512, 158), "to": Vector2(512, 442), "color": Color(0.44, 0.44, 0.95, 0.18), "width": 2.0},
 				{"from": Vector2(236, 300), "to": Vector2(788, 300), "color": Color(0.3, 0.74, 0.95, 0.15), "width": 2.0},
@@ -600,7 +600,7 @@ func _variant_equipment() -> Array[Dictionary]:
 				{"position": Vector2(772, 382), "size": Vector2(112, 110), "kind": "relay", "accent": Color(0.32, 0.94, 1.0, 0.85)},
 				{"position": Vector2(512, 126), "size": Vector2(340, 42), "kind": "antenna", "accent": Color(0.9, 0.52, 0.18, 0.8)},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"position": Vector2(214, 212), "size": Vector2(120, 84), "kind": "server", "accent": Color(0.95, 0.22, 0.18, 0.8)},
 				{"position": Vector2(810, 388), "size": Vector2(120, 84), "kind": "server", "accent": Color(0.95, 0.22, 0.18, 0.8)},
@@ -649,7 +649,7 @@ func _variant_asset_props() -> Array[Dictionary]:
 				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(772, 382), "scale": Vector2(2.1, 2.1), "modulate": Color(0.7, 0.95, 1.0, 0.92)},
 				{"texture": FACILITY_BUTTON_TEXTURE, "region": button_region, "position": Vector2(512, 132), "scale": Vector2(1.5, 1.5), "modulate": Color(0.95, 0.46, 0.26, 0.92)},
 			]
-		"satellite":
+		"comm_control":
 			return [
 				{"texture": FACILITY_ORB_TEXTURE, "region": orb_region, "position": Vector2(512, 300), "scale": Vector2(2.2, 2.2), "modulate": Color(1.0, 0.22, 0.18, 0.9)},
 				{"texture": FACILITY_COMPUTER_TEXTURE, "region": computer_region, "position": Vector2(214, 212), "scale": Vector2(1.9, 1.9), "modulate": Color(1.0, 0.45, 0.35, 0.9)},
@@ -694,7 +694,7 @@ func _variant_cyberpunk_props() -> Array[Dictionary]:
 				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(96, 48, 96, 48), "position": Vector2(512, 300), "scale": Vector2(1.75, 1.55), "modulate": Color(0.9, 0.78, 0.48, 0.94), "z_index": 5},
 				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(192, 112, 48, 32), "position": Vector2(512, 430), "scale": Vector2(1.4, 1.4), "z_index": 5},
 			]
-		"comm", "satellite":
+		"comm", "comm_control":
 			return [
 				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(96, 0, 112, 48), "position": Vector2(512, 126), "scale": Vector2(1.8, 1.3), "z_index": 4},
 				{"texture": CYBERPUNK_INTERIORS_TEXTURE, "region": Rect2(176, 96, 64, 32), "position": Vector2(252, 222), "scale": Vector2(1.2, 1.2), "z_index": 5},
@@ -734,7 +734,7 @@ func _variant_solid_blocking_props() -> Array[Dictionary]:
 
 func _variant_alert_marks() -> Array[Dictionary]:
 	match variant:
-		"satellite":
+		"comm_control":
 			return [
 				{"position": Vector2(512, 150), "size": Vector2(220, 6), "color": Color(0.72, 0.18, 0.18, 0.18)},
 				{"position": Vector2(512, 450), "size": Vector2(220, 6), "color": Color(0.72, 0.18, 0.18, 0.14)},

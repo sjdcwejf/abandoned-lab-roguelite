@@ -229,7 +229,7 @@ func _get_room_symbol(room_type: String) -> String:
 			return "事"
 		"data_comm":
 			return "事"
-		"data_satellite":
+		"data_comm_control":
 			return "事"
 		"archive":
 			return "档"
@@ -266,7 +266,7 @@ func _get_symbol_color(room_type: String, is_current: bool, _is_explored: bool) 
 			return Color(0.5, 1.0, 0.42, 1.0)
 		"data_comm":
 			return Color(0.44, 0.92, 1.0, 1.0)
-		"data_satellite":
+		"data_comm_control":
 			return Color(1.0, 0.38, 0.32, 1.0)
 		"archive":
 			return Color(0.98, 0.78, 0.34, 1.0)
@@ -322,7 +322,7 @@ func _get_type_color(room_type: String) -> Color:
 			return Color(0.12, 0.42, 0.18, 0.92)
 		"data_comm":
 			return Color(0.08, 0.36, 0.46, 0.92)
-		"data_satellite":
+		"data_comm_control":
 			return Color(0.48, 0.1, 0.08, 0.92)
 		"archive":
 			return Color(0.5, 0.32, 0.07, 0.92)
@@ -343,7 +343,7 @@ func _get_room_tooltip(room: Room, is_explored: bool, is_current: bool) -> Strin
 
 
 func _is_special_room(room_type: String) -> bool:
-	return room_type in ["start", "boss", "merchant", "reward", "weapon", "pollution", "data_comm", "data_satellite", "archive", "cryo_pod", "cryo_vent", "elite"]
+	return room_type in ["start", "boss", "merchant", "reward", "weapon", "pollution", "data_comm", "data_comm_control", "archive", "cryo_pod", "cryo_vent", "elite"]
 
 
 func _make_panel_style() -> StyleBoxFlat:

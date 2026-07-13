@@ -30,7 +30,7 @@ const POLLUTION_EVENT_SOURCE_POSITIONS := [
 @export var play_tutorial := true
 @export var dungeon_seed := 0
 @export var debug_start_chapter := 0
-@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_satellite", "cryo_pod", "final_interrogation", "final_signal", "final_antechamber", "weapon", "archive", "boss") var debug_start_room_type := ""
+@export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_comm_control", "cryo_pod", "final_core_interference", "final_signal", "final_antechamber", "weapon", "archive", "boss") var debug_start_room_type := ""
 @export var debug_override_seed := 0
 @export var start_room_coord := Vector2i.ZERO
 @export var tiemu_character_scene: PackedScene
@@ -485,11 +485,11 @@ func _get_debug_target_label(target_type: String) -> String:
 			return "污染事件房"
 		"data_comm":
 			return "通讯塔控制室"
-		"data_satellite":
+		"data_comm_control":
 			return "通讯控制区"
 		"cryo_pod":
 			return "冷冻舱事件房"
-		"final_interrogation":
+		"final_core_interference":
 			return "核心干扰室"
 		"final_signal":
 			return "核心终端室"
@@ -505,7 +505,7 @@ func _debug_find_room(target_type: String) -> Room:
 	if target_type == "event":
 		for room_pos in rooms:
 			var event_room := rooms[room_pos] as Room
-			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod", "final_interrogation", "final_signal"]:
+			if event_room != null and event_room.lab_room_type in ["pollution", "data_comm", "data_comm_control", "cryo_pod", "final_core_interference", "final_signal"]:
 				return event_room
 	for room_pos in rooms:
 		var room := rooms[room_pos] as Room
@@ -1482,11 +1482,11 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "污染事件房"
 		"data_comm":
 			return "数据事件房"
-		"data_satellite":
+		"data_comm_control":
 			return "数据事件房"
 		"final_transition":
 			return "高危战斗区"
-		"final_interrogation":
+		"final_core_interference":
 			return "核心干扰室"
 		"final_signal":
 			return "核心终端室"
@@ -1557,11 +1557,11 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			return "清除原质污染源，并肃清房内样本。"
 		"data_comm":
 			return "重启通讯终端 0/3。"
-		"data_satellite":
+		"data_comm_control":
 			return "关闭控制节点 0/3。"
 		"final_transition":
 			return "清除房间内异常单位。"
-		"final_interrogation":
+		"final_core_interference":
 			return "激活核心终端。"
 		"final_signal":
 			return "激活核心终端。"

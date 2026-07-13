@@ -44,13 +44,13 @@ const EXOSUIT_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_
 const DATA_CORE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_start_room.tscn")
 const DATA_CORE_SERVER_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_server_room.tscn")
 const DATA_CORE_COMM_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_comm_room.tscn")
-const DATA_CORE_SATELLITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_satellite_room.tscn")
+const DATA_CORE_COMM_CONTROL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_comm_control_room.tscn")
 const DATA_CORE_ARCHIVE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_archive_room.tscn")
 const DATA_CORE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_supply_station_room.tscn")
 const DATA_CORE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn")
 const MOTHER_HIVE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_start_room.tscn")
 const MOTHER_HIVE_TRANSITION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_transition_room.tscn")
-const MOTHER_HIVE_INTERROGATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_interrogation_room.tscn")
+const MOTHER_HIVE_CORE_INTERFERENCE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_core_interference_room.tscn")
 const MOTHER_HIVE_SIGNAL_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_signal_room.tscn")
 const MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_antechamber_room.tscn")
 const MOTHER_HIVE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_supply_station_room.tscn")
@@ -108,7 +108,7 @@ const DATA_CORE_COMBAT_ROOM_SCENES := [
 
 const DATA_CORE_EVENT_ROOM_SCENES := [
 	DATA_CORE_COMM_ROOM_SCENE,
-	DATA_CORE_SATELLITE_ROOM_SCENE,
+	DATA_CORE_COMM_CONTROL_ROOM_SCENE,
 ]
 
 const MOTHER_HIVE_COMBAT_ROOM_SCENES := [
@@ -374,11 +374,11 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"main_path_room_count": 7,
 				"reward_room_count": 0,
 				"layout_radius": 4,
-				"main_room_types": ["combat", "data_comm", "data_satellite", "archive"],
+				"main_room_types": ["combat", "data_comm", "data_comm_control", "archive"],
 				"start_label": "数据中枢入口",
 				"combat_label_prefix": "服务器机房",
 				"data_comm_label": "通讯塔控制室",
-				"data_satellite_label": "通讯控制区",
+				"data_comm_control_label": "通讯控制区",
 				"archive_label": "数据封存区",
 				"merchant_label": "渡鸦数据补给站",
 				"boss_label": "清理协议AI核心室",
@@ -389,7 +389,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"start_room_scene": DATA_CORE_START_ROOM_SCENE,
 				"combat_room_scenes": DATA_CORE_COMBAT_ROOM_SCENES,
 				"data_comm_room_scenes": [DATA_CORE_COMM_ROOM_SCENE],
-				"data_satellite_room_scenes": [DATA_CORE_SATELLITE_ROOM_SCENE],
+				"data_comm_control_room_scenes": [DATA_CORE_COMM_CONTROL_ROOM_SCENE],
 				"archive_room_scenes": [DATA_CORE_ARCHIVE_ROOM_SCENE],
 				"reward_room_scenes": [],
 				"weapon_room_scenes": [],
@@ -406,10 +406,10 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"main_path_room_count": 8,
 				"reward_room_count": 2,
 				"layout_radius": 4,
-				"main_room_types": ["final_transition", "final_interrogation", "final_signal", "final_antechamber", "final_transition"],
+				"main_room_types": ["final_transition", "final_core_interference", "final_signal", "final_antechamber", "final_transition"],
 				"start_label": "母巢入口",
 				"final_transition_label": "高危战斗区",
-				"final_interrogation_label": "核心干扰室",
+				"final_core_interference_label": "核心干扰室",
 				"final_signal_label": "核心终端室",
 				"final_antechamber_label": "Boss 前战斗区",
 				"reward_label_prefix": "高危奖励房",
@@ -422,7 +422,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"start_room_scene": MOTHER_HIVE_START_ROOM_SCENE,
 				"combat_room_scenes": MOTHER_HIVE_COMBAT_ROOM_SCENES,
 				"final_transition_room_scenes": [MOTHER_HIVE_TRANSITION_ROOM_SCENE],
-				"final_interrogation_room_scenes": [MOTHER_HIVE_INTERROGATION_ROOM_SCENE],
+				"final_core_interference_room_scenes": [MOTHER_HIVE_CORE_INTERFERENCE_ROOM_SCENE],
 				"final_signal_room_scenes": [MOTHER_HIVE_SIGNAL_ROOM_SCENE],
 				"final_antechamber_room_scenes": [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE],
 				"reward_room_scenes": [MOTHER_HIVE_TRANSITION_ROOM_SCENE, MOTHER_HIVE_SIGNAL_ROOM_SCENE],
@@ -711,9 +711,9 @@ static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 		"combat": (chapter_config.get("combat_room_scenes", COMBAT_ROOM_SCENES) as Array).duplicate(),
 		"pollution": (chapter_config.get("pollution_room_scenes", [COMBAT_ROOM_A_SCENE]) as Array).duplicate(),
 		"data_comm": (chapter_config.get("data_comm_room_scenes", [DATA_CORE_COMM_ROOM_SCENE]) as Array).duplicate(),
-		"data_satellite": (chapter_config.get("data_satellite_room_scenes", [DATA_CORE_SATELLITE_ROOM_SCENE]) as Array).duplicate(),
+		"data_comm_control": (chapter_config.get("data_comm_control_room_scenes", [DATA_CORE_COMM_CONTROL_ROOM_SCENE]) as Array).duplicate(),
 		"final_transition": (chapter_config.get("final_transition_room_scenes", [MOTHER_HIVE_TRANSITION_ROOM_SCENE]) as Array).duplicate(),
-		"final_interrogation": (chapter_config.get("final_interrogation_room_scenes", [MOTHER_HIVE_INTERROGATION_ROOM_SCENE]) as Array).duplicate(),
+		"final_core_interference": (chapter_config.get("final_core_interference_room_scenes", [MOTHER_HIVE_CORE_INTERFERENCE_ROOM_SCENE]) as Array).duplicate(),
 		"final_signal": (chapter_config.get("final_signal_room_scenes", [MOTHER_HIVE_SIGNAL_ROOM_SCENE]) as Array).duplicate(),
 		"final_antechamber": (chapter_config.get("final_antechamber_room_scenes", [MOTHER_HIVE_ANTECHAMBER_ROOM_SCENE]) as Array).duplicate(),
 		"cryo_pod": (chapter_config.get("cryo_pod_room_scenes", [CRYO_POD_ROOM_SCENE]) as Array).duplicate(),
@@ -745,12 +745,12 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return [COMBAT_ROOM_A_SCENE]
 		"data_comm":
 			return [DATA_CORE_COMM_ROOM_SCENE]
-		"data_satellite":
-			return [DATA_CORE_SATELLITE_ROOM_SCENE]
+		"data_comm_control":
+			return [DATA_CORE_COMM_CONTROL_ROOM_SCENE]
 		"final_transition":
 			return [MOTHER_HIVE_TRANSITION_ROOM_SCENE]
-		"final_interrogation":
-			return [MOTHER_HIVE_INTERROGATION_ROOM_SCENE]
+		"final_core_interference":
+			return [MOTHER_HIVE_CORE_INTERFERENCE_ROOM_SCENE]
 		"final_signal":
 			return [MOTHER_HIVE_SIGNAL_ROOM_SCENE]
 		"final_antechamber":
@@ -816,7 +816,7 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 				"target_total": 3,
 				"completion_text": "封锁解除：通讯终端已重启。",
 			}
-		"data_satellite":
+		"data_comm_control":
 			return {
 				"type": Room.OBJECTIVE_INTERACT_TARGETS,
 				"objective_text": "关闭控制节点 0/3。",
@@ -830,7 +830,7 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 				"objective_text": "清除房间内异常单位。",
 				"completion_text": "封锁解除：异常单位已清除。",
 			}
-		"final_interrogation":
+		"final_core_interference":
 			return {
 				"type": Room.OBJECTIVE_READ_ARCHIVE,
 				"objective_text": "激活核心终端。",
@@ -1156,7 +1156,7 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 		if room_type == "merchant":
 			if int(objective.get("target_total", 0)) > 0:
 				errors.append("Map validation failed: shop has event targets")
-		if room_type in ["pollution", "data_comm", "data_satellite", "cryo_pod"]:
+		if room_type in ["pollution", "data_comm", "data_comm_control", "cryo_pod"]:
 			var target_total := int(objective.get("target_total", 0))
 			if target_total != 3:
 				errors.append("Map validation failed: event target count mismatch in %s" % room_type)
@@ -1259,7 +1259,7 @@ static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_confi
 					errors.append("Map validation failed: shop has chest")
 				if room.has_node("Enemies") and room.get_node("Enemies").get_child_count() > 0:
 					errors.append("Map validation failed: shop has enemies")
-			"pollution", "data_comm", "data_satellite", "cryo_pod":
+			"pollution", "data_comm", "data_comm_control", "cryo_pod":
 				if room.has_method("get_event_target_total"):
 					var target_total := int(room.call("get_event_target_total"))
 					if target_total != 3:
@@ -1355,12 +1355,12 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 			return str(chapter_config.get("pollution_label", "污染事件房"))
 		"data_comm":
 			return str(chapter_config.get("data_comm_label", "通讯塔控制室"))
-		"data_satellite":
-			return str(chapter_config.get("data_satellite_label", "通讯控制区"))
+		"data_comm_control":
+			return str(chapter_config.get("data_comm_control_label", "通讯控制区"))
 		"final_transition":
 			return str(chapter_config.get("final_transition_label", "高危战斗区"))
-		"final_interrogation":
-			return str(chapter_config.get("final_interrogation_label", "核心干扰室"))
+		"final_core_interference":
+			return str(chapter_config.get("final_core_interference_label", "核心干扰室"))
 		"final_signal":
 			return str(chapter_config.get("final_signal_label", "核心终端室"))
 		"final_antechamber":

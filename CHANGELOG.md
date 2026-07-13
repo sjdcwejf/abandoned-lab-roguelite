@@ -4,6 +4,25 @@
 
 自 2026-06-22 起，个人开发分支产生的更新在标题末尾使用 `｜姓名` 标注负责人，便于合并 `xiankai-test`、`haitian-test` 与 `playtest` 时确认来源。先凯负责的更新统一标注为 `｜先凯`。
 
+## v0.3.6h - 内部房间命名债清理｜先凯
+
+日期：2026-07-13
+
+### 调整
+
+- 调整最终章“核心干扰室”的内部脚本、场景和房间类型命名，从旧的 `mother_interrogation` / `final_interrogation` 统一为 `core_interference` / `final_core_interference`。
+- 调整第五章“通讯控制区”的内部场景、房间类型和背景 variant 命名，从旧的 `data_satellite` / `satellite` 统一为 `data_comm_control` / `comm_control`。
+- 同步 Debug Chapter Menu、小地图、房间目标 UI、章节生成器和开发文档中的内部房间类型示例。
+- 保留玩家可见名称、房间目标、终端交互、章节流程、小地图 reveal 和 Debug Chapter Menu 构筑保留逻辑不变。
+
+### 删除
+
+- 删除未被引用且内容重复的旧最终章 `lab_mother_hive_recall_room.tscn` 场景，避免后续误以为仍存在“召回腔/审讯室”主流程房间。
+
+### 修复
+
+- 修复 active 代码中仍保留“母体审讯室 / satellite”内部命名导致后续开发误读的问题。
+
 ## v0.3.6g - 全章节假门视觉清理与第三章冷气可见性修正｜先凯
 
 日期：2026-07-10

@@ -149,7 +149,7 @@ func _add_target_options() -> void:
 	var entries: Array[Dictionary] = [
 		{"label": "出生房", "target": "none"},
 		{"label": "事件房", "target": "event"},
-		{"label": "核心干扰室", "target": "final_interrogation"},
+		{"label": "核心干扰室", "target": "final_core_interference"},
 		{"label": "核心终端室", "target": "final_signal"},
 		{"label": "Boss 前战斗区", "target": "final_antechamber"},
 		{"label": "武器房", "target": "weapon"},

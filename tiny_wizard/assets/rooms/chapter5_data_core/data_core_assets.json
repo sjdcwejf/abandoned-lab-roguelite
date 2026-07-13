@@ -12,7 +12,7 @@
     "start": "res://tiny_wizard/room/room_types/lab_data_core_start_room.tscn",
     "server": "res://tiny_wizard/room/room_types/lab_data_core_server_room.tscn",
     "communication": "res://tiny_wizard/room/room_types/lab_data_core_comm_room.tscn",
-    "control": "res://tiny_wizard/room/room_types/lab_data_core_satellite_room.tscn",
+    "control": "res://tiny_wizard/room/room_types/lab_data_core_comm_control_room.tscn",
     "sealed_data": "res://tiny_wizard/room/room_types/lab_data_core_archive_room.tscn",
     "merchant": "res://tiny_wizard/room/room_types/lab_data_core_supply_station_room.tscn",
     "boss": "res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn"
