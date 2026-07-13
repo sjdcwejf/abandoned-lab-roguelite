@@ -39,7 +39,6 @@ func _build_hive_background() -> void:
 	var colors: Dictionary = _palette()
 	_build_floor_system(colors)
 	_build_wall_system(colors)
-	_build_door_system(colors)
 	_build_variant_template(colors)
 	_build_subtle_pulses(colors)
 
@@ -50,7 +49,16 @@ func _hide_inherited_lab_art() -> void:
 		return
 	var inherited_walls := room.get_node_or_null("RoomWalls") as CanvasItem
 	if inherited_walls != null:
-		inherited_walls.visible = false
+		_hide_canvas_tree(inherited_walls)
+		if inherited_walls is Sprite2D:
+			(inherited_walls as Sprite2D).texture = null
+
+
+func _hide_canvas_tree(node: Node) -> void:
+	if node is CanvasItem:
+		(node as CanvasItem).visible = false
+	for child in node.get_children():
+		_hide_canvas_tree(child)
 
 
 func _build_floor_system(colors: Dictionary) -> void:

@@ -34,6 +34,7 @@ const CLOSED_DOORS = [
 
 const PLAYER_CHARACTER = preload("res://tiny_wizard/player/player_character.tscn")
 const GUI_SCENE = preload("res://tiny_wizard/gui/gui.tscn")
+const CHAPTER_DOOR_VISUALS_SCRIPT = preload("res://tiny_wizard/room/chapter_door_visuals.gd")
 
 @onready var doors = [
 	$RoomWalls/RightDoor,
@@ -66,6 +67,7 @@ var reward_claimed := false
 var objective_initial_enemy_count := 0
 var pollution_source_total := 0
 var pollution_source_remaining := 0
+var _chapter_door_visuals: Node2D
 
 signal door_entered(direction)
 signal room_cleared(room: Room)
@@ -74,6 +76,7 @@ signal objective_progress_changed(room: Room)
 func _ready():
 	_normalize_room_blockers(self)
 	_ensure_default_room_objective()
+	_ensure_chapter_door_visuals()
 	call_deferred("_connect_archive_terminals")
 	objective_initial_enemy_count = get_remaining_enemy_count()
 	if get_tree().current_scene != self:
@@ -89,6 +92,28 @@ func _ready():
 		var gui = GUI_SCENE.instantiate()
 		add_child(gui)
 		player_node.gui_path = gui.get_path()
+
+
+func _ensure_chapter_door_visuals() -> void:
+	if Engine.is_editor_hint():
+		return
+	if _chapter_door_visuals != null and is_instance_valid(_chapter_door_visuals):
+		return
+	_chapter_door_visuals = CHAPTER_DOOR_VISUALS_SCRIPT.new()
+	_chapter_door_visuals.name = "ChapterDoorVisuals"
+	add_child(_chapter_door_visuals)
+	_refresh_chapter_door_visuals()
+
+
+func _refresh_chapter_door_visuals() -> void:
+	if Engine.is_editor_hint():
+		return
+	if _chapter_door_visuals == null or not is_instance_valid(_chapter_door_visuals):
+		if is_inside_tree():
+			_ensure_chapter_door_visuals()
+		return
+	if _chapter_door_visuals.has_method("refresh_for_room"):
+		_chapter_door_visuals.call("refresh_for_room", self)
 
 
 func _normalize_room_blockers(root: Node) -> void:
@@ -149,6 +174,7 @@ func update_doors():
 	if hide_down_door: _hide_door(Direction.DOWN)
 	if hide_left_door: _hide_door(Direction.LEFT)
 	if hide_up_door: _hide_door(Direction.UP)
+	_refresh_chapter_door_visuals()
 
 func get_spawning_point(direction):
 	var dir = Direction.UP
@@ -208,18 +234,23 @@ func _hide_door(direction):
 	door.get_node("Locker").collision_layer = 1
 	door.get_node("Area2D").monitoring = false
 	door.visible = false
+	_refresh_chapter_door_visuals()
 
 func close_door(direction:Direction):
 	if _is_door_hidden(direction):
 		return
 	doors[direction].texture = CLOSED_DOORS[direction]
+	doors[direction].visible = false
 	(doors[direction].get_node("Locker") as StaticBody2D).collision_layer = 1
+	_refresh_chapter_door_visuals()
 
 func open_door(direction:Direction):
 	if _is_door_hidden(direction):
 		return
 	doors[direction].texture = OPEN_DOORS[direction]
+	doors[direction].visible = false
 	(doors[direction].get_node("Locker") as StaticBody2D).collision_layer = 0
+	_refresh_chapter_door_visuals()
 
 
 func _on_enemies_child_exiting_tree(node):
@@ -234,6 +265,7 @@ func _mark_room_cleared() -> void:
 	if room_state != ROOM_STATE_REWARD_CLAIMED:
 		room_state = ROOM_STATE_COMPLETED
 	_update_room_chest_locks()
+	_refresh_chapter_door_visuals()
 	_on_room_cleared()
 
 
@@ -275,6 +307,7 @@ func set_room_objective(objective: Dictionary) -> void:
 		set_meta("event_target_label", str(room_objective.get("target_label", "")))
 	if room_objective.has("completion_text"):
 		set_meta("event_completion_text", str(room_objective.get("completion_text", "")))
+	_refresh_chapter_door_visuals()
 
 
 func get_room_objective() -> Dictionary:
@@ -295,6 +328,7 @@ func mark_reward_claimed() -> void:
 	reward_claimed = true
 	room_state = ROOM_STATE_REWARD_CLAIMED
 	objective_progress_changed.emit(self)
+	_refresh_chapter_door_visuals()
 
 
 func has_reward_claimed() -> bool:
@@ -342,6 +376,7 @@ func register_pollution_source(source: Node) -> void:
 	if source.has_signal("pollution_source_destroyed") and not source.is_connected("pollution_source_destroyed", destroyed_callable):
 		source.connect("pollution_source_destroyed", destroyed_callable)
 	objective_progress_changed.emit(self)
+	_refresh_chapter_door_visuals()
 
 
 func has_pending_room_event_objectives() -> bool:
@@ -402,6 +437,7 @@ func _try_finish_room_clear() -> void:
 func _emit_objective_progress_changed() -> void:
 	if is_inside_tree():
 		objective_progress_changed.emit(self)
+		_refresh_chapter_door_visuals()
 
 
 func _set_enemies_active(active: bool, deferred := false) -> void:

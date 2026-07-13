@@ -116,7 +116,16 @@ func _hide_inherited_lab_art() -> void:
 		return
 	var inherited_walls := room.get_node_or_null("RoomWalls") as CanvasItem
 	if inherited_walls != null:
-		inherited_walls.visible = false
+		_hide_canvas_tree(inherited_walls)
+		if inherited_walls is Sprite2D:
+			(inherited_walls as Sprite2D).texture = null
+
+
+func _hide_canvas_tree(node: Node) -> void:
+	if node is CanvasItem:
+		(node as CanvasItem).visible = false
+	for child in node.get_children():
+		_hide_canvas_tree(child)
 
 
 func _background_key() -> String:
@@ -143,7 +152,6 @@ func _build_factory_shell(background_key: String) -> void:
 	_add_rect("FactoryBaseFloor", FLOOR_CENTER, FLOOR_SIZE, _floor_color(background_key), 0)
 	_build_floor_plate_grid(background_key)
 	_build_outer_walls(background_key)
-	_build_factory_door_frames(background_key)
 	_build_wall_modules(background_key)
 
 
@@ -284,28 +292,19 @@ func _is_visual_door_hidden(direction: String) -> bool:
 	var room := get_parent()
 	if room == null:
 		return false
-	var door_node_name := ""
 	match direction:
 		"up":
-			door_node_name = "UpDoor"
 			if room.get("hide_up_door") == true:
 				return true
 		"down":
-			door_node_name = "DownDoor"
 			if room.get("hide_down_door") == true:
 				return true
 		"left":
-			door_node_name = "LeftDoor"
 			if room.get("hide_left_door") == true:
 				return true
 		"right":
-			door_node_name = "RightDoor"
 			if room.get("hide_right_door") == true:
 				return true
-	if door_node_name != "":
-		var inherited_door := room.get_node_or_null("RoomWalls/%s" % door_node_name) as CanvasItem
-		if inherited_door != null and inherited_door.visible == false:
-			return true
 	return false
 
 

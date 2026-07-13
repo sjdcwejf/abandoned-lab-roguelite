@@ -85,7 +85,6 @@ func _build_cryo_background() -> void:
 	var palette: Dictionary = _palette(background_key)
 	_build_cryo_floor_system(background_key, palette)
 	_build_cryo_wall_system(background_key, palette)
-	_build_cryo_door_system(background_key, palette)
 	_build_low_temp_labels(background_key, palette)
 	_build_cryo_equipment(background_key, palette)
 	_build_cryo_floor_decals(background_key, palette)
@@ -98,7 +97,16 @@ func _hide_inherited_lab_art() -> void:
 		return
 	var inherited_walls := room.get_node_or_null("RoomWalls") as CanvasItem
 	if inherited_walls != null:
-		inherited_walls.visible = false
+		_hide_canvas_tree(inherited_walls)
+		if inherited_walls is Sprite2D:
+			(inherited_walls as Sprite2D).texture = null
+
+
+func _hide_canvas_tree(node: Node) -> void:
+	if node is CanvasItem:
+		(node as CanvasItem).visible = false
+	for child in node.get_children():
+		_hide_canvas_tree(child)
 
 
 func _resolve_background_key() -> String:
@@ -458,28 +466,19 @@ func _is_visual_door_hidden(direction: String) -> bool:
 	var room := get_parent()
 	if room == null:
 		return false
-	var door_node_name := ""
 	match direction:
 		"up":
-			door_node_name = "UpDoor"
 			if room.get("hide_up_door") == true:
 				return true
 		"down":
-			door_node_name = "DownDoor"
 			if room.get("hide_down_door") == true:
 				return true
 		"left":
-			door_node_name = "LeftDoor"
 			if room.get("hide_left_door") == true:
 				return true
 		"right":
-			door_node_name = "RightDoor"
 			if room.get("hide_right_door") == true:
 				return true
-	if door_node_name != "":
-		var inherited_door := room.get_node_or_null("RoomWalls/%s" % door_node_name) as CanvasItem
-		if inherited_door != null and inherited_door.visible == false:
-			return true
 	return false
 
 
@@ -502,39 +501,34 @@ func _add_cryo_door_frame(direction: String, center: Vector2, size: Vector2, lig
 
 func _add_sealed_cryo_wall_segment(direction: String, center: Vector2, size: Vector2, background_key: String, palette: Dictionary) -> void:
 	var wall_color := palette["wall_inner"] as Color
-	var rim_color := palette["wall_rim"] as Color
 	if direction in ["up", "down"]:
-		var segment_size := Vector2(size.x + 86, 76)
-		_add_rect("CryoSealedInsulatedWallFill", center, segment_size, wall_color, 24)
-		for x_offset in [-96, -32, 32, 96]:
-			_add_atlas_tile("CryoSealedTopBottomWallAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center + Vector2(x_offset, 0), Vector2(62, 58), Color(0.55, 0.68, 0.7, 0.5), 25)
+		var wall_y := 106.0 if direction == "up" else 494.0
+		var seam_y := 132.0 if direction == "up" else 468.0
+		_add_rect("CryoSealedContinuousWallBand", Vector2(512, wall_y), Vector2(770, 40), wall_color, 24)
+		for x_offset in [-320, -224, -128, 128, 224, 320]:
+			_add_atlas_tile("CryoSealedTopBottomWallAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, Vector2(512 + x_offset, wall_y), Vector2(70, 38), Color(0.55, 0.68, 0.7, 0.46), 25)
 		if background_key in ["cryo_storage_room", "cryo_sample_warehouse"]:
-			_add_cryo_wall_storage_locker(center + Vector2(-92, 0), direction, palette, Vector2(42, 44))
-			_add_cryo_wall_storage_locker(center + Vector2(92, 0), direction, palette, Vector2(42, 44))
+			_add_cryo_wall_storage_locker(Vector2(252, wall_y), direction, palette, Vector2(42, 44))
+			_add_cryo_wall_storage_locker(Vector2(772, wall_y), direction, palette, Vector2(42, 44))
 		else:
-			_add_cryo_wall_vent(center + Vector2(-86, 0), direction, palette, Vector2(74, 20))
-			_add_cryo_wall_pipe(center + Vector2(86, 0), direction, palette, Vector2(74, 20))
+			_add_cryo_wall_vent(Vector2(252, wall_y), direction, palette, Vector2(74, 20))
+			_add_cryo_wall_pipe(Vector2(772, wall_y), direction, palette, Vector2(74, 20))
+		var frost: Color = palette["frost"] as Color
+		_add_rect("CryoSealedWallFrostSeam", Vector2(512, seam_y), Vector2(520, 4), Color(frost.r, frost.g, frost.b, 0.05), 27)
 	else:
-		var segment_size := Vector2(86, size.y + 112)
-		_add_rect("CryoSealedSideWallFill", center, segment_size, wall_color, 24)
-		for y_offset in [-122, -70, -18, 34, 86, 138]:
-			_add_atlas_tile("CryoSealedSideWallAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, center + Vector2(0, y_offset), Vector2(52, 46), Color(0.55, 0.68, 0.7, 0.48), 25)
-		var rim_x := 28.0 if direction == "left" else -28.0
-		_add_rect("CryoSealedSideWallColdRimTop", center + Vector2(rim_x, -104), Vector2(10, 72), rim_color, 26)
-		_add_rect("CryoSealedSideWallColdRimBottom", center + Vector2(rim_x, 104), Vector2(10, 72), rim_color, 26)
+		var wall_x := 92.0 if direction == "left" else 932.0
+		var seam_x := 124.0 if direction == "left" else 900.0
+		_add_rect("CryoSealedSideWallFill", Vector2(wall_x, 300), Vector2(44, 300), wall_color, 24)
+		for y_offset in [-130, -78, -26, 78, 130]:
+			_add_atlas_tile("CryoSealedSideWallAtlas", LAND_PIXELS_WALLS, CRYO_WALL_INSULATED_REGION, Vector2(wall_x, 300 + y_offset), Vector2(42, 42), Color(0.55, 0.68, 0.7, 0.44), 25)
 		if direction == "left":
-			_add_cryo_wall_pipe(center + Vector2(22, -104), direction, palette, Vector2(28, 62))
-			_add_cryo_wall_pipe(center + Vector2(22, 104), direction, palette, Vector2(28, 62))
+			_add_cryo_wall_pipe(Vector2(wall_x + 20, 196), direction, palette, Vector2(24, 62))
+			_add_cryo_wall_pipe(Vector2(wall_x + 20, 404), direction, palette, Vector2(24, 62))
 		else:
-			_add_cryo_wall_storage_locker(center + Vector2(-20, -104), direction, palette, Vector2(38, 58))
-			_add_cryo_wall_storage_locker(center + Vector2(-20, 104), direction, palette, Vector2(38, 58))
-	var frost: Color = palette["frost"] as Color
-	if direction in ["up", "down"]:
-		var seam_y := 36.0 if direction == "up" else -36.0
-		_add_rect("CryoSealedWallFrostSeam", center + Vector2(0, seam_y), Vector2(size.x * 0.44, 4), Color(frost.r, frost.g, frost.b, 0.05), 27)
-	else:
-		var seam_x := 36.0 if direction == "left" else -36.0
-		_add_rect("CryoSealedWallFrostSeam", center + Vector2(seam_x, 0), Vector2(4, size.y * 0.44), Color(frost.r, frost.g, frost.b, 0.05), 27)
+			_add_cryo_wall_storage_locker(Vector2(wall_x - 20, 196), direction, palette, Vector2(34, 58))
+			_add_cryo_wall_storage_locker(Vector2(wall_x - 20, 404), direction, palette, Vector2(34, 58))
+		var frost: Color = palette["frost"] as Color
+		_add_rect("CryoSealedWallFrostSeam", Vector2(seam_x, 300), Vector2(4, size.y * 0.52), Color(frost.r, frost.g, frost.b, 0.05), 27)
 
 
 func _door_panel_position(direction: String, center: Vector2) -> Vector2:
