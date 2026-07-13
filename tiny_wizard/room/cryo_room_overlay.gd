@@ -2,7 +2,6 @@ class_name CryoRoomOverlay
 extends Node2D
 
 
-const CRYO_FLOOR_FOG_SCENE: PackedScene = preload("res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_floor_fog_layer.tscn")
 const CRYO_SMOKE_VENT_SCENE: PackedScene = preload("res://tiny_wizard/assets/effects/chapter3_cryo_mist/scenes/cryo_smoke_vent.tscn")
 const LAND_PIXELS_FLOOR: Texture2D = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesFloor32.png")
 const LAND_PIXELS_WALLS: Texture2D = preload("res://tiny_wizard/assets/third_party/land_of_pixels_lab/32px/tilesWalls.png")
@@ -30,6 +29,7 @@ const SCI_FI_PIPE_REGION := Rect2(32, 48, 16, 16)
 const SCI_FI_CONTROL_REGION := Rect2(0, 0, 16, 16)
 const WARPED_FALLBACK_WALL_REGION := Rect2(0, 32, 16, 16)
 const BACKGROUND_VISUAL_Z := -2
+const CRYO_MIST_VISUAL_Z := -1
 
 const CHAPTER_3_CRYO_BACKGROUND_THEME := {
 	"name": "chapter_3_cryo_background_theme",
@@ -62,7 +62,6 @@ const CHAPTER_3_CRYO_BACKGROUND_THEME := {
 		"blue_white_warning_line",
 	],
 	"mist_set": [
-		"CryoFloorFogLayer",
 		"CryoSmokeVent",
 	],
 }
@@ -235,10 +234,10 @@ func _build_low_temp_floor_markings(background_key: String, palette: Dictionary)
 
 func _build_floor_edge_frost_v2(_background_key: String, palette: Dictionary) -> void:
 	var frost: Color = palette["frost"] as Color
-	_add_patch("CryoNorthFrostEdge", Vector2(512, 148), Vector2(760, 24), Color(frost.r, frost.g, frost.b, 0.12), 6)
-	_add_patch("CryoSouthFrostEdge", Vector2(512, 452), Vector2(760, 24), Color(frost.r, frost.g, frost.b, 0.12), 6)
-	_add_patch("CryoWestFrostEdge", Vector2(130, 300), Vector2(28, 270), Color(frost.r, frost.g, frost.b, 0.11), 6)
-	_add_patch("CryoEastFrostEdge", Vector2(894, 300), Vector2(28, 270), Color(frost.r, frost.g, frost.b, 0.11), 6)
+	_add_rect("CryoNorthFrostEdge", Vector2(512, 148), Vector2(760, 5), Color(frost.r, frost.g, frost.b, 0.055), 6)
+	_add_rect("CryoSouthFrostEdge", Vector2(512, 452), Vector2(760, 5), Color(frost.r, frost.g, frost.b, 0.055), 6)
+	_add_rect("CryoWestFrostEdge", Vector2(130, 300), Vector2(5, 270), Color(frost.r, frost.g, frost.b, 0.05), 6)
+	_add_rect("CryoEastFrostEdge", Vector2(894, 300), Vector2(5, 270), Color(frost.r, frost.g, frost.b, 0.05), 6)
 
 
 func _build_coolant_floor_lines(background_key: String, palette: Dictionary) -> void:
@@ -422,15 +421,14 @@ func _add_cryo_wall_control_panel(center: Vector2, text: String, palette: Dictio
 
 
 func _build_corner_frost(background_key: String, frost_color: Color) -> void:
-	var strong := Color(frost_color.r, frost_color.g, frost_color.b, min(frost_color.a + 0.12, 0.5))
 	_add_atlas_tile("CryoFrostCornerWallNW", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(116, 126), Vector2(76, 38), Color(0.62, 0.78, 0.82, 0.42), 17)
 	_add_atlas_tile("CryoFrostCornerWallNE", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(908, 128), Vector2(70, 38), Color(0.58, 0.75, 0.8, 0.38), 17)
 	_add_atlas_tile("CryoFrostCornerWallSW", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(118, 474), Vector2(72, 40), Color(0.58, 0.75, 0.8, 0.38), 17)
 	_add_atlas_tile("CryoFrostCornerWallSE", LAND_PIXELS_WALLS, CRYO_WALL_RIM_REGION, Vector2(906, 474), Vector2(78, 42), Color(0.62, 0.78, 0.82, 0.42), 17)
-	_add_patch("CryoCornerFrostNW", Vector2(116, 126), Vector2(76, 30), strong, 18)
-	_add_patch("CryoCornerFrostNE", Vector2(908, 128), Vector2(68, 28), frost_color, 18)
-	_add_patch("CryoCornerFrostSW", Vector2(118, 474), Vector2(72, 30), frost_color, 18)
-	_add_patch("CryoCornerFrostSE", Vector2(906, 474), Vector2(78, 32), strong, 18)
+	_add_rect("CryoCornerFrostNW", Vector2(116, 126), Vector2(58, 5), Color(frost_color.r, frost_color.g, frost_color.b, 0.065), 18)
+	_add_rect("CryoCornerFrostNE", Vector2(908, 128), Vector2(50, 5), Color(frost_color.r, frost_color.g, frost_color.b, 0.055), 18)
+	_add_rect("CryoCornerFrostSW", Vector2(118, 474), Vector2(52, 5), Color(frost_color.r, frost_color.g, frost_color.b, 0.055), 18)
+	_add_rect("CryoCornerFrostSE", Vector2(906, 474), Vector2(60, 5), Color(frost_color.r, frost_color.g, frost_color.b, 0.065), 18)
 	if background_key == "cryo_boss_room":
 		for p in [Vector2(116, 126), Vector2(908, 128), Vector2(118, 474), Vector2(906, 474)]:
 			_add_ring("CryoBossCornerFreezeLock", p, 24.0, Color(0.56, 0.96, 1.0, 0.24), 1.4, 19, 18)
@@ -530,7 +528,13 @@ func _add_sealed_cryo_wall_segment(direction: String, center: Vector2, size: Vec
 		else:
 			_add_cryo_wall_storage_locker(center + Vector2(-20, -104), direction, palette, Vector2(38, 58))
 			_add_cryo_wall_storage_locker(center + Vector2(-20, 104), direction, palette, Vector2(38, 58))
-	_add_patch("CryoSealedWallFrostEdge", center + (Vector2(0, 30) if direction == "up" else Vector2(0, -30) if direction == "down" else Vector2(34, 0) if direction == "left" else Vector2(-34, 0)), size * 0.32, palette["frost"] as Color, 27)
+	var frost: Color = palette["frost"] as Color
+	if direction in ["up", "down"]:
+		var seam_y := 36.0 if direction == "up" else -36.0
+		_add_rect("CryoSealedWallFrostSeam", center + Vector2(0, seam_y), Vector2(size.x * 0.44, 4), Color(frost.r, frost.g, frost.b, 0.05), 27)
+	else:
+		var seam_x := 36.0 if direction == "left" else -36.0
+		_add_rect("CryoSealedWallFrostSeam", center + Vector2(seam_x, 0), Vector2(4, size.y * 0.44), Color(frost.r, frost.g, frost.b, 0.05), 27)
 
 
 func _door_panel_position(direction: String, center: Vector2) -> Vector2:
@@ -628,7 +632,6 @@ func _equipment_specs(background_key: String) -> Array[Dictionary]:
 func _add_cryo_pod(center: Vector2, size: Vector2, palette: Dictionary) -> void:
 	var body := Color(0.045, 0.075, 0.082, 0.86)
 	var glass := Color(0.48, 0.86, 1.0, 0.42)
-	var frost: Color = palette["frost_strong"] as Color
 	_add_rect("CryoPodBase", center + Vector2(0, size.y * 0.42), Vector2(size.x * 1.12, 18), Color(0.02, 0.04, 0.05, 0.74), 28)
 	_add_rect("CryoPodBody", center, size, body, 28)
 	_add_rect("CryoPodGlass", center + Vector2(0, -size.y * 0.08), Vector2(size.x * 0.62, size.y * 0.66), glass, 29)
@@ -636,7 +639,6 @@ func _add_cryo_pod(center: Vector2, size: Vector2, palette: Dictionary) -> void:
 		center + Vector2(-size.x * 0.2, -size.y * 0.36),
 		center + Vector2(size.x * 0.18, -size.y * 0.36),
 	]), Color(0.82, 0.96, 1.0, 0.22), 1.4, 30)
-	_add_patch("CryoPodFrostEdge", center + Vector2(0, size.y * 0.18), Vector2(size.x * 0.9, 24), frost, 30)
 	_add_rect("CryoPodTemperaturePanel", center + Vector2(size.x * 0.26, -size.y * 0.22), Vector2(10, 24), Color(0.66, 0.9, 0.96, 0.28), 30)
 
 
@@ -677,7 +679,6 @@ func _add_freezer_unit(center: Vector2, size: Vector2, palette: Dictionary) -> v
 		center + Vector2(-size.x * 0.3, -size.y * 0.22),
 		center + Vector2(size.x * 0.3, -size.y * 0.22),
 	]), Color(0.72, 0.9, 0.94, 0.2), 1.4, 29)
-	_add_patch("CryoFreezerUnitFrost", center + Vector2(0, size.y * 0.36), Vector2(size.x * 0.86, 22), palette["frost"] as Color, 29)
 
 
 func _build_cryo_floor_decals(background_key: String, palette: Dictionary) -> void:
@@ -697,28 +698,7 @@ func _build_cryo_floor_decals(background_key: String, palette: Dictionary) -> vo
 
 
 func _frost_patch_specs(background_key: String) -> Array[Dictionary]:
-	var specs: Array[Dictionary] = [
-		{"position": Vector2(150, 150), "size": Vector2(120, 42), "alpha": 0.24},
-		{"position": Vector2(870, 450), "size": Vector2(124, 46), "alpha": 0.24},
-		{"position": Vector2(512, 482), "size": Vector2(184, 32), "alpha": 0.16},
-	]
-	match background_key:
-		"cryo_storage_room":
-			specs.append_array([
-				{"position": Vector2(180, 292), "size": Vector2(128, 72), "alpha": 0.3},
-				{"position": Vector2(844, 292), "size": Vector2(128, 72), "alpha": 0.3},
-			])
-		"cryo_pipe_room":
-			specs.append_array([
-				{"position": Vector2(512, 136), "size": Vector2(420, 38), "alpha": 0.24},
-				{"position": Vector2(512, 464), "size": Vector2(420, 38), "alpha": 0.24},
-			])
-		"cryo_boss_room":
-			specs.append_array([
-				{"position": ROOM_CENTER, "size": Vector2(260, 104), "alpha": 0.18},
-				{"position": Vector2(512, 130), "size": Vector2(310, 44), "alpha": 0.22},
-			])
-	return specs
+	return []
 
 
 func _ice_crack_specs(background_key: String) -> Array[Array]:
@@ -735,29 +715,14 @@ func _ice_crack_specs(background_key: String) -> Array[Array]:
 
 
 func _condensation_specs(background_key: String) -> Array[Dictionary]:
-	var specs: Array[Dictionary] = [
-		{"position": Vector2(260, 430), "size": Vector2(92, 28)},
-		{"position": Vector2(742, 174), "size": Vector2(86, 26)},
-	]
-	if background_key in ["cryo_storage_room", "cryo_sample_warehouse"]:
-		specs.append_array([
-			{"position": Vector2(184, 440), "size": Vector2(110, 32)},
-			{"position": Vector2(840, 440), "size": Vector2(110, 32)},
-		])
-	return specs
+	return []
 
 
 func _build_cryo_mist_effects(background_key: String, palette: Dictionary) -> void:
 	for spec in _mist_specs(background_key):
-		var kind := String(spec.get("kind", "ground"))
+		var kind := String(spec.get("kind", "vent"))
 		var position: Vector2 = spec.get("position", Vector2.ZERO) as Vector2
 		match kind:
-			"ground":
-				var size: Vector2 = spec.get("size", Vector2(520, 92)) as Vector2
-				var drift: Vector2 = spec.get("drift", Vector2(18, -2)) as Vector2
-				var alpha := float(spec.get("alpha", 0.1))
-				var seconds := float(spec.get("seconds", 10.0))
-				_add_cryo_floor_fog_layer(position, size, alpha, drift, seconds)
 			"vent", "pod", "pipe":
 				var direction: Vector2 = spec.get("direction", Vector2.DOWN) as Vector2
 				var group := String(spec.get("group", "smoke_middle_gray"))
@@ -775,60 +740,45 @@ func _mist_specs(background_key: String) -> Array[Dictionary]:
 	match background_key:
 		"cryo_control_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 414), "size": Vector2(650, 118), "alpha": 0.16, "drift": Vector2(24, -2), "seconds": 13.0},
-				{"kind": "vent", "position": Vector2(214, 250), "direction": Vector2(0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.68, 0.48), "speed": 0.48},
-				{"kind": "vent", "position": Vector2(810, 400), "direction": Vector2(-0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.68, 0.48), "speed": 0.5},
-				{"kind": "vent", "position": Vector2(512, 142), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.3, "scale": Vector2(0.64, 0.44), "speed": 0.44, "intermittent": true, "active": 2.2, "pause": 2.6},
+				{"kind": "vent", "position": Vector2(214, 250), "direction": Vector2(0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.05, 0.72), "speed": 0.64},
+				{"kind": "vent", "position": Vector2(810, 400), "direction": Vector2(-0.2, 1), "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.05, 0.72), "speed": 0.66},
+				{"kind": "vent", "position": Vector2(512, 142), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.44, "scale": Vector2(0.96, 0.62), "speed": 0.58, "intermittent": true, "active": 2.4, "pause": 2.0},
 			]
 		"cryo_storage_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 424), "size": Vector2(620, 110), "alpha": 0.17, "drift": Vector2(18, -2), "seconds": 13.0},
-				{"kind": "pod", "position": Vector2(180, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.36, "scale": Vector2(0.62, 0.46), "speed": 0.46},
-				{"kind": "pod", "position": Vector2(180, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.62, 0.46), "speed": 0.44},
-				{"kind": "pod", "position": Vector2(844, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.36, "scale": Vector2(0.62, 0.46), "speed": 0.48},
-				{"kind": "pod", "position": Vector2(844, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.62, 0.46), "speed": 0.44},
+				{"kind": "pod", "position": Vector2(180, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.56, "scale": Vector2(1.08, 0.72), "speed": 0.66},
+				{"kind": "pod", "position": Vector2(180, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.52, "scale": Vector2(1.06, 0.7), "speed": 0.62},
+				{"kind": "pod", "position": Vector2(844, 286), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.56, "scale": Vector2(1.08, 0.72), "speed": 0.68},
+				{"kind": "pod", "position": Vector2(844, 438), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.52, "scale": Vector2(1.06, 0.7), "speed": 0.62},
+				{"kind": "vent", "position": Vector2(512, 152), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.46, "scale": Vector2(0.96, 0.58), "speed": 0.58, "intermittent": true, "active": 2.4, "pause": 1.8},
 			]
 		"cryo_pipe_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 408), "size": Vector2(650, 108), "alpha": 0.15, "drift": Vector2(-20, -2), "seconds": 12.0},
-				{"kind": "pipe", "position": Vector2(330, 150), "direction": Vector2(1, 0.12), "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.34, "scale": Vector2(0.58, 0.38), "speed": 0.42, "intermittent": true, "active": 2.2, "pause": 2.4},
-				{"kind": "pipe", "position": Vector2(702, 450), "direction": Vector2(-1, -0.08), "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.36, "scale": Vector2(0.58, 0.38), "speed": 0.46, "intermittent": true, "active": 2.2, "pause": 2.6},
-				{"kind": "vent", "position": Vector2(210, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.66, 0.44), "speed": 0.48, "intermittent": true, "active": 2.2, "pause": 2.8},
-				{"kind": "vent", "position": Vector2(812, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.66, 0.44), "speed": 0.46, "intermittent": true, "active": 2.0, "pause": 2.6},
+				{"kind": "pipe", "position": Vector2(330, 150), "direction": Vector2(1, 0.12), "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.52, "scale": Vector2(0.92, 0.56), "speed": 0.58, "intermittent": true, "active": 2.4, "pause": 1.8},
+				{"kind": "pipe", "position": Vector2(702, 450), "direction": Vector2(-1, -0.08), "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.54, "scale": Vector2(0.94, 0.56), "speed": 0.6, "intermittent": true, "active": 2.4, "pause": 1.9},
+				{"kind": "vent", "position": Vector2(210, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.0, 0.64), "speed": 0.62, "intermittent": true, "active": 2.3, "pause": 2.0},
+				{"kind": "vent", "position": Vector2(812, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.0, 0.64), "speed": 0.62, "intermittent": true, "active": 2.2, "pause": 1.9},
 			]
 		"cryo_sample_warehouse":
 			return [
-				{"kind": "ground", "position": Vector2(512, 420), "size": Vector2(700, 116), "alpha": 0.16, "drift": Vector2(18, -2), "seconds": 12.0},
-				{"kind": "pod", "position": Vector2(190, 282), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.6, 0.42), "speed": 0.46},
-				{"kind": "pod", "position": Vector2(190, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.3, "scale": Vector2(0.58, 0.4), "speed": 0.44},
-				{"kind": "pod", "position": Vector2(834, 282), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.32, "scale": Vector2(0.6, 0.42), "speed": 0.48},
-				{"kind": "pod", "position": Vector2(834, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.3, "scale": Vector2(0.58, 0.4), "speed": 0.44},
+				{"kind": "pod", "position": Vector2(190, 282), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.0, 0.68), "speed": 0.62},
+				{"kind": "pod", "position": Vector2(190, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.48, "scale": Vector2(0.96, 0.62), "speed": 0.58},
+				{"kind": "pod", "position": Vector2(834, 282), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.0, 0.68), "speed": 0.64},
+				{"kind": "pod", "position": Vector2(834, 424), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.48, "scale": Vector2(0.96, 0.62), "speed": 0.58},
 			]
 		"cryo_boss_room":
 			return [
-				{"kind": "ground", "position": Vector2(512, 420), "size": Vector2(760, 140), "alpha": 0.16, "drift": Vector2(22, -2), "seconds": 13.0},
-				{"kind": "vent", "position": Vector2(320, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.68, 0.46), "speed": 0.46, "intermittent": true, "active": 2.2, "pause": 2.8},
-				{"kind": "vent", "position": Vector2(704, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.34, "scale": Vector2(0.68, 0.46), "speed": 0.48, "intermittent": true, "active": 2.0, "pause": 2.6},
-				{"kind": "pipe", "position": Vector2(176, 224), "direction": Vector2.RIGHT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.32, "scale": Vector2(0.58, 0.38), "speed": 0.44},
-				{"kind": "pipe", "position": Vector2(848, 376), "direction": Vector2.LEFT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.32, "scale": Vector2(0.58, 0.38), "speed": 0.44},
-				{"kind": "pod", "position": Vector2(512, 150), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.36, "scale": Vector2(0.62, 0.42), "speed": 0.46},
+				{"kind": "vent", "position": Vector2(320, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.08, 0.7), "speed": 0.64, "intermittent": true, "active": 2.4, "pause": 2.0},
+				{"kind": "vent", "position": Vector2(704, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.08, 0.7), "speed": 0.66, "intermittent": true, "active": 2.3, "pause": 1.9},
+				{"kind": "pipe", "position": Vector2(176, 224), "direction": Vector2.RIGHT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.5, "scale": Vector2(0.92, 0.54), "speed": 0.6},
+				{"kind": "pipe", "position": Vector2(848, 376), "direction": Vector2.LEFT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.5, "scale": Vector2(0.92, 0.54), "speed": 0.6},
+				{"kind": "pod", "position": Vector2(512, 150), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.52, "scale": Vector2(1.0, 0.66), "speed": 0.64},
 			]
 	return [
-		{"kind": "ground", "position": Vector2(512, 412), "size": Vector2(650, 112), "alpha": 0.15, "drift": Vector2(18, -2), "seconds": 12.0},
-		{"kind": "vent", "position": Vector2(210, 232), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.3, "scale": Vector2(0.6, 0.44), "speed": 0.46},
-		{"kind": "vent", "position": Vector2(814, 420), "direction": Vector2.UP, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.3, "scale": Vector2(0.6, 0.44), "speed": 0.46},
-		{"kind": "pipe", "position": Vector2(872, 256), "direction": Vector2.LEFT, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.28, "scale": Vector2(0.52, 0.34), "speed": 0.42, "intermittent": true, "active": 2.0, "pause": 2.6},
+		{"kind": "vent", "position": Vector2(210, 232), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.48, "scale": Vector2(1.0, 0.66), "speed": 0.62},
+		{"kind": "vent", "position": Vector2(814, 420), "direction": Vector2.UP, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.48, "scale": Vector2(1.0, 0.66), "speed": 0.62},
+		{"kind": "pipe", "position": Vector2(872, 256), "direction": Vector2.LEFT, "group": "smoke_bright_gray", "smoke": "smoke9", "alpha": 0.46, "scale": Vector2(0.86, 0.52), "speed": 0.58, "intermittent": true, "active": 2.3, "pause": 1.8},
 	]
-
-
-func _add_cryo_floor_fog_layer(position: Vector2, size: Vector2, alpha: float, drift: Vector2, seconds: float) -> void:
-	var fog := CRYO_FLOOR_FOG_SCENE.instantiate() as CryoFloorFogLayer
-	fog.name = "CryoFloorFogLayer"
-	fog.position = position
-	fog.z_as_relative = false
-	fog.z_index = BACKGROUND_VISUAL_Z
-	fog.configure(size, alpha, drift, Color(0.88, 0.96, 1.0, 1.0), seconds)
-	add_child(fog)
 
 
 func _add_cryo_smoke_vent(position: Vector2, direction: Vector2, group: String, smoke: String, alpha: float, scale_value: Vector2, speed: float, intermittent: bool, active: float, pause: float) -> void:
@@ -837,7 +787,7 @@ func _add_cryo_smoke_vent(position: Vector2, direction: Vector2, group: String, 
 	vent.position = position
 	vent.rotation = direction.angle()
 	vent.z_as_relative = false
-	vent.z_index = BACKGROUND_VISUAL_Z
+	vent.z_index = CRYO_MIST_VISUAL_Z
 	vent.configure(group, smoke, alpha, scale_value, speed, Color(0.92, 0.98, 1.0, 1.0), intermittent, active, pause)
 	add_child(vent)
 

@@ -16,6 +16,7 @@ const BACKGROUND_VISUAL_Z := -2
 
 func _ready() -> void:
 	z_index = -2
+	_hide_inherited_lab_art()
 	_build_floor()
 	_build_data_core_frame()
 	_build_wall_background_modules()
@@ -30,6 +31,15 @@ func _ready() -> void:
 	_build_cyberpunk_data_props()
 	_build_solid_blocking_props()
 	_build_signal_noise()
+
+
+func _hide_inherited_lab_art() -> void:
+	var room := get_parent()
+	if room == null:
+		return
+	var inherited_walls := room.get_node_or_null("RoomWalls") as CanvasItem
+	if inherited_walls != null:
+		inherited_walls.visible = false
 
 
 func _build_floor() -> void:

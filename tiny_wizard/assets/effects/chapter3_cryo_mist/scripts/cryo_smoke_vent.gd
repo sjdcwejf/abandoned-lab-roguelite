@@ -6,9 +6,9 @@ const SMOKE_ROOT := "res://tiny_wizard/assets/effects/chapter3_cryo_mist/smoke"
 
 @export_enum("smoke_bright_gray", "smoke_middle_gray") var smoke_group := "smoke_middle_gray"
 @export_enum("smoke9", "smoke10") var smoke_name := "smoke9"
-@export var alpha := 0.22
-@export var animation_speed := 0.55
-@export var sprite_scale := Vector2(0.75, 0.75)
+@export var alpha := 0.32
+@export var animation_speed := 0.85
+@export var sprite_scale := Vector2(1.0, 0.72)
 @export var tint := Color(0.92, 0.98, 1.0, 1.0)
 @export var intermittent := false
 @export var active_seconds := 2.4
@@ -48,7 +48,8 @@ func _build_sprite() -> void:
 	_sprite.sprite_frames = _load_sprite_frames()
 	_sprite.animation = "mist"
 	_sprite.centered = true
-	_sprite.z_index = 0
+	_sprite.z_as_relative = false
+	_sprite.z_index = -1
 	add_child(_sprite)
 	_apply_sprite_settings()
 	if _sprite.sprite_frames != null and _sprite.sprite_frames.get_frame_count("mist") > 0:
@@ -60,16 +61,16 @@ func _build_sprite() -> void:
 func _apply_sprite_settings() -> void:
 	if _sprite == null:
 		return
-	_sprite.modulate = Color(tint.r, tint.g, tint.b, alpha)
-	_sprite.speed_scale = animation_speed
-	_sprite.scale = sprite_scale * _rng.randf_range(0.9, 1.08)
+	_sprite.modulate = Color(tint.r, tint.g, tint.b, clampf(alpha, 0.12, 0.62))
+	_sprite.speed_scale = maxf(animation_speed, 0.72)
+	_sprite.scale = sprite_scale * _rng.randf_range(0.96, 1.18)
 
 
 func _load_sprite_frames() -> SpriteFrames:
 	var frames := SpriteFrames.new()
 	frames.add_animation("mist")
 	frames.set_animation_loop("mist", true)
-	frames.set_animation_speed("mist", 8.0)
+	frames.set_animation_speed("mist", 10.0)
 	for path in _smoke_frame_paths():
 		var texture := load(path) as Texture2D
 		if texture != null:

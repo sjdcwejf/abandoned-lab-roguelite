@@ -30,8 +30,8 @@
       "sealed wall segment for hidden doors"
     ],
     "mistEffects": {
-      "CryoFloorFogLayer": "Noiselong.png driven low-alpha drifting floor fog near pods, doors, corners and freezer units",
-      "CryoSmokeVent": "top-down smoke sprite loops for local freezer vents, pod leaks and damaged coolant pipe steam"
+      "CryoSmokeVent": "active chapter 3 cold mist uses top-down smoke sprite animation loops for local freezer vents, pod leaks and damaged coolant pipe steam",
+      "CryoFloorFogLayer": "Noiselong.png floor fog asset is imported but not actively spawned in rooms after v0.3.6g, to avoid static overlay-like cold air"
     },
     "importedEffectAssets": {
       "root": "res://tiny_wizard/assets/effects/chapter3_cryo_mist/",
@@ -90,7 +90,7 @@
     "v036eRefinements": [
       "Imported Noiselong.png for drifting floor fog and smoke9/smoke10 bright/middle gray frames for local freezer steam.",
       "Deprecated the old GPUParticles2D cirle_particle-based cryo mist in CryoRoomOverlay.",
-      "CryoFloorFogLayer creates one low-alpha floor fog patch per room, while CryoSmokeVent handles pod, vent and pipe leak puffs.",
+      "CryoSmokeVent handles pod, vent and pipe leak puffs with imported smoke animation frames.",
       "Large side-wall freezer units were moved away from the center of side walls to reduce false door silhouettes."
     ],
         "v036fRefinements": [
@@ -103,8 +103,9 @@
         ],
         "v036gRefinements": [
             "All CryoRoomOverlay wall, floor, fog, vent, label and equipment visuals are pinned to the background draw layer so they cannot cover players, enemies, bosses or bullets.",
-            "CryoSmokeVent continues to load imported top-down smoke animation frames, while CryoFloorFogLayer uses Noiselong.png as low-alpha floor mist.",
-            "Mist and wall decorations remain visual only and do not add collision, damage areas, room objectives or pathing changes."
+            "Active cold air in rooms now uses CryoSmokeVent imported top-down smoke animation frames only; static floor fog is kept as an imported asset but is not spawned by CryoRoomOverlay.",
+            "Mist and wall decorations remain visual only and do not add collision, damage areas, room objectives or pathing changes.",
+            "Large irregular sealed-wall frost patches were replaced with thin wall frost seams so sealed directions read as walls, not floating ice blocks or fake doors."
         ]
     },
   "tileSize": 32,

@@ -35,12 +35,22 @@ func _ready() -> void:
 
 
 func _build_hive_background() -> void:
+	_hide_inherited_lab_art()
 	var colors: Dictionary = _palette()
 	_build_floor_system(colors)
 	_build_wall_system(colors)
 	_build_door_system(colors)
 	_build_variant_template(colors)
 	_build_subtle_pulses(colors)
+
+
+func _hide_inherited_lab_art() -> void:
+	var room := get_parent()
+	if room == null:
+		return
+	var inherited_walls := room.get_node_or_null("RoomWalls") as CanvasItem
+	if inherited_walls != null:
+		inherited_walls.visible = false
 
 
 func _build_floor_system(colors: Dictionary) -> void:
