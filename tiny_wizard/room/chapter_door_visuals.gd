@@ -3,8 +3,9 @@ extends Node2D
 
 
 const ChapterDoorThemeScript: Script = preload("res://tiny_wizard/room/chapter_door_theme.gd")
+const ChapterDoorAnimatorScript: Script = preload("res://tiny_wizard/room/chapter_door_animator.gd")
 
-const VISUAL_Z := -1
+const VISUAL_Z := -6
 const DOOR_DIRECTIONS: Array[Dictionary] = [
 	{
 		"name": "right",
@@ -90,21 +91,29 @@ func _draw_door(direction: Dictionary, spec: Dictionary, state: String) -> void:
 	var base_size: Vector2 = direction.get("door_size", Vector2(160, 72)) as Vector2
 	var size := base_size * float(spec.get("scale_multiplier", 1.0))
 	var direction_name := str(direction.get("name", "up"))
+	var body_size := _oriented_door_draw_size(direction_name, spec, size)
 	var tint: Color = spec.get("tint", Color.WHITE) as Color
 	var status_color: Color = spec.get("status_color", Color.WHITE) as Color
+	var is_open := state in [ChapterDoorThemeScript.STATE_NORMAL, ChapterDoorThemeScript.STATE_SUPPLY]
 
-	_add_rect("ChapterDoorRecess", center, size + _frame_extra(direction_name), Color(0.025, 0.03, 0.036, 0.82), VISUAL_Z)
-	_add_atlas_sprite(
-		"ChapterDoorBody_%s" % str(spec.get("asset_name", "door")),
+	_add_rect("ChapterDoorRecess", center, size + _frame_extra(direction_name), Color(0.025, 0.03, 0.036, 0.88), VISUAL_Z)
+	_draw_door_frame(direction_name, center, size, tint)
+	var animator := ChapterDoorAnimatorScript.new()
+	animator.name = "ChapterDoorMaterialAnimation_%s" % str(spec.get("asset_name", "door"))
+	animator.setup(
 		spec.get("texture", null),
 		spec.get("region", Rect2()),
 		center,
-		size,
+		body_size,
 		tint,
+		spec.get("status_texture", null),
+		spec.get("status_region", Rect2(0, 0, 16, 16)),
+		status_color,
+		direction_name,
+		is_open,
 		VISUAL_Z + 1
 	)
-	_draw_door_frame(direction_name, center, size, tint)
-	_draw_status_light(direction, spec, status_color)
+	add_child(animator)
 
 	if bool(spec.get("locked", false)) or state in [ChapterDoorThemeScript.STATE_COMBAT_LOCKED, ChapterDoorThemeScript.STATE_EVENT_LOCKED]:
 		_draw_lock_bars(direction_name, center, size, spec, status_color)
@@ -122,16 +131,9 @@ func _draw_sealed_wall(direction: Dictionary, spec: Dictionary) -> void:
 	var tint: Color = spec.get("tint", Color.WHITE) as Color
 
 	_add_rect("ChapterSealedWallBacker", center, size + Vector2(16, 14), Color(0.025, 0.03, 0.035, 0.92), VISUAL_Z)
-	_add_atlas_sprite(
-		"ChapterSealedWall_%s" % str(spec.get("asset_name", "sealed_wall")),
-		spec.get("texture", null),
-		spec.get("region", Rect2()),
-		center,
-		size,
-		tint,
-		VISUAL_Z + 1
-	)
+	_add_rect("ChapterSealedWallContinuousPanel", center, size, Color(tint.r * 0.18, tint.g * 0.20, tint.b * 0.22, 0.92), VISUAL_Z + 1)
 	_draw_sealed_wall_modules(direction_name, center, size, spec)
+	_draw_sealed_wall_service_lines(direction_name, center, size, tint)
 	if bool(spec.get("corrupted", false)):
 		_draw_hive_corruption(direction_name, center, size * 0.88, 0.18)
 
@@ -153,43 +155,39 @@ func _draw_door_frame(direction_name: String, center: Vector2, size: Vector2, ti
 		_add_rect("ChapterDoorThreshold", center + Vector2(0, 0), Vector2(3, size.y * 0.58), edge_color, VISUAL_Z + 3)
 
 
-func _draw_status_light(direction: Dictionary, spec: Dictionary, status_color: Color) -> void:
-	var center: Vector2 = direction.get("center", Vector2.ZERO) as Vector2
-	var offset: Vector2 = direction.get("status_offset", Vector2.ZERO) as Vector2
-	_add_atlas_sprite(
-		"ChapterDoorStatusLight_%s" % str(spec.get("asset_name", "door")),
-		spec.get("status_texture", null),
-		spec.get("status_region", Rect2(0, 0, 16, 16)),
-		center + offset,
-		Vector2(20, 20),
-		status_color,
-		VISUAL_Z + 4
-	)
-
-
 func _draw_lock_bars(direction_name: String, center: Vector2, size: Vector2, spec: Dictionary, status_color: Color) -> void:
-	var bar_texture: Texture2D = spec.get("status_texture", null)
-	var bar_region: Rect2 = spec.get("status_region", Rect2(0, 0, 16, 16)) as Rect2
 	var bar_color := Color(status_color.r, status_color.g, status_color.b, 0.82)
 	if direction_name in ["up", "down"]:
 		for y_offset in [-size.y * 0.22, size.y * 0.22]:
-			_add_atlas_sprite("ChapterDoorLockBar", bar_texture, bar_region, center + Vector2(0, y_offset), Vector2(size.x * 0.64, 8), bar_color, VISUAL_Z + 5)
+			_add_rect("ChapterDoorLockBar", center + Vector2(0, y_offset), Vector2(size.x * 0.64, 5), bar_color, VISUAL_Z + 5)
 	else:
 		for x_offset in [-size.x * 0.22, size.x * 0.22]:
-			_add_atlas_sprite("ChapterDoorLockBar", bar_texture, bar_region, center + Vector2(x_offset, 0), Vector2(8, size.y * 0.64), bar_color, VISUAL_Z + 5)
+			_add_rect("ChapterDoorLockBar", center + Vector2(x_offset, 0), Vector2(5, size.y * 0.64), bar_color, VISUAL_Z + 5)
 
 
 func _draw_sealed_wall_modules(direction_name: String, center: Vector2, size: Vector2, spec: Dictionary) -> void:
-	var texture: Texture2D = spec.get("texture", null)
-	var region: Rect2 = spec.get("region", Rect2()) as Rect2
 	var tint: Color = spec.get("tint", Color.WHITE) as Color
-	var module_color := Color(tint.r * 0.82, tint.g * 0.82, tint.b * 0.82, 0.7)
+	var module_color := Color(tint.r * 0.66, tint.g * 0.72, tint.b * 0.78, 0.42)
 	if direction_name in ["up", "down"]:
-		for x_offset in [-size.x * 0.32, 0.0, size.x * 0.32]:
-			_add_atlas_sprite("ChapterSealedWallModule", texture, region, center + Vector2(x_offset, 0), Vector2(size.x * 0.26, size.y * 0.76), module_color, VISUAL_Z + 2)
+		for i in range(4):
+			var x_offset: float = lerp(-size.x * 0.34, size.x * 0.34, float(i) / 3.0)
+			var y_offset: float = -size.y * 0.16 if i % 2 == 0 else size.y * 0.18
+			_add_rect("ChapterSealedWallServicePanel", center + Vector2(x_offset, y_offset), Vector2(size.x * 0.16, size.y * 0.20), module_color, VISUAL_Z + 2)
 	else:
-		for y_offset in [-size.y * 0.32, 0.0, size.y * 0.32]:
-			_add_atlas_sprite("ChapterSealedWallModule", texture, region, center + Vector2(0, y_offset), Vector2(size.x * 0.76, size.y * 0.24), module_color, VISUAL_Z + 2)
+		for i in range(4):
+			var y_offset: float = lerp(-size.y * 0.34, size.y * 0.34, float(i) / 3.0)
+			var x_offset: float = -size.x * 0.16 if i % 2 == 0 else size.x * 0.18
+			_add_rect("ChapterSealedWallServicePanel", center + Vector2(x_offset, y_offset), Vector2(size.x * 0.20, size.y * 0.16), module_color, VISUAL_Z + 2)
+
+
+func _draw_sealed_wall_service_lines(direction_name: String, center: Vector2, size: Vector2, tint: Color) -> void:
+	var line_color := Color(tint.r * 0.52, tint.g * 0.68, tint.b * 0.78, 0.34)
+	if direction_name in ["up", "down"]:
+		_add_rect("ChapterSealedWallPipeA", center + Vector2(0, -size.y * 0.32), Vector2(size.x * 0.78, 3), line_color, VISUAL_Z + 3)
+		_add_rect("ChapterSealedWallPipeB", center + Vector2(size.x * 0.16, size.y * 0.30), Vector2(size.x * 0.44, 3), line_color, VISUAL_Z + 3)
+	else:
+		_add_rect("ChapterSealedWallPipeA", center + Vector2(-size.x * 0.32, 0), Vector2(3, size.y * 0.78), line_color, VISUAL_Z + 3)
+		_add_rect("ChapterSealedWallPipeB", center + Vector2(size.x * 0.30, size.y * 0.16), Vector2(3, size.y * 0.44), line_color, VISUAL_Z + 3)
 
 
 func _draw_hive_corruption(direction_name: String, center: Vector2, size: Vector2, alpha := 0.26) -> void:
@@ -211,40 +209,28 @@ func _draw_hive_corruption(direction_name: String, center: Vector2, size: Vector
 		_add_rect("FinalHiveDoorPulse", center + Vector2(0, size.y * 0.22), Vector2(8, 8), red, VISUAL_Z + 7)
 
 
+func _oriented_door_draw_size(direction_name: String, spec: Dictionary, size: Vector2) -> Vector2:
+	if _door_needs_rotation(direction_name, spec):
+		return Vector2(size.y, size.x)
+	return size
+
+
+func _door_needs_rotation(direction_name: String, spec: Dictionary) -> bool:
+	var target_horizontal := direction_name in ["up", "down"]
+	var native_horizontal := _door_asset_native_horizontal(spec)
+	return target_horizontal != native_horizontal
+
+
+func _door_asset_native_horizontal(spec: Dictionary) -> bool:
+	var asset_name := str(spec.get("asset_name", ""))
+	if asset_name.begins_with("chapter5_data") or asset_name.begins_with("final_hive"):
+		return false
+	return true
+
 func _frame_extra(direction_name: String) -> Vector2:
 	if direction_name in ["up", "down"]:
 		return Vector2(28, 18)
 	return Vector2(18, 28)
-
-
-func _add_atlas_sprite(
-	node_name: String,
-	texture: Texture2D,
-	region: Rect2,
-	position: Vector2,
-	target_size: Vector2,
-	modulate_color: Color,
-	node_z: int
-) -> void:
-	if texture == null:
-		return
-	if region.size.x <= 0.0 or region.size.y <= 0.0:
-		return
-
-	var atlas := AtlasTexture.new()
-	atlas.atlas = texture
-	atlas.region = region
-
-	var sprite := Sprite2D.new()
-	sprite.name = node_name
-	sprite.texture = atlas
-	sprite.centered = true
-	sprite.position = position
-	sprite.scale = Vector2(target_size.x / region.size.x, target_size.y / region.size.y)
-	sprite.modulate = modulate_color
-	sprite.z_index = node_z
-	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	add_child(sprite)
 
 
 func _add_rect(node_name: String, center: Vector2, size: Vector2, color: Color, node_z: int) -> void:

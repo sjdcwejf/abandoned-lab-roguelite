@@ -153,7 +153,7 @@ static func _cryo_theme() -> Dictionary:
 		"chapter_label": "第三章：低温封存隔热门",
 		"normal_door": _door("chapter3_cryo_door_normal", LAB_STUFF, LAB_BLUE_DOOR, Color(0.78, 0.94, 1.0, 0.98), Color(0.56, 0.92, 1.0, 0.95)),
 		"combat_locked_door": _door("chapter3_cryo_door_combat_locked", LAB_STUFF, LAB_RED_DOOR, Color(0.92, 0.96, 1.0, 0.98), Color(0.94, 0.18, 0.14, 0.95), true),
-		"event_locked_door": _door("chapter3_cryo_door_event_locked", LAB_STUFF, LAB_PANEL_DOOR, Color(0.76, 0.94, 1.0, 0.98), Color(0.96, 0.68, 0.18, 0.95), true),
+		"event_locked_door": _door("chapter3_cryo_door_event_locked", LAB_STUFF, LAB_BLUE_DOOR, Color(0.76, 0.94, 1.0, 0.98), Color(0.96, 0.68, 0.18, 0.95), true),
 		"supply_door": _door("chapter3_cryo_door_supply", LAB_STUFF, LAB_BLUE_DOOR, Color(0.88, 0.98, 1.0, 0.98), Color(0.62, 1.0, 0.96, 0.95)),
 		"boss_door": _door("chapter3_cryo_door_boss", LAB_STUFF, LAB_RED_DOOR, Color(0.84, 0.94, 1.0, 1.0), Color(0.98, 0.16, 0.12, 0.98), true, 1.18),
 		"sealed_wall": _sealed("chapter3_cryo_sealed_wall", LAB_WALLS, LAB_LOCKER_WALL, Color(0.56, 0.70, 0.76, 1.0)),
