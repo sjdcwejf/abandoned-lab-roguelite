@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/raven_merchant/raven_merchant.tscn" id="3_raven"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_console"]
 size = Vector2(250, 58)
@@ -17,7 +18,17 @@ lab_room_label = "低温封存前厅"
 script = ExtResource("2_overlay")
 variant = "boss"
 
-[node name="ConsoleBlocker" type="StaticBody2D" parent="." index="8"]
+[node name="RavenMerchant" parent="." index="8" instance=ExtResource("3_raven")]
+position = Vector2(512, 304)
+merchant_title = "渡鸦低温补给站"
+merchant_message = "低温整备窗口已开启。补充装备后再进入核心封锁区。"
+max_weapon_offers = 3
+affix_roll_chance = 0.7
+max_affix_count = 1
+allow_stock_refresh = true
+stock_refresh_cost = 1
+
+[node name="ConsoleBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(512, 160)
 collision_layer = 1
 collision_mask = 15
@@ -25,7 +36,7 @@ collision_mask = 15
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ConsoleBlocker"]
 shape = SubResource("RectangleShape2D_console")
 
-[node name="LeftStasisBankBlocker" type="StaticBody2D" parent="." index="9"]
+[node name="LeftStasisBankBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(170, 318)
 collision_layer = 1
 collision_mask = 15
@@ -33,11 +44,10 @@ collision_mask = 15
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftStasisBankBlocker"]
 shape = SubResource("RectangleShape2D_side_bank")
 
-[node name="RightStasisBankBlocker" type="StaticBody2D" parent="." index="10"]
+[node name="RightStasisBankBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(854, 318)
 collision_layer = 1
 collision_mask = 15
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightStasisBankBlocker"]
 shape = SubResource("RectangleShape2D_side_bank")
-
