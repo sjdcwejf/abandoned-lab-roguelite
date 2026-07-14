@@ -5,38 +5,40 @@ extends Node2D
 const ChapterDoorThemeScript: Script = preload("res://tiny_wizard/room/chapter_door_theme.gd")
 const ChapterDoorAnimatorScript: Script = preload("res://tiny_wizard/room/chapter_door_animator.gd")
 
-const VISUAL_Z := -6
+# Door art must sit above chapter wall overlays so a connected exit remains
+# readable, while the actual door colliders and room traversal stay unchanged.
+const VISUAL_Z := 21
 const DOOR_DIRECTIONS: Array[Dictionary] = [
 	{
 		"name": "right",
 		"hidden_property": "hide_right_door",
-		"center": Vector2(952, 300),
+		"center": Vector2(979, 280),
 		"door_size": Vector2(72, 190),
-		"sealed_size": Vector2(88, 314),
+		"sealed_size": Vector2(88, 190),
 		"status_offset": Vector2(-30, 0),
 	},
 	{
 		"name": "down",
 		"hidden_property": "hide_down_door",
-		"center": Vector2(512, 506),
+		"center": Vector2(512, 557),
 		"door_size": Vector2(208, 74),
-		"sealed_size": Vector2(362, 88),
+		"sealed_size": Vector2(208, 74),
 		"status_offset": Vector2(0, -30),
 	},
 	{
 		"name": "left",
 		"hidden_property": "hide_left_door",
-		"center": Vector2(72, 300),
+		"center": Vector2(48, 280),
 		"door_size": Vector2(72, 190),
-		"sealed_size": Vector2(88, 314),
+		"sealed_size": Vector2(88, 190),
 		"status_offset": Vector2(30, 0),
 	},
 	{
 		"name": "up",
 		"hidden_property": "hide_up_door",
-		"center": Vector2(512, 94),
+		"center": Vector2(515, 51),
 		"door_size": Vector2(208, 74),
-		"sealed_size": Vector2(362, 88),
+		"sealed_size": Vector2(208, 74),
 		"status_offset": Vector2(0, 30),
 	},
 ]
@@ -98,9 +100,9 @@ func _draw_door(direction: Dictionary, spec: Dictionary, state: String) -> void:
 
 	_add_rect("ChapterDoorRecess", center, size + _frame_extra(direction_name), Color(0.025, 0.03, 0.036, 0.88), VISUAL_Z)
 	_draw_door_frame(direction_name, center, size, tint)
-	var animator := ChapterDoorAnimatorScript.new()
+	var animator: Node2D = ChapterDoorAnimatorScript.new() as Node2D
 	animator.name = "ChapterDoorMaterialAnimation_%s" % str(spec.get("asset_name", "door"))
-	animator.setup(
+	animator.call("setup",
 		spec.get("texture", null),
 		spec.get("region", Rect2()),
 		center,

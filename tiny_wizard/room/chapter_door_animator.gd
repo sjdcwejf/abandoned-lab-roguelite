@@ -59,7 +59,7 @@ func setup(
 
 
 func _uniform_fit_scale(source_size: Vector2, target_size: Vector2) -> Vector2:
-	var factor := min(target_size.x / source_size.x, target_size.y / source_size.y)
+	var factor: float = min(target_size.x / source_size.x, target_size.y / source_size.y)
 	return Vector2.ONE * factor
 
 
