@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/cultivation_chamber_room.png" id="2_room_art"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_bank"]
-size = Vector2(270, 336)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_bank_top"]
+size = Vector2(270, 98)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_bank_bottom"]
+size = Vector2(270, 174)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_north_equipment_side"]
 size = Vector2(102, 54)
@@ -29,7 +32,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
-shape = SubResource("RectangleShape2D_culture_bank")
+position = Vector2(0, -119)
+shape = SubResource("RectangleShape2D_culture_bank_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
+position = Vector2(0, 81)
+shape = SubResource("RectangleShape2D_culture_bank_bottom")
 
 [node name="RightCultureBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(784, 318)
@@ -38,7 +46,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
-shape = SubResource("RectangleShape2D_culture_bank")
+position = Vector2(0, -119)
+shape = SubResource("RectangleShape2D_culture_bank_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="RightCultureBankBlocker"]
+position = Vector2(0, 81)
+shape = SubResource("RectangleShape2D_culture_bank_bottom")
 
 [node name="NorthEquipmentBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 116)

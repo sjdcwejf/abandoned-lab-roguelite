@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/room_4.tscn" id="1_base"]
 [ext_resource type="Script" path="res://tiny_wizard/room/formal_weapon_room.gd" id="2_weapon_room"]
@@ -7,8 +7,14 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_rack"]
 size = Vector2(142, 250)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_terminal"]
-size = Vector2(312, 74)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_rack_top"]
+size = Vector2(142, 119)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_rack_bottom"]
+size = Vector2(142, 67)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_terminal_side"]
+size = Vector2(124, 74)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_side_tray"]
 size = Vector2(116, 48)
@@ -31,7 +37,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthTerminalBlocker"]
-shape = SubResource("RectangleShape2D_north_terminal")
+position = Vector2(-94, 0)
+shape = SubResource("RectangleShape2D_north_terminal_side")
+
+[node name="CollisionShape2DRight" type="CollisionShape2D" parent="NorthTerminalBlocker"]
+position = Vector2(94, 0)
+shape = SubResource("RectangleShape2D_north_terminal_side")
 
 [node name="NorthWestCultureRackBlocker" type="StaticBody2D" parent="."]
 position = Vector2(166, 254)
@@ -40,7 +51,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestCultureRackBlocker"]
-shape = SubResource("RectangleShape2D_culture_rack")
+position = Vector2(0, -65.5)
+shape = SubResource("RectangleShape2D_culture_rack_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="NorthWestCultureRackBlocker"]
+position = Vector2(0, 91.5)
+shape = SubResource("RectangleShape2D_culture_rack_bottom")
 
 [node name="SouthWestCultureRackBlocker" type="StaticBody2D" parent="."]
 position = Vector2(170, 436)
@@ -58,7 +74,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastCultureRackBlocker"]
-shape = SubResource("RectangleShape2D_culture_rack")
+position = Vector2(0, -63.5)
+shape = SubResource("RectangleShape2D_culture_rack_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="NorthEastCultureRackBlocker"]
+position = Vector2(0, 93.5)
+shape = SubResource("RectangleShape2D_culture_rack_bottom")
 
 [node name="SouthEastCultureRackBlocker" type="StaticBody2D" parent="."]
 position = Vector2(846, 434)

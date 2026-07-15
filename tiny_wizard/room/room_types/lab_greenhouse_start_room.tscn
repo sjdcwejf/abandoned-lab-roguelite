@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_formal_start_room.tscn" id="1_base"]
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/greenhouse_entry_room.png" id="2_room_art"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay"]
-size = Vector2(142, 212)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay_top"]
+size = Vector2(142, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay_bottom"]
+size = Vector2(142, 120)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_console"]
 size = Vector2(70, 56)
@@ -29,7 +32,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBayBlocker"]
-shape = SubResource("RectangleShape2D_side_bay")
+position = Vector2(0, -82)
+shape = SubResource("RectangleShape2D_side_bay_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="LeftCultureBayBlocker"]
+position = Vector2(0, 56)
+shape = SubResource("RectangleShape2D_side_bay_bottom")
 
 [node name="RightCultureBayBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(840, 326)
@@ -38,7 +46,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBayBlocker"]
-shape = SubResource("RectangleShape2D_side_bay")
+position = Vector2(0, -92)
+shape = SubResource("RectangleShape2D_side_bay_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="RightCultureBayBlocker"]
+position = Vector2(0, 46)
+shape = SubResource("RectangleShape2D_side_bay_bottom")
 
 [node name="QuarantineConsoleBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(300, 190)

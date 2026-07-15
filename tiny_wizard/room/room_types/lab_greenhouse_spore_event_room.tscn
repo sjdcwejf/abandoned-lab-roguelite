@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/greenhouse_spore_event_room.gd" id="2_script"]
@@ -7,11 +7,14 @@
 [ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="5_crawler"]
 [ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/greenhouse/rooms/spore_contamination_room.png" id="6_room_art"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank"]
-size = Vector2(178, 400)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank_top"]
+size = Vector2(178, 128)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_center_contamination"]
-size = Vector2(188, 60)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bank_bottom"]
+size = Vector2(178, 208)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_center_contamination_side"]
+size = Vector2(62, 60)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_top_tube"]
 size = Vector2(54, 100)
@@ -34,7 +37,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
-shape = SubResource("RectangleShape2D_side_bank")
+position = Vector2(0, -136)
+shape = SubResource("RectangleShape2D_side_bank_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
+position = Vector2(0, 96)
+shape = SubResource("RectangleShape2D_side_bank_bottom")
 
 [node name="RightCultureBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(808, 320)
@@ -43,7 +51,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
-shape = SubResource("RectangleShape2D_side_bank")
+position = Vector2(0, -136)
+shape = SubResource("RectangleShape2D_side_bank_top")
+
+[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="RightCultureBankBlocker"]
+position = Vector2(0, 96)
+shape = SubResource("RectangleShape2D_side_bank_bottom")
 
 [node name="ContaminationBeltBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 390)
@@ -52,7 +65,12 @@ collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ContaminationBeltBlocker"]
-shape = SubResource("RectangleShape2D_center_contamination")
+position = Vector2(-65, 0)
+shape = SubResource("RectangleShape2D_center_contamination_side")
+
+[node name="CollisionShape2DRight" type="CollisionShape2D" parent="ContaminationBeltBlocker"]
+position = Vector2(65, 0)
+shape = SubResource("RectangleShape2D_center_contamination_side")
 
 [node name="TopTubeBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(520, 198)
