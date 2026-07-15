@@ -28,6 +28,7 @@ centered = false
 position = Vector2(512, 172)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthTerminalBlocker"]
 shape = SubResource("RectangleShape2D_north_terminal")
@@ -36,6 +37,7 @@ shape = SubResource("RectangleShape2D_north_terminal")
 position = Vector2(166, 254)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestCultureRackBlocker"]
 shape = SubResource("RectangleShape2D_culture_rack")
@@ -44,6 +46,7 @@ shape = SubResource("RectangleShape2D_culture_rack")
 position = Vector2(170, 436)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SouthWestCultureRackBlocker"]
 shape = SubResource("RectangleShape2D_culture_rack")
@@ -52,6 +55,7 @@ shape = SubResource("RectangleShape2D_culture_rack")
 position = Vector2(858, 250)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastCultureRackBlocker"]
 shape = SubResource("RectangleShape2D_culture_rack")
@@ -60,6 +64,7 @@ shape = SubResource("RectangleShape2D_culture_rack")
 position = Vector2(846, 434)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEastCultureRackBlocker"]
 shape = SubResource("RectangleShape2D_culture_rack")
@@ -68,6 +73,7 @@ shape = SubResource("RectangleShape2D_culture_rack")
 position = Vector2(384, 398)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WestTrayBlocker"]
 shape = SubResource("RectangleShape2D_side_tray")
@@ -76,6 +82,7 @@ shape = SubResource("RectangleShape2D_side_tray")
 position = Vector2(640, 398)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EastTrayBlocker"]
 shape = SubResource("RectangleShape2D_side_tray")

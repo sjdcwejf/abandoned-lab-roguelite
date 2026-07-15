@@ -31,6 +31,7 @@ centered = false
 position = Vector2(216, 320)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
 shape = SubResource("RectangleShape2D_side_bank")
@@ -39,27 +40,28 @@ shape = SubResource("RectangleShape2D_side_bank")
 position = Vector2(808, 320)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
 shape = SubResource("RectangleShape2D_side_bank")
 
 [node name="ContaminationBeltBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 390)
-collision_layer = 0
-collision_mask = 0
+collision_layer = 1
+collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ContaminationBeltBlocker"]
 shape = SubResource("RectangleShape2D_center_contamination")
-disabled = true
 
 [node name="TopTubeBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(520, 198)
-collision_layer = 0
-collision_mask = 0
+collision_layer = 1
+collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TopTubeBlocker"]
 shape = SubResource("RectangleShape2D_top_tube")
-disabled = true
 
 [node name="SporePods" type="Node2D" parent="." index="12"]
 

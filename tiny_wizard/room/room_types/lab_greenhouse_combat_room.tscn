@@ -6,11 +6,11 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_culture_bank"]
 size = Vector2(270, 336)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_equipment"]
-size = Vector2(250, 54)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_north_equipment_side"]
+size = Vector2(102, 54)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_south_equipment"]
-size = Vector2(250, 48)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_south_equipment_side"]
+size = Vector2(102, 48)
 
 [node name="Room" instance=ExtResource("1_room")]
 lab_room_type = "combat"
@@ -26,6 +26,7 @@ centered = false
 position = Vector2(240, 318)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
 shape = SubResource("RectangleShape2D_culture_bank")
@@ -34,24 +35,35 @@ shape = SubResource("RectangleShape2D_culture_bank")
 position = Vector2(784, 318)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
 shape = SubResource("RectangleShape2D_culture_bank")
 
 [node name="NorthEquipmentBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 116)
-collision_layer = 0
-collision_mask = 0
+collision_layer = 1
+collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEquipmentBlocker"]
-shape = SubResource("RectangleShape2D_north_equipment")
-disabled = true
+position = Vector2(-74, 0)
+shape = SubResource("RectangleShape2D_north_equipment_side")
+
+[node name="CollisionShape2DRight" type="CollisionShape2D" parent="NorthEquipmentBlocker"]
+position = Vector2(74, 0)
+shape = SubResource("RectangleShape2D_north_equipment_side")
 
 [node name="SouthEquipmentBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(512, 488)
-collision_layer = 0
-collision_mask = 0
+collision_layer = 1
+collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEquipmentBlocker"]
-shape = SubResource("RectangleShape2D_south_equipment")
-disabled = true
+position = Vector2(-74, 0)
+shape = SubResource("RectangleShape2D_south_equipment_side")
+
+[node name="CollisionShape2DRight" type="CollisionShape2D" parent="SouthEquipmentBlocker"]
+position = Vector2(74, 0)
+shape = SubResource("RectangleShape2D_south_equipment_side")
