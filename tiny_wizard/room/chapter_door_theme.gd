@@ -143,7 +143,7 @@ static func _greenhouse_theme() -> Dictionary:
 		"event_locked_door": _door("chapter2_greenhouse_door_event_locked", GREENHOUSE_TILES, GREENHOUSE_CONTROL_DOOR, Color(0.86, 1.0, 0.82, 0.98), Color(0.95, 0.72, 0.18, 0.95), true),
 		"supply_door": _door("chapter2_greenhouse_door_supply", GREENHOUSE_TILES, GREENHOUSE_GLASS_DOOR, Color(0.92, 1.0, 0.88, 0.98), Color(0.35, 1.0, 0.58, 0.95)),
 		"boss_door": _door("chapter2_greenhouse_door_boss", GREENHOUSE_TILES, GREENHOUSE_CONTROL_DOOR, Color(0.78, 0.95, 0.76, 1.0), Color(1.0, 0.18, 0.12, 0.98), true, 1.18),
-		"sealed_wall": _sealed("chapter2_greenhouse_sealed_wall", GREENHOUSE_TILES, GREENHOUSE_SEALED_WALL, Color(0.62, 0.88, 0.64, 1.0)),
+		"sealed_wall": _sealed("chapter2_greenhouse_sealed_wall", GREENHOUSE_TILES, GREENHOUSE_SEALED_WALL, Color(0.62, 0.88, 0.64, 1.0), false, true),
 	}
 
 
@@ -223,11 +223,12 @@ static func _door(
 	}
 
 
-static func _sealed(asset_name: String, texture: Texture2D, region: Rect2, tint: Color, corrupted := false) -> Dictionary:
+static func _sealed(asset_name: String, texture: Texture2D, region: Rect2, tint: Color, corrupted := false, suppress_visual := false) -> Dictionary:
 	return {
 		"asset_name": asset_name,
 		"texture": texture,
 		"region": region,
 		"tint": tint,
 		"corrupted": corrupted,
+		"suppress_visual": suppress_visual,
 	}

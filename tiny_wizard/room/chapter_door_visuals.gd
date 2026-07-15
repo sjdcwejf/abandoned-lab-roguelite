@@ -126,6 +126,8 @@ func _draw_door(direction: Dictionary, spec: Dictionary, state: String) -> void:
 func _draw_sealed_wall(direction: Dictionary, spec: Dictionary) -> void:
 	if spec.is_empty():
 		return
+	if bool(spec.get("suppress_visual", false)):
+		return
 
 	var center: Vector2 = direction.get("center", Vector2.ZERO) as Vector2
 	var size: Vector2 = direction.get("sealed_size", Vector2(320, 80)) as Vector2
