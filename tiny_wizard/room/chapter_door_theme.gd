@@ -130,7 +130,7 @@ static func _lab_theme() -> Dictionary:
 		"event_locked_door": _door("chapter1_lab_door_event_locked", LAB_STUFF, LAB_PANEL_DOOR, Color(0.76, 0.88, 1.0, 0.98), Color(0.95, 0.62, 0.18, 0.95), true),
 		"supply_door": _door("chapter1_lab_door_supply", LAB_STUFF, LAB_BLUE_DOOR, Color(0.82, 0.96, 1.0, 0.98), Color(0.2, 0.92, 0.78, 0.95)),
 		"boss_door": _door("chapter1_lab_door_boss", LAB_STUFF, LAB_RED_DOOR, Color(0.92, 0.84, 0.82, 1.0), Color(1.0, 0.16, 0.12, 0.98), true, 1.18),
-		"sealed_wall": _sealed("chapter1_lab_sealed_wall", LAB_WALLS, LAB_SEALED_WALL, Color(0.50, 0.50, 0.68, 1.0)),
+		"sealed_wall": _sealed("chapter1_lab_sealed_wall", LAB_WALLS, LAB_SEALED_WALL, Color(0.50, 0.50, 0.68, 1.0), false, true),
 	}
 
 
@@ -182,7 +182,7 @@ static func _data_core_theme() -> Dictionary:
 		"event_locked_door": _door("chapter5_data_door_event_locked", CYBERPUNK_DOORS, DATA_DOOR_DARK, Color(0.72, 0.9, 1.0, 0.98), Color(0.95, 0.62, 0.18, 0.95), true),
 		"supply_door": _door("chapter5_data_door_supply", CYBERPUNK_DOORS, DATA_DOOR_BLUE, Color(0.8, 0.98, 1.0, 0.98), Color(0.2, 1.0, 0.9, 0.95)),
 		"boss_door": _door("chapter5_data_door_boss", CYBERPUNK_DOORS, DATA_DOOR_ORANGE, Color(1.0, 0.78, 0.62, 1.0), Color(1.0, 0.16, 0.10, 0.98), true, 1.2),
-		"sealed_wall": _sealed("chapter5_data_sealed_wall", CYBERPUNK_WALLS, DATA_SEALED_WALL, Color(0.34, 0.52, 0.66, 1.0)),
+		"sealed_wall": _sealed("chapter5_data_sealed_wall", CYBERPUNK_WALLS, DATA_SEALED_WALL, Color(0.34, 0.52, 0.66, 1.0), false, true),
 	}
 
 
