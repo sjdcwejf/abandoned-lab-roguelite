@@ -156,7 +156,7 @@ static func _cryo_theme() -> Dictionary:
 		"event_locked_door": _door("chapter3_cryo_door_event_locked", LAB_STUFF, LAB_BLUE_DOOR, Color(0.76, 0.94, 1.0, 0.98), Color(0.96, 0.68, 0.18, 0.95), true),
 		"supply_door": _door("chapter3_cryo_door_supply", LAB_STUFF, LAB_BLUE_DOOR, Color(0.88, 0.98, 1.0, 0.98), Color(0.62, 1.0, 0.96, 0.95)),
 		"boss_door": _door("chapter3_cryo_door_boss", LAB_STUFF, LAB_RED_DOOR, Color(0.84, 0.94, 1.0, 1.0), Color(0.98, 0.16, 0.12, 0.98), true, 1.18),
-		"sealed_wall": _sealed("chapter3_cryo_sealed_wall", LAB_WALLS, LAB_LOCKER_WALL, Color(0.56, 0.70, 0.76, 1.0)),
+		"sealed_wall": _sealed("chapter3_cryo_sealed_wall", LAB_WALLS, LAB_LOCKER_WALL, Color(0.56, 0.70, 0.76, 1.0), false, true),
 	}
 
 
@@ -169,7 +169,7 @@ static func _factory_theme() -> Dictionary:
 		"event_locked_door": _door("chapter4_factory_door_event_locked", ROBOT_FACTORY_PAGE_01, FACTORY_STANDARD_GATE, Color(0.88, 0.76, 0.64, 0.98), Color(1.0, 0.68, 0.18, 0.95), true),
 		"supply_door": _door("chapter4_factory_door_supply", ROBOT_FACTORY_PAGE_01, FACTORY_SUPPLY_GATE, Color(0.9, 0.78, 0.62, 0.98), Color(0.35, 0.95, 0.92, 0.95)),
 		"boss_door": _door("chapter4_factory_door_boss", ROBOT_FACTORY_PAGE_01, FACTORY_HEAVY_GATE, Color(0.86, 0.68, 0.54, 1.0), Color(1.0, 0.14, 0.08, 0.98), true, 1.22),
-		"sealed_wall": _sealed("chapter4_factory_sealed_wall", ROBOT_FACTORY_PAGE_01, FACTORY_SEALED_WALL, Color(0.72, 0.62, 0.52, 1.0)),
+		"sealed_wall": _sealed("chapter4_factory_sealed_wall", ROBOT_FACTORY_PAGE_01, FACTORY_SEALED_WALL, Color(0.72, 0.62, 0.52, 1.0), false, true),
 	}
 
 
@@ -195,7 +195,7 @@ static func _final_hive_theme() -> Dictionary:
 		"event_locked_door": _door("final_hive_door_event_locked", CYBERPUNK_DOORS, DATA_DOOR_DARK, Color(0.7, 0.56, 0.86, 0.98), Color(0.88, 0.3, 0.92, 0.95), true, 1.05, true),
 		"supply_door": _door("final_hive_door_supply", CYBERPUNK_DOORS, DATA_DOOR_BLUE, Color(0.72, 0.8, 0.92, 0.98), Color(0.34, 0.9, 0.88, 0.95), false, 1.02, true),
 		"boss_door": _door("final_hive_door_boss", CYBERPUNK_DOORS, DATA_DOOR_ORANGE, Color(0.86, 0.48, 0.68, 1.0), Color(1.0, 0.10, 0.08, 0.98), true, 1.28, true),
-		"sealed_wall": _sealed("final_hive_sealed_wall", CYBERPUNK_WALLS, DATA_SEALED_WALL, Color(0.32, 0.25, 0.42, 1.0), true),
+		"sealed_wall": _sealed("final_hive_sealed_wall", CYBERPUNK_WALLS, DATA_SEALED_WALL, Color(0.32, 0.25, 0.42, 1.0), true, true),
 	}
 
 
