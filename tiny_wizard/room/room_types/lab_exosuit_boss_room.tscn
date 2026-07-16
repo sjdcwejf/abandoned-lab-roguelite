@@ -24,22 +24,29 @@ boss_display_name = "弥赛亚重装清理机（占位）"
 position = Vector2(184, 302)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftMechBayBlocker"]
-shape = SubResource("RectangleShape2D_mech_bay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftMechBayBlocker"]
+polygon = PackedVector2Array(-50, -150, 40, -150, 40, -66, -50, -66)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftMechBayBlocker"]
+polygon = PackedVector2Array(-50, 62, 40, 62, 40, 150, -50, 150)
 [node name="RightMechBayBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(840, 302)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightMechBayBlocker"]
-shape = SubResource("RectangleShape2D_mech_bay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightMechBayBlocker"]
+polygon = PackedVector2Array(-40, -150, 50, -150, 50, -66, -40, -66)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightMechBayBlocker"]
+polygon = PackedVector2Array(-40, 62, 50, 62, 50, 150, -40, 150)
 [node name="NorthHeavyGateBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(512, 130)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthHeavyGateBlocker"]
-shape = SubResource("RectangleShape2D_heavy_gate")
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthHeavyGateBlocker"]
+polygon = PackedVector2Array(-210, -40, -64, -40, -64, 40, -210, 40)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthHeavyGateBlocker"]
+polygon = PackedVector2Array(64, -40, 210, -40, 210, 40, 64, 40)

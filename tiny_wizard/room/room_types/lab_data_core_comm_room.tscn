@@ -28,18 +28,22 @@ variant = "comm"
 position = Vector2(252, 222)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftRelayBlocker"]
-shape = SubResource("RectangleShape2D_relay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftRelayBlocker"]
+polygon = PackedVector2Array(-28, -55, 56, -55, 56, 55, -28, 55)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftRelayBlocker"]
+polygon = PackedVector2Array(-56, -55, -28, -55, -28, 14, -56, 14)
 [node name="RightRelayBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(772, 382)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightRelayBlocker"]
-shape = SubResource("RectangleShape2D_relay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightRelayBlocker"]
+polygon = PackedVector2Array(-56, -55, 28, -55, 28, 55, -56, 55)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightRelayBlocker"]
+polygon = PackedVector2Array(28, -18, 56, -18, 56, 55, 28, 55)
 [node name="CommTargets" type="Node2D" parent="." index="10"]
 
 [node name="CommTerminalA" parent="CommTargets" instance=ExtResource("4_target")]

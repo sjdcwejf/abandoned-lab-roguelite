@@ -24,30 +24,37 @@ variant = "drone"
 position = Vector2(206, 220)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthDroneRackBlocker"]
-shape = SubResource("RectangleShape2D_drone_rack")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthDroneRackBlocker"]
+polygon = PackedVector2Array(18, -43, 62, -43, 62, 43, 18, 43)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthDroneRackBlocker"]
+polygon = PackedVector2Array(-62, -43, 18, -43, 18, 16, -62, 16)
 [node name="SouthDroneRackBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(818, 396)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthDroneRackBlocker"]
-shape = SubResource("RectangleShape2D_drone_rack")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="SouthDroneRackBlocker"]
+polygon = PackedVector2Array(-62, -43, -18, -43, -18, 43, -62, 43)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="SouthDroneRackBlocker"]
+polygon = PackedVector2Array(-18, -32, 62, -32, 62, 43, -18, 43)
 [node name="NorthAssemblyConveyorBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 128)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthAssemblyConveyorBlocker"]
-shape = SubResource("RectangleShape2D_conveyor")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthAssemblyConveyorBlocker"]
+polygon = PackedVector2Array(-150, -21, -64, -21, -64, 21, -150, 21)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthAssemblyConveyorBlocker"]
+polygon = PackedVector2Array(64, -21, 150, -21, 150, 21, 64, 21)
 [node name="SouthPartsBinBlocker" type="StaticBody2D" parent="." index="11"]
-position = Vector2(512, 472)
+position = Vector2(666, 472)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SouthPartsBinBlocker"]
 shape = SubResource("RectangleShape2D_parts_bin")

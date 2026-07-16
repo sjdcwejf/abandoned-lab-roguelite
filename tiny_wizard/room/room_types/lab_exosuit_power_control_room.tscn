@@ -32,42 +32,54 @@ variant = "power_control"
 position = Vector2(208, 300)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPowerCabinetBlocker"]
-shape = SubResource("RectangleShape2D_power_cabinet")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftPowerCabinetBlocker"]
+polygon = PackedVector2Array(16, -118, 56, -118, 56, 118, 16, 118)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftPowerCabinetBlocker"]
+polygon = PackedVector2Array(-56, -118, 16, -118, 16, -64, -56, -64)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="LeftPowerCabinetBlocker"]
+polygon = PackedVector2Array(-56, 64, 16, 64, 16, 118, -56, 118)
 [node name="RightPowerCabinetBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(816, 300)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPowerCabinetBlocker"]
-shape = SubResource("RectangleShape2D_power_cabinet")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightPowerCabinetBlocker"]
+polygon = PackedVector2Array(-56, -118, -16, -118, -16, 118, -56, 118)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightPowerCabinetBlocker"]
+polygon = PackedVector2Array(-16, -118, 56, -118, 56, -64, -16, -64)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="RightPowerCabinetBlocker"]
+polygon = PackedVector2Array(-16, 64, 56, 64, 56, 118, -16, 118)
 [node name="NorthPowerGateBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 120)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthPowerGateBlocker"]
-shape = SubResource("RectangleShape2D_north_gate")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthPowerGateBlocker"]
+polygon = PackedVector2Array(-130, -22, -64, -22, -64, 22, -130, 22)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthPowerGateBlocker"]
+polygon = PackedVector2Array(64, -22, 130, -22, 130, 22, 64, 22)
 [node name="SouthControlConsoleBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(512, 432)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthControlConsoleBlocker"]
-shape = SubResource("RectangleShape2D_control_console")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="SouthControlConsoleBlocker"]
+polygon = PackedVector2Array(-78, -27, -64, -27, -64, 27, -78, 27)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="SouthControlConsoleBlocker"]
+polygon = PackedVector2Array(64, -27, 78, -27, 78, 27, 64, 27)
 [node name="CoolingUnitBlocker" type="StaticBody2D" parent="." index="12"]
 position = Vector2(512, 206)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CoolingUnitBlocker"]
-shape = SubResource("RectangleShape2D_cooling_unit")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="CoolingUnitBlocker"]
+polygon = PackedVector2Array(-60, 10, 60, 10, 60, 35, -60, 35)
 [node name="TestNodes" type="Node2D" parent="." index="13"]
 
 [node name="PowerNodeA" parent="TestNodes" instance=ExtResource("4_power_node")]

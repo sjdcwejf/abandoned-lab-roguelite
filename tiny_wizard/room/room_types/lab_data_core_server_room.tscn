@@ -25,26 +25,36 @@ variant = "server"
 position = Vector2(188, 306)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftServerBankBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftServerBankBlocker"]
+polygon = PackedVector2Array(36, -120, 50, -120, 50, 120, 36, 120)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftServerBankBlocker"]
+polygon = PackedVector2Array(-50, -120, 36, -120, 36, -70, -50, -70)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="LeftServerBankBlocker"]
+polygon = PackedVector2Array(-50, 58, 36, 58, 36, 120, -50, 120)
 [node name="RightServerBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(836, 306)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightServerBankBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightServerBankBlocker"]
+polygon = PackedVector2Array(-50, -120, -36, -120, -36, 120, -50, 120)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightServerBankBlocker"]
+polygon = PackedVector2Array(-36, -120, 50, -120, 50, -70, -36, -70)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="RightServerBankBlocker"]
+polygon = PackedVector2Array(-36, 58, 50, 58, 50, 120, -36, 120)
 [node name="NorthCableBridgeBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 126)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthCableBridgeBlocker"]
-shape = SubResource("RectangleShape2D_top")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthCableBridgeBlocker"]
+polygon = PackedVector2Array(-155, -23, -64, -23, -64, 23, -155, 23)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthCableBridgeBlocker"]
+polygon = PackedVector2Array(64, -23, 155, -23, 155, 23, 64, 23)
 [node name="RavenAccessKeyTerminal" parent="." index="11" instance=ExtResource("3_terminal")]
 position = Vector2(512, 388)
 archive_id = "server_data_terminal"
@@ -60,6 +70,7 @@ already_read_message = "终端已激活。"
 position = Vector2(512, 388)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TerminalBlocker"]
-shape = SubResource("RectangleShape2D_terminal")
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="TerminalBlocker"]
+polygon = PackedVector2Array(-50, -36, 50, -36, 50, -4, -50, -4)

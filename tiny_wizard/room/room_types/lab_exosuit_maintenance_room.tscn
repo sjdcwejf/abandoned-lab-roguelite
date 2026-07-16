@@ -27,30 +27,37 @@ variant = "maintenance"
 position = Vector2(230, 232)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="MaintenanceWorkbenchBlocker"]
-shape = SubResource("RectangleShape2D_workbench")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="MaintenanceWorkbenchBlocker"]
+polygon = PackedVector2Array(-6, -32, 71, -32, 71, 32, -6, 32)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="MaintenanceWorkbenchBlocker"]
+polygon = PackedVector2Array(-71, -32, -6, -32, -6, 4, -71, 4)
 [node name="MaintenanceToolCabinetBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(794, 366)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="MaintenanceToolCabinetBlocker"]
-shape = SubResource("RectangleShape2D_tool_cabinet")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="MaintenanceToolCabinetBlocker"]
+polygon = PackedVector2Array(-71, -32, 6, -32, 6, 32, -71, 32)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="MaintenanceToolCabinetBlocker"]
+polygon = PackedVector2Array(6, -2, 71, -2, 71, 32, 6, 32)
 [node name="NorthCoolantPipeBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 142)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthCoolantPipeBlocker"]
-shape = SubResource("RectangleShape2D_coolant_pipe")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthCoolantPipeBlocker"]
+polygon = PackedVector2Array(-145, -19, -64, -19, -64, 19, -145, 19)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthCoolantPipeBlocker"]
+polygon = PackedVector2Array(64, -19, 145, -19, 145, 19, 64, 19)
 [node name="BrokenExosuitPartsBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(334, 410)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BrokenExosuitPartsBlocker"]
 shape = SubResource("RectangleShape2D_broken_parts")

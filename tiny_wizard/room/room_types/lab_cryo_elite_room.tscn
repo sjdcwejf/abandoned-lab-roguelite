@@ -22,6 +22,7 @@ variant = "elite"
 position = Vector2(174, 190)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WestTerminalBlocker"]
 shape = SubResource("RectangleShape2D_terminal")
@@ -30,10 +31,10 @@ shape = SubResource("RectangleShape2D_terminal")
 position = Vector2(850, 360)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EastStasisBankBlocker"]
-shape = SubResource("RectangleShape2D_stasis_bank")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="EastStasisBankBlocker"]
+polygon = PackedVector2Array(-50, 4, 52, 4, 52, 115, -50, 115)
 [node name="IceCoreGuardian" parent="Enemies" index="0" instance=ExtResource("3_elite")]
 position = Vector2(512, 306)
 

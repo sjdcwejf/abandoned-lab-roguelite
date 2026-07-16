@@ -25,26 +25,34 @@ variant = "merchant"
 position = Vector2(512, 224)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthDataCounterBlocker"]
-shape = SubResource("RectangleShape2D_counter")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthDataCounterBlocker"]
+polygon = PackedVector2Array(-165, -36, -64, -36, -64, 36, -165, 36)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthDataCounterBlocker"]
+polygon = PackedVector2Array(64, -36, 165, -36, 165, 36, 64, 36)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="NorthDataCounterBlocker"]
+polygon = PackedVector2Array(-64, -8, 64, -8, 64, 36, -64, 36)
 [node name="LeftServerRackBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(210, 386)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftServerRackBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftServerRackBlocker"]
+polygon = PackedVector2Array(14, -75, 59, -75, 59, 75, 14, 75)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftServerRackBlocker"]
+polygon = PackedVector2Array(-59, -22, 14, -22, 14, 75, -59, 75)
 [node name="RightServerRackBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(814, 386)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightServerRackBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightServerRackBlocker"]
+polygon = PackedVector2Array(-59, -75, -14, -75, -14, 75, -59, 75)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightServerRackBlocker"]
+polygon = PackedVector2Array(-14, -22, 59, -22, 59, 75, -14, 75)
 [node name="EndingHintTerminal" parent="." index="12" instance=ExtResource("3_terminal")]
 position = Vector2(392, 354)
 archive_id = "supply_terminal"
@@ -60,6 +68,7 @@ already_read_message = "终端已激活。"
 position = Vector2(392, 354)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EndingHintTerminalBlocker"]
 shape = SubResource("RectangleShape2D_terminal")

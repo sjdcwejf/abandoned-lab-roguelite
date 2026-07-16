@@ -31,38 +31,40 @@ collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWestCultureBayBlocker"]
-position = Vector2(0, -11)
-shape = SubResource("RectangleShape2D_north_bay_top")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthWestCultureBayBlocker"]
+polygon = PackedVector2Array(48, -94, 71, -94, 71, 72, 48, 72)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthWestCultureBayBlocker"]
+polygon = PackedVector2Array(-71, -94, 48, -94, 48, 60, -71, 60)
 [node name="SouthWestCultureBayBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(172, 430)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthWestCultureBayBlocker"]
-shape = SubResource("RectangleShape2D_side_bay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="SouthWestCultureBayBlocker"]
+polygon = PackedVector2Array(52, -102, 71, -102, 71, 102, 52, 102)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="SouthWestCultureBayBlocker"]
+polygon = PackedVector2Array(-71, -66, 52, -66, 52, 102, -71, 102)
 [node name="NorthEastCultureBayBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(844, 184)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEastCultureBayBlocker"]
-position = Vector2(0, -19)
-shape = SubResource("RectangleShape2D_north_bay_top")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthEastCultureBayBlocker"]
+polygon = PackedVector2Array(-71, -102, -44, -102, -44, 64, -71, 64)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthEastCultureBayBlocker"]
+polygon = PackedVector2Array(-44, -102, 71, -102, 71, 52, -44, 52)
 [node name="SouthEastCultureBayBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(836, 422)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEastCultureBayBlocker"]
-shape = SubResource("RectangleShape2D_side_bay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="SouthEastCultureBayBlocker"]
+polygon = PackedVector2Array(-71, -102, -36, -102, -36, 102, -71, 102)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="SouthEastCultureBayBlocker"]
+polygon = PackedVector2Array(-36, -58, 71, -58, 71, 102, -36, 102)
 [node name="WestTrayBlocker" type="StaticBody2D" parent="." index="12"]
 position = Vector2(352, 184)
 collision_layer = 1
@@ -87,5 +89,5 @@ collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TerminalBlocker"]
-shape = SubResource("RectangleShape2D_terminal")
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="TerminalBlocker"]
+polygon = PackedVector2Array(-34, -26, 36, -26, 36, 26, -34, 26)

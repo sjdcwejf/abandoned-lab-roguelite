@@ -22,18 +22,22 @@ variant = "vent"
 position = Vector2(512, 128)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthPipeBlocker"]
-shape = SubResource("RectangleShape2D_pipe")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthPipeBlocker"]
+polygon = PackedVector2Array(-119, -21, -64, -21, -64, 21, -119, 21)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthPipeBlocker"]
+polygon = PackedVector2Array(64, -21, 119, -21, 119, 21, 64, 21)
 [node name="SouthPipeBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(512, 474)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthPipeBlocker"]
-shape = SubResource("RectangleShape2D_pipe")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="SouthPipeBlocker"]
+polygon = PackedVector2Array(-119, -21, -64, -21, -64, 21, -119, 21)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="SouthPipeBlocker"]
+polygon = PackedVector2Array(64, -21, 119, -21, 119, 21, 64, 21)
 [node name="Vents" type="Node2D" parent="." index="10"]
 
 [node name="VentA" type="Node2D" parent="Vents" groups=["cryo_vents"]]

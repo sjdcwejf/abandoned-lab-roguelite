@@ -25,26 +25,32 @@ variant = "boss"
 position = Vector2(512, 140)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthPodBlocker"]
-shape = SubResource("RectangleShape2D_north_pods")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthPodBlocker"]
+polygon = PackedVector2Array(-180, -35, -64, -35, -64, 35, -180, 35)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthPodBlocker"]
+polygon = PackedVector2Array(64, -35, 180, -35, 180, 35, 64, 35)
 [node name="LeftBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(170, 320)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftBankBlocker"]
-shape = SubResource("RectangleShape2D_side_bank")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftBankBlocker"]
+polygon = PackedVector2Array(-43, -125, 43, -125, 43, -84, -43, -84)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftBankBlocker"]
+polygon = PackedVector2Array(-43, 44, 43, 44, 43, 125, -43, 125)
 [node name="RightBankBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(854, 320)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightBankBlocker"]
-shape = SubResource("RectangleShape2D_side_bank")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightBankBlocker"]
+polygon = PackedVector2Array(-43, -125, 43, -125, 43, -84, -43, -84)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightBankBlocker"]
+polygon = PackedVector2Array(-43, 44, 43, 44, 43, 125, -43, 125)
 [node name="SubjectZeroCryo" parent="Enemies" index="0" instance=ExtResource("4_boss")]
 position = Vector2(512, 310)
 

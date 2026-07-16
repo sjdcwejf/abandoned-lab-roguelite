@@ -22,25 +22,31 @@ variant = "elite"
 position = Vector2(188, 196)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WestMechBayBlocker"]
-shape = SubResource("RectangleShape2D_terminal")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="WestMechBayBlocker"]
+polygon = PackedVector2Array(36, -42, 65, -42, 65, 42, 36, 42)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="WestMechBayBlocker"]
+polygon = PackedVector2Array(-65, -42, 36, -42, 36, 40, -65, 40)
 [node name="EastMechBayBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(836, 404)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EastMechBayBlocker"]
-shape = SubResource("RectangleShape2D_terminal")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="EastMechBayBlocker"]
+polygon = PackedVector2Array(-65, -42, -36, -42, -36, 42, -65, 42)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="EastMechBayBlocker"]
+polygon = PackedVector2Array(-36, -40, 65, -40, 65, 42, -36, 42)
 [node name="NorthConveyorBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 120)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthConveyorBlocker"]
-shape = SubResource("RectangleShape2D_conveyor")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthConveyorBlocker"]
+polygon = PackedVector2Array(-155, -21, -64, -21, -64, 21, -155, 21)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthConveyorBlocker"]
+polygon = PackedVector2Array(64, -21, 155, -21, 155, 21, 64, 21)
 [node name="SecurityMechPlaceholder" parent="Enemies" index="0" instance=ExtResource("3_elite")]
 position = Vector2(512, 306)

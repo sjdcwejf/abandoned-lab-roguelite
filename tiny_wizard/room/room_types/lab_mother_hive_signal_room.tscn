@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/mother_hive_overlay.gd" id="2_overlay"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="3_terminal"]
+
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mother_signal_platform"]
+size = Vector2(236, 56)
 
 [node name="Room" instance=ExtResource("1_room")]
 lab_room_type = "final_signal"
@@ -22,3 +26,14 @@ prompt_text = "按 F 激活核心终端"
 show_panel_on_read = false
 record_to_main = false
 already_read_message = "终端已激活。"
+
+[node name="MotherSignalArchivePlatformBlocker" type="StaticBody2D" parent="."]
+position = Vector2(512, 410)
+collision_layer = 1
+collision_mask = 15
+metadata/solid_blocking_prop = true
+
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="MotherSignalArchivePlatformBlocker"]
+polygon = PackedVector2Array(-118, -28, -64, -28, -64, 28, -118, 28)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="MotherSignalArchivePlatformBlocker"]
+polygon = PackedVector2Array(64, -28, 118, -28, 118, 28, 64, 28)

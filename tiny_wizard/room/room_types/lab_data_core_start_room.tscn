@@ -21,22 +21,33 @@ variant = "start"
 position = Vector2(190, 296)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftServerBankBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftServerBankBlocker"]
+polygon = PackedVector2Array(34, -120, 49, -120, 49, 120, 34, 120)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftServerBankBlocker"]
+polygon = PackedVector2Array(-49, -120, 34, -120, 34, -60, -49, -60)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="LeftServerBankBlocker"]
+polygon = PackedVector2Array(-49, 68, 34, 68, 34, 120, -49, 120)
 [node name="RightServerBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(834, 296)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightServerBankBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightServerBankBlocker"]
+polygon = PackedVector2Array(-49, -120, -34, -120, -34, 120, -49, 120)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightServerBankBlocker"]
+polygon = PackedVector2Array(-34, -120, 49, -120, 49, -60, -34, -60)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="RightServerBankBlocker"]
+polygon = PackedVector2Array(-34, 68, 49, 68, 49, 120, -34, 120)
 [node name="NorthSecurityGateBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 126)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthSecurityGateBlocker"]
-shape = SubResource("RectangleShape2D_gate")
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthSecurityGateBlocker"]
+polygon = PackedVector2Array(-140, -23, -64, -23, -64, 23, -140, 23)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthSecurityGateBlocker"]
+polygon = PackedVector2Array(64, -23, 140, -23, 140, 23, 64, 23)

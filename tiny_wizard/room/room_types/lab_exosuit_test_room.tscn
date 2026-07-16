@@ -23,18 +23,22 @@ variant = "test"
 position = Vector2(188, 302)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftTestBayBlocker"]
-shape = SubResource("RectangleShape2D_side_bay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftTestBayBlocker"]
+polygon = PackedVector2Array(-46, -120, 36, -120, 36, -66, -46, -66)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftTestBayBlocker"]
+polygon = PackedVector2Array(-46, 62, 36, 62, 36, 120, -46, 120)
 [node name="RightTestBayBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(836, 302)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightTestBayBlocker"]
-shape = SubResource("RectangleShape2D_side_bay")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightTestBayBlocker"]
+polygon = PackedVector2Array(-36, -120, 46, -120, 46, -66, -36, -66)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightTestBayBlocker"]
+polygon = PackedVector2Array(-36, 62, 46, 62, 46, 120, -36, 120)
 [node name="TestNodes" type="Node2D" parent="." index="10"]
 
 [node name="TestNodeA" parent="TestNodes" instance=ExtResource("4_test_node")]

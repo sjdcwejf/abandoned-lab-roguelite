@@ -28,18 +28,22 @@ variant = "comm_control"
 position = Vector2(214, 212)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftSignalBankBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftSignalBankBlocker"]
+polygon = PackedVector2Array(10, -42, 60, -42, 60, 42, 10, 42)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftSignalBankBlocker"]
+polygon = PackedVector2Array(-60, -42, 10, -42, 10, 24, -60, 24)
 [node name="RightSignalBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(810, 388)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightSignalBankBlocker"]
-shape = SubResource("RectangleShape2D_server")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightSignalBankBlocker"]
+polygon = PackedVector2Array(-60, -42, -10, -42, -10, 42, -60, 42)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightSignalBankBlocker"]
+polygon = PackedVector2Array(-10, -24, 60, -24, 60, 42, -10, 42)
 [node name="ControlNodes" type="Node2D" parent="." index="10"]
 
 [node name="ControlNodeA" parent="ControlNodes" instance=ExtResource("4_target")]

@@ -31,52 +31,45 @@ collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
-position = Vector2(0, -119)
-shape = SubResource("RectangleShape2D_culture_bank_top")
-
-[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="LeftCultureBankBlocker"]
-position = Vector2(0, 81)
-shape = SubResource("RectangleShape2D_culture_bank_bottom")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftCultureBankBlocker"]
+polygon = PackedVector2Array(-16, -168, 135, -168, 135, -70, -16, -70)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftCultureBankBlocker"]
+polygon = PackedVector2Array(-135, -168, -16, -168, -16, -82, -135, -82)
+[node name="CollisionShape2DBottomRouteSafeA" type="CollisionPolygon2D" parent="LeftCultureBankBlocker"]
+polygon = PackedVector2Array(-16, -6, 135, -6, 135, 168, -16, 168)
+[node name="CollisionShape2DBottomRouteSafeB" type="CollisionPolygon2D" parent="LeftCultureBankBlocker"]
+polygon = PackedVector2Array(-135, 46, -16, 46, -16, 168, -135, 168)
 [node name="RightCultureBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(784, 318)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightCultureBankBlocker"]
-position = Vector2(0, -119)
-shape = SubResource("RectangleShape2D_culture_bank_top")
-
-[node name="CollisionShape2DBottom" type="CollisionShape2D" parent="RightCultureBankBlocker"]
-position = Vector2(0, 81)
-shape = SubResource("RectangleShape2D_culture_bank_bottom")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightCultureBankBlocker"]
+polygon = PackedVector2Array(-135, -168, 16, -168, 16, -70, -135, -70)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightCultureBankBlocker"]
+polygon = PackedVector2Array(16, -168, 135, -168, 135, -82, 16, -82)
+[node name="CollisionShape2DBottomRouteSafeA" type="CollisionPolygon2D" parent="RightCultureBankBlocker"]
+polygon = PackedVector2Array(-135, -6, 16, -6, 16, 168, -135, 168)
+[node name="CollisionShape2DBottomRouteSafeB" type="CollisionPolygon2D" parent="RightCultureBankBlocker"]
+polygon = PackedVector2Array(16, 46, 135, 46, 135, 168, 16, 168)
 [node name="NorthEquipmentBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 116)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthEquipmentBlocker"]
-position = Vector2(-74, 0)
-shape = SubResource("RectangleShape2D_north_equipment_side")
-
-[node name="CollisionShape2DRight" type="CollisionShape2D" parent="NorthEquipmentBlocker"]
-position = Vector2(74, 0)
-shape = SubResource("RectangleShape2D_north_equipment_side")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthEquipmentBlocker"]
+polygon = PackedVector2Array(-125, -27, -64, -27, -64, 27, -125, 27)
+[node name="CollisionShape2DRightRouteSafeA" type="CollisionPolygon2D" parent="NorthEquipmentBlocker"]
+polygon = PackedVector2Array(64, -27, 125, -27, 125, 27, 64, 27)
 [node name="SouthEquipmentBlocker" type="StaticBody2D" parent="." index="11"]
 position = Vector2(512, 488)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthEquipmentBlocker"]
-position = Vector2(-74, 0)
-shape = SubResource("RectangleShape2D_south_equipment_side")
-
-[node name="CollisionShape2DRight" type="CollisionShape2D" parent="SouthEquipmentBlocker"]
-position = Vector2(74, 0)
-shape = SubResource("RectangleShape2D_south_equipment_side")
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="SouthEquipmentBlocker"]
+polygon = PackedVector2Array(-125, -24, -64, -24, -64, 24, -125, 24)
+[node name="CollisionShape2DRightRouteSafeA" type="CollisionPolygon2D" parent="SouthEquipmentBlocker"]
+polygon = PackedVector2Array(64, -24, 125, -24, 125, 24, 64, 24)

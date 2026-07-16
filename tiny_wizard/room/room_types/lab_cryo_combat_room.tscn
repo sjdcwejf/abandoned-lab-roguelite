@@ -19,18 +19,22 @@ variant = "combat"
 position = Vector2(168, 306)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftStasisBankBlocker"]
-shape = SubResource("RectangleShape2D_side_bank")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftStasisBankBlocker"]
+polygon = PackedVector2Array(-63, -125, 56, -125, 56, -70, -63, -70)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftStasisBankBlocker"]
+polygon = PackedVector2Array(-63, 58, 56, 58, 56, 125, -63, 125)
 [node name="RightStasisBankBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(856, 306)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightStasisBankBlocker"]
-shape = SubResource("RectangleShape2D_side_bank")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightStasisBankBlocker"]
+polygon = PackedVector2Array(-56, -125, 63, -125, 63, -70, -56, -70)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightStasisBankBlocker"]
+polygon = PackedVector2Array(-56, 58, 63, 58, 63, 125, -56, 125)
 [node name="LeftColdLeak" parent="." index="10" instance=ExtResource("3_cryo_zone")]
 position = Vector2(282, 218)
 radius = 74.0

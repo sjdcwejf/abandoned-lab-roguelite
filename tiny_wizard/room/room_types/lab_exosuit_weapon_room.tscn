@@ -28,30 +28,43 @@ variant = "weapon"
 position = Vector2(228, 304)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWeaponRackBlocker"]
-shape = SubResource("RectangleShape2D_side_rack")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftWeaponRackBlocker"]
+polygon = PackedVector2Array(-4, -115, 63, -115, 63, 115, -4, 115)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftWeaponRackBlocker"]
+polygon = PackedVector2Array(-63, -115, -4, -115, -4, -68, -63, -68)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="LeftWeaponRackBlocker"]
+polygon = PackedVector2Array(-63, 60, -4, 60, -4, 115, -63, 115)
 [node name="RightWeaponRackBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(796, 304)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWeaponRackBlocker"]
-shape = SubResource("RectangleShape2D_side_rack")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightWeaponRackBlocker"]
+polygon = PackedVector2Array(-63, -115, 4, -115, 4, 115, -63, 115)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightWeaponRackBlocker"]
+polygon = PackedVector2Array(4, -115, 63, -115, 63, -68, 4, -68)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="RightWeaponRackBlocker"]
+polygon = PackedVector2Array(4, 60, 63, 60, 63, 115, 4, 115)
 [node name="QualityTerminalBlocker" type="StaticBody2D" parent="." index="10"]
 position = Vector2(512, 236)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="QualityTerminalBlocker"]
-shape = SubResource("RectangleShape2D_terminal")
-
+[node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="QualityTerminalBlocker"]
+polygon = PackedVector2Array(-94, -22, -64, -22, -64, 22, -94, 22)
+[node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="QualityTerminalBlocker"]
+polygon = PackedVector2Array(64, -22, 94, -22, 94, 22, 64, 22)
+[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="QualityTerminalBlocker"]
+polygon = PackedVector2Array(-64, -20, 64, -20, 64, 22, -64, 22)
 [node name="PartsBinBlocker" type="StaticBody2D" parent="." index="11"]
-position = Vector2(512, 404)
+position = Vector2(650, 404)
 collision_layer = 1
 collision_mask = 15
+metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PartsBinBlocker"]
 shape = SubResource("RectangleShape2D_parts_bin")

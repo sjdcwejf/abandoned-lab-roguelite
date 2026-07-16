@@ -877,6 +877,10 @@ func _add_asset_sprite(texture: Texture2D, region: Rect2, position: Vector2, sca
 
 
 func _add_solid_blocking_prop(name_suffix: String, center: Vector2, size: Vector2) -> void:
+	var pieces := _route_safe_blocking_rects(center, size)
+	if pieces.is_empty():
+		return
+
 	var body := StaticBody2D.new()
 	body.name = "SolidBlocker%s" % name_suffix
 	body.position = center
@@ -885,12 +889,61 @@ func _add_solid_blocking_prop(name_suffix: String, center: Vector2, size: Vector
 	body.add_to_group("solid_blocking_prop")
 	body.set_meta("solid_blocking_prop", true)
 
-	var shape := CollisionShape2D.new()
-	var rect := RectangleShape2D.new()
-	rect.size = size
-	shape.shape = rect
-	body.add_child(shape)
+	for piece in pieces:
+		var shape := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = piece.size
+		shape.position = piece.position + piece.size * 0.5 - center
+		shape.shape = rect
+		body.add_child(shape)
 	add_child(body)
+
+
+func _route_safe_blocking_rects(center: Vector2, size: Vector2) -> Array[Rect2]:
+	var source := Rect2(center - size * 0.5, size)
+	var pieces: Array[Rect2] = [source]
+	for clearance in _door_clearance_rects():
+		var next_pieces: Array[Rect2] = []
+		for piece in pieces:
+			if _rects_overlap(piece, clearance):
+				next_pieces.append_array(_split_blocking_rect(piece, clearance))
+			else:
+				next_pieces.append(piece)
+		pieces = next_pieces
+	return pieces
+
+
+func _door_clearance_rects() -> Array[Rect2]:
+	return [
+		Rect2(Vector2(448, 72), Vector2(128, 144)),
+		Rect2(Vector2(448, 384), Vector2(128, 144)),
+		Rect2(Vector2(32, 236), Vector2(192, 128)),
+		Rect2(Vector2(800, 236), Vector2(192, 128)),
+	]
+
+
+func _rects_overlap(a: Rect2, b: Rect2) -> bool:
+	return a.position.x < b.position.x + b.size.x 		and a.position.x + a.size.x > b.position.x 		and a.position.y < b.position.y + b.size.y 		and a.position.y + a.size.y > b.position.y
+
+
+func _split_blocking_rect(source: Rect2, clearance: Rect2) -> Array[Rect2]:
+	var ix1: float = max(source.position.x, clearance.position.x)
+	var iy1: float = max(source.position.y, clearance.position.y)
+	var ix2: float = min(source.position.x + source.size.x, clearance.position.x + clearance.size.x)
+	var iy2: float = min(source.position.y + source.size.y, clearance.position.y + clearance.size.y)
+	if ix1 >= ix2 or iy1 >= iy2:
+		return [source]
+	var pieces: Array[Rect2] = []
+	_append_blocking_piece(pieces, Rect2(Vector2(source.position.x, source.position.y), Vector2(ix1 - source.position.x, source.size.y)))
+	_append_blocking_piece(pieces, Rect2(Vector2(ix2, source.position.y), Vector2(source.position.x + source.size.x - ix2, source.size.y)))
+	_append_blocking_piece(pieces, Rect2(Vector2(ix1, source.position.y), Vector2(ix2 - ix1, iy1 - source.position.y)))
+	_append_blocking_piece(pieces, Rect2(Vector2(ix1, iy2), Vector2(ix2 - ix1, source.position.y + source.size.y - iy2)))
+	return pieces
+
+
+func _append_blocking_piece(pieces: Array[Rect2], piece: Rect2) -> void:
+	if piece.size.x >= 12.0 and piece.size.y >= 12.0:
+		pieces.append(piece)
 
 
 func _add_warning_strip(center: Vector2, size: Vector2, vertical := false) -> void:
