@@ -455,27 +455,34 @@ func _build_factory_power_control_background() -> void:
 
 
 func _build_factory_armory_supply_background() -> void:
-	_add_rect("ArmoryCentralClearLane", ROOM_CENTER, Vector2(460, 290), Color(0.078, 0.088, 0.08, 0.5), 2)
-	_add_rect("ArmoryMerchantSafeZone", Vector2(328, 304), Vector2(208, 150), Color(0.055, 0.088, 0.096, 0.58), 2)
-	_add_rect("ArmoryTerminalZone", Vector2(696, 304), Vector2(208, 150), Color(0.092, 0.076, 0.052, 0.5), 2)
-	_add_rect("ArmoryAmmoRackLeftBay", Vector2(170, 300), Vector2(132, 276), Color(0.09, 0.074, 0.056, 0.46), 2)
-	_add_rect("ArmoryAmmoRackRightBay", Vector2(854, 300), Vector2(132, 276), Color(0.09, 0.074, 0.056, 0.46), 2)
-	_add_line(Vector2(328, 304), Vector2(696, 304), Color(0.25, 0.9, 1.0, 0.3), 2.0, 3)
-	for y in [188, 252, 348, 412]:
-		_add_line(Vector2(112, y), Vector2(230, y), Color(0.92, 0.58, 0.18, 0.24), 1.5, 3)
-		_add_line(Vector2(794, y), Vector2(912, y), Color(0.92, 0.58, 0.18, 0.24), 1.5, 3)
-	for x in [280, 376, 648, 744]:
-		_add_line(Vector2(x, 230), Vector2(x, 378), Color(0.30, 0.78, 0.92, 0.18), 1.2, 3)
-	_add_equipment_frame(Vector2(170, 300), Vector2(108, 252), "左军械墙")
-	_add_equipment_frame(Vector2(854, 300), Vector2(108, 252), "右军械墙")
-	_add_equipment_frame(Vector2(512, 176), Vector2(340, 72), "补给缓存控制台")
-	_add_equipment_frame(Vector2(328, 428), Vector2(174, 58), "商人安全区")
-	_add_equipment_frame(Vector2(696, 428), Vector2(174, 58), "终端维护区")
-	_add_asset_sprite(LAB_STUFF_TEXTURE, Rect2(882, 304, 80, 56), Vector2(512, 176), Vector2(1.0, 1.0), Color(1.0, 0.82, 0.55, 0.92), 5)
-	_add_asset_sprite(FACILITY_CRATES_TEXTURE, Rect2(32, 48, 16, 16), Vector2(168, 220), Vector2(1.7, 1.7), Color.WHITE, 5)
-	_add_asset_sprite(FACILITY_CRATES_TEXTURE, Rect2(32, 48, 16, 16), Vector2(168, 380), Vector2(1.7, 1.7), Color.WHITE, 5)
-	_add_asset_sprite(FACILITY_CRATES_TEXTURE, Rect2(32, 48, 16, 16), Vector2(856, 220), Vector2(1.7, 1.7), Color.WHITE, 5)
-	_add_asset_sprite(FACILITY_CRATES_TEXTURE, Rect2(32, 48, 16, 16), Vector2(856, 380), Vector2(1.7, 1.7), Color.WHITE, 5)
+	_add_rect("ArmoryHangarBackplate", ROOM_CENTER, Vector2(766, 362), Color(0.055, 0.050, 0.042, 0.78), 1)
+	_add_rect("ArmoryCentralServiceLane", ROOM_CENTER, Vector2(438, 332), Color(0.035, 0.034, 0.030, 0.86), 2)
+	_add_rect("ArmoryLeftMechReserve", Vector2(250, 330), Vector2(246, 238), Color(0.115, 0.088, 0.054, 0.46), 2)
+	_add_rect("ArmoryRightMechReserve", Vector2(774, 330), Vector2(246, 238), Color(0.115, 0.088, 0.054, 0.44), 2)
+	_add_rect("ArmoryMerchantSafeZone", Vector2(328, 424), Vector2(178, 58), Color(0.050, 0.076, 0.078, 0.46), 2)
+	_add_rect("ArmoryTerminalZone", Vector2(696, 424), Vector2(178, 58), Color(0.086, 0.064, 0.042, 0.44), 2)
+
+	_add_line(Vector2(356, 138), Vector2(356, 462), Color(0.95, 0.42, 0.10, 0.26), 2.0, 3)
+	_add_line(Vector2(668, 138), Vector2(668, 462), Color(0.95, 0.42, 0.10, 0.24), 2.0, 3)
+	for y in [200, 304, 408]:
+		_add_line(Vector2(134, y), Vector2(328, y), Color(0.78, 0.46, 0.16, 0.32), 2.0, 3)
+		_add_line(Vector2(696, y), Vector2(890, y), Color(0.78, 0.46, 0.16, 0.30), 2.0, 3)
+	_add_line(Vector2(328, 424), Vector2(696, 424), Color(0.28, 0.82, 0.88, 0.22), 2.0, 3)
+
+	_add_equipment_frame(Vector2(512, 156), Vector2(360, 76), "补给缓存控制台")
+	_add_equipment_frame(Vector2(190, 328), Vector2(124, 116), "左侧安保机甲")
+	_add_equipment_frame(Vector2(834, 328), Vector2(124, 116), "右侧安保机甲")
+	_add_equipment_frame(Vector2(328, 424), Vector2(174, 58), "商人安全区")
+	_add_equipment_frame(Vector2(696, 424), Vector2(174, 58), "终端维护区")
+
+	_add_asset_sprite(ROBOT_FACTORY_PAGE_03, Rect2(376, 0, 376, 110), Vector2(512, 146), Vector2(0.84, 0.78), Color(1, 1, 1, 0.82), 5)
+	_add_asset_sprite(ROBOT_FACTORY_PAGE_04, Rect2(0, 520, 256, 170), Vector2(190, 328), Vector2(0.50, 0.50), Color(1, 1, 1, 0.88), 5)
+	_add_asset_sprite(ROBOT_FACTORY_PAGE_04, Rect2(0, 520, 256, 170), Vector2(834, 328), Vector2(-0.50, 0.50), Color(1, 1, 1, 0.86), 5)
+	_add_asset_sprite(LAB_STUFF_TEXTURE, Rect2(882, 304, 80, 56), Vector2(512, 166), Vector2(0.86, 0.86), Color(1.0, 0.82, 0.55, 0.86), 5)
+	_add_asset_sprite(FACILITY_CRATES_TEXTURE, Rect2(32, 48, 16, 16), Vector2(266, 216), Vector2(1.35, 1.35), Color.WHITE, 5)
+	_add_asset_sprite(FACILITY_CRATES_TEXTURE, Rect2(32, 48, 16, 16), Vector2(758, 216), Vector2(1.35, 1.35), Color.WHITE, 5)
+	_add_warning_light(Vector2(122, 160))
+	_add_warning_light(Vector2(902, 440))
 
 
 func _build_factory_heavy_cleaner_boss_background() -> void:
