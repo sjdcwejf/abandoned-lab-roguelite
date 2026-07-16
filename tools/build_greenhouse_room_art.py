@@ -138,7 +138,7 @@ LOP_WALL_SCREEN = recolor(trim(crop(LOP_STUFF, (480, 80, 736, 128))), brightness
 LOP_LIQUID = recolor(crop(LOP_LIQUID, (64, 0, 96, 32)), brightness=0.55, saturation=0.65, alpha=0.64)
 
 
-def draw_room_shell(rng: random.Random) -> Image.Image:
+def draw_room_shell(rng: random.Random, door_directions: tuple[str, ...] = ("up", "down", "left", "right")) -> Image.Image:
     img = Image.new("RGBA", ROOM_SIZE, (5, 12, 14, 255))
     draw = ImageDraw.Draw(img, "RGBA")
 
@@ -172,10 +172,8 @@ def draw_room_shell(rng: random.Random) -> Image.Image:
         else:
             draw.rectangle((x, y, x + rng.randrange(2, 6), y + rng.randrange(1, 4)), fill=col)
 
-    draw_door(img, "up")
-    draw_door(img, "down")
-    draw_door(img, "left")
-    draw_door(img, "right")
+    for direction in door_directions:
+        draw_door(img, direction)
     return img
 
 
@@ -275,7 +273,7 @@ def draw_floor_liquid_tiles(img: Image.Image, rect: tuple[int, int, int, int], r
 
 def greenhouse_entry_room() -> Image.Image:
     rng = random.Random(2101)
-    img = draw_room_shell(rng)
+    img = draw_room_shell(rng, ("up", "right"))
     draw_culture_bay(img, (184, 306), rng, False, False)
     draw_culture_bay(img, (840, 326), rng, True, True)
     paste_equipment(img, VOID_CONSOLE.resize((54, 60), Image.Resampling.NEAREST), (300, 190))
