@@ -51,10 +51,9 @@ metadata/solid_blocking_prop = true
 polygon = PackedVector2Array(-43, -125, 43, -125, 43, -84, -43, -84)
 [node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightBankBlocker"]
 polygon = PackedVector2Array(-43, 44, 43, 44, 43, 125, -43, 125)
-[node name="SubjectZeroCryo" parent="Enemies" index="0" instance=ExtResource("4_boss")]
+[node name="PrototypeBoss" parent="Enemies" index="0" instance=ExtResource("4_boss")]
 position = Vector2(512, 310)
 
 [node name="ExitBlackHole" parent="." index="11" instance=ExtResource("5_black_hole")]
 position = Vector2(512, 420)
 monitoring = false
-

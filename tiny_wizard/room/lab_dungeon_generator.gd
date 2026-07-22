@@ -65,6 +65,7 @@ const REWARD_ROOM_COUNT := 2
 const MAX_LAYOUT_ATTEMPTS := 80
 const LAYOUT_RADIUS := 3
 const ROOM_ROLE_PRE_BOSS_SHOP := "PRE_BOSS_SHOP"
+const DEFAULT_END_SEQUENCE := ["merchant", "boss"]
 
 const DIRECTIONS := [
 	Vector2i.RIGHT,
@@ -225,8 +226,8 @@ static func generate(rooms_parent: Node2D, requested_seed := 0, chapter_id := DE
 	last_seed = _resolve_seed(requested_seed)
 	rng.seed = last_seed
 
-	var chapter_config := get_chapter_config(chapter_id)
-	var room_layout := _generate_random_layout(rng, chapter_config, layer_index)
+	var floor_config := get_floor_config(chapter_id, layer_index)
+	var room_layout := _generate_random_layout(rng, floor_config, layer_index)
 	var generated_rooms := {}
 	for spec in room_layout:
 		var room := _instantiate_room(spec)
@@ -234,7 +235,7 @@ static func generate(rooms_parent: Node2D, requested_seed := 0, chapter_id := DE
 			FORMAL_ENCOUNTER_GENERATOR.populate(room, rng, int(spec.get("depth", 1)))
 		rooms_parent.add_child(room)
 		generated_rooms[room.room_pos] = room
-	_validate_generated_rooms(generated_rooms, chapter_config, layer_index)
+	_validate_generated_rooms(generated_rooms, floor_config, layer_index)
 
 	return generated_rooms
 
@@ -305,7 +306,8 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"title": "第三章：低温封存区",
 				"sector": "低温封存区",
 				"planned_minutes": "8-12",
-				"formal_layer_count": 1,
+				"formal_layer_count": 2,
+				"floor_count": 2,
 				"main_path_room_count": 8,
 				"reward_room_count": 2,
 				"layout_radius": 4,
@@ -330,6 +332,34 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"reward_room_scenes": [CRYO_REWARD_ROOM_SCENE, CRYO_REWARD_ROOM_SCENE],
 				"merchant_room_scenes": [CRYO_BOSS_ANTECHAMBER_SCENE],
 				"boss_room_scenes": [CRYO_BOSS_ROOM_SCENE],
+				"miniboss_room_scenes": [CRYO_BOSS_ROOM_SCENE],
+				"miniboss_label": "零号封存室",
+				"floors": [
+					{
+						"floor_id": "cryo_storage",
+						"local_floor_index": 1,
+						"floor_name": "冷藏仓储层",
+						"floor_role": "elite",
+						"objective_text": "击败冰核守卫，打开深层封存通道。",
+						"main_path_room_count": 6,
+						"reward_room_count": 1,
+						"main_room_types": ["combat", "combat", "cryo_pod", "cryo_vent"],
+						"end_sequence": ["elite"],
+						"next_floor_id": "cryo_deep_storage",
+					},
+					{
+						"floor_id": "cryo_deep_storage",
+						"local_floor_index": 2,
+						"floor_name": "深度封存层",
+						"floor_role": "miniboss",
+						"objective_text": "击败零号封存体，解锁兵器工厂访问权限。",
+						"main_path_room_count": 8,
+						"reward_room_count": 1,
+						"main_room_types": ["combat", "combat", "cryo_pod", "cryo_vent", "cryo_vent"],
+						"end_sequence": ["merchant", "miniboss"],
+						"next_floor_id": "",
+					},
+				],
 			}
 		4:
 			return {
@@ -445,8 +475,50 @@ static func get_chapter_planned_minutes(chapter_id: int) -> String:
 	return str(get_chapter_config(chapter_id).get("planned_minutes", "4-5"))
 
 
+static func get_floor_config(chapter_id: int, floor_index: int) -> Dictionary:
+	var chapter_config := get_chapter_config(chapter_id)
+	var floor_count := get_chapter_floor_count(chapter_id)
+	var resolved_index := clampi(floor_index, 1, floor_count)
+	var resolved_config := chapter_config.duplicate(true)
+	var floors_value = chapter_config.get("floors", [])
+	if floors_value is Array:
+		var floors := floors_value as Array
+		for floor_value in floors:
+			if not floor_value is Dictionary:
+				continue
+			var floor_overrides := floor_value as Dictionary
+			if int(floor_overrides.get("local_floor_index", 0)) == resolved_index:
+				resolved_config.merge(floor_overrides, true)
+				break
+
+	resolved_config["floor_count"] = floor_count
+	resolved_config["formal_layer_count"] = floor_count
+	resolved_config["local_floor_index"] = resolved_index
+	if not resolved_config.has("floor_id"):
+		resolved_config["floor_id"] = "chapter_%d_floor_%d" % [chapter_id, resolved_index]
+	if not resolved_config.has("floor_name"):
+		resolved_config["floor_name"] = str(chapter_config.get("sector", "封存区"))
+	if not resolved_config.has("end_sequence"):
+		resolved_config["end_sequence"] = DEFAULT_END_SEQUENCE.duplicate()
+	else:
+		resolved_config["end_sequence"] = _get_end_sequence(resolved_config)
+	if not resolved_config.has("floor_role"):
+		resolved_config["floor_role"] = _floor_role_for_terminal(str((_get_end_sequence(resolved_config) as Array).back()))
+	if not resolved_config.has("next_floor_id"):
+		resolved_config["next_floor_id"] = "chapter_%d_floor_%d" % [chapter_id, resolved_index + 1] if resolved_index < floor_count else ""
+	return resolved_config
+
+
+static func get_chapter_floor_count(chapter_id: int) -> int:
+	var chapter_config := get_chapter_config(chapter_id)
+	var floors_value = chapter_config.get("floors", [])
+	if floors_value is Array and not (floors_value as Array).is_empty():
+		return maxi(1, (floors_value as Array).size())
+	return maxi(1, int(chapter_config.get("formal_layer_count", 1)))
+
+
 static func get_chapter_layer_count(chapter_id: int) -> int:
-	return maxi(1, int(get_chapter_config(chapter_id).get("formal_layer_count", 1)))
+	return get_chapter_floor_count(chapter_id)
 
 
 static func get_chapter_boss_objective(chapter_id: int) -> String:
@@ -521,6 +593,12 @@ static func _instantiate_room(spec: Dictionary) -> Room:
 	room.set_meta("chapter_title", str(spec.get("chapter_title", "")))
 	room.set_meta("chapter_sector", str(spec.get("chapter_sector", "")))
 	room.set_meta("planned_minutes", str(spec.get("planned_minutes", "")))
+	room.set_meta("floor_id", str(spec.get("floor_id", "")))
+	room.set_meta("floor_index", int(spec.get("layer_index", 1)))
+	room.set_meta("floor_count", int(spec.get("floor_count", 1)))
+	room.set_meta("floor_name", str(spec.get("floor_name", "")))
+	room.set_meta("floor_role", str(spec.get("floor_role", "boss")))
+	room.set_meta("is_floor_terminal", bool(spec.get("is_floor_terminal", false)))
 	room.set_meta("room_role", str(spec.get("room_role", "")))
 	if room.has_method("set_room_objective"):
 		room.call("set_room_objective", spec.get("objective", {}) as Dictionary)
@@ -547,6 +625,7 @@ static func _generate_random_layout(rng: RandomNumberGenerator, chapter_config: 
 	var main_path_room_count := maxi(4, int(chapter_config.get("main_path_room_count", MAIN_PATH_ROOM_COUNT)))
 	var reward_room_count := maxi(0, int(chapter_config.get("reward_room_count", REWARD_ROOM_COUNT)))
 	var layout_radius := maxi(2, int(chapter_config.get("layout_radius", LAYOUT_RADIUS)))
+	var end_sequence := _get_end_sequence(chapter_config)
 	var last_failed_specs := []
 
 	for attempt in range(MAX_LAYOUT_ATTEMPTS):
@@ -557,7 +636,7 @@ static func _generate_random_layout(rng: RandomNumberGenerator, chapter_config: 
 		var reward_coords := _build_reward_branches(main_path, rng, reward_room_count, layout_radius)
 		if reward_coords.size() != reward_room_count:
 			continue
-		if not _has_isolated_pre_boss_room(main_path, reward_coords):
+		if not _has_isolated_end_room(main_path, reward_coords, end_sequence):
 			continue
 
 		var specs := _build_room_specs(main_path, reward_coords, rng, chapter_config, layer_index)
@@ -635,7 +714,7 @@ static func _collect_loop_branch_candidates(anchor_coords: Array, occupied: Dict
 				continue
 			if _is_outside_layout_bounds(branch_coord, layout_radius):
 				continue
-			if _touches_boss_without_being_merchant(branch_coord, main_path):
+			if _touches_terminal_without_being_predecessor(branch_coord, main_path):
 				continue
 			if _count_adjacent_coords(branch_coord, occupied) < 2:
 				continue
@@ -648,14 +727,14 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	var room_specs := []
 	var label_counts := {}
 	var scene_pools := _build_scene_pools(chapter_config)
+	var end_sequence := _get_end_sequence(chapter_config)
 	var flexible_main_types := (chapter_config.get("main_room_types", ["combat", "combat", "weapon"]) as Array).duplicate()
-	var required_flexible_count := maxi(0, main_path.size() - 3)
+	var required_flexible_count := maxi(0, main_path.size() - 1 - end_sequence.size())
 	while flexible_main_types.size() < required_flexible_count:
 		flexible_main_types.append("combat")
 	var main_room_types := flexible_main_types.slice(0, required_flexible_count)
 	_shuffle_array(main_room_types, rng)
-	main_room_types.append("merchant")
-	main_room_types.append("boss")
+	main_room_types.append_array(end_sequence)
 
 	room_specs.append(_make_spec(
 		Vector2i.ZERO,
@@ -671,7 +750,9 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 		var room_type := main_room_types[path_index - 1] as String
 		var coord := main_path[path_index] as Vector2i
 		var scene := _take_scene(scene_pools, room_type, rng)
-		room_specs.append(_make_spec(coord, room_type, _label_for_scene(room_type, label_counts, chapter_config, scene), scene, path_index, chapter_config, layer_index))
+		var spec := _make_spec(coord, room_type, _label_for_scene(room_type, label_counts, chapter_config, scene), scene, path_index, chapter_config, layer_index)
+		spec["is_floor_terminal"] = path_index == main_path.size() - 1
+		room_specs.append(spec)
 
 	for coord in reward_coords:
 		var scene := _take_scene(scene_pools, "reward", rng)
@@ -680,16 +761,13 @@ static func _build_room_specs(main_path: Array, reward_coords: Array, rng: Rando
 	return room_specs
 
 
-static func _has_isolated_pre_boss_room(main_path: Array, reward_coords: Array) -> bool:
-	if main_path.size() < 3:
+static func _has_isolated_end_room(main_path: Array, reward_coords: Array, end_sequence: Array) -> bool:
+	if end_sequence.is_empty() or main_path.size() < end_sequence.size() + 1:
 		return false
 
-	var boss_coord := main_path[main_path.size() - 1] as Vector2i
-	var merchant_coord := main_path[main_path.size() - 2] as Vector2i
-	var previous_coord := main_path[main_path.size() - 3] as Vector2i
-	if not _are_adjacent(merchant_coord, boss_coord):
-		return false
-	if not _are_adjacent(previous_coord, merchant_coord):
+	var terminal_coord := main_path[main_path.size() - 1] as Vector2i
+	var predecessor_coord := main_path[main_path.size() - 2] as Vector2i
+	if not _are_adjacent(predecessor_coord, terminal_coord):
 		return false
 
 	var room_coords := []
@@ -698,9 +776,9 @@ static func _has_isolated_pre_boss_room(main_path: Array, reward_coords: Array) 
 
 	for coord_value in room_coords:
 		var coord := coord_value as Vector2i
-		if coord == boss_coord or coord == merchant_coord:
+		if coord == terminal_coord or coord == predecessor_coord:
 			continue
-		if _are_adjacent(coord, boss_coord):
+		if _are_adjacent(coord, terminal_coord):
 			return false
 
 	return true
@@ -724,6 +802,7 @@ static func _build_scene_pools(chapter_config: Dictionary) -> Dictionary:
 		"weapon": (chapter_config.get("weapon_room_scenes", WEAPON_ROOM_SCENES) as Array).duplicate(),
 		"merchant": (chapter_config.get("merchant_room_scenes", [RAVEN_SAFEHOUSE_ROOM_SCENE]) as Array).duplicate(),
 		"boss": (chapter_config.get("boss_room_scenes", BOSS_ROOM_SCENES) as Array).duplicate(),
+		"miniboss": (chapter_config.get("miniboss_room_scenes", chapter_config.get("boss_room_scenes", BOSS_ROOM_SCENES)) as Array).duplicate(),
 	}
 
 
@@ -771,6 +850,8 @@ static func _default_scene_pool(room_type: String) -> Array:
 			return [RAVEN_SAFEHOUSE_ROOM_SCENE]
 		"boss":
 			return BOSS_ROOM_SCENES
+		"miniboss":
+			return [CRYO_BOSS_ROOM_SCENE]
 	return COMBAT_ROOM_SCENES
 
 
@@ -786,6 +867,11 @@ static func _make_spec(coord: Vector2i, room_type: String, label: String, scene:
 		"chapter_sector": str(chapter_config.get("sector", "")),
 		"planned_minutes": str(chapter_config.get("planned_minutes", "")),
 		"layer_index": layer_index,
+		"floor_id": str(chapter_config.get("floor_id", "chapter_%d_floor_%d" % [int(chapter_config.get("id", DEFAULT_CHAPTER_ID)), layer_index])),
+		"floor_count": int(chapter_config.get("floor_count", chapter_config.get("formal_layer_count", 1))),
+		"floor_name": str(chapter_config.get("floor_name", chapter_config.get("sector", ""))),
+		"floor_role": str(chapter_config.get("floor_role", "boss")),
+		"is_floor_terminal": false,
 		"room_role": ROOM_ROLE_PRE_BOSS_SHOP if room_type == "merchant" else "",
 		"objective": _make_room_objective(room_type, label, chapter_config),
 	}
@@ -892,10 +978,10 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 				"objective_text": "激活数据终端。",
 				"completion_text": "数据节点已清除。",
 			}
-		"boss":
+		"boss", "miniboss":
 			return {
 				"type": Room.OBJECTIVE_BOSS,
-				"objective_text": str(chapter_config.get("boss_objective", "击败当前章节 Boss。")),
+				"objective_text": str(chapter_config.get("miniboss_objective", chapter_config.get("boss_objective", "击败当前章节 Boss。"))) if room_type == "miniboss" else str(chapter_config.get("boss_objective", "击败当前章节 Boss。")),
 				"completion_text": "Boss 已击败：裂隙稳定。",
 			}
 	return {
@@ -1001,14 +1087,18 @@ static func _build_safe_fallback_specs(rng: RandomNumberGenerator, chapter_confi
 	var label_counts := {}
 	var scene_pools := _build_scene_pools(chapter_config)
 	var specs := []
-	var path_types := (chapter_config.get("main_room_types", ["combat", "combat", "weapon"]) as Array).duplicate()
-	path_types.append("merchant")
-	path_types.append("boss")
+	var end_sequence := _get_end_sequence(chapter_config)
 	var main_path_room_count := maxi(4, int(chapter_config.get("main_path_room_count", MAIN_PATH_ROOM_COUNT)))
 	var reward_room_count := maxi(0, int(chapter_config.get("reward_room_count", REWARD_ROOM_COUNT)))
 	var layout_radius := maxi(2, int(chapter_config.get("layout_radius", LAYOUT_RADIUS)))
 	var main_path := _build_safe_main_path(main_path_room_count)
 	var reward_coords := _build_safe_reward_coords(main_path, reward_room_count, layout_radius)
+	var flexible_main_types := (chapter_config.get("main_room_types", ["combat", "combat", "weapon"]) as Array).duplicate()
+	var required_flexible_count := maxi(0, main_path.size() - 1 - end_sequence.size())
+	while flexible_main_types.size() < required_flexible_count:
+		flexible_main_types.append("combat")
+	var path_types := flexible_main_types.slice(0, required_flexible_count)
+	path_types.append_array(end_sequence)
 	specs.append(_make_spec(
 		main_path[0] as Vector2i,
 		"start",
@@ -1023,7 +1113,9 @@ static func _build_safe_fallback_specs(rng: RandomNumberGenerator, chapter_confi
 		var room_type := str(path_types[index])
 		var coord := main_path[index + 1] as Vector2i
 		var scene := _take_scene(scene_pools, room_type, rng)
-		specs.append(_make_spec(coord, room_type, _label_for_scene(room_type, label_counts, chapter_config, scene), scene, index + 1, chapter_config, layer_index))
+		var spec := _make_spec(coord, room_type, _label_for_scene(room_type, label_counts, chapter_config, scene), scene, index + 1, chapter_config, layer_index)
+		spec["is_floor_terminal"] = index == path_types.size() - 1
+		specs.append(spec)
 
 	for coord in reward_coords:
 		var scene := _take_scene(scene_pools, "reward", rng)
@@ -1100,9 +1192,12 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 	var errors := PackedStringArray()
 	var coords := {}
 	var start_specs := []
-	var boss_specs := []
 	var merchant_specs := []
+	var terminal_specs := []
 	var type_counts := {}
+	var path_types_by_depth := {}
+	var end_sequence := _get_end_sequence(chapter_config)
+	var expected_terminal_type := str(end_sequence.back())
 
 	for spec_value in room_specs:
 		var spec := spec_value as Dictionary
@@ -1110,26 +1205,39 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 		var room_type := str(spec.get("type", ""))
 		coords[coord] = true
 		type_counts[room_type] = int(type_counts.get(room_type, 0)) + 1
+		if int(spec.get("depth", 0)) > 0:
+			path_types_by_depth[int(spec.get("depth", 0))] = room_type
+		if bool(spec.get("is_floor_terminal", false)):
+			terminal_specs.append(spec)
 		match room_type:
 			"start":
 				start_specs.append(spec)
-			"boss":
-				boss_specs.append(spec)
 			"merchant":
 				merchant_specs.append(spec)
 
-	if start_specs.is_empty():
-		errors.append("Map validation failed: missing spawn room")
-	if boss_specs.is_empty():
-		errors.append("Map validation failed: missing boss room")
-	if merchant_specs.is_empty():
-		errors.append("Map validation failed: pre-boss shop missing")
+	if start_specs.size() != 1:
+		errors.append("Map validation failed: expected exactly one spawn room")
+	if terminal_specs.size() != 1:
+		errors.append("Map validation failed: expected exactly one floor terminal")
+	elif str((terminal_specs[0] as Dictionary).get("type", "")) != expected_terminal_type:
+		errors.append("Map validation failed: floor terminal type does not match end_sequence")
+	if "merchant" in end_sequence and merchant_specs.size() != 1:
+		errors.append("Map validation failed: expected exactly one pre-terminal shop")
+	if not _floor_role_matches_terminal(str(chapter_config.get("floor_role", "boss")), expected_terminal_type):
+		errors.append("Map validation failed: floor_role does not match end_sequence")
 
-	if not boss_specs.is_empty() and not merchant_specs.is_empty():
-		var boss_coord := boss_specs[0].get("coord", Vector2i.ZERO) as Vector2i
+	var main_path_room_count := maxi(4, int(chapter_config.get("main_path_room_count", MAIN_PATH_ROOM_COUNT)))
+	for sequence_index in range(end_sequence.size()):
+		var expected_depth := main_path_room_count - end_sequence.size() + sequence_index
+		var expected_type := str(end_sequence[sequence_index])
+		if str(path_types_by_depth.get(expected_depth, "")) != expected_type:
+			errors.append("Map validation failed: end_sequence mismatch at depth %d" % expected_depth)
+
+	if "merchant" in end_sequence and not terminal_specs.is_empty() and not merchant_specs.is_empty():
+		var terminal_coord := (terminal_specs[0] as Dictionary).get("coord", Vector2i.ZERO) as Vector2i
 		var merchant_coord := merchant_specs[0].get("coord", Vector2i.ZERO) as Vector2i
-		if not _are_adjacent(merchant_coord, boss_coord):
-			errors.append("Map validation failed: pre-boss shop is not adjacent to boss")
+		if not _are_adjacent(merchant_coord, terminal_coord):
+			errors.append("Map validation failed: pre-terminal shop is not adjacent to terminal")
 		var merchant_objective := merchant_specs[0].get("objective", {}) as Dictionary
 		if str(merchant_specs[0].get("room_role", "")) != ROOM_ROLE_PRE_BOSS_SHOP:
 			errors.append("Map validation failed: merchant room is not marked PRE_BOSS_SHOP")
@@ -1160,8 +1268,8 @@ static func _validate_room_specs(room_specs: Array, chapter_config: Dictionary, 
 			var target_total := int(objective.get("target_total", 0))
 			if target_total != 3:
 				errors.append("Map validation failed: event target count mismatch in %s" % room_type)
-		if room_type == "boss" and str(objective.get("type", "")) != Room.OBJECTIVE_BOSS:
-			errors.append("Map validation failed: boss room objective is not BOSS")
+		if room_type in ["boss", "miniboss"] and str(objective.get("type", "")) != Room.OBJECTIVE_BOSS:
+			errors.append("Map validation failed: terminal combat room objective is not BOSS")
 
 	if not errors.is_empty():
 		if print_errors:
@@ -1177,7 +1285,7 @@ static func _append_room_exit_errors(errors: PackedStringArray, room_specs: Arra
 		var room_type := str(spec.get("type", ""))
 		var coord := spec.get("coord", Vector2i.ZERO) as Vector2i
 		var exit_count := _count_adjacent_coords(coord, coords)
-		if room_type == "boss":
+		if bool(spec.get("is_floor_terminal", false)):
 			continue
 		if room_type == "start" and exit_count < 2:
 			errors.append("Map validation failed: spawn room has only one exit")
@@ -1192,7 +1300,7 @@ static func _append_generated_room_exit_errors(errors: PackedStringArray, genera
 		if room == null:
 			continue
 		var exit_count := _count_adjacent_coords(room.room_pos, coords)
-		if room.lab_room_type == "boss":
+		if bool(room.get_meta("is_floor_terminal", false)):
 			continue
 		if room.lab_room_type == "start" and exit_count < 2:
 			errors.append("Map validation failed: spawn room has only one exit")
@@ -1226,31 +1334,35 @@ static func _count_adjacent_coords(coord: Vector2i, coords: Dictionary) -> int:
 	return count
 
 
-static func _touches_boss_without_being_merchant(coord: Vector2i, main_path: Array) -> bool:
+static func _touches_terminal_without_being_predecessor(coord: Vector2i, main_path: Array) -> bool:
 	if main_path.size() < 2:
 		return false
-	var boss_coord := main_path[main_path.size() - 1] as Vector2i
-	var merchant_coord := main_path[main_path.size() - 2] as Vector2i
-	return coord != merchant_coord and _are_adjacent(coord, boss_coord)
+	var terminal_coord := main_path[main_path.size() - 1] as Vector2i
+	var predecessor_coord := main_path[main_path.size() - 2] as Vector2i
+	return coord != predecessor_coord and _are_adjacent(coord, terminal_coord)
 
 
 static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_config: Dictionary, layer_index: int) -> bool:
 	var errors := PackedStringArray()
 	var start_room: Room = null
-	var boss_room: Room = null
 	var merchant_room: Room = null
+	var terminal_room: Room = null
+	var terminal_count := 0
 	var coords := {}
+	var end_sequence := _get_end_sequence(chapter_config)
+	var expected_terminal_type := str(end_sequence.back())
 
 	for room_pos in generated_rooms:
 		var room := generated_rooms[room_pos] as Room
 		if room == null:
 			continue
 		coords[room.room_pos] = true
+		if bool(room.get_meta("is_floor_terminal", false)):
+			terminal_count += 1
+			terminal_room = room
 		match room.lab_room_type:
 			"start":
 				start_room = room
-			"boss":
-				boss_room = room
 			"merchant":
 				merchant_room = room
 				if _count_children_in_group(room, "room_event_targets") > 0:
@@ -1267,19 +1379,23 @@ static func _validate_generated_rooms(generated_rooms: Dictionary, chapter_confi
 
 	if start_room == null:
 		errors.append("Map validation failed: missing spawn room")
-	if boss_room == null:
-		errors.append("Map validation failed: missing boss room")
-	if merchant_room == null:
+	if terminal_count != 1 or terminal_room == null:
+		errors.append("Map validation failed: expected exactly one instantiated floor terminal")
+	elif terminal_room.lab_room_type != expected_terminal_type:
+		errors.append("Map validation failed: instantiated floor terminal does not match end_sequence")
+	if "merchant" in end_sequence and merchant_room == null:
 		errors.append("Map validation failed: pre-boss shop missing")
-	if boss_room != null and merchant_room != null and not _are_adjacent(merchant_room.room_pos, boss_room.room_pos):
-		errors.append("Map validation failed: pre-boss shop is not adjacent to boss")
+	if terminal_room != null and merchant_room != null and "merchant" in end_sequence and not _are_adjacent(merchant_room.room_pos, terminal_room.room_pos):
+		errors.append("Map validation failed: pre-terminal shop is not adjacent to terminal")
+	if not _floor_role_matches_terminal(str(chapter_config.get("floor_role", "boss")), expected_terminal_type):
+		errors.append("Map validation failed: floor_role does not match instantiated terminal")
 	if start_room != null:
 		var reachable := _collect_reachable_coords(start_room.room_pos, coords)
 		for coord in coords.keys():
 			if not reachable.has(coord):
 				errors.append("Map validation failed: unreachable instantiated room at %s" % [coord])
 		_append_generated_room_exit_errors(errors, generated_rooms, coords)
-	if boss_room != null and _boss_has_active_enemy(boss_room):
+	if terminal_room != null and terminal_room.lab_room_type in ["boss", "miniboss"] and _boss_has_active_enemy(terminal_room):
 		errors.append("Map validation failed: boss appears active before room entry")
 
 	if not errors.is_empty():
@@ -1381,7 +1497,46 @@ static func _next_label(room_type: String, label_counts: Dictionary, chapter_con
 			return str(chapter_config.get("merchant_label", "渡鸦检疫商店"))
 		"boss":
 			return str(chapter_config.get("boss_label", "A-03 回收室"))
+		"miniboss":
+			return str(chapter_config.get("miniboss_label", chapter_config.get("boss_label", "封存区守卫室")))
 	return "房间 %d" % count
+
+
+static func _get_end_sequence(chapter_config: Dictionary) -> Array:
+	var sequence_value = chapter_config.get("end_sequence", DEFAULT_END_SEQUENCE)
+	var sequence := []
+	if sequence_value is Array:
+		for room_type_value in sequence_value as Array:
+			var room_type := str(room_type_value).strip_edges()
+			if room_type != "":
+				sequence.append(room_type)
+	if sequence.is_empty():
+		return DEFAULT_END_SEQUENCE.duplicate()
+	return sequence
+
+
+static func _floor_role_for_terminal(terminal_type: String) -> String:
+	match terminal_type:
+		"elite":
+			return "elite"
+		"miniboss":
+			return "miniboss"
+		"boss":
+			return "boss"
+	return "normal"
+
+
+static func _floor_role_matches_terminal(floor_role: String, terminal_type: String) -> bool:
+	match floor_role:
+		"elite":
+			return terminal_type == "elite"
+		"miniboss":
+			return terminal_type == "miniboss"
+		"boss", "final_boss":
+			return terminal_type == "boss"
+		"normal", "pre_final":
+			return terminal_type not in ["elite", "miniboss", "boss"]
+	return false
 
 
 static func _shuffle_array(values: Array, rng: RandomNumberGenerator) -> void:

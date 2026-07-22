@@ -1,8 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="2_overlay"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/enemies/ice_core_guardian/ice_core_guardian.tscn" id="3_elite"]
+[ext_resource type="Script" path="res://tiny_wizard/room/formal_floor_exit_room.gd" id="4_exit_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/black_hole/black_hole.tscn" id="5_black_hole"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
 size = Vector2(118, 82)
@@ -11,6 +13,7 @@ size = Vector2(118, 82)
 size = Vector2(104, 230)
 
 [node name="Room" instance=ExtResource("1_room")]
+script = ExtResource("4_exit_script")
 lab_room_type = "elite"
 lab_room_label = "冰核守卫间"
 
@@ -38,3 +41,7 @@ polygon = PackedVector2Array(-50, 4, 52, 4, 52, 115, -50, 115)
 [node name="IceCoreGuardian" parent="Enemies" index="0" instance=ExtResource("3_elite")]
 position = Vector2(512, 306)
 
+[node name="ExitBlackHole" parent="." index="10" instance=ExtResource("5_black_hole")]
+position = Vector2(812, 190)
+monitoring = false
+enter_prompt_text = "按 F 进入深度封存层"

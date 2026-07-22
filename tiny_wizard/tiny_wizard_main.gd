@@ -399,9 +399,10 @@ func _start_formal_run(layer_index := 1, chapter_id := FORMAL_CHAPTER_ID) -> voi
 	_base_next_chapter_id = 0
 	_hide_tutorial_hint()
 	_hide_room_objective()
-	_hide_minimap()
+	_reset_minimap()
 	_hide_layer_clear_screen()
 	_set_character_control_enabled(true)
+	_clear_transient_combat_nodes()
 	_current_room = start_room_coord
 	if use_generated_lab_dungeon:
 		rooms = LabDungeonGenerator.generate($Rooms, _get_formal_layer_seed(_formal_layer_index), _formal_chapter_id, _formal_layer_index)
@@ -520,9 +521,10 @@ func _start_chapter_base(completed_chapter_id: int) -> void:
 	_base_next_chapter_id = LabDungeonGenerator.get_next_chapter_id(completed_chapter_id)
 	_hide_tutorial_hint()
 	_hide_room_objective()
-	_hide_minimap()
+	_reset_minimap()
 	_hide_layer_clear_screen()
 	_set_character_control_enabled(true)
+	_clear_transient_combat_nodes()
 	_current_room = start_room_coord
 	rooms = LabDungeonGenerator.generate_chapter_base($Rooms, completed_chapter_id)
 	CHINESE_FONT_BOOTSTRAP.apply_to_tree($Rooms)
@@ -856,6 +858,22 @@ func _get_formal_layer_seed(layer_index: int) -> int:
 	if dungeon_seed == 0:
 		return 0
 	return dungeon_seed + maxi(0, _formal_chapter_id - 1) * 1000 + maxi(0, layer_index - 1)
+
+
+func _clear_transient_combat_nodes() -> void:
+	for projectile in get_tree().get_nodes_in_group(&"enemy_projectiles"):
+		if projectile != null and is_instance_valid(projectile) and not projectile.is_queued_for_deletion():
+			projectile.queue_free()
+	_queue_free_player_projectiles(self)
+
+
+func _queue_free_player_projectiles(root: Node) -> void:
+	for child in root.get_children():
+		if child is LabProjectile:
+			if not child.is_queued_for_deletion():
+				child.queue_free()
+			continue
+		_queue_free_player_projectiles(child)
 
 
 func _get_formal_layer_count() -> int:
