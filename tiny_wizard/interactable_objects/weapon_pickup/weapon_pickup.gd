@@ -69,6 +69,13 @@ func _request_pickup(character: Node2D) -> void:
 		_pick_up(character)
 		return
 
+	var has_free_slot := true
+	if weapon_holder.has_method("has_free_quick_slot"):
+		has_free_slot = bool(weapon_holder.call("has_free_quick_slot"))
+	if has_free_slot:
+		_pick_up(character)
+		return
+
 	_show_pickup_comparison(character, weapon_holder)
 
 
