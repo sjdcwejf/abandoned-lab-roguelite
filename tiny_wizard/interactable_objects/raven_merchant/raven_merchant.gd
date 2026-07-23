@@ -43,6 +43,8 @@ var _selected_weapon_affixes: Array = []
 var _offer_preview_instance: Node2D
 var _awaiting_weapon_replacement := false
 var _retired_weapon_keys := {}
+var _run_purchased_weapon_keys := {}
+var _run_retired_weapon_keys := {}
 var _choice_overlay: LabWeaponChoiceOverlay
 var _relic_sell_dialog: RelicSellDialog
 var _visual_time := 0.0
@@ -73,6 +75,11 @@ func _ready() -> void:
 	status_label.text = ""
 	interact_area.body_entered.connect(_on_interact_area_body_entered)
 	interact_area.body_exited.connect(_on_interact_area_body_exited)
+
+
+func set_run_weapon_stock_state(purchased_keys: Dictionary, retired_keys: Dictionary) -> void:
+	_run_purchased_weapon_keys = purchased_keys
+	_run_retired_weapon_keys = retired_keys
 
 
 func _process(_delta: float) -> void:
@@ -420,6 +427,7 @@ func _complete_purchase(character: Node2D, replacement_slot := -1) -> void:
 		status_label.text = "武器转移失败。"
 		return
 
+	_record_purchased_weapon_scene(weapon_holder, purchased_scene)
 	if weapon_cost > 0:
 		inventory.remove_item(CURRENCY_NAME, weapon_cost)
 	if replaced_weapon_scene != null:
@@ -686,7 +694,7 @@ func _get_available_weapon_scenes(character: Node2D) -> Array[PackedScene]:
 			continue
 
 		var weapon_key := WEAPON_CATALOG.get_weapon_key(weapon_scene, weapon_holder)
-		if _retired_weapon_keys.has(weapon_key):
+		if _is_weapon_key_excluded(weapon_key):
 			continue
 		if not owned.has(weapon_key):
 			available.append(weapon_scene)
@@ -743,11 +751,35 @@ func _get_weapon_scene_at_slot(weapon_holder: Node, slot_index: int) -> PackedSc
 func _retire_weapon_scene(weapon_holder: Node, weapon_scene: PackedScene) -> void:
 	if weapon_scene == null:
 		return
-	var weapon_key := weapon_scene.resource_path
-	if weapon_holder.has_method("get_weapon_scene_key"):
-		weapon_key = str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
+	var weapon_key := _get_weapon_stock_key(weapon_holder, weapon_scene)
 	if weapon_key != "":
 		_retired_weapon_keys[weapon_key] = true
+		_run_retired_weapon_keys[weapon_key] = true
+
+
+func _record_purchased_weapon_scene(weapon_holder: Node, weapon_scene: PackedScene) -> void:
+	var weapon_key := _get_weapon_stock_key(weapon_holder, weapon_scene)
+	if weapon_key == "":
+		return
+	_run_purchased_weapon_keys[weapon_key] = true
+
+
+func _is_weapon_key_excluded(weapon_key: String) -> bool:
+	if weapon_key == "":
+		return false
+	return (
+		_retired_weapon_keys.has(weapon_key)
+		or _run_retired_weapon_keys.has(weapon_key)
+		or _run_purchased_weapon_keys.has(weapon_key)
+	)
+
+
+func _get_weapon_stock_key(weapon_holder: Node, weapon_scene: PackedScene) -> String:
+	if weapon_scene == null:
+		return ""
+	if weapon_holder != null and weapon_holder.has_method("get_weapon_scene_key"):
+		return str(weapon_holder.call("get_weapon_scene_key", weapon_scene))
+	return weapon_scene.resource_path
 
 
 func _get_currency_count(character: Node2D) -> int:

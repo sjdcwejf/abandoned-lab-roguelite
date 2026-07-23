@@ -13,6 +13,8 @@ const EXIT_BLACK_HOLE_CANDIDATES := [
 var _boss_health_ui: CanvasLayer
 var _boss_node: Node
 var _boss_defeat_position := Vector2.ZERO
+var _boss_defeat_handled := false
+var _exit_activated := false
 
 @onready var exit_black_hole := $ExitBlackHole as LabBlackHole
 
@@ -35,7 +37,10 @@ func enter_room() -> void:
 func _on_room_cleared() -> void:
 	if _boss_health_ui != null:
 		_boss_health_ui.call("hide_bar")
+	if _exit_activated:
+		return
 	if exit_black_hole != null:
+		_exit_activated = true
 		exit_black_hole.global_position = _choose_exit_black_hole_position(_find_player_global_position())
 		exit_black_hole.set_active(true)
 
@@ -59,6 +64,9 @@ func _connect_boss_signals() -> void:
 
 
 func _on_boss_defeated() -> void:
+	if _boss_defeat_handled:
+		return
+	_boss_defeat_handled = true
 	if _boss_node is Node2D:
 		_boss_defeat_position = (_boss_node as Node2D).global_position
 	for direction in [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]:

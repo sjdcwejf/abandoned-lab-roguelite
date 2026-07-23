@@ -74,6 +74,10 @@ var _raven_secret_clues := {}
 var _raven_secret_fragments := 0
 var _raven_hidden_quest_unlocked := false
 var _ending_hints_unlocked := false
+var _completed_floor_ids := {}
+var _completed_chapter_ids := {}
+var _raven_purchased_weapon_keys := {}
+var _raven_retired_weapon_keys := {}
 
 var rooms := {}
 
@@ -133,6 +137,7 @@ func _register_rooms() -> void:
 		if room.has_method("set_relic_controller"):
 			room.call("set_relic_controller", _get_relic_controller())
 
+		_bind_room_runtime_services(room)
 		_connect_black_holes(room)
 
 
@@ -145,6 +150,15 @@ func _connect_black_holes(root: Node) -> void:
 
 	for child in root.get_children():
 		_connect_black_holes(child)
+
+
+func _bind_room_runtime_services(root: Node) -> void:
+	if root == null:
+		return
+	if root.has_method("set_run_weapon_stock_state"):
+		root.call("set_run_weapon_stock_state", _raven_purchased_weapon_keys, _raven_retired_weapon_keys)
+	for child in root.get_children():
+		_bind_room_runtime_services(child)
 
 
 func _update_room_doors() -> void:
@@ -284,6 +298,7 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_hide_layer_clear_screen()
 	_hide_death_prompt(false)
 	_reset_run_story_flags()
+	_reset_run_progress_flags()
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
 
@@ -337,6 +352,7 @@ func _rebuild_selected_character_for_checkpoint() -> bool:
 	_hide_layer_clear_screen()
 	_hide_death_prompt(false)
 	_reset_run_story_flags()
+	_reset_run_progress_flags()
 	get_tree().paused = false
 	if _character != null and is_instance_valid(_character):
 		_character.queue_free()
@@ -568,6 +584,39 @@ func _reset_run_story_flags() -> void:
 	_raven_secret_fragments = 0
 	_raven_hidden_quest_unlocked = false
 	_ending_hints_unlocked = false
+
+
+func _reset_run_progress_flags() -> void:
+	_completed_floor_ids.clear()
+	_completed_chapter_ids.clear()
+	_raven_purchased_weapon_keys.clear()
+	_raven_retired_weapon_keys.clear()
+
+
+func _mark_current_floor_completed() -> void:
+	var floor_id := _get_current_floor_id()
+	if floor_id == "":
+		return
+	_completed_floor_ids[floor_id] = true
+
+
+func _mark_chapter_completed(chapter_id: int) -> void:
+	if chapter_id <= 0:
+		return
+	_completed_chapter_ids[chapter_id] = true
+
+
+func _get_current_floor_id() -> String:
+	var floor_config := LabDungeonGenerator.get_floor_config(_formal_chapter_id, _formal_layer_index)
+	return str(floor_config.get("floor_id", ""))
+
+
+func is_floor_completed(floor_id: String) -> bool:
+	return _completed_floor_ids.has(floor_id)
+
+
+func is_chapter_completed(chapter_id: int) -> bool:
+	return _completed_chapter_ids.has(chapter_id)
 
 
 func are_ending_hints_unlocked() -> bool:
@@ -832,12 +881,17 @@ func _on_black_hole_entered(body: Node2D) -> void:
 			call_deferred("_start_formal_run", 1)
 		RUN_STATE_FORMAL:
 			if _formal_layer_index < _get_formal_layer_count():
+				_mark_current_floor_completed()
 				call_deferred("_start_next_formal_layer")
 			elif LabDungeonGenerator.get_next_chapter_id(_formal_chapter_id) > 0:
+				_mark_current_floor_completed()
+				_mark_chapter_completed(_formal_chapter_id)
 				call_deferred("_start_chapter_base", _formal_chapter_id)
 			elif _formal_chapter_id == FINAL_CHAPTER_ID:
+				_mark_current_floor_completed()
 				call_deferred("_complete_formal_layer")
 			else:
+				_mark_current_floor_completed()
 				call_deferred("_complete_formal_layer")
 		RUN_STATE_BASE:
 			if _base_next_chapter_id > 0:
