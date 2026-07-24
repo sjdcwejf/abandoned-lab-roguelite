@@ -7,6 +7,7 @@ const PAUSE_MENU_SCENE := preload("res://tiny_wizard/gui/pause_menu/pause_menu.t
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 const INTERACTION_FEEDBACK_SCRIPT := preload("res://tiny_wizard/gui/interaction_feedback.gd")
 const DEBUG_CHAPTER_MENU_SCRIPT := preload("res://tiny_wizard/gui/debug_chapter_menu/debug_chapter_menu.gd")
+const CHAPTER_FLOOR_HUD_SCRIPT := preload("res://tiny_wizard/gui/chapter_floor_hud/chapter_floor_hud.gd")
 
 @export var inventory : QuiverInventory
 
@@ -15,6 +16,7 @@ var _ability_ui: Control
 var _pause_menu: LabPauseMenu
 var _interaction_feedback: LabInteractionFeedback
 var _debug_chapter_menu: LabDebugChapterMenu
+var _chapter_floor_hud: Node
 
 
 func _ready() -> void:
@@ -29,13 +31,20 @@ func _ready() -> void:
 	_ability_ui.name = "AbilityUI"
 	add_child(_ability_ui)
 
+	_chapter_floor_hud = CHAPTER_FLOOR_HUD_SCRIPT.new()
+	_chapter_floor_hud.name = "ChapterFloorHUD"
+	add_child(_chapter_floor_hud)
+
 	_interaction_feedback = INTERACTION_FEEDBACK_SCRIPT.new()
 	_interaction_feedback.name = "InteractionFeedback"
 	add_child(_interaction_feedback)
 
 	_pause_menu = PAUSE_MENU_SCENE.instantiate() as LabPauseMenu
-	_pause_menu.name = "PauseMenu"
-	add_child(_pause_menu)
+	if _pause_menu != null:
+		_pause_menu.name = "PauseMenu"
+		add_child(_pause_menu)
+	else:
+		push_warning("PauseMenu failed to instantiate.")
 
 	_debug_chapter_menu = DEBUG_CHAPTER_MENU_SCRIPT.new()
 	_debug_chapter_menu.name = "DebugChapterMenu"
@@ -102,6 +111,28 @@ func is_pause_menu_open() -> bool:
 	return _pause_menu != null and _pause_menu.is_open()
 
 
+func show_chapter_floor_hud(view_model: Dictionary) -> void:
+	if _chapter_floor_hud == null:
+		return
+	_chapter_floor_hud.show_floor(view_model)
+
+
+func show_chapter_floor_complete(view_model: Dictionary) -> void:
+	if _chapter_floor_hud == null:
+		return
+	_chapter_floor_hud.show_floor_complete(view_model)
+
+
+func hide_chapter_floor_hud() -> void:
+	if _chapter_floor_hud == null:
+		return
+	_chapter_floor_hud.clear_floor()
+
+
+func get_chapter_floor_hud() -> Node:
+	return _chapter_floor_hud
+
+
 func _current_scene_allows_pause() -> bool:
 	var current_scene := get_tree().current_scene
 	if current_scene == null or not current_scene.has_method("can_pause_game"):
@@ -116,14 +147,14 @@ func _current_scene_allows_debug_chapter_menu() -> bool:
 	return bool(current_scene.call("can_open_debug_chapter_menu"))
 
 
-func _on_debug_chapter_entry_requested(chapter_id: int, target_room_type: String) -> void:
+func _on_debug_chapter_entry_requested(chapter_id: int, floor_index: int, target_room_type: String) -> void:
 	if _debug_chapter_menu != null:
 		_debug_chapter_menu.close_menu()
 
 	var current_scene := get_tree().current_scene
 	if current_scene == null or not current_scene.has_method("debug_enter_chapter"):
 		return
-	current_scene.call("debug_enter_chapter", chapter_id, target_room_type)
+	current_scene.call("debug_enter_chapter", chapter_id, floor_index, target_room_type)
 
 
 func _ensure_debug_chapter_input() -> void:

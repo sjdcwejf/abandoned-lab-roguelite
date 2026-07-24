@@ -202,6 +202,8 @@ func _drop_relic() -> void:
 		return
 	_relic_dropped = true
 
+	if _debug_drops_blocked():
+		return
 	var drop_parent := _get_drop_parent()
 	if drop_parent == null:
 		return

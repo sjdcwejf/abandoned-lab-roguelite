@@ -112,7 +112,7 @@ func _build_ui() -> void:
 	layout.add_child(_map_area)
 
 	var legend := Label.new()
-	legend.text = "仅显示已探索房间  高亮：当前位置  始：起点  战：战斗  商：补给  王：Boss"
+	legend.text = "仅显示已探索房间  高亮：当前位置  始：起点  战：战斗  精：精英  小：小 Boss  王：Boss"
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	legend.add_theme_font_size_override("font_size", 10)
@@ -219,6 +219,8 @@ func _get_room_symbol(room_type: String) -> String:
 			return "战"
 		"boss":
 			return "王"
+		"miniboss":
+			return "小"
 		"merchant":
 			return "商"
 		"reward":
@@ -256,6 +258,8 @@ func _get_symbol_color(room_type: String, is_current: bool, _is_explored: bool) 
 			return Color(0.58, 0.66, 0.68, 0.8)
 		"boss":
 			return Color(1.0, 0.36, 0.26, 1.0)
+		"miniboss":
+			return Color(0.9, 0.58, 0.44, 1.0)
 		"merchant":
 			return Color(0.38, 0.92, 1.0, 1.0)
 		"reward":
@@ -312,6 +316,8 @@ func _get_type_color(room_type: String) -> Color:
 			return Color(0.14, 0.46, 0.28, 0.92)
 		"boss":
 			return Color(0.55, 0.11, 0.09, 0.92)
+		"miniboss":
+			return Color(0.42, 0.18, 0.12, 0.92)
 		"merchant":
 			return Color(0.05, 0.36, 0.42, 0.92)
 		"reward":
@@ -343,7 +349,7 @@ func _get_room_tooltip(room: Room, is_explored: bool, is_current: bool) -> Strin
 
 
 func _is_special_room(room_type: String) -> bool:
-	return room_type in ["start", "boss", "merchant", "reward", "weapon", "pollution", "data_comm", "data_comm_control", "archive", "cryo_pod", "cryo_vent", "elite"]
+	return room_type in ["start", "boss", "miniboss", "merchant", "reward", "weapon", "pollution", "data_comm", "data_comm_control", "archive", "cryo_pod", "cryo_vent", "elite"]
 
 
 func _make_panel_style() -> StyleBoxFlat:

@@ -15,6 +15,7 @@ const INTERACTION_FEEDBACK := preload("res://tiny_wizard/gui/interaction_feedbac
 var _elite_reward_claimed := false
 var _exit_activated := false
 var _relic_controller: RelicController
+var _debug_progression_context := {}
 
 @onready var exit_black_hole := $ExitBlackHole as LabBlackHole
 
@@ -29,6 +30,10 @@ func set_relic_controller(controller: RelicController) -> void:
 	_relic_controller = controller
 
 
+func set_debug_progression_context(context: Dictionary) -> void:
+	_debug_progression_context = context.duplicate(true)
+
+
 func _on_room_cleared() -> void:
 	_grant_elite_reward_once()
 	_activate_exit_once()
@@ -38,6 +43,9 @@ func _grant_elite_reward_once() -> void:
 	if _elite_reward_claimed:
 		return
 	_elite_reward_claimed = true
+
+	if _debug_progression_rewards_blocked():
+		return
 	set_meta("elite_reward_claimed", true)
 	set_meta("floor_completion_claimed", true)
 
@@ -55,6 +63,14 @@ func _grant_elite_reward_once() -> void:
 		if dropped_relic:
 			message += "\n第三章遗物样本已析出"
 		INTERACTION_FEEDBACK.show_from(self, message, 1.45)
+
+
+func _debug_progression_rewards_blocked() -> bool:
+	if _debug_progression_context.is_empty():
+		return false
+	if not bool(_debug_progression_context.get("debug_mode", false)):
+		return false
+	return not bool(_debug_progression_context.get("debug_progression_rewards_enabled", false))
 
 
 func _grant_protomatter(player: Node2D, amount: int) -> bool:

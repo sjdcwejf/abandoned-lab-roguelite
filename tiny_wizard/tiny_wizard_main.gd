@@ -30,6 +30,7 @@ const POLLUTION_EVENT_SOURCE_POSITIONS := [
 @export var play_tutorial := true
 @export var dungeon_seed := 0
 @export var debug_start_chapter := 0
+@export_range(1, 8, 1) var debug_start_floor_index := 1
 @export_enum("none", "start", "merchant", "pre_boss_shop", "event", "pollution", "data_comm", "data_comm_control", "cryo_pod", "final_core_interference", "final_signal", "final_antechamber", "weapon", "archive", "boss") var debug_start_room_type := ""
 @export var debug_override_seed := 0
 @export var start_room_coord := Vector2i.ZERO
@@ -78,6 +79,8 @@ var _completed_floor_ids := {}
 var _completed_chapter_ids := {}
 var _raven_purchased_weapon_keys := {}
 var _raven_retired_weapon_keys := {}
+var _debug_progression_context := {}
+var _debug_floor_jump_in_progress := false
 
 var rooms := {}
 
@@ -132,6 +135,10 @@ func _register_rooms() -> void:
 		if room.has_signal("tutorial_boss_defeated") and not room.is_connected("tutorial_boss_defeated", boss_defeated_callable):
 			room.connect("tutorial_boss_defeated", boss_defeated_callable)
 
+		var floor_terminal_cleared_callable := Callable(self, "_on_formal_floor_terminal_cleared")
+		if room.has_signal("room_cleared") and not room.is_connected("room_cleared", floor_terminal_cleared_callable):
+			room.connect("room_cleared", floor_terminal_cleared_callable)
+
 		if room.has_method("set_weapon_holder"):
 			room.call("set_weapon_holder", _get_weapon_holder())
 		if room.has_method("set_relic_controller"):
@@ -157,6 +164,8 @@ func _bind_room_runtime_services(root: Node) -> void:
 		return
 	if root.has_method("set_run_weapon_stock_state"):
 		root.call("set_run_weapon_stock_state", _raven_purchased_weapon_keys, _raven_retired_weapon_keys)
+	if root.has_method("set_debug_progression_context"):
+		root.call("set_debug_progression_context", _debug_progression_context)
 	for child in root.get_children():
 		_bind_room_runtime_services(child)
 
@@ -247,6 +256,7 @@ func _find_sleep_pod(root: Node, character_id: String) -> LabSleepPod:
 
 
 func _show_character_select() -> void:
+	_hide_chapter_floor_hud()
 	if character_select_scene == null:
 		_start_run_with_character(tiemu_character_scene, CharacterSelectScreen.TIEMU_ID)
 		return
@@ -297,6 +307,8 @@ func _start_run_with_character(character_scene: PackedScene, character_id := Cha
 	_selected_character_id = character_id
 	_hide_layer_clear_screen()
 	_hide_death_prompt(false)
+	_hide_chapter_floor_hud()
+	_clear_debug_progression_context()
 	_reset_run_story_flags()
 	_reset_run_progress_flags()
 	if _character != null and is_instance_valid(_character):
@@ -351,6 +363,8 @@ func _rebuild_selected_character_for_checkpoint() -> bool:
 
 	_hide_layer_clear_screen()
 	_hide_death_prompt(false)
+	_hide_chapter_floor_hud()
+	_clear_debug_progression_context()
 	_reset_run_story_flags()
 	_reset_run_progress_flags()
 	get_tree().paused = false
@@ -393,9 +407,11 @@ func abandon_current_run_to_chapter_one_start() -> void:
 
 func _start_tutorial_run(wake_character_id: String) -> void:
 	_run_state = RUN_STATE_TUTORIAL
+	_clear_debug_progression_context()
 	_tutorial_rewards_dropped = false
 	_tutorial_rewards_granted = false
 	_tutorial_reward_pickups_remaining = 0
+	_hide_chapter_floor_hud()
 	_reset_minimap()
 	_current_room = start_room_coord
 	rooms = LabDungeonGenerator.generate_tutorial($Rooms)
@@ -430,6 +446,7 @@ func _start_formal_run(layer_index := 1, chapter_id := FORMAL_CHAPTER_ID) -> voi
 	_register_rooms()
 	_update_room_doors()
 	_set_minimap_rooms()
+	_update_chapter_floor_hud_for_current_floor()
 	_enter_start_room()
 
 
@@ -437,37 +454,73 @@ func _start_debug_formal_entry() -> void:
 	if debug_override_seed != 0:
 		dungeon_seed = debug_override_seed
 	var chapter_id := _resolve_debug_chapter_id(debug_start_chapter)
-	_start_formal_run(1, chapter_id)
+	var floor_index := _resolve_debug_floor_index(chapter_id, debug_start_floor_index)
+	_set_debug_progression_context(chapter_id, floor_index)
+	_start_formal_run(floor_index, chapter_id)
 	if debug_start_room_type != "" and debug_start_room_type != "none":
 		call_deferred("_debug_move_to_room_type", debug_start_room_type)
-	print("Debug entry ready: chapter %d, target '%s', seed %d." % [chapter_id, debug_start_room_type, LabDungeonGenerator.last_seed])
+	print("Debug entry ready: chapter %d floor %d, target '%s', seed %d." % [chapter_id, floor_index, debug_start_room_type, LabDungeonGenerator.last_seed])
 
 
-func debug_enter_chapter(chapter_id: int, target_room_type: String = "none") -> void:
+func debug_enter_chapter(chapter_id: int, floor_index_or_target: Variant = 1, target_room_type: String = "none") -> void:
+	if _debug_floor_jump_in_progress:
+		return
+	_debug_floor_jump_in_progress = true
 	var resolved_chapter_id := _resolve_debug_chapter_id(chapter_id)
+	var requested_floor_index := 1
+	var requested_target_type := target_room_type
+	if floor_index_or_target is String or floor_index_or_target is StringName:
+		requested_target_type = str(floor_index_or_target)
+	else:
+		requested_floor_index = int(floor_index_or_target)
+	var resolved_floor_index := _resolve_debug_floor_index(resolved_chapter_id, requested_floor_index)
 	if _selected_character_id == "" or _selected_character_id == "none":
 		_selected_character_id = CharacterSelectScreen.TIEMU_ID
 	if _character == null or not is_instance_valid(_character):
 		if not _rebuild_selected_character_for_checkpoint():
+			_debug_floor_jump_in_progress = false
 			return
 	else:
 		_set_character_control_enabled(true)
 
-	var resolved_target_type := target_room_type.strip_edges()
-	_start_formal_run(1, resolved_chapter_id)
+	var resolved_target_type := requested_target_type.strip_edges()
+	_set_debug_progression_context(resolved_chapter_id, resolved_floor_index)
+	_prepare_debug_floor_transition()
+	await get_tree().process_frame
+	_start_formal_run(resolved_floor_index, resolved_chapter_id)
 	if resolved_target_type != "" and resolved_target_type != "none" and resolved_target_type != "start":
 		call_deferred("_debug_move_to_room_type", resolved_target_type)
 
 	var chapter_title := LabDungeonGenerator.get_chapter_title(resolved_chapter_id)
 	var target_label := _get_debug_target_label(resolved_target_type)
-	_show_story_feedback("开发入口：已保留构筑并进入%s｜%s。" % [chapter_title, target_label], 1.6)
-	print("In-game debug entry ready: chapter %d, target '%s', seed %d." % [resolved_chapter_id, resolved_target_type, LabDungeonGenerator.last_seed])
+	var floor_config := LabDungeonGenerator.get_floor_config(resolved_chapter_id, resolved_floor_index)
+	var floor_label := str(floor_config.get("floor_name", "第 %d 层" % resolved_floor_index))
+	_show_story_feedback("开发入口：已保留构筑并进入%s｜%s｜%s。" % [chapter_title, floor_label, target_label], 1.6)
+	print("In-game debug entry ready: chapter %d floor %d, target '%s', seed %d." % [resolved_chapter_id, resolved_floor_index, resolved_target_type, LabDungeonGenerator.last_seed])
+	_debug_floor_jump_in_progress = false
 
 
 func _resolve_debug_chapter_id(raw_chapter_id: int) -> int:
 	if raw_chapter_id == FINAL_CHAPTER_ID:
 		return FINAL_CHAPTER_ID
 	return clampi(raw_chapter_id, CHAPTER_1_ID, CHAPTER_5_ID)
+
+
+func _resolve_debug_floor_index(chapter_id: int, raw_floor_index: int) -> int:
+	return clampi(raw_floor_index, 1, LabDungeonGenerator.get_chapter_floor_count(chapter_id))
+
+
+func _prepare_debug_floor_transition() -> void:
+	_hide_chapter_floor_hud()
+	_hide_room_objective()
+	_reset_minimap()
+	_hide_layer_clear_screen()
+	_clear_transient_combat_nodes()
+	_current_room = start_room_coord
+	rooms.clear()
+	for child in $Rooms.get_children():
+		if child != null and is_instance_valid(child) and not child.is_queued_for_deletion():
+			child.queue_free()
 
 
 func _debug_move_to_room_type(target_type: String) -> void:
@@ -519,6 +572,11 @@ func _get_debug_target_label(target_type: String) -> String:
 func _debug_find_room(target_type: String) -> Room:
 	if target_type == "pre_boss_shop":
 		target_type = "merchant"
+	if target_type == "boss":
+		for room_pos in rooms:
+			var terminal_room := rooms[room_pos] as Room
+			if terminal_room != null and terminal_room.lab_room_type in ["boss", "miniboss"]:
+				return terminal_room
 	if target_type == "event":
 		for room_pos in rooms:
 			var event_room := rooms[room_pos] as Room
@@ -535,6 +593,7 @@ func _start_chapter_base(completed_chapter_id: int) -> void:
 	_run_state = RUN_STATE_BASE
 	_base_completed_chapter_id = completed_chapter_id
 	_base_next_chapter_id = LabDungeonGenerator.get_next_chapter_id(completed_chapter_id)
+	_hide_chapter_floor_hud()
 	_hide_tutorial_hint()
 	_hide_room_objective()
 	_reset_minimap()
@@ -593,7 +652,34 @@ func _reset_run_progress_flags() -> void:
 	_raven_retired_weapon_keys.clear()
 
 
+func _set_debug_progression_context(chapter_id: int, floor_index: int) -> void:
+	_debug_progression_context = {
+		"debug_mode": true,
+		"debug_preserve_build": true,
+		"debug_progression_rewards_enabled": false,
+		"debug_combat_drops_enabled": false,
+		"chapter_id": chapter_id,
+		"floor_index": floor_index,
+		"floor_id": str(LabDungeonGenerator.get_floor_config(chapter_id, floor_index).get("floor_id", "")),
+	}
+
+
+func _clear_debug_progression_context() -> void:
+	_debug_progression_context.clear()
+	_debug_floor_jump_in_progress = false
+
+
+func is_debug_progression_active() -> bool:
+	return bool(_debug_progression_context.get("debug_mode", false))
+
+
+func get_debug_progression_context() -> Dictionary:
+	return _debug_progression_context.duplicate(true)
+
+
 func _mark_current_floor_completed() -> void:
+	if is_debug_progression_active():
+		return
 	var floor_id := _get_current_floor_id()
 	if floor_id == "":
 		return
@@ -601,6 +687,8 @@ func _mark_current_floor_completed() -> void:
 
 
 func _mark_chapter_completed(chapter_id: int) -> void:
+	if is_debug_progression_active():
+		return
 	if chapter_id <= 0:
 		return
 	_completed_chapter_ids[chapter_id] = true
@@ -619,6 +707,110 @@ func is_chapter_completed(chapter_id: int) -> bool:
 	return _completed_chapter_ids.has(chapter_id)
 
 
+func _on_formal_floor_terminal_cleared(room: Room) -> void:
+	if _run_state != RUN_STATE_FORMAL:
+		return
+	if room == null or not bool(room.get_meta("is_floor_terminal", false)):
+		return
+	if not _chapter_uses_chapter_floor_hud(_formal_chapter_id):
+		return
+	_show_chapter_floor_complete()
+
+
+func _update_chapter_floor_hud_for_current_floor() -> void:
+	if _run_state != RUN_STATE_FORMAL:
+		_hide_chapter_floor_hud()
+		return
+	if not _chapter_uses_chapter_floor_hud(_formal_chapter_id):
+		_hide_chapter_floor_hud()
+		return
+	var gui := _get_ui_manager()
+	if gui == null or not gui.has_method("show_chapter_floor_hud"):
+		return
+	gui.call("show_chapter_floor_hud", _build_chapter_floor_view_model())
+
+
+func _show_chapter_floor_complete() -> void:
+	var gui := _get_ui_manager()
+	if gui == null or not gui.has_method("show_chapter_floor_complete"):
+		return
+	gui.call("show_chapter_floor_complete", _build_chapter_floor_view_model())
+
+
+func _hide_chapter_floor_hud() -> void:
+	var gui := _get_ui_manager()
+	if gui == null or not gui.has_method("hide_chapter_floor_hud"):
+		return
+	gui.call("hide_chapter_floor_hud")
+
+
+func _build_chapter_floor_view_model() -> Dictionary:
+	var floor_config := LabDungeonGenerator.get_floor_config(_formal_chapter_id, _formal_layer_index)
+	var local_index := int(floor_config.get("local_floor_index", _formal_layer_index))
+	var floor_count := int(floor_config.get("floor_count", LabDungeonGenerator.get_chapter_floor_count(_formal_chapter_id)))
+	var chapter_config := LabDungeonGenerator.get_chapter_config(_formal_chapter_id)
+	var chapter_title := LabDungeonGenerator.get_chapter_title(_formal_chapter_id)
+	var sector := LabDungeonGenerator.get_chapter_sector_label(_formal_chapter_id)
+	var floor_name := str(floor_config.get("floor_name", sector))
+	var floor_role := str(floor_config.get("floor_role", "normal"))
+	var is_final_floor := local_index >= floor_count
+	return {
+		"chapter_id": _formal_chapter_id,
+		"chapter_title": chapter_title,
+		"chapter_display": _format_chapter_floor_title(chapter_title),
+		"chapter_sector": sector,
+		"floor_id": str(floor_config.get("floor_id", "")),
+		"floor_name": floor_name,
+		"local_floor_index": local_index,
+		"floor_count": floor_count,
+		"global_floor_index": _get_global_floor_index(_formal_chapter_id, local_index),
+		"objective_text": str(floor_config.get("objective_text", chapter_config.get("boss_objective", ""))),
+		"floor_role": floor_role,
+		"threat_label": _get_floor_threat_label(floor_role),
+		"progress_nodes": _get_floor_progress_nodes(local_index, floor_count),
+		"completion_text": "%s完成" % (sector if is_final_floor else floor_name),
+	}
+
+
+func _chapter_uses_chapter_floor_hud(chapter_id: int) -> bool:
+	var chapter_config := LabDungeonGenerator.get_chapter_config(chapter_id)
+	var floors_value = chapter_config.get("floors", [])
+	return floors_value is Array and not (floors_value as Array).is_empty()
+
+
+func _format_chapter_floor_title(chapter_title: String) -> String:
+	return chapter_title.replace("：", "·").replace(":", "·")
+
+
+func _get_floor_threat_label(floor_role: String) -> String:
+	match floor_role:
+		"elite":
+			return "精英"
+		"miniboss":
+			return "小型 Boss"
+		"boss":
+			return "Boss"
+	return "常规"
+
+
+func _get_floor_progress_nodes(local_index: int, floor_count: int) -> String:
+	var nodes := PackedStringArray()
+	for index in range(1, maxi(1, floor_count) + 1):
+		nodes.append("●" if index <= local_index else "○")
+	return "——".join(nodes)
+
+
+func _get_global_floor_index(chapter_id: int, local_floor_index: int) -> int:
+	var global_index := maxi(1, local_floor_index)
+	for previous_chapter_id in range(CHAPTER_1_ID, chapter_id):
+		global_index += LabDungeonGenerator.get_chapter_floor_count(previous_chapter_id)
+	return global_index
+
+
+func _get_ui_manager() -> Node:
+	return $Camera2D/GUI
+
+
 func are_ending_hints_unlocked() -> bool:
 	return _ending_hints_unlocked
 
@@ -632,6 +824,13 @@ func show_story_feedback(message: String, seconds := 1.6) -> void:
 
 
 func record_data_archive(payload: Dictionary) -> void:
+	if is_debug_progression_active():
+		var debug_message := str(payload.get("success_message", "终端已激活。"))
+		if debug_message == "":
+			debug_message = "Debug 模式：档案读取不写入正式剧情进度。"
+		_show_story_feedback("%s\nDebug 模式：正式剧情进度已隔离。" % debug_message, 1.8)
+		return
+
 	var archive_id := str(payload.get("archive_id", ""))
 	if archive_id == "":
 		archive_id = str(payload.get("title", "data_archive")).to_snake_case()
@@ -843,6 +1042,7 @@ func _on_character_death_requested() -> void:
 	if _death_prompt_root != null and _death_prompt_root.visible:
 		return
 
+	_hide_chapter_floor_hud()
 	_set_character_control_enabled(false)
 	if _character != null and is_instance_valid(_character):
 		_character.set("can_grab_items", false)
@@ -939,6 +1139,7 @@ func _complete_formal_layer() -> void:
 		return
 
 	_run_state = RUN_STATE_LAYER_COMPLETE
+	_hide_chapter_floor_hud()
 	_hide_tutorial_hint()
 	_hide_room_objective()
 	_hide_minimap()
@@ -1384,6 +1585,7 @@ func _confirm_death_respawn() -> void:
 
 func _return_to_main_menu_from_death() -> void:
 	GameSettings.save_settings()
+	_hide_chapter_floor_hud()
 	_hide_death_prompt()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
@@ -1515,7 +1717,8 @@ func _update_formal_room_feedback(room: Room) -> void:
 	if _room_objective_ui == null:
 		_update_minimap_current_room()
 		return
-	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective, _formal_chapter_title)
+	var use_chapter_floor_hud := _chapter_uses_chapter_floor_hud(_formal_chapter_id)
+	_room_objective_ui.show_room(room, _formal_layer_index, type_label, objective, _formal_chapter_title, not use_chapter_floor_hud)
 	_update_minimap_current_room()
 
 
@@ -1586,6 +1789,8 @@ func _get_formal_room_type_label(room_type: String) -> String:
 			return "数据封存区"
 		"boss":
 			return "Boss 房"
+		"miniboss":
+			return "小型 Boss 房"
 	return "未知区域"
 
 
@@ -1675,6 +1880,8 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			return "激活数据终端。"
 		"boss":
 			return LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)
+		"miniboss":
+			return str(LabDungeonGenerator.get_floor_config(_formal_chapter_id, _formal_layer_index).get("objective_text", LabDungeonGenerator.get_chapter_boss_objective(_formal_chapter_id)))
 	return ""
 
 

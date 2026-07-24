@@ -8,6 +8,7 @@ var _relic_controller: RelicController
 var _next_chapter_title := "下一章"
 var _next_chapter_id := 0
 var _completed_chapter_id := 0
+var _debug_progression_context := {}
 
 @onready var exit_black_hole: LabBlackHole = get_node_or_null("ExitBlackHole") as LabBlackHole
 @onready var relic_choices: Node = get_node_or_null("RelicChoices")
@@ -36,6 +37,11 @@ func _ready() -> void:
 func set_relic_controller(controller: RelicController) -> void:
 	_relic_controller = controller
 	_update_status()
+
+
+func set_debug_progression_context(context: Dictionary) -> void:
+	_debug_progression_context = context.duplicate(true)
+	_apply_debug_progression_context()
 
 
 func enter_room() -> void:
@@ -73,7 +79,8 @@ func _configure_text() -> void:
 
 func refresh_story_progress() -> void:
 	_configure_text()
-	_set_relic_choices_enabled(_next_chapter_id > 0)
+	_set_relic_choices_enabled(_next_chapter_id > 0 and not _debug_progression_rewards_blocked())
+	_apply_debug_progression_context()
 	_update_status()
 
 
@@ -92,6 +99,11 @@ func _connect_relic_choices() -> void:
 
 func _on_relic_choice_picked(definition: BuildItemDefinition) -> void:
 	if _choice_made:
+		return
+	if _debug_progression_rewards_blocked():
+		_update_status("Debug 模式：正式章节奖励已隔离，下一章入口可直接测试。")
+		if exit_black_hole != null and _next_chapter_id > 0:
+			exit_black_hole.set_active(true)
 		return
 	if _next_chapter_id <= 0:
 		_update_status("当前主线已收束。后续版本将补完整结局表现。")
@@ -124,6 +136,9 @@ func _update_status(override_text := "") -> void:
 	if override_text != "":
 		status_label.text = override_text
 		return
+	if _debug_progression_rewards_blocked():
+		status_label.text = "Debug 模式：正式三选一奖励已关闭，入口仅用于流程测试。"
+		return
 	if _next_chapter_id <= 0:
 		status_label.text = "当前主线记录已归档。终局结算仍为占位版本。"
 		return
@@ -141,6 +156,23 @@ func _set_relic_choices_enabled(enabled: bool) -> void:
 	if relic_choices == null:
 		return
 	relic_choices.visible = enabled
+
+
+func _apply_debug_progression_context() -> void:
+	if not _debug_progression_rewards_blocked():
+		return
+	_set_relic_choices_enabled(false)
+	if exit_black_hole != null and _next_chapter_id > 0:
+		exit_black_hole.set_active(true)
+	_update_status()
+
+
+func _debug_progression_rewards_blocked() -> bool:
+	if _debug_progression_context.is_empty():
+		return false
+	if not bool(_debug_progression_context.get("debug_mode", false)):
+		return false
+	return not bool(_debug_progression_context.get("debug_progression_rewards_enabled", false))
 
 
 func _get_relic_name(definition: BuildItemDefinition) -> String:

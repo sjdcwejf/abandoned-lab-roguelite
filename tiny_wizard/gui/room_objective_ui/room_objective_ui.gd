@@ -9,6 +9,7 @@ var _floor_index := 1
 var _chapter_label := ""
 var _room_type_label := ""
 var _objective_text := ""
+var _show_floor_context := true
 
 var _root: Control
 var _floor_label: Label
@@ -25,13 +26,14 @@ func _ready() -> void:
 	hide_objective()
 
 
-func show_room(room: Room, floor_index: int, room_type_label: String, objective_text: String, chapter_label := "") -> void:
+func show_room(room: Room, floor_index: int, room_type_label: String, objective_text: String, chapter_label := "", show_floor_context := true) -> void:
 	_disconnect_room()
 	_current_room = room
 	_floor_index = floor_index
 	_chapter_label = chapter_label
 	_room_type_label = room_type_label
 	_objective_text = objective_text
+	_show_floor_context = show_floor_context
 	_connect_room()
 	_refresh()
 	if _root != null:
@@ -144,7 +146,9 @@ func _refresh() -> void:
 	if _current_room == null or not is_instance_valid(_current_room):
 		return
 
-	if _chapter_label != "":
+	if not _show_floor_context:
+		_floor_label.text = _room_type_label
+	elif _chapter_label != "":
 		_floor_label.text = "%s｜第 %d 层 / %s" % [_chapter_label, _floor_index, _room_type_label]
 	else:
 		_floor_label.text = "第 %d 层 / %s" % [_floor_index, _room_type_label]
@@ -196,7 +200,7 @@ func _get_progress_text() -> String:
 		return "%s：%d/%d    剩余样本：%d" % [_get_event_target_label(), target_cleared, target_total, remaining]
 	if not _current_room.has_method("has_enemy_clear_objective") or not bool(_current_room.call("has_enemy_clear_objective")):
 		return ""
-	if _current_room.lab_room_type == "boss":
+	if _current_room.lab_room_type in ["boss", "miniboss"]:
 		return "目标生命信号：未稳定"
 	return "剩余样本：%d" % remaining
 
@@ -235,6 +239,8 @@ func _get_completion_text() -> String:
 		"reward":
 			return "奖励解锁：守卫样本已清除。"
 		"boss":
+			return "下行裂隙稳定：可进入裂隙。"
+		"miniboss":
 			return "下行裂隙稳定：可进入裂隙。"
 	return ""
 

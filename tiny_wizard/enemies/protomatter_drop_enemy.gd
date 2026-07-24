@@ -22,6 +22,11 @@ const BOTTOM_DOOR_SAFE_Y := 420.0
 
 var _protomatter_dropped := false
 var _relic_dropped := false
+var _debug_progression_context := {}
+
+
+func set_debug_progression_context(context: Dictionary) -> void:
+	_debug_progression_context = context.duplicate(true)
 
 
 func hit(damage := 1, from := Vector2.ZERO) -> void:
@@ -45,6 +50,8 @@ func _drop_protomatter_fragments() -> void:
 		return
 	_protomatter_dropped = true
 
+	if _debug_drops_blocked():
+		return
 	if PROTOMATTER_FRAGMENT_ITEM == null:
 		return
 	if randf() > protomatter_drop_chance:
@@ -77,6 +84,8 @@ func _drop_relic_from_pool() -> bool:
 		return false
 	_relic_dropped = true
 
+	if _debug_drops_blocked():
+		return false
 	if relic_drop_chance <= 0.0 or randf() > relic_drop_chance:
 		return false
 
@@ -92,6 +101,14 @@ func _drop_relic_from_pool() -> bool:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	return RelicDropService.try_drop_relic_from_pool(drop_parent, relic_controller, drop_position, relic_pool_tag, rng)
+
+
+func _debug_drops_blocked() -> bool:
+	if _debug_progression_context.is_empty():
+		return false
+	if not bool(_debug_progression_context.get("debug_mode", false)):
+		return false
+	return not bool(_debug_progression_context.get("debug_combat_drops_enabled", false))
 
 
 func _get_drop_parent() -> Node:

@@ -2,13 +2,15 @@ class_name LabDebugChapterMenu
 extends Control
 
 
-signal chapter_entry_requested(chapter_id: int, target_room_type: String)
+signal chapter_entry_requested(chapter_id: int, floor_index: int, target_room_type: String)
 
 
 const CHINESE_FONT_BOOTSTRAP := preload("res://tiny_wizard/gui/chinese_font_bootstrap.gd")
 
 var _target_option: OptionButton
 var _first_chapter_button: Button
+var _entry_buttons: Array[Button] = []
+var _is_generating := false
 
 
 func _ready() -> void:
@@ -33,6 +35,7 @@ func open_menu() -> void:
 	if visible:
 		return
 	visible = true
+	_set_generating(false)
 	get_tree().paused = true
 	if _first_chapter_button != null:
 		_first_chapter_button.grab_focus()
@@ -65,7 +68,7 @@ func _build_layout() -> void:
 
 	var panel := PanelContainer.new()
 	panel.name = "Panel"
-	panel.custom_minimum_size = Vector2(520, 520)
+	panel.custom_minimum_size = Vector2(560, 620)
 	panel.add_theme_stylebox_override("panel", _make_panel_style())
 	center.add_child(panel)
 
@@ -127,12 +130,14 @@ func _build_layout() -> void:
 	for entry in _get_chapter_entries():
 		var button := Button.new()
 		var chapter_id: int = int(entry.get("chapter", 0))
+		var floor_index: int = int(entry.get("floor", 1))
 		button.text = str(entry.get("label", "章节"))
-		button.custom_minimum_size = Vector2(440, 42)
+		button.custom_minimum_size = Vector2(440, 54 if chapter_id == 3 else 42)
 		button.add_theme_stylebox_override("normal", _make_button_style())
 		button.add_theme_stylebox_override("hover", _make_button_hover_style())
-		button.pressed.connect(_on_chapter_pressed.bind(chapter_id))
+		button.pressed.connect(_on_chapter_pressed.bind(chapter_id, floor_index))
 		layout.add_child(button)
+		_entry_buttons.append(button)
 		if _first_chapter_button == null:
 			_first_chapter_button = button
 
@@ -166,19 +171,32 @@ func _get_chapter_entries() -> Array[Dictionary]:
 	return [
 		{"chapter": 1, "label": "第一章：极渊前哨基地"},
 		{"chapter": 2, "label": "第二章：生态温室"},
-		{"chapter": 3, "label": "第三章：低温封存区"},
+		{"chapter": 3, "floor": 1, "label": "第三章·低温封存区 1/2\n冷藏仓储层"},
+		{"chapter": 3, "floor": 2, "label": "第三章·低温封存区 2/2\n深度封存层"},
 		{"chapter": 4, "label": "第四章：外骨骼兵器工厂"},
 		{"chapter": 5, "label": "第五章：数据中枢"},
 		{"chapter": 99, "label": "最终章：母巢核心"},
 	]
 
 
-func _on_chapter_pressed(chapter_id: int) -> void:
+func _on_chapter_pressed(chapter_id: int, floor_index: int) -> void:
+	if _is_generating:
+		return
+	_set_generating(true)
 	var target_room_type: String = "none"
 	if _target_option != null:
 		var metadata_value: Variant = _target_option.get_item_metadata(_target_option.selected)
 		target_room_type = str(metadata_value)
-	chapter_entry_requested.emit(chapter_id, target_room_type)
+	chapter_entry_requested.emit(chapter_id, floor_index, target_room_type)
+
+
+func _set_generating(is_generating: bool) -> void:
+	_is_generating = is_generating
+	if _target_option != null:
+		_target_option.disabled = is_generating
+	for button in _entry_buttons:
+		if button != null:
+			button.disabled = is_generating
 
 
 func _make_panel_style() -> StyleBoxFlat:
