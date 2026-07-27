@@ -11,6 +11,7 @@ const POWER_GAUNTLETS := preload("res://tiny_wizard/player/weapons/power_gauntle
 const TEST_SWORD := preload("res://tiny_wizard/player/weapons/test_sword/test_sword.tscn")
 const QUARANTINE_SHOTGUN := preload("res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.tscn")
 const BREACH_CHAINSAW := preload("res://tiny_wizard/player/weapons/breach_chainsaw/breach_chainsaw.tscn")
+const PROTOMATTER_CORROSION_GUN := preload("res://tiny_wizard/player/weapons/protomatter_corrosion_gun/protomatter_corrosion_gun.tscn")
 
 const CHAPTER_WEAPON_POOLS := {
 	1: [
@@ -25,6 +26,7 @@ const CHAPTER_WEAPON_POOLS := {
 	4: [
 		CONTAINMENT_NAILGUN,
 		QUARANTINE_SHOTGUN,
+		PROTOMATTER_CORROSION_GUN,
 		POWER_GAUNTLETS,
 		BREACH_CHAINSAW,
 		LASER_POINTER,

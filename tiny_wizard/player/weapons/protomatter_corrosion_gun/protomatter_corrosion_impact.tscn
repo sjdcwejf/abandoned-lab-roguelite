@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/protomatter_corrosion_gun/protomatter_corrosion_impact.gd" id="1_impact_script"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/protomatter_corrosion_gun/protomatter_corrosion_impact.png" id="2_impact_texture"]
+
+[node name="ProtomatterCorrosionImpact" type="Node2D"]
+z_index = 25
+script = ExtResource("1_impact_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_impact_texture")

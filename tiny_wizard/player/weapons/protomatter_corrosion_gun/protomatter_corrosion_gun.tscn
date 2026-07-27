@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/protomatter_corrosion_gun/protomatter_corrosion_gun.gd" id="1_gun_script"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/weapons/protomatter_corrosion_gun/protomatter_corrosion_round.tscn" id="2_round_scene"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/protomatter_corrosion_gun/protomatter_corrosion_gun_idle.png" id="3_idle_texture"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/protomatter_corrosion_gun/protomatter_corrosion_gun_fire.png" id="4_fire_texture"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/protomatter_corrosion_gun/protomatter_corrosion_muzzle.png" id="5_muzzle_texture"]
+
+[node name="ProtomatterCorrosionGun" type="Node2D"]
+script = ExtResource("1_gun_script")
+display_name = "原质蚀变枪"
+weapon_id = "protomatter_corrosion_gun"
+inventory_size = Vector2i(2, 1)
+inventory_color = Color(0.5, 0.3, 0.78, 1)
+projectile_scene = ExtResource("2_round_scene")
+damage = 1
+projectile_speed = 620.0
+cooldown = 0.28
+collision_mask = 73
+idle_texture = ExtResource("3_idle_texture")
+fire_texture = ExtResource("4_fire_texture")
+rarity_name = "异常"
+combat_role = "持续腐蚀"
+weapon_description = "以原质蚀变弹命中目标，造成低额直伤并刷新腐蚀。"
+stat_damage_text = "1 / 发"
+stat_rate_text = "快"
+stat_range_text = "中 / 远"
+special_text = "命中施加 3 秒腐蚀；重复命中刷新持续时间。"
+
+[node name="WeaponSprite" type="Sprite2D" parent="."]
+position = Vector2(-8, -16)
+z_index = 5
+texture = ExtResource("3_idle_texture")
+centered = false
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(55, 0)
+
+[node name="MuzzleFlash" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(62, 0)
+z_index = 12
+texture = ExtResource("5_muzzle_texture")

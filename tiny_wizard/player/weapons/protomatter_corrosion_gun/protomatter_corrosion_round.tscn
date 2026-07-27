@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/protomatter_corrosion_gun/protomatter_corrosion_round.gd" id="1_round_script"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/protomatter_corrosion_gun/protomatter_corrosion_round.png" id="2_round_texture"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/weapons/protomatter_corrosion_gun/protomatter_corrosion_impact.tscn" id="3_impact_scene"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_round"]
+size = Vector2(16, 5)
+
+[node name="ProtomatterCorrosionRound" type="Area2D"]
+collision_layer = 0
+collision_mask = 73
+script = ExtResource("1_round_script")
+speed = 620.0
+lifetime = 0.82
+knockback_multiplier = 0.65
+impact_scene = ExtResource("3_impact_scene")
+corrosion_duration = 3.0
+corrosion_tick_damage = 1
+corrosion_tick_interval = 1.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = 20
+texture = ExtResource("2_round_texture")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_round")
