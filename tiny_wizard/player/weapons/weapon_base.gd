@@ -22,6 +22,11 @@ const WEAPON_AFFIX_SERVICE := preload("res://tiny_wizard/player/weapons/weapon_a
 var owner_character: Node2D
 var aim_direction := Vector2.RIGHT
 var weapon_affixes: Array = []
+var _visual_root: Node2D
+var _visual_root_base_scale := Vector2.ONE
+var _muzzle_nodes: Array[Node2D] = []
+var _muzzle_base_positions := {}
+var _orientation_nodes_ready := false
 
 
 func get_inventory_display_name() -> String:
@@ -91,6 +96,10 @@ func set_aim_direction(direction: Vector2) -> void:
 	if direction.length() == 0:
 		return
 	aim_direction = direction.normalized()
+	if not is_node_ready():
+		call_deferred("_apply_visual_orientation")
+		return
+	_apply_visual_orientation()
 
 
 func primary_pressed() -> void:
@@ -279,3 +288,78 @@ func _has_weapon_property(property_name: String) -> bool:
 		if str(property_info.get("name", "")) == property_name:
 			return true
 	return false
+
+
+func _apply_visual_orientation() -> void:
+	_ensure_orientation_nodes()
+	var aim_angle := aim_direction.angle()
+	var facing_left := absf(aim_angle) > PI * 0.5
+
+	if _visual_root != null:
+		var visual_scale := _visual_root_base_scale
+		visual_scale.y = -absf(_visual_root_base_scale.y) if facing_left else absf(_visual_root_base_scale.y)
+		_visual_root.scale = visual_scale
+
+	for muzzle in _muzzle_nodes:
+		if muzzle == null:
+			continue
+		var key := muzzle.get_instance_id()
+		if not _muzzle_base_positions.has(key):
+			continue
+		var base_position := _muzzle_base_positions[key] as Vector2
+		muzzle.position = Vector2(base_position.x, -base_position.y if facing_left else base_position.y)
+
+
+func _ensure_orientation_nodes() -> void:
+	if _orientation_nodes_ready:
+		return
+	_orientation_nodes_ready = true
+
+	var existing_visual_root := get_node_or_null("VisualRoot") as Node2D
+	if existing_visual_root != null:
+		_visual_root = existing_visual_root
+	else:
+		var visual_candidates := _collect_visual_children_for_mirroring()
+		if not visual_candidates.is_empty():
+			_visual_root = Node2D.new()
+			_visual_root.name = "VisualRoot"
+			add_child(_visual_root)
+			move_child(_visual_root, 0)
+			for visual_node in visual_candidates:
+				if visual_node != null and visual_node.get_parent() == self:
+					visual_node.owner = null
+					visual_node.reparent(_visual_root, false)
+
+	if _visual_root != null:
+		_visual_root_base_scale = _visual_root.scale
+
+	_cache_muzzle_positions()
+
+
+func _collect_visual_children_for_mirroring() -> Array[Node2D]:
+	var visual_nodes: Array[Node2D] = []
+	for child in get_children():
+		if child is Node2D and _is_visual_child_for_mirroring(child):
+			visual_nodes.append(child as Node2D)
+	return visual_nodes
+
+
+func _is_visual_child_for_mirroring(child: Node) -> bool:
+	if child == null:
+		return false
+	if child.name in [&"VisualRoot", &"Muzzle", &"HitArea", &"PunchArea", &"Beam"]:
+		return false
+	if child is Marker2D:
+		return false
+	if child is CollisionObject2D or child is CollisionShape2D:
+		return false
+	return child is CanvasItem
+
+
+func _cache_muzzle_positions() -> void:
+	_muzzle_nodes.clear()
+	_muzzle_base_positions.clear()
+	var muzzle := get_node_or_null("Muzzle") as Node2D
+	if muzzle != null:
+		_muzzle_nodes.append(muzzle)
+		_muzzle_base_positions[muzzle.get_instance_id()] = muzzle.position

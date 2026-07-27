@@ -241,7 +241,7 @@ func set_aim_direction(direction: Vector2) -> void:
 	if direction.length() == 0:
 		return
 	aim_direction = direction.normalized()
-	rotation = aim_direction.angle()
+	global_rotation = aim_direction.angle()
 	if current_weapon != null:
 		current_weapon.set_aim_direction(aim_direction)
 
