@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/player/weapons/laser_pointer/laser_pointer.gd" id="1_laser"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/calibration_laser_07.png" id="2_4qt3w"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/calibration_laser/01_calibration_laser_attack_64x32_4f.png" id="2_weapon"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/calibration_laser/01_calibration_laser_beam_128x8_2f.png" id="3_beam"]
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/weapon_sheet_sprite.gd" id="4_sheet"]
 
 [node name="LaserPointer" type="Node2D"]
 script = ExtResource("1_laser")
@@ -9,6 +11,7 @@ display_name = "校准激光笔"
 weapon_id = "calibration_laser"
 inventory_size = Vector2i(2, 1)
 inventory_color = Color(0.18, 0.66, 0.95, 1)
+beam_sheet = ExtResource("3_beam")
 rarity_name = "制式"
 combat_role = "持续远程"
 weapon_description = "稳定输出的实验室校准光束，适合保持距离处理单体目标。"
@@ -18,10 +21,15 @@ stat_range_text = "远"
 special_text = "低爆发、长射程，适合作为安全输出武器。"
 
 [node name="WeaponSprite" type="Sprite2D" parent="."]
-position = Vector2(0, -12)
+texture_filter = 1
+position = Vector2(24, 5)
+scale = Vector2(1.5, 1.5)
 z_index = 5
-texture = ExtResource("2_4qt3w")
-centered = false
+texture = ExtResource("2_weapon")
+hframes = 4
+script = ExtResource("4_sheet")
+animation_frames = 4
+animation_fps = 14.0
 
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(46, 0)
@@ -29,6 +37,7 @@ position = Vector2(46, 0)
 [node name="Beam" type="Line2D" parent="."]
 width = 5.0
 default_color = Color(0.15, 0.85, 1, 0.9)
+texture_mode = 1
 begin_cap_mode = 2
 end_cap_mode = 2
 joint_mode = 2

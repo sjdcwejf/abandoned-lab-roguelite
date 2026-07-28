@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_shotgun.gd" id="1_shotgun"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/player/weapons/quarantine_shotgun/quarantine_pellet.tscn" id="2_pellet"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/quarantine_shotgun/07_quarantine_shotgun_attack_96x64_6f.png" id="3_attack"]
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/weapon_sheet_sprite.gd" id="4_sheet"]
 
 [node name="QuarantineShotgun" type="Node2D"]
 script = ExtResource("1_shotgun")
@@ -26,31 +28,47 @@ special_text = "扇形霰弹，适合贴脸爆发和清理小群敌人。"
 
 [node name="WeaponVisual" type="Node2D" parent="."]
 
+[node name="WeaponSprite" type="Sprite2D" parent="WeaponVisual"]
+texture_filter = 1
+position = Vector2(34, 0)
+scale = Vector2(1.15, 1.15)
+z_index = 9
+texture = ExtResource("3_attack")
+hframes = 6
+script = ExtResource("4_sheet")
+animation_frames = 6
+animation_fps = 26.0
+
 [node name="Stock" type="Polygon2D" parent="WeaponVisual"]
+visible = false
 position = Vector2(-8, 0)
 z_index = 5
 color = Color(0.12, 0.16, 0.17, 1)
 polygon = PackedVector2Array(-20, -7, -2, -9, 10, -5, 10, 5, -2, 9, -20, 7, -26, 0)
 
 [node name="Receiver" type="Polygon2D" parent="WeaponVisual"]
+visible = false
 position = Vector2(12, 0)
 z_index = 6
 color = Color(0.26, 0.34, 0.3, 1)
 polygon = PackedVector2Array(-14, -9, 18, -9, 25, -5, 25, 5, 18, 9, -14, 9, -19, 0)
 
 [node name="ContainmentStripe" type="Polygon2D" parent="WeaponVisual"]
+visible = false
 position = Vector2(10, 0)
 z_index = 7
 color = Color(0.64, 0.95, 0.34, 1)
 polygon = PackedVector2Array(-4, -9, 3, -9, 10, 9, 3, 9)
 
 [node name="Barrel" type="Polygon2D" parent="WeaponVisual"]
+visible = false
 position = Vector2(38, 0)
 z_index = 5
 color = Color(0.1, 0.13, 0.14, 1)
 polygon = PackedVector2Array(-14, -7, 14, -7, 19, -4, 19, 4, 14, 7, -14, 7)
 
 [node name="BarrelVent" type="Line2D" parent="WeaponVisual"]
+visible = false
 position = Vector2(32, 0)
 z_index = 7
 points = PackedVector2Array(-5, -4, 8, -4, 11, 0, 8, 4, -5, 4)
@@ -58,6 +76,7 @@ width = 2.0
 default_color = Color(0.45, 0.98, 0.65, 0.9)
 
 [node name="Grip" type="Polygon2D" parent="WeaponVisual"]
+visible = false
 position = Vector2(8, 9)
 z_index = 5
 color = Color(0.15, 0.18, 0.18, 1)

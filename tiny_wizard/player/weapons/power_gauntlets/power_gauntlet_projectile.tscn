@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlet_projectile.gd" id="1_projectile"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/power_gauntlets/08_power_gauntlets_projectile_32x16_4f.png" id="2_texture"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/player/weapons/power_gauntlets/power_gauntlet_impact.tscn" id="3_impact"]
+[ext_resource type="Script" path="res://tiny_wizard/player/weapons/weapon_sheet_sprite.gd" id="4_sheet"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_projectile"]
+radius = 5.0
+
+[node name="PowerGauntletProjectile" type="Area2D"]
+collision_layer = 0
+collision_mask = 73
+script = ExtResource("1_projectile")
+speed = 600.0
+lifetime = 1.25
+impact_scene = ExtResource("3_impact")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+z_index = 20
+texture = ExtResource("2_texture")
+hframes = 4
+script = ExtResource("4_sheet")
+animation_frames = 4
+animation_fps = 18.0
+autoplay_loop = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_projectile")

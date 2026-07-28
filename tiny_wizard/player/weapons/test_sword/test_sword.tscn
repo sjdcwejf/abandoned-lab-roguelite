@@ -1,6 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/player/weapons/test_sword/test_sword.gd" id="1_test_sword"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/melee_attacks/quarantine_blade_attack_96x64_6f.png" id="2_attack"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/melee_effects/quarantine_blade_hit_24x24_3f.png" id="3_hit"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/melee_effects/quarantine_blade_projectile_cut_32x24_3f.png" id="4_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_test_sword"]
 size = Vector2(68, 36)
@@ -19,6 +22,12 @@ swing_start_angle = -0.5
 swing_end_angle = 0.42
 swing_recover_time = 0.09
 swing_scale_peak = Vector2(1.1, 1.04)
+slash_texture = ExtResource("2_attack")
+slash_frame_count = 6
+hit_texture = ExtResource("3_hit")
+hit_frame_count = 3
+projectile_cut_texture = ExtResource("4_cut")
+projectile_cut_frame_count = 3
 rarity_name = "制式"
 combat_role = "近战训练"
 weapon_description = "渡鸦留下的检疫刃，结构简单，适合熟悉近战节奏。"

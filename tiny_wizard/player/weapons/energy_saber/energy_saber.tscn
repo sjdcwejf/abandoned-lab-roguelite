@@ -1,6 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://tiny_wizard/player/weapons/energy_saber/energy_saber.gd" id="1_saber"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/melee_attacks/energy_saber_attack_96x64_7f.png" id="2_attack"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/melee_effects/energy_saber_hit_24x24_4f.png" id="3_hit"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/weapons/melee_effects/energy_saber_projectile_cut_32x28_4f.png" id="4_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_saber"]
 size = Vector2(74, 42)
@@ -19,6 +22,12 @@ swing_start_angle = -0.65
 swing_end_angle = 0.55
 swing_recover_time = 0.1
 swing_scale_peak = Vector2(1.12, 1.05)
+slash_texture = ExtResource("2_attack")
+slash_frame_count = 7
+hit_texture = ExtResource("3_hit")
+hit_frame_count = 4
+projectile_cut_texture = ExtResource("4_cut")
+projectile_cut_frame_count = 4
 rarity_name = "改造"
 combat_role = "近战防御"
 weapon_description = "高温能量刃，适合贴身斩击和清理敌方弹幕。"

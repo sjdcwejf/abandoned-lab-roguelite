@@ -2,10 +2,7 @@ class_name LabProtomatterCorrosionGun
 extends LabProjectileWeapon
 
 
-@export var idle_texture: Texture2D
-@export var fire_texture: Texture2D
-
-@onready var weapon_sprite: Sprite2D = $WeaponSprite
+@onready var weapon_sprite = $WeaponSprite
 @onready var muzzle_flash: CanvasItem = $MuzzleFlash
 
 var _sprite_rest_position := Vector2.ZERO
@@ -15,8 +12,6 @@ var _fire_tween: Tween
 func _ready() -> void:
 	_sprite_rest_position = weapon_sprite.position
 	muzzle_flash.visible = false
-	if idle_texture != null:
-		weapon_sprite.texture = idle_texture
 
 
 func fire_projectile() -> bool:
@@ -31,8 +26,7 @@ func _play_fire_feedback() -> void:
 		_fire_tween.kill()
 
 	weapon_sprite.position = _sprite_rest_position
-	if fire_texture != null:
-		weapon_sprite.texture = fire_texture
+	weapon_sprite.play_once(0.18)
 	muzzle_flash.visible = true
 	muzzle_flash.modulate.a = 1.0
 	muzzle_flash.scale = Vector2(0.85, 0.85)
@@ -48,6 +42,5 @@ func _play_fire_feedback() -> void:
 
 
 func _restore_idle_visual() -> void:
-	if idle_texture != null:
-		weapon_sprite.texture = idle_texture
+	weapon_sprite.stop_playback()
 	muzzle_flash.visible = false

@@ -6,6 +6,7 @@ extends LabProjectileWeapon
 @export_range(0.0, 60.0, 1.0) var spread_degrees := 30.0
 
 @onready var weapon_visual: Node2D = $WeaponVisual
+@onready var weapon_sprite = $WeaponVisual/WeaponSprite
 @onready var muzzle_flash: CanvasItem = $MuzzleFlash
 
 var _visual_rest_position := Vector2.ZERO
@@ -53,6 +54,7 @@ func _play_recoil() -> void:
 		_recoil_tween.kill()
 
 	weapon_visual.position = _visual_rest_position
+	weapon_sprite.play_once(0.22)
 	muzzle_flash.visible = true
 	muzzle_flash.scale = Vector2(0.7, 0.7)
 	muzzle_flash.modulate.a = 1.0
@@ -65,3 +67,9 @@ func _play_recoil() -> void:
 	_recoil_tween.chain().set_parallel(true)
 	_recoil_tween.tween_property(weapon_visual, "position", _visual_rest_position, 0.11).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_recoil_tween.tween_callback(func() -> void: muzzle_flash.visible = false)
+
+
+func unequip() -> void:
+	if weapon_sprite != null:
+		weapon_sprite.stop_playback()
+	super.unequip()

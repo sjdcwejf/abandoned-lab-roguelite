@@ -10,6 +10,9 @@ extends LabProjectileWeapon
 @export var can_destroy_enemy_projectiles := true
 @export var punch_lunge_distance := 16.0
 @export var punch_recover_time := 0.12
+@export var idle_texture: Texture2D
+@export var punch_texture: Texture2D
+@export var shoot_texture: Texture2D
 
 var _punch_cooldown_timer := 0.0
 var _punch_active_timer := 0.0
@@ -23,6 +26,7 @@ var _hit_flash_tween: Tween
 @onready var punch_shape: CollisionShape2D = get_node_or_null("PunchArea/CollisionShape2D") as CollisionShape2D
 @onready var punch_visual: CanvasItem = get_node_or_null("PunchVisual") as CanvasItem
 @onready var hit_flash: Node2D = get_node_or_null("HitFlash") as Node2D
+@onready var weapon_sprite = get_node_or_null("WeaponSprite")
 
 
 func _ready() -> void:
@@ -68,6 +72,13 @@ func secondary_pressed() -> void:
 	fire_projectile()
 
 
+func fire_projectile() -> bool:
+	var fired := super.fire_projectile()
+	if fired and weapon_sprite != null and shoot_texture != null:
+		weapon_sprite.play_texture_once(shoot_texture, 5, 0.16, idle_texture)
+	return fired
+
+
 func unequip() -> void:
 	_set_punch_active(false)
 	_reset_punch_animation()
@@ -89,7 +100,7 @@ func _set_punch_active(is_active: bool) -> void:
 	if punch_shape != null:
 		punch_shape.disabled = not is_active
 	if punch_visual != null:
-		punch_visual.visible = is_active
+		punch_visual.visible = is_active and weapon_sprite == null
 
 
 func _damage_overlapping_punch_targets() -> void:
@@ -144,6 +155,8 @@ func _try_destroy_projectile(projectile: Node) -> bool:
 func _play_punch_animation() -> void:
 	if _punch_tween != null:
 		_punch_tween.kill()
+	if weapon_sprite != null and punch_texture != null:
+		weapon_sprite.play_texture_once(punch_texture, 8, 0.19, idle_texture)
 
 	var attack_time: float = max(punch_active_time * 0.75, 0.06)
 	var peak_scale: Vector2 = Vector2(_base_scale.x * 1.12, _base_scale.y * 0.92)
@@ -184,3 +197,5 @@ func _reset_punch_animation() -> void:
 	scale = _base_scale
 	if hit_flash != null:
 		hit_flash.visible = false
+	if weapon_sprite != null:
+		weapon_sprite.stop_playback()
