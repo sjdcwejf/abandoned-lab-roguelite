@@ -4,8 +4,8 @@
 [ext_resource type="Script" path="res://tiny_wizard/room/cryo_pod_room.gd" id="2_room_script"]
 [ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="3_overlay"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/cryo_pod/cryo_pod.tscn" id="4_pod"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.tscn" id="5_frost"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/stasis_crawler/stasis_crawler.tscn" id="6_crawler"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/brittle_shell_adapter/brittle_shell_adapter.tscn" id="5_frost"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/sealed_technician/sealed_technician.tscn" id="6_crawler"]
 
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("2_room_script")
@@ -20,13 +20,15 @@ variant = "pod"
 
 [node name="CryoPodA" parent="CryoPods" instance=ExtResource("4_pod")]
 position = Vector2(252, 212)
+releases_enemy = true
 enemy_scene = ExtResource("5_frost")
 
 [node name="CryoPodB" parent="CryoPods" instance=ExtResource("4_pod")]
 position = Vector2(512, 344)
+releases_enemy = true
 enemy_scene = ExtResource("6_crawler")
 
 [node name="CryoPodC" parent="CryoPods" instance=ExtResource("4_pod")]
 position = Vector2(772, 218)
+releases_enemy = true
 enemy_scene = ExtResource("5_frost")
-

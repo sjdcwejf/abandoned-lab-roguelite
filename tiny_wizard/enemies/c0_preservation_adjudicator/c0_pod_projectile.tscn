@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/enemies/c0_preservation_adjudicator/c0_pod_projectile.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/03_preservation_pod_ejection_sheet.png" id="2_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pod"]
+atlas = ExtResource("2_sheet")
+region = Rect2(1515, 105, 42, 40)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pod"]
+radius = 9.0
+height = 28.0
+
+[node name="C0PreservationPod" type="Area2D" groups=["enemy_projectiles"]]
+texture_filter = 1
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_pod")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_pod")
+

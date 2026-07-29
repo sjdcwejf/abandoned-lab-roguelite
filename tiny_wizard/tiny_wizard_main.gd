@@ -1864,7 +1864,7 @@ func _get_formal_room_objective(room_type: String, room_label := "") -> String:
 			if _formal_chapter_id == CHAPTER_4_ID:
 				return "整备武器与补给。"
 			if _formal_chapter_id == CHAPTER_3_ID:
-				return "确认低温封存舱状态，进入零号封存室。"
+				return "确认低温封存舱状态，进入零号封存裁定室。"
 			if _formal_chapter_id == CHAPTER_2_ID:
 				return "在渡鸦温室补给站交易，准备进入培育舱。"
 			return "与渡鸦交易，补充装备后前往下一房间。"

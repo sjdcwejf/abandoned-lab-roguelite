@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://tiny_wizard/enemies/cryo_inspector_r6/cryo_pressure_round.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://tiny_wizard/assets/art/enemies/chapter3/cryo_pressure_round_frames.tres" id="2_frames"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_round"]
+radius = 8.0
+
+[node name="CryoPressureRound" type="Area2D" groups=["enemy_projectiles"]]
+texture_filter = 1
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("2_frames")
+animation = &"flight"
+autoplay = "flight"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_round")
+

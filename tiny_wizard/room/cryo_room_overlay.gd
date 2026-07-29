@@ -610,12 +610,7 @@ func _equipment_specs(background_key: String) -> Array[Dictionary]:
 				{"kind": "terminal", "position": Vector2(512, 132), "size": Vector2(126, 42)},
 			]
 		"cryo_boss_room":
-			return [
-				{"kind": "freezer_unit", "position": Vector2(512, 124), "size": Vector2(320, 50)},
-				{"kind": "pipe_bank", "position": Vector2(512, 476), "size": Vector2(360, 44)},
-				{"kind": "freezer_unit", "position": Vector2(180, 172), "size": Vector2(120, 50)},
-				{"kind": "freezer_unit", "position": Vector2(844, 428), "size": Vector2(120, 50)},
-			]
+			return []
 	return [
 		{"kind": "freezer_unit", "position": Vector2(210, 206), "size": Vector2(126, 52)},
 		{"kind": "freezer_unit", "position": Vector2(814, 394), "size": Vector2(126, 52)},
@@ -764,9 +759,6 @@ func _mist_specs(background_key: String) -> Array[Dictionary]:
 			return [
 				{"kind": "vent", "position": Vector2(320, 142), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.08, 0.7), "speed": 0.64, "intermittent": true, "active": 2.4, "pause": 2.0},
 				{"kind": "vent", "position": Vector2(704, 458), "direction": Vector2.UP, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.5, "scale": Vector2(1.08, 0.7), "speed": 0.66, "intermittent": true, "active": 2.3, "pause": 1.9},
-				{"kind": "pipe", "position": Vector2(176, 224), "direction": Vector2.RIGHT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.5, "scale": Vector2(0.92, 0.54), "speed": 0.6},
-				{"kind": "pipe", "position": Vector2(848, 376), "direction": Vector2.LEFT, "group": "smoke_middle_gray", "smoke": "smoke9", "alpha": 0.5, "scale": Vector2(0.92, 0.54), "speed": 0.6},
-				{"kind": "pod", "position": Vector2(512, 150), "direction": Vector2.DOWN, "group": "smoke_bright_gray", "smoke": "smoke10", "alpha": 0.52, "scale": Vector2(1.0, 0.66), "speed": 0.64},
 			]
 	return [
 		{"kind": "vent", "position": Vector2(210, 232), "direction": Vector2.DOWN, "group": "smoke_middle_gray", "smoke": "smoke10", "alpha": 0.48, "scale": Vector2(1.0, 0.66), "speed": 0.62},

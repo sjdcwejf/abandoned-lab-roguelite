@@ -5,9 +5,8 @@ extends RefCounted
 const CRAWLER_SCENE := preload("res://tiny_wizard/enemies/red_fly/red_fly.tscn")
 const FLOATER_SCENE := preload("res://tiny_wizard/enemies/black_fly/black_fly.tscn")
 const SPITTER_SCENE := preload("res://tiny_wizard/enemies/quarantine_spitter/quarantine_spitter.tscn")
-const FROSTBITTEN_SCENE := preload("res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.tscn")
-const STASIS_CRAWLER_SCENE := preload("res://tiny_wizard/enemies/stasis_crawler/stasis_crawler.tscn")
-const CRYO_SPITTER_SCENE := preload("res://tiny_wizard/enemies/cryo_spitter/cryo_spitter.tscn")
+const BRITTLE_SHELL_ADAPTER_SCENE := preload("res://tiny_wizard/enemies/brittle_shell_adapter/brittle_shell_adapter.tscn")
+const SEALED_TECHNICIAN_SCENE := preload("res://tiny_wizard/enemies/sealed_technician/sealed_technician.tscn")
 
 const MAX_ENEMY_COUNT := 6
 const MAX_SPITTER_COUNT := 2
@@ -46,20 +45,14 @@ const ENEMY_DEFINITIONS := [
 
 const CRYO_ENEMY_DEFINITIONS := [
 	{
-		"id": "frostbitten_infected",
-		"scene": FROSTBITTEN_SCENE,
+		"id": "brittle_shell_adapter",
+		"scene": BRITTLE_SHELL_ADAPTER_SCENE,
 		"cost": 1,
 		"weight": 5,
 	},
 	{
-		"id": "stasis_crawler",
-		"scene": STASIS_CRAWLER_SCENE,
-		"cost": 2,
-		"weight": 3,
-	},
-	{
-		"id": "cryo_spitter",
-		"scene": CRYO_SPITTER_SCENE,
+		"id": "sealed_technician",
+		"scene": SEALED_TECHNICIAN_SCENE,
 		"cost": 3,
 		"weight": 3,
 	},
@@ -135,11 +128,11 @@ static func _build_encounter(rng: RandomNumberGenerator, budget: int, path_depth
 			var cost := int(definition["cost"])
 			if cost > remaining_budget:
 				continue
-			if str(definition["id"]) in ["quarantine_spitter", "cryo_spitter"] and spitter_count >= MAX_SPITTER_COUNT:
+			if str(definition["id"]) in ["quarantine_spitter", "sealed_technician"] and spitter_count >= MAX_SPITTER_COUNT:
 				continue
 
 			var weight := int(definition["weight"])
-			if str(definition["id"]) in ["quarantine_spitter", "cryo_spitter"]:
+			if str(definition["id"]) in ["quarantine_spitter", "sealed_technician"]:
 				weight += maxi(0, path_depth - 1)
 			candidates.append({"definition": definition, "weight": weight})
 			total_weight += weight
@@ -158,7 +151,7 @@ static func _build_encounter(rng: RandomNumberGenerator, budget: int, path_depth
 
 		encounter.append(selected)
 		remaining_budget -= int(selected["cost"])
-		if str(selected["id"]) in ["quarantine_spitter", "cryo_spitter"]:
+		if str(selected["id"]) in ["quarantine_spitter", "sealed_technician"]:
 			spitter_count += 1
 
 	_shuffle_array(encounter, rng)

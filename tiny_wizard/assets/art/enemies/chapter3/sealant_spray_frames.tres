@@ -1,0 +1,53 @@
+[gd_resource type="SpriteFrames" load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/sealant_spray.png" id="1_spray"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spray_0"]
+atlas = ExtResource("1_spray")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spray_1"]
+atlas = ExtResource("1_spray")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spray_2"]
+atlas = ExtResource("1_spray")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spray_3"]
+atlas = ExtResource("1_spray")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spray_4"]
+atlas = ExtResource("1_spray")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spray_5"]
+atlas = ExtResource("1_spray")
+region = Rect2(320, 0, 64, 64)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spray_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spray_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spray_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spray_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spray_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spray_5")
+}],
+"loop": false,
+"name": &"spray",
+"speed": 12.0
+}]

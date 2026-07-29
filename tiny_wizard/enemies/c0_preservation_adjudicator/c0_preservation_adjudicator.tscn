@@ -1,0 +1,66 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/c0_preservation_adjudicator/c0_preservation_adjudicator.gd" id="2_script"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="3_stats"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_physics"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/c0_preservation_adjudicator/c0_behavior.gd" id="5_behavior"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/visual/visual.gd" id="6_visual"]
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="7_detector"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/c0_preservation_adjudicator_cold_revision.png" id="8_body"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/c0_preservation_adjudicator_shadow.png" id="9_shadow"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+resource_local_to_scene = true
+script = ExtResource("3_stats")
+max_life = 78
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("4_physics")
+max_speed = 0.0
+acceleration = 0.3
+friction = 0.18
+impulse_force = 0.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detector"]
+radius = 620.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 46.0
+
+[node name="C0PreservationAdjudicator" instance=ExtResource("1_character")]
+process_mode = 4
+y_sort_enabled = true
+collision_layer = 8
+script = ExtResource("2_script")
+character_stats = SubResource("Resource_stats")
+physics_stats = SubResource("Resource_physics")
+boss_display_name = "零号封存裁定机 C-0"
+low_health_threshold = 0.42
+death_burst_count = 9
+death_burst_scale = 2.4
+
+[node name="Visual" parent="." index="0"]
+texture_filter = 1
+script = ExtResource("6_visual")
+
+[node name="Shadow" type="Sprite2D" parent="Visual" index="0"]
+position = Vector2(0, -3)
+texture = ExtResource("9_shadow")
+
+[node name="BodySprite" type="Sprite2D" parent="Visual" index="1"]
+position = Vector2(0, -58)
+texture = ExtResource("8_body")
+
+[node name="Behavior" parent="." index="1"]
+script = ExtResource("5_behavior")
+
+[node name="PlayerDetector" parent="Behavior" index="0" instance=ExtResource("7_detector")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Behavior/PlayerDetector" index="0"]
+shape = SubResource("CircleShape2D_detector")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(0, -58)
+shape = SubResource("CircleShape2D_body")

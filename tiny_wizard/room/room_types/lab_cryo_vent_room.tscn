@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/cold_vent_room.gd" id="2_room_script"]
 [ext_resource type="Script" path="res://tiny_wizard/room/cryo_room_overlay.gd" id="3_overlay"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/frostbitten_infected/frostbitten_infected.tscn" id="4_frost"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/cryo_spitter/cryo_spitter.tscn" id="5_spitter"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/brittle_shell_adapter/brittle_shell_adapter.tscn" id="4_frost"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/sealed_technician/sealed_technician.tscn" id="5_spitter"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pipe"]
 size = Vector2(238, 42)
@@ -58,8 +58,8 @@ default_color = Color(0.46, 0.86, 1, 0.72)
 closed = true
 points = PackedVector2Array(-18, -18, 18, -18, 18, 18, -18, 18)
 
-[node name="FrostbittenInfected" parent="Enemies" index="0" instance=ExtResource("4_frost")]
+[node name="BrittleShellAdapter" parent="Enemies" index="0" instance=ExtResource("4_frost")]
 position = Vector2(390, 312)
 
-[node name="CryoSpitter" parent="Enemies" index="1" instance=ExtResource("5_spitter")]
+[node name="SealedTechnician" parent="Enemies" index="1" instance=ExtResource("5_spitter")]
 position = Vector2(642, 232)

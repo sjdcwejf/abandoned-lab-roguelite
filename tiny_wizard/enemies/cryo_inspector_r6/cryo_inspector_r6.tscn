@@ -1,0 +1,71 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/cryo_inspector_r6/cryo_inspector_r6.gd" id="2_script"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="3_stats"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_physics"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/cryo_inspector_r6/cryo_inspector_r6_behavior.gd" id="5_behavior"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/visual/visual.gd" id="6_visual"]
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="7_detector"]
+[ext_resource type="SpriteFrames" path="res://tiny_wizard/assets/art/enemies/chapter3/cryo_inspector_r6_idle_frames.tres" id="8_frames"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/cryo_inspector_r6_shadow.png" id="9_shadow"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+resource_local_to_scene = true
+script = ExtResource("3_stats")
+max_life = 24
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("4_physics")
+max_speed = 54.0
+acceleration = 0.3
+friction = 0.16
+impulse_force = 520.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detector"]
+radius = 470.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 25.0
+
+[node name="CryoInspectorR6" instance=ExtResource("1_character")]
+process_mode = 4
+y_sort_enabled = true
+collision_layer = 8
+script = ExtResource("2_script")
+character_stats = SubResource("Resource_stats")
+physics_stats = SubResource("Resource_physics")
+protomatter_drop_chance = 1.0
+protomatter_min_drop = 3
+protomatter_max_drop = 5
+relic_drop_chance = 1.0
+relic_pool_tag = &"cryo_relic"
+green_blood_splatter_scale = 1.3
+
+[node name="Visual" parent="." index="0"]
+texture_filter = 1
+script = ExtResource("6_visual")
+
+[node name="Shadow" type="Sprite2D" parent="Visual" index="0"]
+position = Vector2(0, -4)
+texture = ExtResource("9_shadow")
+
+[node name="BodySprite" type="AnimatedSprite2D" parent="Visual" index="1"]
+position = Vector2(0, -42)
+sprite_frames = ExtResource("8_frames")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="Behavior" parent="." index="1"]
+script = ExtResource("5_behavior")
+
+[node name="PlayerDetector" parent="Behavior" index="0" instance=ExtResource("7_detector")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Behavior/PlayerDetector" index="0"]
+shape = SubResource("CircleShape2D_detector")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(0, -34)
+shape = SubResource("CircleShape2D_body")
+

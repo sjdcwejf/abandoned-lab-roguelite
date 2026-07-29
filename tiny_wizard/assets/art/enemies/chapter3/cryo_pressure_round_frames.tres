@@ -1,0 +1,102 @@
+[gd_resource type="SpriteFrames" load_steps=15 format=3]
+
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/cryo_pressure_round_flight.png" id="1_flight"]
+
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter3/cryo_pressure_round_impact.png" id="2_impact"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flight_0"]
+atlas = ExtResource("1_flight")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flight_1"]
+atlas = ExtResource("1_flight")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flight_2"]
+atlas = ExtResource("1_flight")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flight_3"]
+atlas = ExtResource("1_flight")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flight_4"]
+atlas = ExtResource("1_flight")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flight_5"]
+atlas = ExtResource("1_flight")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact_0"]
+atlas = ExtResource("2_impact")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact_1"]
+atlas = ExtResource("2_impact")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact_2"]
+atlas = ExtResource("2_impact")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact_3"]
+atlas = ExtResource("2_impact")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact_4"]
+atlas = ExtResource("2_impact")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact_5"]
+atlas = ExtResource("2_impact")
+region = Rect2(160, 0, 32, 32)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flight_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flight_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flight_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flight_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flight_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flight_5")
+}],
+"loop": true,
+"name": &"flight",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact_5")
+}],
+"loop": false,
+"name": &"impact",
+"speed": 12.0
+}]

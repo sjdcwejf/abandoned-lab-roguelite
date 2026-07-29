@@ -316,11 +316,11 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"combat_label_prefix": "冷雾处理间",
 				"cryo_pod_label": "冷冻舱列阵",
 				"cryo_vent_label": "冷却通风廊",
-				"elite_label": "冰核守卫间",
+				"elite_label": "低温复检间",
 				"reward_label_prefix": "封存样本库",
 				"merchant_label": "低温封存前厅",
-				"boss_label": "零号封存室",
-				"boss_objective": "击败零号封存体，解锁兵器工厂访问权限。",
+				"boss_label": "零号封存裁定室",
+				"boss_objective": "击败零号封存裁定机 C-0，解锁兵器工厂访问权限。",
 				"completion_destination": "兵器工厂访问权限",
 				"next_chapter_id": 4,
 				"next_chapter_title": "第四章：外骨骼兵器工厂",
@@ -1077,7 +1077,7 @@ static func _chapter_shop_objective(chapter_id: int) -> String:
 		4:
 			return "整备武器与补给。"
 		3:
-			return "确认低温封存舱状态，进入零号封存室。"
+			return "确认低温封存舱状态，进入零号封存裁定室。"
 		2:
 			return "在渡鸦温室补给站交易，准备进入培育舱。"
 	return "与渡鸦交易，补充装备后前往下一房间。"
