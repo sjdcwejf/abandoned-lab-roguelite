@@ -1,0 +1,138 @@
+[gd_resource type="SpriteFrames" load_steps=20 format=3]
+
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rejected_carrier_frame_96x96.png" id="1_idle"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rejected_carrier_charge_right_112x96_8f.png" id="2_charge_right"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rejected_carrier_charge_left_112x96_8f.png" id="3_charge_left"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_0"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(0, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_1"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(112, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_2"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(224, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_3"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(336, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_4"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(448, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_5"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(560, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_6"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(672, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_right_7"]
+atlas = ExtResource("2_charge_right")
+region = Rect2(784, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_0"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(0, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_1"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(112, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_2"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(224, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_3"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(336, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_4"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(448, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_5"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(560, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_6"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(672, 0, 112, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_charge_left_7"]
+atlas = ExtResource("3_charge_left")
+region = Rect2(784, 0, 112, 96)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_idle")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_right_7")
+}],
+"loop": false,
+"name": &"charge_right",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_charge_left_7")
+}],
+"loop": false,
+"name": &"charge_left",
+"speed": 14.0
+}]
