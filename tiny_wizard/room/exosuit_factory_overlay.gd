@@ -21,6 +21,8 @@ const BACKGROUND_VISUAL_Z := -2
 
 @export var variant := "combat"
 
+var _retracted_boss_decor: Dictionary = {}
+
 
 static func chapter_4_factory_background_theme() -> Dictionary:
 	return {
@@ -486,25 +488,61 @@ func _build_factory_armory_supply_background() -> void:
 
 
 func _build_factory_heavy_cleaner_boss_background() -> void:
-	_add_rect("BossOuterMovementRing", ROOM_CENTER, Vector2(650, 332), Color(0.075, 0.064, 0.058, 0.56), 1)
-	_add_rect("BossLaunchPlatform", ROOM_CENTER, Vector2(292, 188), Color(0.095, 0.052, 0.042, 0.72), 2)
-	_add_rect("BossLaunchInnerPad", ROOM_CENTER, Vector2(176, 104), Color(0.045, 0.035, 0.032, 0.78), 3)
-	_add_warning_strip(Vector2(512, 202), Vector2(330, 14), false, 0.34)
-	_add_warning_strip(Vector2(512, 398), Vector2(330, 14), false, 0.30)
-	_add_warning_strip(Vector2(360, 300), Vector2(210, 12), true, 0.26)
-	_add_warning_strip(Vector2(664, 300), Vector2(210, 12), true, 0.24)
-	_add_line(Vector2(248, 300), Vector2(776, 300), Color(0.92, 0.18, 0.12, 0.44), 4.0, 4)
-	_add_line(Vector2(512, 174), Vector2(512, 426), Color(0.92, 0.18, 0.12, 0.30), 3.0, 4)
-	_add_equipment_frame(Vector2(184, 302), Vector2(108, 300), "左侧维修轨")
-	_add_equipment_frame(Vector2(840, 302), Vector2(108, 300), "右侧维修轨")
-	_add_equipment_frame(Vector2(512, 130), Vector2(420, 80), "重装机闸门")
-	_add_asset_sprite(ROBOT_FACTORY_PAGE_04, Rect2(0, 520, 256, 170), Vector2(190, 314), Vector2(0.55, 0.55), Color(1, 1, 1, 0.86), 5)
-	_add_asset_sprite(ROBOT_FACTORY_PAGE_04, Rect2(0, 520, 256, 170), Vector2(834, 314), Vector2(-0.55, 0.55), Color(1, 1, 1, 0.86), 5)
-	_add_asset_sprite(ROBOT_FACTORY_PAGE_03, Rect2(376, 0, 376, 110), Vector2(512, 146), Vector2(0.92, 0.92), Color(1, 1, 1, 0.84), 5)
-	_add_warning_light(Vector2(166, 142))
-	_add_warning_light(Vector2(858, 142))
-	_add_warning_light(Vector2(166, 458))
-	_add_warning_light(Vector2(858, 458))
+	_add_rect("BossOuterMovementRing", ROOM_CENTER, Vector2(780, 400), Color(0.075, 0.064, 0.058, 0.56), 1)
+	_add_rect("BossLaunchPlatform", ROOM_CENTER, Vector2(360, 220), Color(0.095, 0.052, 0.042, 0.72), 2)
+	_add_rect("BossLaunchInnerPad", ROOM_CENTER, Vector2(208, 124), Color(0.045, 0.035, 0.032, 0.78), 3)
+	_add_warning_strip(Vector2(512, 146), Vector2(420, 14), false, 0.34)
+	_add_warning_strip(Vector2(512, 454), Vector2(420, 14), false, 0.30)
+	_add_warning_strip(Vector2(318, 300), Vector2(258, 12), true, 0.26)
+	_add_warning_strip(Vector2(706, 300), Vector2(258, 12), true, 0.24)
+	_add_line(Vector2(126, 300), Vector2(898, 300), Color(0.92, 0.18, 0.12, 0.44), 4.0, 4)
+	_add_line(Vector2(512, 108), Vector2(512, 492), Color(0.92, 0.18, 0.12, 0.30), 3.0, 4)
+
+	var left_decor_start := get_child_count()
+	_add_equipment_frame(Vector2(142, 300), Vector2(76, 260), "左侧维修轨")
+	_add_asset_sprite(ROBOT_FACTORY_PAGE_04, Rect2(0, 520, 256, 170), Vector2(142, 312), Vector2(0.43, 0.43), Color(1, 1, 1, 0.86), 5)
+	_add_warning_light(Vector2(128, 140))
+	_add_warning_light(Vector2(128, 460))
+	_tag_new_boss_decor(left_decor_start, &"left_rivet", Vector2(142, 300))
+
+	var right_decor_start := get_child_count()
+	_add_equipment_frame(Vector2(882, 300), Vector2(76, 260), "右侧维修轨")
+	_add_asset_sprite(ROBOT_FACTORY_PAGE_04, Rect2(0, 520, 256, 170), Vector2(882, 312), Vector2(-0.43, 0.43), Color(1, 1, 1, 0.86), 5)
+	_add_warning_light(Vector2(896, 140))
+	_add_warning_light(Vector2(896, 460))
+	_tag_new_boss_decor(right_decor_start, &"right_plate", Vector2(882, 300))
+
+	var north_decor_start := get_child_count()
+	_add_equipment_frame(Vector2(512, 104), Vector2(380, 54), "重装机闸门")
+	_add_asset_sprite(ROBOT_FACTORY_PAGE_03, Rect2(376, 0, 376, 110), Vector2(512, 112), Vector2(0.72, 0.72), Color(1, 1, 1, 0.84), 5)
+	_tag_new_boss_decor(north_decor_start, &"north_rotor", Vector2(512, 104))
+
+
+func _tag_new_boss_decor(start_index: int, part_id: StringName, source_center: Vector2) -> void:
+	for index in range(start_index, get_child_count()):
+		var child := get_child(index)
+		child.set_meta("r0_boss_decor_part", part_id)
+		child.set_meta("r0_boss_decor_source", source_center)
+
+
+func retract_boss_decor(part_id: StringName, target_global_position: Vector2) -> void:
+	if _retracted_boss_decor.get(part_id, false):
+		return
+	_retracted_boss_decor[part_id] = true
+	var target_position := to_local(target_global_position)
+	for child in get_children():
+		if StringName(str(child.get_meta("r0_boss_decor_part", ""))) != part_id:
+			continue
+		if not child is Node2D or not child is CanvasItem:
+			continue
+		var source_center: Vector2 = child.get_meta("r0_boss_decor_source", Vector2.ZERO) as Vector2
+		var visual := child as Node2D
+		var canvas := child as CanvasItem
+		var tween := visual.create_tween()
+		tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(visual, "position", visual.position + target_position - source_center, 0.82)
+		tween.parallel().tween_property(canvas, "modulate", Color(1.0, 0.48, 0.18, 0.0), 0.64)
+		tween.tween_callback(visual.queue_free)
 
 
 func _build_variant_solid_blocking_props(background_key: String) -> void:
@@ -557,9 +595,9 @@ func _build_variant_solid_blocking_props(background_key: String) -> void:
 			]
 		"boss_arena":
 			props = [
-				{"name": "BossLeftMechRail", "position": Vector2(184, 302), "size": Vector2(100, 300)},
-				{"name": "BossRightMechRail", "position": Vector2(840, 302), "size": Vector2(100, 300)},
-				{"name": "BossNorthHeavyGate", "position": Vector2(512, 130), "size": Vector2(420, 80)},
+				{"name": "BossLeftMechRail", "position": Vector2(142, 300), "size": Vector2(76, 260)},
+				{"name": "BossRightMechRail", "position": Vector2(882, 300), "size": Vector2(76, 260)},
+				{"name": "BossNorthHeavyGate", "position": Vector2(512, 104), "size": Vector2(380, 54)},
 			]
 
 	for prop in props:

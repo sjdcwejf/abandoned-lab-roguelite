@@ -1,80 +1,80 @@
 [gd_resource type="SpriteFrames" load_steps=22 format=3]
 
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rivet_inspection_rig_96x96.png" id="1_idle"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rivet_inspection_rig_burst_right_112x96_9f.png" id="2_burst_right"]
-[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rivet_inspection_rig_burst_left_112x96_9f.png" id="3_burst_left"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rivet_inspection_rig_v2_idle_64x64.png" id="1_idle"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rivet_inspection_rig_v2_attack_right_64x64_9f.png" id="2_burst_right"]
+[ext_resource type="Texture2D" path="res://tiny_wizard/assets/art/enemies/chapter4/rivet_inspection_rig_v2_attack_left_64x64_9f.png" id="3_burst_left"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_0"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(0, 0, 112, 96)
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_1"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(112, 0, 112, 96)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_2"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(224, 0, 112, 96)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_3"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(336, 0, 112, 96)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_4"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(448, 0, 112, 96)
+region = Rect2(256, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_5"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(560, 0, 112, 96)
+region = Rect2(320, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_6"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(672, 0, 112, 96)
+region = Rect2(384, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_7"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(784, 0, 112, 96)
+region = Rect2(448, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_right_8"]
 atlas = ExtResource("2_burst_right")
-region = Rect2(896, 0, 112, 96)
+region = Rect2(512, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_0"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(0, 0, 112, 96)
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_1"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(112, 0, 112, 96)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_2"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(224, 0, 112, 96)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_3"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(336, 0, 112, 96)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_4"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(448, 0, 112, 96)
+region = Rect2(256, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_5"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(560, 0, 112, 96)
+region = Rect2(320, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_6"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(672, 0, 112, 96)
+region = Rect2(384, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_7"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(784, 0, 112, 96)
+region = Rect2(448, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_burst_left_8"]
 atlas = ExtResource("3_burst_left")
-region = Rect2(896, 0, 112, 96)
+region = Rect2(512, 0, 64, 64)
 
 [resource]
 animations = [{

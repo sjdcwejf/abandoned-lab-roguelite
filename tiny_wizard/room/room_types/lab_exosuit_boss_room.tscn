@@ -1,13 +1,15 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_boss_room.tscn" id="1_base"]
 [ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/r0_reverse_assembler/r0_reverse_assembler.tscn" id="3_r0_boss"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/r0_reverse_assembler/r0_room_part.tscn" id="4_r0_part"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mech_bay"]
-size = Vector2(100, 300)
+size = Vector2(76, 260)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_heavy_gate"]
-size = Vector2(420, 80)
+size = Vector2(380, 54)
 
 [node name="Room" instance=ExtResource("1_base")]
 lab_room_type = "boss"
@@ -17,36 +19,51 @@ lab_room_label = "重装清理机停放库"
 script = ExtResource("2_overlay")
 variant = "boss"
 
-[node name="PrototypeBoss" parent="Enemies" index="0"]
-boss_display_name = "弥赛亚重装清理机（占位）"
+[node name="PrototypeBoss" parent="Enemies" index="0" instance=ExtResource("3_r0_boss")]
+position = Vector2(512, 340)
 
-[node name="LeftMechBayBlocker" type="StaticBody2D" parent="." index="9"]
-position = Vector2(184, 302)
+[node name="R0RoomParts" type="Node2D" parent="." index="9"]
+z_index = 8
+
+[node name="LeftRivetCassette" parent="R0RoomParts" instance=ExtResource("4_r0_part")]
+position = Vector2(142, 300)
+part_id = &"left_rivet"
+
+[node name="RightArmorPlate" parent="R0RoomParts" instance=ExtResource("4_r0_part")]
+position = Vector2(882, 300)
+part_id = &"right_plate"
+
+[node name="NorthMagneticRotor" parent="R0RoomParts" instance=ExtResource("4_r0_part")]
+position = Vector2(512, 104)
+part_id = &"north_rotor"
+
+[node name="LeftMechBayBlocker" type="StaticBody2D" parent="." index="10"]
+position = Vector2(142, 300)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="LeftMechBayBlocker"]
-polygon = PackedVector2Array(-50, -150, 40, -150, 40, -66, -50, -66)
+polygon = PackedVector2Array(-38, -130, 38, -130, 38, -64, -38, -64)
 [node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="LeftMechBayBlocker"]
-polygon = PackedVector2Array(-50, 62, 40, 62, 40, 150, -50, 150)
-[node name="RightMechBayBlocker" type="StaticBody2D" parent="." index="10"]
-position = Vector2(840, 302)
+polygon = PackedVector2Array(-38, 64, 38, 64, 38, 130, -38, 130)
+[node name="RightMechBayBlocker" type="StaticBody2D" parent="." index="11"]
+position = Vector2(882, 300)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="RightMechBayBlocker"]
-polygon = PackedVector2Array(-40, -150, 50, -150, 50, -66, -40, -66)
+polygon = PackedVector2Array(-38, -130, 38, -130, 38, -64, -38, -64)
 [node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="RightMechBayBlocker"]
-polygon = PackedVector2Array(-40, 62, 50, 62, 50, 150, -40, 150)
-[node name="NorthHeavyGateBlocker" type="StaticBody2D" parent="." index="11"]
-position = Vector2(512, 130)
+polygon = PackedVector2Array(-38, 64, 38, 64, 38, 130, -38, 130)
+[node name="NorthHeavyGateBlocker" type="StaticBody2D" parent="." index="12"]
+position = Vector2(512, 104)
 collision_layer = 1
 collision_mask = 15
 metadata/solid_blocking_prop = true
 
 [node name="CollisionShape2DRouteSafeA" type="CollisionPolygon2D" parent="NorthHeavyGateBlocker"]
-polygon = PackedVector2Array(-210, -40, -64, -40, -64, 40, -210, 40)
+polygon = PackedVector2Array(-190, -27, -64, -27, -64, 27, -190, 27)
 [node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthHeavyGateBlocker"]
-polygon = PackedVector2Array(64, -40, 210, -40, 210, 40, 64, 40)
+polygon = PackedVector2Array(64, -27, 190, -27, 190, 27, 64, 27)

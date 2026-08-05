@@ -231,7 +231,7 @@ static func generate(rooms_parent: Node2D, requested_seed := 0, chapter_id := DE
 	var generated_rooms := {}
 	for spec in room_layout:
 		var room := _instantiate_room(spec)
-		if str(spec["type"]) in ["combat", "cryo_vent", "final_transition", "final_antechamber"]:
+		if str(spec["type"]) in ["combat", "cryo_vent", "elite", "final_transition", "final_antechamber"]:
 			FORMAL_ENCOUNTER_GENERATOR.populate(room, rng, int(spec.get("depth", 1)))
 		rooms_parent.add_child(room)
 		generated_rooms[room.room_pos] = room

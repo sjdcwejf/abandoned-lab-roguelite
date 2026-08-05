@@ -4,7 +4,7 @@ extends ProtomatterDropEnemy
 const RIVET_PROJECTILE_SCENE := preload("res://tiny_wizard/enemies/rivet_inspection_rig/rivet_projectile.tscn")
 
 @export var burst_warning_length := 360.0
-@export var muzzle_offset := Vector2(34.0, -38.0)
+@export var muzzle_offset := Vector2(24.0, -42.0)
 
 var _burst_direction := Vector2.RIGHT
 

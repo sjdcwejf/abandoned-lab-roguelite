@@ -130,7 +130,7 @@ func _active_duration(attack_name: StringName) -> float:
 func _damage_time(attack_name: StringName) -> float:
 	match attack_name:
 		&"driver_slam":
-			return 0.38
+			return 0.44
 		&"pendulum_sweep":
-			return 0.28
-	return 0.3
+			return 0.36
+	return 0.36

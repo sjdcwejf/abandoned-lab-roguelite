@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room.tscn" id="1_room"]
 [ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="2_overlay"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/ice_core_guardian/ice_core_guardian.tscn" id="3_elite"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/security_gantry_unit/security_gantry_unit.tscn" id="3_elite"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_terminal"]
 size = Vector2(130, 84)
@@ -48,5 +48,5 @@ metadata/solid_blocking_prop = true
 polygon = PackedVector2Array(-155, -21, -64, -21, -64, 21, -155, 21)
 [node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="NorthConveyorBlocker"]
 polygon = PackedVector2Array(64, -21, 155, -21, 155, 21, 64, 21)
-[node name="SecurityMechPlaceholder" parent="Enemies" index="0" instance=ExtResource("3_elite")]
+[node name="SecurityGantryUnitPreview" parent="Enemies" index="0" instance=ExtResource("3_elite")]
 position = Vector2(512, 306)
