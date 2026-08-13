@@ -518,16 +518,16 @@ func _make_default_objective() -> Dictionary:
 			}
 		"data_comm":
 			return {
-				"type": OBJECTIVE_INTERACT_TARGETS,
-				"objective_text": "重启通讯终端 0/3。",
+				"type": OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "过载通讯终端 0/3，并清理房内异常单位。",
 				"target_label": "通讯终端",
 				"target_total": 3,
-				"completion_text": "封锁解除：通讯终端已重启。",
+				"completion_text": "封锁解除：通讯终端已过载。",
 			}
 		"data_comm_control":
 			return {
-				"type": OBJECTIVE_INTERACT_TARGETS,
-				"objective_text": "关闭控制节点 0/3。",
+				"type": OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "关闭控制节点 0/3，并清理房内异常单位。",
 				"target_label": "控制节点",
 				"target_total": 3,
 				"completion_text": "封锁解除：控制节点已关闭。",

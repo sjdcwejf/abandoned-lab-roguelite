@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_boss_room.tscn" id="1_base"]
 [ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="2_overlay"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/t0_trunk_adjudicator/t0_trunk_adjudicator.tscn" id="3_t0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
 size = Vector2(100, 270)
@@ -17,8 +18,8 @@ lab_room_label = "清理协议AI核心室"
 script = ExtResource("2_overlay")
 variant = "boss"
 
-[node name="PrototypeBoss" parent="Enemies" index="0"]
-boss_display_name = "清理协议AI（占位）"
+[node name="PrototypeBoss" parent="Enemies" index="0" instance=ExtResource("3_t0")]
+position = Vector2(512, 370)
 
 [node name="LeftCoreServerBlocker" type="StaticBody2D" parent="." index="9"]
 position = Vector2(188, 302)
@@ -54,5 +55,3 @@ metadata/solid_blocking_prop = true
 polygon = PackedVector2Array(-110, -85, -64, -85, -64, 85, -110, 85)
 [node name="CollisionShape2DRouteSafeB" type="CollisionPolygon2D" parent="CentralCoreBlocker"]
 polygon = PackedVector2Array(64, -85, 110, -85, 110, 85, 64, 85)
-[node name="CollisionShape2DRouteSafeC" type="CollisionPolygon2D" parent="CentralCoreBlocker"]
-polygon = PackedVector2Array(-64, -84, 64, -84, 64, 84, -64, 84)

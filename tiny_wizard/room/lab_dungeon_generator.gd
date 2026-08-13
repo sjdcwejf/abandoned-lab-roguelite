@@ -48,6 +48,7 @@ const DATA_CORE_COMM_CONTROL_ROOM_SCENE := preload("res://tiny_wizard/room/room_
 const DATA_CORE_ARCHIVE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_archive_room.tscn")
 const DATA_CORE_SUPPLY_STATION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_supply_station_room.tscn")
 const DATA_CORE_BOSS_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_boss_room.tscn")
+const DATA_CORE_ELITE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_data_core_elite_room.tscn")
 const MOTHER_HIVE_START_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_start_room.tscn")
 const MOTHER_HIVE_TRANSITION_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_transition_room.tscn")
 const MOTHER_HIVE_CORE_INTERFERENCE_ROOM_SCENE := preload("res://tiny_wizard/room/room_types/lab_mother_hive_core_interference_room.tscn")
@@ -404,7 +405,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"main_path_room_count": 7,
 				"reward_room_count": 0,
 				"layout_radius": 4,
-				"main_room_types": ["combat", "data_comm", "data_comm_control", "archive"],
+				"main_room_types": ["combat", "data_comm", "data_comm_control", "archive", "elite"],
 				"start_label": "数据中枢入口",
 				"combat_label_prefix": "服务器机房",
 				"data_comm_label": "通讯塔控制室",
@@ -421,6 +422,7 @@ static func get_chapter_config(chapter_id: int) -> Dictionary:
 				"data_comm_room_scenes": [DATA_CORE_COMM_ROOM_SCENE],
 				"data_comm_control_room_scenes": [DATA_CORE_COMM_CONTROL_ROOM_SCENE],
 				"archive_room_scenes": [DATA_CORE_ARCHIVE_ROOM_SCENE],
+				"elite_room_scenes": [DATA_CORE_ELITE_ROOM_SCENE],
 				"reward_room_scenes": [],
 				"weapon_room_scenes": [],
 				"merchant_room_scenes": [DATA_CORE_SUPPLY_STATION_ROOM_SCENE],
@@ -896,16 +898,16 @@ static func _make_room_objective(room_type: String, label: String, chapter_confi
 			return _chapter_event_objective(chapter_id, label)
 		"data_comm":
 			return {
-				"type": Room.OBJECTIVE_INTERACT_TARGETS,
-				"objective_text": "重启通讯终端 0/3。",
+				"type": Room.OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "过载通讯终端 0/3，并清理房内异常单位。",
 				"target_label": "通讯终端",
 				"target_total": 3,
-				"completion_text": "封锁解除：通讯终端已重启。",
+				"completion_text": "封锁解除：通讯终端已过载。",
 			}
 		"data_comm_control":
 			return {
-				"type": Room.OBJECTIVE_INTERACT_TARGETS,
-				"objective_text": "关闭控制节点 0/3。",
+				"type": Room.OBJECTIVE_DESTROY_TARGETS,
+				"objective_text": "关闭控制节点 0/3，并清理房内异常单位。",
 				"target_label": "控制节点",
 				"target_total": 3,
 				"completion_text": "封锁解除：控制节点已关闭。",

@@ -10,6 +10,10 @@ const SEALED_TECHNICIAN_SCENE := preload("res://tiny_wizard/enemies/sealed_techn
 const RIVET_INSPECTION_RIG_SCENE := preload("res://tiny_wizard/enemies/rivet_inspection_rig/rivet_inspection_rig.tscn")
 const REJECTED_CARRIER_SCENE := preload("res://tiny_wizard/enemies/rejected_carrier/rejected_carrier.tscn")
 const SECURITY_GANTRY_UNIT_SCENE := preload("res://tiny_wizard/enemies/security_gantry_unit/security_gantry_unit.tscn")
+const CHAPTER5_INDEX_PURSUER_SCENE := preload("res://tiny_wizard/enemies/index_pursuer/index_pursuer.tscn")
+const CHAPTER5_PORT_RELAY_SCENE := preload("res://tiny_wizard/enemies/port_relay/port_relay.tscn")
+const CHAPTER5_HYDRAULIC_CLEARANCE_RIG_SCENE := preload("res://tiny_wizard/enemies/hydraulic_clearance_rig/hydraulic_clearance_rig.tscn")
+const CHAPTER5_R7_EXECUTOR_SCENE := preload("res://tiny_wizard/enemies/r7_executor/r7_executor.tscn")
 
 const MAX_ENEMY_COUNT := 6
 const MAX_SPITTER_COUNT := 2
@@ -91,12 +95,22 @@ const EXOSUIT_ELITE_DEFINITIONS := [
 	},
 ]
 
+const DATA_CORE_ENEMY_DEFINITIONS := [
+	{"id": "index_pursuer", "scene": CHAPTER5_INDEX_PURSUER_SCENE, "cost": 1, "weight": 6, "max_count": 3},
+	{"id": "port_relay", "scene": CHAPTER5_PORT_RELAY_SCENE, "cost": 2, "weight": 3, "max_count": 1, "requires": ["index_pursuer"]},
+	{"id": "hydraulic_clearance_rig", "scene": CHAPTER5_HYDRAULIC_CLEARANCE_RIG_SCENE, "cost": 3, "weight": 2, "max_count": 2},
+]
+
+const DATA_CORE_ELITE_DEFINITIONS := [
+	{"id": "r7_executor", "scene": CHAPTER5_R7_EXECUTOR_SCENE, "cost": 99, "weight": 1, "max_count": 1, "spawn_clearance": 130.0},
+]
+
 
 static func populate(room: Room, rng: RandomNumberGenerator, path_depth: int) -> void:
 	if room == null:
 		return
 	var chapter_id := int(room.get_meta("chapter_id", 1))
-	if not (room.lab_room_type in ["combat", "cryo_vent"]) and not (chapter_id == 4 and room.lab_room_type == "elite"):
+	if not (room.lab_room_type in ["combat", "cryo_vent"]) and not (chapter_id in [4, 5] and room.lab_room_type == "elite"):
 		return
 	var enemies := room.get_node_or_null("Enemies")
 	if enemies == null:
@@ -106,6 +120,9 @@ static func populate(room: Room, rng: RandomNumberGenerator, path_depth: int) ->
 	if chapter_id == 4 and room.lab_room_type == "elite":
 		_populate_chapter_four_elite(room, enemies, rng, path_depth)
 		return
+	if chapter_id == 5 and room.lab_room_type == "elite":
+		_populate_chapter_five_elite(room, enemies, rng, path_depth)
+		return
 
 	var budget_index := clampi(path_depth - 1, 0, BUDGET_BY_DEPTH.size() - 1)
 	var budget := int(BUDGET_BY_DEPTH[budget_index])
@@ -114,7 +131,7 @@ static func populate(room: Room, rng: RandomNumberGenerator, path_depth: int) ->
 	if chapter_id == 4:
 		budget += 2
 	if chapter_id == 5:
-		budget += 2
+		budget = 4
 	var definitions := _get_enemy_definitions(room)
 	var encounter := _build_encounter(rng, budget, path_depth, definitions)
 	var spawn_positions := _build_spawn_positions(room, encounter, rng)
@@ -150,6 +167,8 @@ static func _get_enemy_definitions(room: Room) -> Array:
 		return CRYO_ENEMY_DEFINITIONS
 	if room != null and int(room.get_meta("chapter_id", 1)) == 4:
 		return EXOSUIT_ENEMY_DEFINITIONS
+	if room != null and int(room.get_meta("chapter_id", 1)) == 5:
+		return DATA_CORE_ENEMY_DEFINITIONS
 	return ENEMY_DEFINITIONS
 
 
@@ -173,6 +192,14 @@ static func _build_encounter(rng: RandomNumberGenerator, budget: int, path_depth
 				continue
 			var definition_id := str(definition["id"])
 			var max_count := int(definition.get("max_count", MAX_ENEMY_COUNT))
+			var requirements := definition.get("requires", []) as Array
+			var requirement_missing := false
+			for required_id in requirements:
+				if not selected_counts.has(str(required_id)):
+					requirement_missing = true
+					break
+			if requirement_missing:
+				continue
 			if definition_id in ["quarantine_spitter", "sealed_technician"]:
 				max_count = mini(max_count, MAX_SPITTER_COUNT)
 			if int(selected_counts.get(definition_id, 0)) >= max_count:
@@ -226,6 +253,31 @@ static func _populate_chapter_four_elite(room: Room, enemies: Node, rng: RandomN
 		return
 	enemy.name = "SecurityGantryUnit_01"
 	enemy.position = spawn_positions[0]
+	enemy.process_mode = Node.PROCESS_MODE_DISABLED
+	enemies.add_child(enemy)
+	room.set_meta("formal_encounter_budget", 99)
+	room.set_meta("formal_encounter_depth", path_depth)
+	room.set_meta("formal_encounter_ids", [str(definition.get("id", "enemy"))])
+
+
+static func _populate_chapter_five_elite(room: Room, enemies: Node, rng: RandomNumberGenerator, path_depth: int) -> void:
+	var definition := DATA_CORE_ELITE_DEFINITIONS[0] as Dictionary
+	var spawn_position := Vector2(512.0, 306.0)
+	if not _is_spawn_position_valid_for_definition(room, spawn_position, [], definition):
+		var fallback := _build_spawn_positions(room, [definition], rng)
+		if fallback.is_empty():
+			room.set_meta("formal_encounter_ids", [])
+			push_warning("Chapter 5 elite room has no safe R-7 spawn position.")
+			return
+		spawn_position = fallback[0]
+	var enemy_scene := definition.get("scene") as PackedScene
+	if enemy_scene == null:
+		return
+	var enemy := enemy_scene.instantiate() as Node2D
+	if enemy == null:
+		return
+	enemy.name = "R7Executor_01"
+	enemy.position = spawn_position
 	enemy.process_mode = Node.PROCESS_MODE_DISABLED
 	enemies.add_child(enemy)
 	room.set_meta("formal_encounter_budget", 99)

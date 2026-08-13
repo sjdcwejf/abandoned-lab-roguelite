@@ -5,20 +5,20 @@
 [ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="3_overlay"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_target"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="5_terminal"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="7_red"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/index_pursuer/index_pursuer.tscn" id="6_index"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/port_relay/port_relay.tscn" id="7_relay"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_relay"]
 size = Vector2(112, 110)
 
 [node name="Room" instance=ExtResource("1_room")]
 script = ExtResource("2_script")
-lab_room_type = "pollution"
+lab_room_type = "data_comm"
 lab_room_label = "通讯塔控制室"
-event_objective_text = "重启通讯终端 0/3，并清理房内异常单位。"
+event_objective_text = "过载通讯终端 0/3，并清理房内异常单位。"
 event_target_label = "通讯终端"
-event_completion_text = "封锁解除：通讯终端已重启。"
-event_target_success_message = "通讯终端已重启"
+event_completion_text = "封锁解除：通讯终端已过载。"
+event_target_success_message = "通讯终端已过载"
 
 [node name="DataCoreOverlay" type="Node2D" parent="." index="7"]
 script = ExtResource("3_overlay")
@@ -50,19 +50,19 @@ polygon = PackedVector2Array(28, -18, 56, -18, 56, 55, 28, 55)
 position = Vector2(372, 216)
 max_health = 4
 display_name = "通讯终端"
-destroyed_display_name = "终端重启"
+destroyed_display_name = "终端过载"
 
 [node name="CommTerminalB" parent="CommTargets" instance=ExtResource("4_target")]
 position = Vector2(512, 304)
 max_health = 4
 display_name = "通讯终端"
-destroyed_display_name = "终端重启"
+destroyed_display_name = "终端过载"
 
 [node name="CommTerminalC" parent="CommTargets" instance=ExtResource("4_target")]
 position = Vector2(652, 392)
 max_health = 4
 display_name = "通讯终端"
-destroyed_display_name = "终端重启"
+destroyed_display_name = "终端过载"
 
 [node name="BlackBoxSignalTerminal" parent="." index="11" instance=ExtResource("5_terminal")]
 position = Vector2(512, 142)
@@ -75,8 +75,8 @@ show_panel_on_read = false
 record_to_main = false
 already_read_message = "终端已激活。"
 
-[node name="DataFloater" parent="Enemies" index="0" instance=ExtResource("6_black")]
+[node name="IndexPursuer" parent="Enemies" index="0" instance=ExtResource("6_index")]
 position = Vector2(430, 260)
 
-[node name="DataCrawler" parent="Enemies" index="1" instance=ExtResource("7_red")]
+[node name="PortRelay" parent="Enemies" index="1" instance=ExtResource("7_relay")]
 position = Vector2(612, 350)

@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://tiny_wizard/room/room_types/lab_data_core_server_room.tscn" id="1_base"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/r7_executor/r7_executor.tscn" id="2_r7"]
+
+[node name="Room" instance=ExtResource("1_base")]
+lab_room_type = "elite"
+lab_room_label = "数据中枢执行审查室"
+
+[node name="RavenAccessKeyTerminal" parent="." index="11"]
+process_mode = 4
+visible = false
+
+[node name="TerminalBlocker" parent="." index="12"]
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2DRouteSafeA" parent="TerminalBlocker" index="0"]
+disabled = true
+
+[node name="R7Executor" parent="Enemies" index="0" instance=ExtResource("2_r7")]
+position = Vector2(512, 306)

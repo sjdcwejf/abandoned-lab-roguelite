@@ -1,0 +1,56 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/hydraulic_clearance_rig/hydraulic_clearance_rig.gd" id="2_script"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/character_stats.gd" id="3_stats"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/character_stats/physics_stats.gd" id="4_physics"]
+[ext_resource type="Script" path="res://tiny_wizard/enemies/hydraulic_clearance_rig/hydraulic_clearance_rig_behavior.gd" id="5_behavior"]
+[ext_resource type="Script" path="res://top-down-shooter-core/character/visual/visual.gd" id="6_visual"]
+[ext_resource type="PackedScene" path="res://top-down-shooter-core/character/behavior/behavior_modules/player_detector.tscn" id="7_detector"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+resource_local_to_scene = true
+script = ExtResource("3_stats")
+max_life = 10
+
+[sub_resource type="Resource" id="Resource_physics"]
+resource_local_to_scene = true
+script = ExtResource("4_physics")
+max_speed = 54.0
+acceleration = 0.28
+friction = 0.16
+impulse_force = 480.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detector"]
+radius = 420.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 24.0
+
+[node name="HydraulicClearanceRig" instance=ExtResource("1_character")]
+process_mode = 4
+y_sort_enabled = true
+collision_layer = 8
+script = ExtResource("2_script")
+character_stats = SubResource("Resource_stats")
+physics_stats = SubResource("Resource_physics")
+protomatter_drop_chance = 0.7
+
+[node name="Visual" parent="." index="0"]
+texture_filter = 1
+script = ExtResource("6_visual")
+
+[node name="BodySprite" type="Sprite2D" parent="Visual" index="0"]
+position = Vector2(0, -34)
+
+[node name="Behavior" parent="." index="1"]
+script = ExtResource("5_behavior")
+
+[node name="PlayerDetector" parent="Behavior" index="0" instance=ExtResource("7_detector")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Behavior/PlayerDetector" index="0"]
+shape = SubResource("CircleShape2D_detector")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(0, -25)
+shape = SubResource("CircleShape2D_body")

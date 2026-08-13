@@ -4,8 +4,8 @@
 [ext_resource type="Script" path="res://tiny_wizard/room/exosuit_test_room.gd" id="2_script"]
 [ext_resource type="Script" path="res://tiny_wizard/room/exosuit_factory_overlay.gd" id="3_overlay"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_test_node"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="5_floater"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="6_crawler"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/rejected_carrier/rejected_carrier.tscn" id="5_carrier"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/rivet_inspection_rig/rivet_inspection_rig.tscn" id="6_rivet"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_side_bay"]
 size = Vector2(92, 240)
@@ -59,8 +59,8 @@ max_health = 5
 display_name = "外骨骼测试节点"
 destroyed_display_name = "节点销毁"
 
-[node name="FactoryFloater" parent="Enemies" index="0" instance=ExtResource("5_floater")]
-position = Vector2(418, 258)
+[node name="RejectedCarrier" parent="Enemies" index="0" instance=ExtResource("5_carrier")]
+position = Vector2(716, 244)
 
-[node name="FactoryCrawler" parent="Enemies" index="1" instance=ExtResource("6_crawler")]
-position = Vector2(616, 356)
+[node name="RivetInspectionRig" parent="Enemies" index="1" instance=ExtResource("6_rivet")]
+position = Vector2(340, 394)

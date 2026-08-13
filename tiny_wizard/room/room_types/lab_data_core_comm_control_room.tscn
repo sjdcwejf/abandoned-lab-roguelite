@@ -5,8 +5,8 @@
 [ext_resource type="Script" path="res://tiny_wizard/room/data_core_overlay.gd" id="3_overlay"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/pollution_source/pollution_source.tscn" id="4_target"]
 [ext_resource type="PackedScene" path="res://tiny_wizard/interactable_objects/data_archive_terminal/data_archive_terminal.tscn" id="5_terminal"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/black_fly/black_fly.tscn" id="6_black"]
-[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/red_fly/red_fly.tscn" id="7_red"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/index_pursuer/index_pursuer.tscn" id="6_index"]
+[ext_resource type="PackedScene" path="res://tiny_wizard/enemies/hydraulic_clearance_rig/hydraulic_clearance_rig.tscn" id="7_hydraulic"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_server"]
 size = Vector2(120, 84)
@@ -75,8 +75,8 @@ show_panel_on_read = false
 record_to_main = false
 already_read_message = "终端已激活。"
 
-[node name="SignalFloater" parent="Enemies" index="0" instance=ExtResource("6_black")]
+[node name="IndexPursuer" parent="Enemies" index="0" instance=ExtResource("6_index")]
 position = Vector2(422, 344)
 
-[node name="SignalCrawler" parent="Enemies" index="1" instance=ExtResource("7_red")]
+[node name="HydraulicClearanceRig" parent="Enemies" index="1" instance=ExtResource("7_hydraulic")]
 position = Vector2(612, 246)
